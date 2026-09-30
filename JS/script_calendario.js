@@ -222,18 +222,44 @@ function adicionarBlocoPersonalizado(dados) {
 
 window.adicionarBlocoPersonalizado = adicionarBlocoPersonalizado;
 
-fetch('HTML/modal_bloco.html')
-    .then((resposta) => {
-        if (!resposta.ok) throw new Error('Não foi possível carregar o formulário do bloco.');
-        return resposta.text();
-    })
-    .then((marcacao) => {
-        document.querySelector('#area-modal-bloco').innerHTML = marcacao;
-        document.dispatchEvent(new Event('modal-bloco-carregado'));
-    })
-    .catch((erro) => {
-        console.error(erro);
-        const botao = document.querySelector('#abrir-modal-bloco');
-        botao.disabled = true;
-        botao.title = 'Não foi possível carregar a janela. Abra a página por um servidor local.';
-    });
+const quadroModal = document.querySelector('#quadro-modal');
+let modalPronto = false;
+let aberturaPendente = false;
+
+document.querySelector('#abrir-modal-bloco').addEventListener('click', () => {
+    if (!modalPronto) aberturaPendente = true;
+    quadroModal.contentWindow.postMessage({ tipo: 'abrir-modal' }, '*');
+});
+
+quadroModal.addEventListener('load', () => {
+    if (!aberturaPendente) return;
+    aberturaPendente = false;
+    quadroModal.contentWindow.postMessage({ tipo: 'abrir-modal' }, '*');
+});
+
+window.addEventListener('message', (evento) => {
+    if (evento.source !== quadroModal.contentWindow || !evento.data) return;
+
+    if (evento.data.tipo === 'modal-pronto') {
+        modalPronto = true;
+        if (aberturaPendente) {
+            aberturaPendente = false;
+            quadroModal.contentWindow.postMessage({ tipo: 'abrir-modal' }, '*');
+        }
+    }
+
+    if (evento.data.tipo === 'modal-aberto') {
+        quadroModal.classList.add('ativo');
+        quadroModal.setAttribute('aria-hidden', 'false');
+    }
+
+    if (evento.data.tipo === 'modal-fechado') {
+        quadroModal.classList.remove('ativo');
+        quadroModal.setAttribute('aria-hidden', 'true');
+        document.querySelector('#abrir-modal-bloco').focus();
+    }
+
+    if (evento.data.tipo === 'bloco-salvo') {
+        adicionarBlocoPersonalizado(evento.data.dados);
+    }
+});
