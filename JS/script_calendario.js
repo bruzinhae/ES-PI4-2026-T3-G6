@@ -114,6 +114,21 @@ function obterPosicaoDeSoltura(alvo) {
     return null;
 }
 
+function ativarArrasteDeRotina(rotina) {
+    rotina.draggable = true;
+    rotina.addEventListener('dragstart', (evento) => {
+        rotinaArrastada = rotina;
+        rotina.classList.add('arrastando');
+        evento.dataTransfer.effectAllowed = 'copy';
+        evento.dataTransfer.setData('text/plain', rotina.dataset.rotina);
+    });
+    rotina.addEventListener('dragend', () => {
+        rotina.classList.remove('arrastando');
+        rotinaArrastada = null;
+        calendario.classList.remove('pronto-para-soltar');
+    });
+}
+
 function ativarArrasteDeCompromisso(bloco) {
     bloco.draggable = true;
     bloco.addEventListener('dragstart', (evento) => {
@@ -133,20 +148,7 @@ function ativarArrasteDeCompromisso(bloco) {
 montarCalendario();
 calendario.querySelectorAll('.evento-calendario').forEach(ativarArrasteDeCompromisso);
 
-rotinas.forEach((rotina) => {
-    rotina.addEventListener('dragstart', (evento) => {
-        rotinaArrastada = rotina;
-        rotina.classList.add('arrastando');
-        evento.dataTransfer.effectAllowed = 'copy';
-        evento.dataTransfer.setData('text/plain', rotina.dataset.rotina);
-    });
-
-    rotina.addEventListener('dragend', () => {
-        rotina.classList.remove('arrastando');
-        rotinaArrastada = null;
-        calendario.classList.remove('pronto-para-soltar');
-    });
-});
+rotinas.forEach(ativarArrasteDeRotina);
 
 calendario.addEventListener('dragover', (evento) => {
     const posicao = obterPosicaoDeSoltura(evento.target);
@@ -174,11 +176,64 @@ calendario.addEventListener('drop', (evento) => {
     const bloco = document.createElement('div');
     const corRotina = Array.from(rotinaArrastada.classList).find((nome) => ['roxo', 'azul', 'escuro', 'verde', 'amarelo', 'deslocamento'].includes(nome));
     const duracaoHoras = { Aulas: 2, Trabalho: 4, Sono: 8, Saúde: 1, Pausa: 1, Translado: 1 };
-    const duracaoFaixas = duracaoHoras[rotinaArrastada.dataset.rotina] * faixasPorHora;
+    const duracaoFaixas = Number(rotinaArrastada.dataset.duracaoFaixas) || duracaoHoras[rotinaArrastada.dataset.rotina] * faixasPorHora;
     bloco.className = `evento-adicionado evento-calendario ${corRotina}`;
     bloco.dataset.rotina = rotinaArrastada.dataset.rotina;
-    bloco.innerHTML = `<span>${rotinaArrastada.dataset.icone} ${rotinaArrastada.dataset.rotina}</span><small class="horario-movido"></small>`;
+    const tituloBloco = document.createElement('span');
+    tituloBloco.textContent = `${rotinaArrastada.dataset.icone || '✦'} ${rotinaArrastada.dataset.rotina}`;
+    const horarioBloco = document.createElement('small');
+    horarioBloco.className = 'horario-movido';
+    bloco.append(tituloBloco, horarioBloco);
     posicionarCompromisso(bloco, posicao.indiceDia, posicao.indiceFaixa, duracaoFaixas);
     ativarArrasteDeCompromisso(bloco);
     calendario.appendChild(bloco);
 });
+
+function adicionarBlocoPersonalizado(dados) {
+    const cartao = document.createElement('div');
+    cartao.className = `rotina ${dados.cor}`;
+    cartao.dataset.rotina = dados.nome;
+    cartao.dataset.icone = dados.icone;
+    cartao.dataset.categoria = dados.categoria;
+    cartao.dataset.duracaoFaixas = dados.duracaoFaixas;
+    cartao.dataset.prioridade = dados.prioridade;
+    cartao.dataset.diaPreferido = dados.diaPreferido;
+    cartao.dataset.horarioPreferido = dados.horarioPreferido;
+
+    const icone = document.createElement('div');
+    icone.className = 'icone-rotina';
+    icone.textContent = dados.icone;
+    const detalhes = document.createElement('div');
+    const titulo = document.createElement('strong');
+    titulo.textContent = dados.nome;
+    const preferencia = document.createElement('small');
+    preferencia.textContent = `Preferência: ${dados.textoDia} · ${dados.horarioPreferido || 'sem horário'}`;
+    detalhes.append(titulo, preferencia);
+    const duracao = document.createElement('span');
+    duracao.textContent = dados.duracaoTexto;
+    const etiqueta = document.createElement('label');
+    etiqueta.textContent = dados.categoria;
+    cartao.append(icone, detalhes, duracao, etiqueta);
+    ativarArrasteDeRotina(cartao);
+
+    const botaoCriacao = document.querySelector('#abrir-modal-bloco');
+    document.querySelector('.cartao-lateral').insertBefore(cartao, botaoCriacao);
+}
+
+window.adicionarBlocoPersonalizado = adicionarBlocoPersonalizado;
+
+fetch('HTML/modal_bloco.html')
+    .then((resposta) => {
+        if (!resposta.ok) throw new Error('Não foi possível carregar o formulário do bloco.');
+        return resposta.text();
+    })
+    .then((marcacao) => {
+        document.querySelector('#area-modal-bloco').innerHTML = marcacao;
+        document.dispatchEvent(new Event('modal-bloco-carregado'));
+    })
+    .catch((erro) => {
+        console.error(erro);
+        const botao = document.querySelector('#abrir-modal-bloco');
+        botao.disabled = true;
+        botao.title = 'Não foi possível carregar a janela. Abra a página por um servidor local.';
+    });

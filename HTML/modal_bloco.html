@@ -1,0 +1,83 @@
+    <div class="modal-fundo" id="modal-bloco" aria-hidden="true">
+        <section class="modal-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-bloco">
+            <header class="modal-cabecalho">
+                <div class="modal-icone">＋</div>
+                <div>
+                    <h2 id="titulo-modal-bloco">Criar bloco personalizado</h2>
+                    <p>Defina o compromisso e suas preferências de horário.</p>
+                </div>
+                <span class="modal-etiqueta">Novo bloco</span>
+                <button class="modal-fechar" type="button" aria-label="Fechar janela">×</button>
+            </header>
+
+            <form id="formulario-bloco">
+                <div class="campo-modal campo-inteiro">
+                    <div class="rotulo-com-contador">
+                        <label for="nome-bloco">Nome do bloco <b>*</b></label>
+                        <small><span id="contador-nome">0</span>/60 caracteres</small>
+                    </div>
+                    <input id="nome-bloco" name="nome" type="text" maxlength="60" placeholder="Ex.: Projeto final, consulta ou leitura" required>
+                </div>
+
+                <div class="grade-modal">
+                    <div class="campo-modal">
+                        <label for="categoria-bloco">Categoria <b>*</b></label>
+                        <select id="categoria-bloco" name="categoria" required>
+                            <option value="aulas">Aulas e faculdade</option>
+                            <option value="trabalho">Trabalho e estágio</option>
+                            <option value="sono">Sono e descanso</option>
+                            <option value="saude">Saúde e exercício</option>
+                            <option value="pausa">Refeições e pausas</option>
+                            <option value="translado">Deslocamento</option>
+                            <option value="outro" selected>Outro compromisso</option>
+                        </select>
+                    </div>
+                    <div class="campo-modal">
+                        <label for="dia-preferido">Dia preferido</label>
+                        <select id="dia-preferido" name="dia">
+                            <option value="0">Segunda-feira</option>
+                            <option value="1">Terça-feira</option>
+                            <option value="2">Quarta-feira</option>
+                            <option value="3" selected>Quinta-feira</option>
+                            <option value="4">Sexta-feira</option>
+                            <option value="5">Sábado</option>
+                            <option value="6">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="campo-modal campo-inteiro">
+                        <label for="horario-preferido">Horário preferido</label>
+                        <input id="horario-preferido" name="horario" type="time" min="06:00" max="22:30" step="1800" value="14:00">
+                    </div>
+                </div>
+
+                <section class="ajuste-modal">
+                    <div class="ajuste-titulo">
+                        <div><strong>◷ &nbsp; Duração estimada</strong><small>Ajustável na grade em intervalos de 30 minutos.</small></div>
+                        <output id="valor-duracao" for="duracao-bloco">2h</output>
+                    </div>
+                    <input id="duracao-bloco" type="range" min="1" max="32" step="1" value="4">
+                    <div class="escala-modal"><span>30 min</span><span>4h</span><span>8h</span><span>16h</span></div>
+                </section>
+
+                <section class="ajuste-modal impacto-modal">
+                    <div class="ajuste-titulo">
+                        <div><strong>☆ &nbsp; Prioridade do compromisso</strong><small>Use a prioridade para destacar a importância deste bloco.</small></div>
+                        <output id="valor-prioridade" for="prioridade-bloco">5/10</output>
+                    </div>
+                    <input id="prioridade-bloco" type="range" min="1" max="10" step="1" value="5">
+                    <div class="escala-modal"><span>Baixa</span><span>Normal</span><span>Alta</span></div>
+                </section>
+
+                <div class="recomendacao-modal">
+                    <span>✦</span>
+                    <div><strong>Preferência de horário</strong><p>O bloco ficará no menu para você arrastá-lo à grade no dia e horário desejados.</p></div>
+                </div>
+
+                <footer class="acoes-modal">
+                    <button class="botao-cancelar-modal" type="button">Cancelar</button>
+                    <button class="botao-salvar-modal" type="submit">＋ &nbsp; Salvar bloco</button>
+                </footer>
+            </form>
+        </section>
+    </div>
+
