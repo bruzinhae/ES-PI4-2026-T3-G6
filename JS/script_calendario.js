@@ -1,0 +1,184 @@
+const calendario = document.querySelector('.calendario');
+const rotinas = document.querySelectorAll('.rotina[draggable="true"]');
+const dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const datas = ['03 Fev', '04 Fev', '05 Fev', '06 Fev', '07 Fev', '08 Fev', '09 Fev'];
+const horaInicial = 6; // horário que começa 
+const horaFinal = 23; // horário que termina
+const faixasPorHora = 2;
+const totalFaixas = (horaFinal - horaInicial) * faixasPorHora;
+const eventosIniciais = Array.from(calendario.querySelectorAll('.compromisso')).map((bloco) => {
+    const indiceOriginal = Array.from(calendario.children).indexOf(bloco);
+    const linhaAntiga = Math.floor(indiceOriginal / 8) + 1;
+    const colunaAntiga = indiceOriginal % 8 + 1;
+    const horariosPorLinha = { 2: 6, 3: 7, 4: 8, 5: 12, 6: 13, 7: 15, 8: 22 };
+    const texto = bloco.textContent;
+    const inicioExplicito = texto.match(/(\d{1,2}):(\d{2})\s*[-–]/);
+    let hora = inicioExplicito ? Number(inicioExplicito[1]) : horariosPorLinha[linhaAntiga] || 6;
+    let minuto = inicioExplicito ? Number(inicioExplicito[2]) : 0;
+    if (bloco.classList.contains('evento-sono') && !inicioExplicito) hora = 22;
+
+    const duracaoExplicita = texto.match(/\((\d+)h\)/i);
+    let duracaoMinutos = duracaoExplicita ? Number(duracaoExplicita[1]) * 60 : 60;
+    if (bloco.classList.contains('evento-sono') || bloco.classList.contains('sono-noturno')) {
+        duracaoMinutos = duracaoExplicita ? Number(duracaoExplicita[1]) * 60 : 8 * 60;
+    }
+    if (inicioExplicito && !duracaoExplicita) {
+        const intervalo = texto.match(/\d{1,2}:(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+        if (intervalo) {
+            const inicio = hora * 60 + minuto;
+            let fim = Number(intervalo[2]) * 60 + Number(intervalo[3]);
+            if (fim <= inicio) fim += 24 * 60;
+            duracaoMinutos = fim - inicio;
+        }
+    }
+
+    return {
+        elemento: bloco,
+        indiceDia: Math.max(0, Math.min(6, colunaAntiga - 2)),
+        indiceFaixa: Math.max(0, Math.min(totalFaixas - 1, (hora - horaInicial) * faixasPorHora + minuto / 30)),
+        duracaoFaixas: Math.max(1, Math.ceil(duracaoMinutos / 30)),
+    };
+});
+
+let rotinaArrastada = null;
+let compromissoArrastado = null;
+
+function criarCelulaGrade(nomeClasse, texto, linha, coluna) {
+    const celula = document.createElement('div');
+    celula.className = nomeClasse;
+    if (texto) celula.textContent = texto;
+    celula.style.gridRow = linha;
+    celula.style.gridColumn = coluna;
+    calendario.appendChild(celula);
+    return celula;
+}
+
+function montarCalendario() {
+    calendario.replaceChildren();
+    criarCelulaGrade('canto', 'HORA', 1, 1);
+    dias.forEach((dia, indice) => {
+        const cabecalho = criarCelulaGrade(`dia${indice === 3 ? ' selecionado' : ''}`, '', 1, indice + 2);
+        cabecalho.innerHTML = `<small>${dia.toUpperCase()}</small><strong>${datas[indice]}</strong>`;
+    });
+
+    for (let indiceFaixa = 0; indiceFaixa < totalFaixas; indiceFaixa += 1) {
+        const minutosDesdeInicio = indiceFaixa * 30;
+        const hora = horaInicial + Math.floor(minutosDesdeInicio / 60);
+        const minuto = minutosDesdeInicio % 60;
+        const rotulo = `${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`;
+        const linha = indiceFaixa + 2;
+        criarCelulaGrade('horario', rotulo, linha, 1);
+        dias.forEach((_, indiceDia) => {
+            const faixa = criarCelulaGrade('faixa-calendario', '', linha, indiceDia + 2);
+            faixa.dataset.indiceDia = indiceDia;
+            faixa.dataset.indiceFaixa = indiceFaixa;
+            faixa.setAttribute('aria-label', `${dias[indiceDia]} às ${rotulo}`);
+        });
+    }
+
+    eventosIniciais.forEach(({ elemento, indiceDia, indiceFaixa, duracaoFaixas }) => {
+        elemento.classList.add('evento-calendario');
+        elemento.dataset.indiceDia = indiceDia;
+        elemento.dataset.indiceFaixa = indiceFaixa;
+        elemento.dataset.duracaoFaixas = duracaoFaixas;
+        posicionarCompromisso(elemento, indiceDia, indiceFaixa, duracaoFaixas);
+        calendario.appendChild(elemento);
+    });
+}
+
+function posicionarCompromisso(bloco, indiceDia, indiceFaixa, duracaoFaixas) {
+    const linha = indiceFaixa + 2;
+    const duracaoVisivel = Math.min(duracaoFaixas, totalFaixas - indiceFaixa);
+    bloco.style.gridRow = `${linha} / span ${duracaoVisivel}`;
+    bloco.style.gridColumn = indiceDia + 2;
+    bloco.dataset.indiceDia = indiceDia;
+    bloco.dataset.indiceFaixa = indiceFaixa;
+    bloco.dataset.duracaoFaixas = duracaoFaixas;
+
+    const rotuloHorario = bloco.querySelector('.horario-movido');
+    if (rotuloHorario) rotuloHorario.textContent = `${dias[indiceDia]} · ${formatarHorario(indiceFaixa)}`;
+}
+
+function formatarHorario(indiceFaixa) {
+    const minutos = horaInicial * 60 + indiceFaixa * 30;
+    return `${String(Math.floor(minutos / 60)).padStart(2, '0')}:${String(minutos % 60).padStart(2, '0')}`;
+}
+
+function obterPosicaoDeSoltura(alvo) {
+    const faixa = alvo.closest('.faixa-calendario');
+    if (faixa) return { indiceDia: Number(faixa.dataset.indiceDia), indiceFaixa: Number(faixa.dataset.indiceFaixa) };
+
+    // Permite soltar sobre outro compromisso e usar a faixa onde ele começa.
+    const evento = alvo.closest('.evento-calendario');
+    if (evento) return { indiceDia: Number(evento.dataset.indiceDia), indiceFaixa: Number(evento.dataset.indiceFaixa) };
+    return null;
+}
+
+function ativarArrasteDeCompromisso(bloco) {
+    bloco.draggable = true;
+    bloco.addEventListener('dragstart', (evento) => {
+        compromissoArrastado = bloco;
+        bloco.classList.add('arrastando');
+        evento.dataTransfer.effectAllowed = 'move';
+        evento.dataTransfer.setData('text/plain', bloco.dataset.rotina || bloco.textContent.trim());
+    });
+    bloco.addEventListener('dragend', (evento) => {
+        bloco.classList.remove('arrastando');
+        if (evento.dataTransfer.dropEffect === 'none') bloco.remove();
+        compromissoArrastado = null;
+        calendario.classList.remove('pronto-para-soltar');
+    });
+}
+
+montarCalendario();
+calendario.querySelectorAll('.evento-calendario').forEach(ativarArrasteDeCompromisso);
+
+rotinas.forEach((rotina) => {
+    rotina.addEventListener('dragstart', (evento) => {
+        rotinaArrastada = rotina;
+        rotina.classList.add('arrastando');
+        evento.dataTransfer.effectAllowed = 'copy';
+        evento.dataTransfer.setData('text/plain', rotina.dataset.rotina);
+    });
+
+    rotina.addEventListener('dragend', () => {
+        rotina.classList.remove('arrastando');
+        rotinaArrastada = null;
+        calendario.classList.remove('pronto-para-soltar');
+    });
+});
+
+calendario.addEventListener('dragover', (evento) => {
+    const posicao = obterPosicaoDeSoltura(evento.target);
+    if ((!rotinaArrastada && !compromissoArrastado) || !posicao) return;
+    evento.preventDefault();
+    evento.dataTransfer.dropEffect = compromissoArrastado ? 'move' : 'copy';
+    calendario.classList.add('pronto-para-soltar');
+});
+
+calendario.addEventListener('dragleave', (evento) => {
+    if (!calendario.contains(evento.relatedTarget)) calendario.classList.remove('pronto-para-soltar');
+});
+
+calendario.addEventListener('drop', (evento) => {
+    const posicao = obterPosicaoDeSoltura(evento.target);
+    if ((!rotinaArrastada && !compromissoArrastado) || !posicao) return;
+    evento.preventDefault();
+    calendario.classList.remove('pronto-para-soltar');
+
+    if (compromissoArrastado) {
+        posicionarCompromisso(compromissoArrastado, posicao.indiceDia, posicao.indiceFaixa, Number(compromissoArrastado.dataset.duracaoFaixas));
+        return;
+    }
+
+    const bloco = document.createElement('div');
+    const corRotina = Array.from(rotinaArrastada.classList).find((nome) => ['roxo', 'azul', 'escuro', 'verde', 'amarelo', 'deslocamento'].includes(nome));
+    const duracaoHoras = { Aulas: 2, Trabalho: 4, Sono: 8, Saúde: 1, Pausa: 1, Translado: 1 };
+    const duracaoFaixas = duracaoHoras[rotinaArrastada.dataset.rotina] * faixasPorHora;
+    bloco.className = `evento-adicionado evento-calendario ${corRotina}`;
+    bloco.dataset.rotina = rotinaArrastada.dataset.rotina;
+    bloco.innerHTML = `<span>${rotinaArrastada.dataset.icone} ${rotinaArrastada.dataset.rotina}</span><small class="horario-movido"></small>`;
+    posicionarCompromisso(bloco, posicao.indiceDia, posicao.indiceFaixa, duracaoFaixas);
+    ativarArrasteDeCompromisso(bloco);
+    calendario.appendChild(bloco);
+});
