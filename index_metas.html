@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Gestão de Metas & Objetivos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_metas.css">
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="cabecalho-principal">
+
+        <img class="logo" src="assets/icons/metas/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+
+        <nav class="abas">
+            <a href="index_calendario.html">Grade</a>
+            <a href="index_metas.html" class="ativo" aria-current="page">Metas</a>
+            <a href="index_disciplinas.html">Disciplinas</a>
+            <a href="#">Relatórios</a>
+            <a href="#">Métricas</a>
+        </nav>
+
+        <div class="itens-direita">
+
+            <div class="alternador" role="group" aria-label="Visualização">
+                <button type="button" class="ativo">Semana</button>
+                <button type="button">Mês</button>
+            </div>
+
+            <div class="progresso-tarefas">
+                <img src="assets/icons/metas/progresso-tarefas.svg" alt="" width="15" height="15">
+
+                <div class="progresso-texto">
+                    <span>Tarefas: <strong>18/24 •</strong></span>
+                    <strong>75%</strong>
+                </div>
+
+                <div class="trilha-mini">
+                    <span style="width: 75%"></span>
+                </div>
+            </div>
+
+            <button type="button" class="botao-ia">
+                <img src="assets/icons/metas/ia-preencher.svg" alt="" width="17" height="17">
+                <span>Preencher Vagas<br>com IA</span>
+            </button>
+
+            <button type="button" class="botao-notificacao" aria-label="Notificações">
+                <img src="assets/icons/metas/notificacao.svg" alt="" width="13.33" height="16.67">
+                <span class="alerta-notificacao"></span>
+            </button>
+
+            <span class="divisor-vertical"></span>
+
+            <button type="button" class="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha">
+                <img src="assets/icons/metas/avatar-704c8e.png" alt="">
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="barra-lateral">
+
+        <div class="grupo-lateral">
+            <p class="rotulo-lateral rotulo-pequeno">Ações Rápidas</p>
+
+            <button type="button" class="botao-sessao">
+                <img src="assets/icons/metas/iniciar.svg" alt="" width="8.25" height="10.5">
+                <span>Iniciar Sessão</span>
+            </button>
+        </div>
+
+
+        <div class="grupo-lateral grupo-navegacao">
+            <p class="rotulo-lateral">Navegação</p>
+
+            <nav class="navegacao">
+                <a href="index_calendario.html">
+                    <img src="assets/icons/metas/nav-cronograma.svg" alt="" width="13.5" height="15">
+                    <span>Cronograma Semanal</span>
+                </a>
+
+                <a href="index_metas.html" class="ativo" aria-current="page">
+                    <img src="assets/icons/metas/nav-metas.svg" alt="" width="13.5" height="13.5">
+                    <span>Tarefas & Metas</span>
+                </a>
+
+                <a href="index_disciplinas.html">
+                    <img src="assets/icons/metas/nav-disciplinas.svg" alt="" width="12" height="15">
+                    <span>Disciplinas & Blocos</span>
+                </a>
+
+                <a href="#">
+                    <img src="assets/icons/metas/nav-relatorios.svg" alt="" width="12" height="15">
+                    <span>Relatórios Acadêmicos</span>
+                </a>
+
+                <a href="#">
+                    <img src="assets/icons/metas/nav-rendimento.svg" alt="" width="16.5" height="12.75">
+                    <span>Rendimento & Foco</span>
+                </a>
+            </nav>
+        </div>
+
+
+        <div class="grupo-lateral">
+            <p class="rotulo-lateral rotulo-pequeno">Disciplinas Ativas</p>
+
+            <div class="lista-disciplinas">
+
+                <div class="disciplina">
+                    <div>
+                        <span class="ponto-disciplina" style="background: #4F3466"></span>
+                        <span>Algoritmos & ED</span>
+                    </div>
+                    <span class="horas">4h</span>
+                </div>
+
+                <div class="disciplina">
+                    <div>
+                        <span class="ponto-disciplina" style="background: #1B1E36"></span>
+                        <span>Sistemas Operacionais</span>
+                    </div>
+                    <span class="horas">3h</span>
+                </div>
+
+                <div class="disciplina">
+                    <div>
+                        <span class="ponto-disciplina" style="background: #10B981"></span>
+                        <span>Bancos de Dados</span>
+                    </div>
+                    <span class="horas">2.5h</span>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="rodape-lateral">
+            <div class="pomodoro">
+                <div>
+                    <img src="assets/icons/metas/pomodoro.svg" alt="" width="13.5" height="15.75">
+                    <span>Pomodoro: 25:00</span>
+                </div>
+
+                <button type="button">Configurar</button>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- ================= CONTEÚDO ================= -->
+
+    <main class="principal">
+
+        <div class="conteiner">
+
+            <!-- ================= CABEÇALHO DA PÁGINA ================= -->
+
+            <section class="cabecalho-pagina">
+
+                <div class="titulos">
+
+                    <div class="linha-contexto">
+                        <span class="selo-contexto">Planejamento Acadêmico • Metas & Objetivos Semestrais</span>
+                        <span class="usuario">Mariana Rocha</span>
+                    </div>
+
+                    <h1>Gestão de Metas & Objetivos</h1>
+
+                    <p>
+                        Acompanhe seus marcos acadêmicos, prazos de entrega e consistência de estudo <br>gerenciados pela Sofia IA.
+                    </p>
+
+                </div>
+
+
+                <div class="controles-superiores">
+
+                    <button type="button" class="botao-claro">
+                        <img src="assets/icons/metas/filtro.svg" alt="" width="13.5" height="9">
+                        <span>Todas as Metas (5)</span>
+                    </button>
+
+                    <button type="button" class="botao-roxo">
+                        <img src="assets/icons/metas/mais.svg" alt="" width="10.5" height="10.5">
+                        <span>+ Nova Meta</span>
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= KPIs ================= -->
+
+            <section class="indicadores">
+
+                <!-- Metas do semestre -->
+
+                <article class="cartao-kpi">
+
+                    <div class="kpi-topo">
+                        <span class="kpi-titulo">Metas do Semestre</span>
+
+                        <span class="kpi-icone">
+                            <img src="assets/icons/metas/metas-semestre.svg" alt="" width="11.25" height="12.75">
+                        </span>
+                    </div>
+
+                    <div class="kpi-corpo" style="height: 70px; margin-top: 12px">
+                        <p class="kpi-valor-linha" style="top: 12px">
+                            <strong class="kpi-valor">8/12</strong>
+                            <span class="kpi-complemento">(67%)</span>
+                        </p>
+
+                        <span class="selo-verde selo-oval" style="left: 111.81px; top: 0">
+                            <img src="assets/icons/metas/tendencia.svg" alt="" width="11.67" height="7">
+                            <span>+15%<br>vs<br>mês<br>ant.</span>
+                        </span>
+                    </div>
+
+                    <p class="kpi-nota">4 metas pendentes para a reta<br>final</p>
+
+                </article>
+
+
+                <!-- Consistência semanal -->
+
+                <article class="cartao-kpi">
+
+                    <div class="kpi-topo">
+                        <span class="kpi-titulo">Consistência Semanal</span>
+
+                        <span class="kpi-icone kpi-icone-verde">
+                            <img src="assets/icons/metas/consistencia.svg" alt="" width="16.5" height="15.75">
+                        </span>
+                    </div>
+
+                    <div class="kpi-corpo" style="height: 36px; margin-top: 12px">
+                        <strong class="kpi-valor" style="position: absolute; left: 0; top: 0">94%</strong>
+                        <span class="kpi-rotulo-medio" style="left: 104.48px; top: 17.5px">23/25 blocos</span>
+                    </div>
+
+                    <div class="kpi-barra-area">
+                        <div class="trilha kpi-trilha">
+                            <span style="width: 94%"></span>
+                        </div>
+                    </div>
+
+                    <p class="kpi-nota">23/25 blocos cumpridos no<br>prazo</p>
+
+                </article>
+
+
+                <!-- Dias restantes -->
+
+                <article class="cartao-kpi">
+
+                    <div class="kpi-topo">
+                        <span class="kpi-titulo">Dias Restantes no<br>Semestre</span>
+
+                        <span class="kpi-icone kpi-icone-oval">
+                            <img src="assets/icons/metas/calendario-dias.svg" alt="" width="13.5" height="15">
+                        </span>
+                    </div>
+
+                    <div class="kpi-corpo" style="height: 37px; margin-top: 12px">
+                        <strong class="kpi-valor" style="left: 0; top: 0">42</strong>
+                        <span class="kpi-unidade" style="left: 43.14px; top: 14px">dias</span>
+
+                        <span class="selo-roxo" style="left: 91.69px; top: 15px">Sprint Final</span>
+                    </div>
+
+                    <p class="kpi-nota">Próximo marco crítico: P2 em<br>12 dias</p>
+
+                </article>
+
+
+                <!-- Previsão Sofia IA -->
+
+                <article class="cartao-kpi">
+
+                    <div class="kpi-topo">
+                        <span class="kpi-titulo">Previsão Sofia IA</span>
+
+                        <span class="kpi-icone">
+                            <img src="assets/icons/metas/previsao-ia.svg" alt="" width="15.04" height="15.05">
+                        </span>
+                    </div>
+
+                    <div class="kpi-corpo" style="height: 64px; margin-top: 12px">
+                        <strong class="kpi-destaque">Alto<br>Êxito</strong>
+
+                        <span class="selo-verde selo-precisao" style="left: 95.83px; top: 11px">91%<br>precisão</span>
+                    </div>
+
+                    <p class="kpi-nota">91% de chance de atingir todas<br>as metas</p>
+
+                </article>
+
+            </section>
+
+
+            <!-- ================= METAS EM ANDAMENTO ================= -->
+
+            <section class="secao-metas">
+
+                <div class="cabecalho-secao">
+
+                    <div class="titulo-secao">
+                        <h2>Metas em Andamento</h2>
+                        <span class="selo-roxo">5 Ativas</span>
+                    </div>
+
+                    <div class="ordenacao">
+                        <label for="ordenar-metas">Ordenar por:</label>
+
+                        <select id="ordenar-metas">
+                            <option value="prioridade">Maior Prioridade</option>
+                            <option value="prazo">Prazo Mais Próximo</option>
+                            <option value="progresso">Menor Progresso</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <!-- Marcos recentes -->
+
+                <div class="marcos-recentes">
+
+                    <div class="marcos-titulo">
+                        <img src="assets/icons/metas/historico.svg" alt="" width="12" height="12">
+                        <span>Marcos recentes:</span>
+                    </div>
+
+                    <span class="marco marco-verde">
+                        <img src="assets/icons/metas/check-marco.svg" alt="" width="9.51" height="7.01">
+                        <span>P1 Cálculo (8.8)</span>
+                    </span>
+
+                    <span class="marco marco-verde">
+                        <img src="assets/icons/metas/check-marco.svg" alt="" width="9.51" height="7.01">
+                        <span>P1 Algoritmos (9.0)</span>
+                    </span>
+
+                    <span class="marco marco-verde">
+                        <img src="assets/icons/metas/check-marco.svg" alt="" width="9.51" height="7.01">
+                        <span>Projeto ED Lab</span>
+                    </span>
+
+                    <span class="marco marco-ambar">
+                        <img src="assets/icons/metas/relogio-marco.svg" alt="" width="9.33" height="11.67">
+                        <span>P2 Sistemas Operacionais (Pendente)</span>
+                    </span>
+
+                </div>
+
+
+                <!-- Lista de metas -->
+
+                <div class="lista-metas" id="lista-metas">
+
+                    <!-- Meta 1 -->
+
+                    <article class="meta" data-prioridade="1" data-prazo="2026-12-15" data-progresso="68">
+
+                        <div class="meta-linha">
+
+                            <div class="meta-esquerda">
+
+                                <div class="meta-icone icone-roxo">
+                                    <img src="assets/icons/metas/card-bandeira.svg" alt="" width="9.17" height="18.33">
+                                </div>
+
+                                <div class="meta-corpo">
+
+                                    <div class="meta-cabecalho">
+                                        <div class="meta-titulo-linha">
+                                            <h3>Passar em todas as matérias com CR &gt; 8.0</h3>
+                                            <span class="etiqueta etiqueta-roxa">Objetivo Geral</span>
+                                        </div>
+
+                                        <div class="meta-etiquetas">
+                                            <span class="etiqueta etiqueta-ambar etiqueta-suave">Alta Prioridade</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="meta-detalhes">
+                                        <span class="prazo">
+                                            <img src="assets/icons/metas/calendario-prazo.svg" alt="" width="12" height="13.33">
+                                            <span>Prazo: 15 de Dezembro</span>
+                                        </span>
+
+                                        <span class="separador">•</span>
+
+                                        <span class="detalhe-texto">5 de 7 marcos atingidos</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="meta-direita">
+
+                                <div class="meta-progresso">
+                                    <div class="meta-progresso-topo">
+                                        <span>Progresso</span>
+                                        <strong style="color: #4F3466">68%</strong>
+                                    </div>
+
+                                    <div class="trilha">
+                                        <span style="width: 68%; background: #4F3466"></span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-acoes">
+                                    <button type="button" class="botao-detalhes">Ver<br>Detalhes</button>
+
+                                    <button type="button" class="botao-editar" aria-label="Editar meta">
+                                        <img src="assets/icons/metas/editar.svg" alt="" width="14" height="14">
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Meta 2 -->
+
+                    <article class="meta meta-com-nota" data-prioridade="2" data-prazo="2026-11-04" data-progresso="85">
+
+                        <div class="meta-linha">
+
+                            <div class="meta-esquerda">
+
+                                <div class="meta-icone icone-verde">
+                                    <img src="assets/icons/metas/card-tcc.svg" alt="" width="14.67" height="18.33">
+                                </div>
+
+                                <div class="meta-corpo">
+
+                                    <div class="meta-cabecalho">
+                                        <h3>Concluir capítulo 1 e 2 do Trabalho de Conclusão de Curso (TCC <br>I)</h3>
+
+                                        <div class="meta-etiquetas">
+                                            <span class="etiqueta etiqueta-cinza">Projeto Final</span>
+                                            <span class="etiqueta etiqueta-rosa">Crítica</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="meta-detalhes">
+                                        <span class="prazo prazo-critico">
+                                            <img src="assets/icons/metas/alerta-prazo.svg" alt="" width="13.33" height="13.33">
+                                            <span>Prazo: 04 de Novembro</span>
+                                        </span>
+
+                                        <span class="separador">•</span>
+
+                                        <span class="detalhe-texto">6 de 7 entregáveis revisados com orientador</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="meta-direita">
+
+                                <div class="meta-progresso">
+                                    <div class="meta-progresso-topo">
+                                        <span>Progresso</span>
+                                        <strong style="color: #10B981">85%</strong>
+                                    </div>
+
+                                    <div class="trilha">
+                                        <span style="width: 85%; background: #10B981"></span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-acoes">
+                                    <button type="button" class="botao-detalhes">Ver<br>Detalhes</button>
+
+                                    <button type="button" class="botao-editar" aria-label="Editar meta">
+                                        <img src="assets/icons/metas/editar.svg" alt="" width="14" height="14">
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="nota-sofia">
+                            <img src="assets/icons/metas/sofia-nota.svg" alt="" width="16.5" height="16.5">
+                            <p>Sofia IA: <span>Revisão de literatura alinhada para a próxima terça-feira às 14:00. Resta apenas referenciar 4 artigos IEEE.</span></p>
+                        </div>
+
+                    </article>
+
+
+                    <!-- Meta 3 -->
+
+                    <article class="meta" data-prioridade="3" data-prazo="2026-10-28" data-progresso="50">
+
+                        <div class="meta-linha">
+
+                            <div class="meta-esquerda">
+
+                                <div class="meta-icone icone-azul">
+                                    <img src="assets/icons/metas/card-codigo.svg" alt="" width="18.33" height="11">
+                                </div>
+
+                                <div class="meta-corpo">
+
+                                    <div class="meta-cabecalho">
+                                        <h3>Dominar Estrutura de Dados e Grafos em C#</h3>
+
+                                        <div class="meta-etiquetas">
+                                            <span class="etiqueta etiqueta-cinza">Engenharia de Software</span>
+                                            <span class="etiqueta etiqueta-azul">Média Prioridade</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="meta-detalhes">
+                                        <span class="prazo">
+                                            <img src="assets/icons/metas/calendario-prazo.svg" alt="" width="12" height="13.33">
+                                            <span>Prazo: 28 de Outubro</span>
+                                        </span>
+
+                                        <span class="separador">•</span>
+
+                                        <span class="detalhe-texto">8 de 16 exercícios de listas e árvores concluídos</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="meta-direita">
+
+                                <div class="meta-progresso">
+                                    <div class="meta-progresso-topo">
+                                        <span>Progresso</span>
+                                        <strong style="color: #2563EB">50%</strong>
+                                    </div>
+
+                                    <div class="trilha">
+                                        <span style="width: 50%; background: #2563EB"></span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-acoes">
+                                    <button type="button" class="botao-detalhes">Ver<br>Detalhes</button>
+
+                                    <button type="button" class="botao-editar" aria-label="Editar meta">
+                                        <img src="assets/icons/metas/editar.svg" alt="" width="14" height="14">
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Meta 4 -->
+
+                    <article class="meta" data-prioridade="4" data-prazo="2026-12-31" data-progresso="92">
+
+                        <div class="meta-linha">
+
+                            <div class="meta-esquerda">
+
+                                <div class="meta-icone icone-verde">
+                                    <img src="assets/icons/metas/card-habito.svg" alt="" width="16.5" height="19.25">
+                                </div>
+
+                                <div class="meta-corpo">
+
+                                    <div class="meta-cabecalho">
+                                        <h3>Manter rotina de 25 horas semanais de estudo com pausas <br>ativas</h3>
+
+                                        <div class="meta-etiquetas">
+                                            <span class="etiqueta etiqueta-cinza">Produtividade & Hábito</span>
+                                            <span class="etiqueta etiqueta-verde">Semanal Contínuo</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="meta-detalhes meta-detalhes-coluna">
+                                        <div class="detalhe-linha">
+                                            <span class="detalhe-verde">23 de 25 horas realizadas esta semana</span>
+                                            <span class="separador">•</span>
+                                        </div>
+
+                                        <span class="detalhe-cinza">Ritmo excelente: restam 2h até domingo</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="meta-direita">
+
+                                <div class="meta-progresso">
+                                    <div class="meta-progresso-topo">
+                                        <span>Progresso</span>
+                                        <strong style="color: #10B981">92%</strong>
+                                    </div>
+
+                                    <div class="trilha">
+                                        <span style="width: 92%; background: #10B981"></span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-acoes">
+                                    <button type="button" class="botao-detalhes">Ver<br>Detalhes</button>
+
+                                    <button type="button" class="botao-editar" aria-label="Editar meta">
+                                        <img src="assets/icons/metas/editar.svg" alt="" width="14" height="14">
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Meta 5 -->
+
+                    <article class="meta" data-prioridade="5" data-prazo="2026-11-10" data-progresso="40">
+
+                        <div class="meta-linha">
+
+                            <div class="meta-esquerda">
+
+                                <div class="meta-icone icone-vermelho">
+                                    <img src="assets/icons/metas/card-atencao.svg" alt="" width="20.17" height="17.42">
+                                </div>
+
+                                <div class="meta-corpo">
+
+                                    <div class="meta-cabecalho">
+                                        <h3>Concluir listas de exercícios de Cálculo Numérico e Integral</h3>
+
+                                        <div class="meta-etiquetas">
+                                            <span class="etiqueta etiqueta-cinza">Ciências Exatas</span>
+                                            <span class="etiqueta etiqueta-ambar">Requer Atenção</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="meta-detalhes">
+                                        <span class="prazo">
+                                            <img src="assets/icons/metas/calendario-prazo.svg" alt="" width="12" height="13.33">
+                                            <span>Prazo: 10 de Novembro</span>
+                                        </span>
+
+                                        <span class="separador">•</span>
+
+                                        <span class="detalhe-ambar">2 listas em atraso (4h estimadas)</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="meta-direita">
+
+                                <div class="meta-progresso">
+                                    <div class="meta-progresso-topo">
+                                        <span>Progresso</span>
+                                        <strong style="color: #DC2626">40%</strong>
+                                    </div>
+
+                                    <div class="trilha">
+                                        <span style="width: 40%; background: #DC2626"></span>
+                                    </div>
+                                </div>
+
+                                <div class="meta-acoes">
+                                    <button type="button" class="botao-detalhes">Ver<br>Detalhes</button>
+
+                                    <button type="button" class="botao-editar" aria-label="Editar meta">
+                                        <img src="assets/icons/metas/editar.svg" alt="" width="14" height="14">
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= INSIGHT SOFIA IA ================= -->
+
+            <section class="insight">
+
+                <div class="insight-linha">
+
+                    <div class="insight-esquerda">
+
+                        <div class="insight-icone">
+                            <img src="assets/icons/metas/banner-ia.svg" alt="" width="23.83" height="20.58">
+                        </div>
+
+                        <div class="insight-texto">
+
+                            <div class="insight-titulo">
+                                <h3>Insight Açaí IA (Sofia)</h3>
+                                <span class="selo-cinza">Otimização Ativa</span>
+                            </div>
+
+                            <p>
+                                Você está a apenas <b>2 blocos de estudo</b> de atingir a meta de TCC <br>desta semana. Deseja que a IA pré-aloque <b class="destaque-verde">1h30 na quinta-feira às</b> <br><b class="destaque-verde">15:00</b> para garantir sua entrega sem sobrecarga?
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="insight-acoes">
+                        <button type="button" class="botao-claro botao-vertical">Personalizar</button>
+
+                        <button type="button" class="botao-roxo botao-aprovar">
+                            <img src="assets/icons/metas/aprovar.svg" alt="" width="17" height="17">
+                            <span>Aprovar Sugestão</span>
+                        </button>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <script src="JS/script_metas.js"></script>
+
+</body>
+</html>
