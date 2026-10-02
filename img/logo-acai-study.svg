@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="titulo">
+  <title id="titulo">Logo AçaíStudy</title>
+  <circle cx="50" cy="50" r="48" fill="#56306b"/>
+  <ellipse cx="61" cy="16" rx="11" ry="16" fill="#10b981" transform="rotate(-28 61 16)"/>
+  <ellipse cx="37" cy="25" rx="7" ry="11" fill="#34c99a" transform="rotate(25 37 25)"/>
+  <ellipse cx="34" cy="38" rx="9" ry="4" fill="#a78bb9" transform="rotate(-32 34 38)"/>
+  <circle cx="50" cy="49" r="5.5" fill="#facc15"/>
+  <path d="M20 64Q34 54 50 64Q66 54 80 64V78Q65 69 50 78Q35 69 20 78Z" fill="#fff"/>
+</svg>

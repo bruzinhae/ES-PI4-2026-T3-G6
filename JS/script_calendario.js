@@ -42,6 +42,21 @@ const eventosIniciais = Array.from(calendario.querySelectorAll('.compromisso')).
 
 let rotinaArrastada = null;
 let compromissoArrastado = null;
+const quadroModalConcluido = document.querySelector('#quadro-modal-concluido');
+let modalConclusaoPronto = false;
+let dadosConclusaoPendente = null;
+let diaComemorado = null;
+
+function exibirConclusaoPendente() {
+    if (!modalConclusaoPronto || !dadosConclusaoPendente) return;
+    quadroModalConcluido.contentWindow.postMessage({ tipo: 'abrir-modal-concluido', dados: dadosConclusaoPendente }, '*');
+    dadosConclusaoPendente = null;
+}
+
+quadroModalConcluido.addEventListener('load', () => {
+    modalConclusaoPronto = true;
+    exibirConclusaoPendente();
+});
 
 function criarCelulaGrade(nomeClasse, texto, linha, coluna) {
     const celula = document.createElement('div');
@@ -130,8 +145,33 @@ function ativarArrasteDeRotina(rotina) {
 }
 
 function ativarArrasteDeCompromisso(bloco) {
+    if (!bloco.querySelector('.botao-conclusao')) {
+        const botaoConclusao = document.createElement('button');
+        botaoConclusao.type = 'button';
+        botaoConclusao.className = 'botao-conclusao';
+        botaoConclusao.setAttribute('aria-pressed', 'false');
+        botaoConclusao.setAttribute('aria-label', 'Marcar tarefa como concluída');
+        botaoConclusao.textContent = '✓';
+        botaoConclusao.addEventListener('pointerdown', (evento) => evento.stopPropagation());
+        botaoConclusao.addEventListener('mousedown', (evento) => evento.stopPropagation());
+        botaoConclusao.addEventListener('click', (evento) => {
+            evento.preventDefault();
+            evento.stopPropagation();
+            const concluido = bloco.classList.toggle('concluido');
+            botaoConclusao.setAttribute('aria-pressed', String(concluido));
+            botaoConclusao.setAttribute('aria-label', concluido ? 'Marcar tarefa como não concluída' : 'Marcar tarefa como concluída');
+            botaoConclusao.title = concluido ? 'Tarefa concluída' : 'Marcar como concluída';
+            verificarMetaDiaria(bloco);
+        });
+        bloco.appendChild(botaoConclusao);
+    }
+
     bloco.draggable = true;
     bloco.addEventListener('dragstart', (evento) => {
+        if (evento.target.closest('.botao-conclusao')) {
+            evento.preventDefault();
+            return;
+        }
         compromissoArrastado = bloco;
         bloco.classList.add('arrastando');
         evento.dataTransfer.effectAllowed = 'move';
@@ -143,6 +183,35 @@ function ativarArrasteDeCompromisso(bloco) {
         compromissoArrastado = null;
         calendario.classList.remove('pronto-para-soltar');
     });
+}
+
+function verificarMetaDiaria(blocoAtualizado) {
+    const dia = Number(blocoAtualizado.dataset.indiceDia);
+    const tarefasDoDia = Array.from(calendario.querySelectorAll('.evento-calendario'))
+        .filter((bloco) => Number(bloco.dataset.indiceDia) === dia && !bloco.classList.contains('evento-sono') && !bloco.classList.contains('sono-noturno'));
+    if (!tarefasDoDia.length) return;
+
+    const todasConcluidas = tarefasDoDia.every((bloco) => bloco.classList.contains('concluido'));
+    if (!todasConcluidas) {
+        if (diaComemorado === dia) diaComemorado = null;
+        return;
+    }
+    if (diaComemorado === dia) return;
+    diaComemorado = dia;
+    const minutosTotais = tarefasDoDia.reduce((total, bloco) => total + (Number(bloco.dataset.duracaoFaixas) || 1) * 30, 0);
+    dadosConclusaoPendente = {
+        tarefas: tarefasDoDia.length,
+        duracao: formatarDuracao(minutosTotais),
+        dia: dias[dia],
+    };
+    exibirConclusaoPendente();
+}
+
+function formatarDuracao(minutos) {
+    const horas = Math.floor(minutos / 60);
+    const resto = minutos % 60;
+    if (!horas) return `${resto} min`;
+    return resto ? `${horas}h ${resto}min` : `${horas}h`;
 }
 
 montarCalendario();
@@ -238,6 +307,21 @@ quadroModal.addEventListener('load', () => {
 });
 
 window.addEventListener('message', (evento) => {
+    if (evento.source === quadroModalConcluido.contentWindow && evento.data) {
+        if (evento.data.tipo === 'modal-concluido-pronto') {
+            modalConclusaoPronto = true;
+            exibirConclusaoPendente();
+        }
+        if (evento.data.tipo === 'modal-concluido-aberto' || evento.data.tipo === 'modal-concluido-fechado') {
+            const aberto = evento.data.tipo === 'modal-concluido-aberto';
+            quadroModalConcluido.classList.toggle('ativo', aberto);
+            quadroModalConcluido.setAttribute('aria-hidden', String(!aberto));
+        }
+        if (evento.data.tipo === 'abrir-progresso') {
+            quadroModalConcluido.contentWindow.postMessage({ tipo: 'fechar-modal-concluido' }, '*');
+        }
+        return;
+    }
     if (evento.source !== quadroModal.contentWindow || !evento.data) return;
 
     if (evento.data.tipo === 'modal-pronto') {

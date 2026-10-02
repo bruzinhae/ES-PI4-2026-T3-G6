@@ -1,0 +1,112 @@
+* { box-sizing: border-box; }
+
+html, body { width: 100%; min-height: 100%; margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+
+.fundo-concluido {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    overflow-y: auto;
+    background: rgba(48, 39, 64, .48);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s ease, visibility .2s ease;
+}
+
+.fundo-concluido.aberto { opacity: 1; visibility: visible; }
+
+.cartao-concluido {
+    position: relative;
+    width: min(586px, 100%);
+    padding: 40px 40px 34px;
+    border: 1px solid rgba(255,255,255,.8);
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 24%, #f6efff 0, transparent 16%), radial-gradient(circle at 84% 13%, #ecfff6 0, transparent 13%), #fff;
+    box-shadow: 0 24px 70px rgba(32, 24, 42, .24);
+    text-align: center;
+    transform: translateY(10px) scale(.99);
+    transition: transform .2s ease;
+}
+
+.aberto .cartao-concluido { transform: translateY(0) scale(1); }
+
+.fechar-concluido {
+    position: absolute;
+    top: 23px;
+    right: 25px;
+    border: 0;
+    background: transparent;
+    color: #91a0b4;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.selo-concluido {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 13px;
+    border: 1px solid #ead9f3;
+    border-radius: 999px;
+    background: #f8f1fb;
+    color: #56306b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .015em;
+}
+
+.brilho { position: absolute; color: #f6b83f; }
+.brilho-esquerdo { top: 44px; left: 40px; }
+.brilho-direito { top: 80px; right: 47px; color: #a7aebb; font-size: 13px; }
+
+.ilustracao-acai {
+    display: grid;
+    place-items: center;
+    width: 100px;
+    height: 100px;
+    margin: 19px auto 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #f1e8fb 0, rgba(242,233,250,0) 70%);
+    filter: drop-shadow(0 5px 5px rgba(55, 37, 71, .12));
+}
+
+.ilustracao-acai svg { width: 82px; height: 66px; }
+
+.cartao-concluido h1 { margin: 0; color: #211b2a; font-size: clamp(25px, 4vw, 32px); letter-spacing: -.045em; }
+.mensagem-concluido { margin: 9px 0 26px; color: #66758d; font-size: 14px; line-height: 1.5; }
+.mensagem-concluido span { color: #56306b; }
+
+.resumo-concluido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.indicador { display: flex; min-height: 84px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px; border: 1px solid #e0e8f0; border-radius: 16px; background: #f8fafc; color: #61718a; }
+.indicador span, .indicador small { font-size: 11px; }
+.indicador strong { color: #252033; font-size: 14px; }
+.indicador-verde { border-color: #9aefd0; background: #effdf7; color: #07845f; }
+.indicador-verde strong { color: #00825c; }
+.indicador-roxo { border-color: #e8d6f1; background: #fdfaff; color: #56306b; }
+.indicador-roxo strong { color: #56306b; }
+
+.insight-concluido { display: flex; gap: 12px; margin-top: 23px; padding: 16px 14px; border: 1px solid #e8d6f1; border-radius: 16px; background: #fbf8fd; color: #56306b; text-align: left; }
+.icone-insight { display: grid; flex: 0 0 28px; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: #56306b; color: #ffd65a; }
+.insight-concluido strong { font-size: 11px; }
+.insight-concluido p { margin: 5px 0 3px; color: #63718a; font-size: 11px; line-height: 1.5; }
+.insight-concluido em { color: #272232; font-size: 16px; font-style: normal; }
+
+.botao-progresso { display: flex; width: 100%; min-height: 45px; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; border: 0; border-radius: 12px; background: #56306b; box-shadow: 0 3px 6px rgba(56,34,71,.2); color: white; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+.botao-progresso:hover { background: #472658; }
+.botao-voltar { margin-top: 12px; padding: 5px 10px; border: 0; background: transparent; color: #63718a; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.botao-voltar:hover, .fechar-concluido:hover { color: #56306b; }
+
+@media (max-width: 520px) {
+    .fundo-concluido { padding: 12px; }
+    .cartao-concluido { padding: 36px 20px 25px; border-radius: 20px; }
+    .brilho-esquerdo { left: 19px; }
+    .brilho-direito { right: 24px; }
+    .resumo-concluido { gap: 7px; }
+    .indicador { min-height: 78px; padding: 7px 4px; }
+    .indicador span, .indicador small { font-size: 9px; }
+    .indicador strong { font-size: 11px; }
+}

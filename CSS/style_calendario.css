@@ -79,12 +79,9 @@ body {
 }
 
 .logotipo {
-    width: 38px;
-    height: 38px;
-
-    background: var(--roxo);
-
-    border-radius: 11px;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
 
     display: flex;
     justify-content: center;
@@ -93,8 +90,11 @@ body {
     margin-right: 10px;
 }
 
-.logotipo span {
-    font-size: 20px;
+.logotipo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .texto-marca {
@@ -986,6 +986,8 @@ h1 {
 
 .quadro-modal.ativo { pointer-events: auto; }
 
+#quadro-modal-concluido { z-index: 1001; }
+
 .calendario.pronto-para-soltar {
     outline: 2px dashed #9b73ac;
     outline-offset: -3px;
@@ -1136,6 +1138,45 @@ h1 {
     height: auto;
     touch-action: none;
     padding-bottom: 14px;
+    position: relative;
+    padding-right: 19px;
+}
+
+.evento-calendario.concluido {
+    opacity: .82;
+}
+
+.botao-conclusao {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    z-index: 7;
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    background: transparent;
+    color: #94a3b8;
+    font: inherit;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.botao-conclusao:hover {
+    border-color: #15803d;
+    color: #15803d;
+}
+
+.evento-calendario.concluido .botao-conclusao {
+    border-color: #16a34a;
+    background: #16a34a;
+    color: #fff;
 }
 
 .evento-calendario.redimensionando {
