@@ -10,157 +10,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/style_metas.css">
+    <link rel="stylesheet" href="CSS/layout.css?v=12">
+    <link rel="stylesheet" href="CSS/style_metas.css?v=12">
 </head>
 
 <body>
 
-    <!-- ================= HEADER ================= -->
-
-    <header class="cabecalho-principal">
-
-        <img class="logo" src="assets/icons/metas/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
-
-        <nav class="abas">
-            <a href="index_calendario.html">Grade</a>
-            <a href="index_metas.html" class="ativo" aria-current="page">Metas</a>
-            <a href="index_disciplinas.html">Disciplinas</a>
-            <a href="#">Relatórios</a>
-            <a href="#">Métricas</a>
-        </nav>
-
-        <div class="itens-direita">
-
-            <div class="alternador" role="group" aria-label="Visualização">
-                <button type="button" class="ativo">Semana</button>
-                <button type="button">Mês</button>
-            </div>
-
-            <div class="progresso-tarefas">
-                <img src="assets/icons/metas/progresso-tarefas.svg" alt="" width="15" height="15">
-
-                <div class="progresso-texto">
-                    <span>Tarefas: <strong>18/24 •</strong></span>
-                    <strong>75%</strong>
-                </div>
-
-                <div class="trilha-mini">
-                    <span style="width: 75%"></span>
-                </div>
-            </div>
-
-            <button type="button" class="botao-ia">
-                <img src="assets/icons/metas/ia-preencher.svg" alt="" width="17" height="17">
-                <span>Preencher Vagas<br>com IA</span>
-            </button>
-
-            <button type="button" class="botao-notificacao" aria-label="Notificações">
-                <img src="assets/icons/metas/notificacao.svg" alt="" width="13.33" height="16.67">
-                <span class="alerta-notificacao"></span>
-            </button>
-
-            <span class="divisor-vertical"></span>
-
-            <button type="button" class="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha">
-                <img src="assets/icons/metas/avatar-704c8e.png" alt="">
-            </button>
-
-        </div>
-
-    </header>
-
-
-    <!-- ================= SIDEBAR ================= -->
-
-    <aside class="barra-lateral">
-
-        <div class="grupo-lateral">
-            <p class="rotulo-lateral rotulo-pequeno">Ações Rápidas</p>
-
-            <button type="button" class="botao-sessao">
-                <img src="assets/icons/metas/iniciar.svg" alt="" width="8.25" height="10.5">
-                <span>Iniciar Sessão</span>
-            </button>
-        </div>
-
-
-        <div class="grupo-lateral grupo-navegacao">
-            <p class="rotulo-lateral">Navegação</p>
-
-            <nav class="navegacao">
-                <a href="index_calendario.html">
-                    <img src="assets/icons/metas/nav-cronograma.svg" alt="" width="13.5" height="15">
-                    <span>Cronograma Semanal</span>
-                </a>
-
-                <a href="index_metas.html" class="ativo" aria-current="page">
-                    <img src="assets/icons/metas/nav-metas.svg" alt="" width="13.5" height="13.5">
-                    <span>Tarefas & Metas</span>
-                </a>
-
-                <a href="index_disciplinas.html">
-                    <img src="assets/icons/metas/nav-disciplinas.svg" alt="" width="12" height="15">
-                    <span>Disciplinas & Blocos</span>
-                </a>
-
-                <a href="#">
-                    <img src="assets/icons/metas/nav-relatorios.svg" alt="" width="12" height="15">
-                    <span>Relatórios Acadêmicos</span>
-                </a>
-
-                <a href="#">
-                    <img src="assets/icons/metas/nav-rendimento.svg" alt="" width="16.5" height="12.75">
-                    <span>Rendimento & Foco</span>
-                </a>
-            </nav>
-        </div>
-
-
-        <div class="grupo-lateral">
-            <p class="rotulo-lateral rotulo-pequeno">Disciplinas Ativas</p>
-
-            <div class="lista-disciplinas">
-
-                <div class="disciplina">
-                    <div>
-                        <span class="ponto-disciplina" style="background: #4F3466"></span>
-                        <span>Algoritmos & ED</span>
-                    </div>
-                    <span class="horas">4h</span>
-                </div>
-
-                <div class="disciplina">
-                    <div>
-                        <span class="ponto-disciplina" style="background: #1B1E36"></span>
-                        <span>Sistemas Operacionais</span>
-                    </div>
-                    <span class="horas">3h</span>
-                </div>
-
-                <div class="disciplina">
-                    <div>
-                        <span class="ponto-disciplina" style="background: #10B981"></span>
-                        <span>Bancos de Dados</span>
-                    </div>
-                    <span class="horas">2.5h</span>
-                </div>
-
-            </div>
-        </div>
-
-
-        <div class="rodape-lateral">
-            <div class="pomodoro">
-                <div>
-                    <img src="assets/icons/metas/pomodoro.svg" alt="" width="13.5" height="15.75">
-                    <span>Pomodoro: 25:00</span>
-                </div>
-
-                <button type="button">Configurar</button>
-            </div>
-        </div>
-
-    </aside>
+    <div id="cabecalho-raiz"></div>
+    <div id="barra-lateral-raiz"></div>
 
 
     <!-- ================= CONTEÚDO ================= -->
@@ -174,11 +31,6 @@
             <section class="cabecalho-pagina">
 
                 <div class="titulos">
-
-                    <div class="linha-contexto">
-                        <span class="selo-contexto">Planejamento Acadêmico • Metas & Objetivos Semestrais</span>
-                        <span class="usuario">Mariana Rocha</span>
-                    </div>
 
                     <h1>Gestão de Metas & Objetivos</h1>
 
@@ -222,19 +74,19 @@
                         </span>
                     </div>
 
-                    <div class="kpi-corpo" style="height: 70px; margin-top: 12px">
-                        <p class="kpi-valor-linha" style="top: 12px">
+                    <div class="kpi-corpo kpi-corpo-linha">
+                        <p class="kpi-valor-linha">
                             <strong class="kpi-valor">8/12</strong>
                             <span class="kpi-complemento">(67%)</span>
                         </p>
 
-                        <span class="selo-verde selo-oval" style="left: 111.81px; top: 0">
+                        <span class="selo-verde">
                             <img src="assets/icons/metas/tendencia.svg" alt="" width="11.67" height="7">
-                            <span>+15%<br>vs<br>mês<br>ant.</span>
+                            <span>+15% vs mês ant.</span>
                         </span>
                     </div>
 
-                    <p class="kpi-nota">4 metas pendentes para a reta<br>final</p>
+                    <p class="kpi-nota">4 metas pendentes para a reta final</p>
 
                 </article>
 
@@ -251,9 +103,11 @@
                         </span>
                     </div>
 
-                    <div class="kpi-corpo" style="height: 36px; margin-top: 12px">
-                        <strong class="kpi-valor" style="position: absolute; left: 0; top: 0">94%</strong>
-                        <span class="kpi-rotulo-medio" style="left: 104.48px; top: 17.5px">23/25 blocos</span>
+                    <div class="kpi-corpo kpi-corpo-linha">
+                        <p class="kpi-valor-linha">
+                            <strong class="kpi-valor">94%</strong>
+                            <span class="kpi-complemento">23/25 blocos</span>
+                        </p>
                     </div>
 
                     <div class="kpi-barra-area">
@@ -262,7 +116,7 @@
                         </div>
                     </div>
 
-                    <p class="kpi-nota">23/25 blocos cumpridos no<br>prazo</p>
+                    <p class="kpi-nota">23/25 blocos cumpridos no prazo</p>
 
                 </article>
 
@@ -272,21 +126,23 @@
                 <article class="cartao-kpi">
 
                     <div class="kpi-topo">
-                        <span class="kpi-titulo">Dias Restantes no<br>Semestre</span>
+                        <span class="kpi-titulo">Dias Restantes no Semestre</span>
 
-                        <span class="kpi-icone kpi-icone-oval">
+                        <span class="kpi-icone">
                             <img src="assets/icons/metas/calendario-dias.svg" alt="" width="13.5" height="15">
                         </span>
                     </div>
 
-                    <div class="kpi-corpo" style="height: 37px; margin-top: 12px">
-                        <strong class="kpi-valor" style="left: 0; top: 0">42</strong>
-                        <span class="kpi-unidade" style="left: 43.14px; top: 14px">dias</span>
+                    <div class="kpi-corpo kpi-corpo-linha">
+                        <p class="kpi-valor-linha">
+                            <strong class="kpi-valor">42</strong>
+                            <span class="kpi-complemento">dias</span>
+                        </p>
 
-                        <span class="selo-roxo" style="left: 91.69px; top: 15px">Sprint Final</span>
+                        <span class="selo-roxo">Sprint Final</span>
                     </div>
 
-                    <p class="kpi-nota">Próximo marco crítico: P2 em<br>12 dias</p>
+                    <p class="kpi-nota">Próximo marco crítico: P2 em 12 dias</p>
 
                 </article>
 
@@ -303,13 +159,15 @@
                         </span>
                     </div>
 
-                    <div class="kpi-corpo" style="height: 64px; margin-top: 12px">
-                        <strong class="kpi-destaque">Alto<br>Êxito</strong>
+                    <div class="kpi-corpo kpi-corpo-linha">
+                        <p class="kpi-valor-linha">
+                            <strong class="kpi-destaque">Alto Êxito</strong>
+                        </p>
 
-                        <span class="selo-verde selo-precisao" style="left: 95.83px; top: 11px">91%<br>precisão</span>
+                        <span class="selo-verde">91% precisão</span>
                     </div>
 
-                    <p class="kpi-nota">91% de chance de atingir todas<br>as metas</p>
+                    <p class="kpi-nota">91% de chance de atingir todas as metas</p>
 
                 </article>
 
@@ -759,7 +617,8 @@
 
     </main>
 
-    <script src="JS/script_metas.js"></script>
+    <script src="JS/componentes/layout.js?v=12"></script>
+    <script src="JS/script_metas.js?v=12"></script>
 
 </body>
 </html>

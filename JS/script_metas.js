@@ -1,3 +1,7 @@
+renderLayout({
+    paginaAtiva: 'metas',
+});
+
 const lista = document.getElementById('lista-metas');
 const ordenar = document.getElementById('ordenar-metas');
 const alternadorSemana = document.querySelectorAll('.alternador button');

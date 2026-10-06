@@ -1,3 +1,7 @@
+renderLayout({
+    paginaAtiva: 'disciplinas',
+});
+
 const cartoes = document.getElementById('cartoes-disciplinas');
 const filtrarArea = document.getElementById('filtrar-area');
 const ordenar = document.getElementById('ordenar-disciplinas');
