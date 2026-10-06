@@ -1,0 +1,1747 @@
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Arial, sans-serif;
+
+    background: #f8fafc;
+    color: #29252d;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   CORES
+===================================================== */
+
+:root {
+
+    --roxo: #56306b;
+    --roxo-escuro: #4F3466;
+    --roxo-claro: #f1eafa;
+
+    --verde: #18b989;
+    --verde-claro: #e6f8f2;
+
+    --azul: #087fbd;
+    --azul-claro: #e6f4fc;
+
+    --amarelo: #e7bd35;
+    --amarelo-claro: #fff8df;
+
+    --cinza-50: #f8fafc;
+    --cinza-100: #f1f4f7;
+    --cinza-200: #e4e8ee;
+    --cinza-300: #d4dae2;
+    --cinza-400: #a6afba;
+    --cinza-500: #77818e;
+
+    --texto: #29252d;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.barra-superior {
+    height: 76px;
+
+    background: white;
+
+    border-bottom: 1px solid #e6e9ee;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 32px;
+
+    gap: 40px;
+}
+
+
+/* Logo */
+
+.marca {
+    display: flex;
+    align-items: center;
+
+    min-width: 330px;
+}
+
+.logotipo {
+    width: 38px;
+    height: 38px;
+
+    background: var(--roxo);
+
+    border-radius: 11px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-right: 10px;
+}
+
+.logotipo span {
+    font-size: 20px;
+}
+
+.texto-marca {
+    display: flex;
+    flex-direction: column;
+}
+
+.texto-marca strong {
+    font-size: 17px;
+    color: #302936;
+}
+
+.texto-marca small {
+    font-size: 8px;
+    color: #7f858d;
+    margin-top: 1px;
+}
+
+.integracao {
+    margin-left: 18px;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    color: var(--roxo);
+
+    background: #f0eaf4;
+
+    padding: 5px 8px;
+
+    border-radius: 4px;
+}
+
+
+/* Steps */
+
+.etapas {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+
+    flex: 1;
+}
+
+.etapa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #a1a5ac;
+
+    white-space: nowrap;
+}
+
+.etapa span {
+    width: 23px;
+    height: 23px;
+
+    border-radius: 50%;
+
+    background: #f0f2f5;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-weight: 700;
+
+    font-size: 11px;
+}
+
+.etapa strong {
+    font-size: 11px;
+}
+
+.etapa.ativo {
+    color: var(--roxo);
+}
+
+.etapa.ativo span {
+    background: #eadff0;
+    color: var(--roxo);
+}
+
+
+/* Header actions */
+
+.acoes-cabecalho {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    white-space: nowrap;
+}
+
+.acoes-cabecalho button {
+    border: 0;
+    background: transparent;
+
+    color: #858b93;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+.ajuda {
+    width: 20px;
+    height: 20px;
+
+    border: 1px solid #bfc4cb;
+    border-radius: 50%;
+
+    color: #777;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 11px;
+}
+
+.perfil {
+    position: relative;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eee;
+}
+
+.conectado {
+    width: 8px;
+    height: 8px;
+
+    position: absolute;
+
+    bottom: 1px;
+    right: -1px;
+
+    border-radius: 50%;
+
+    background: #2cc38c;
+
+    border: 2px solid white;
+}
+
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+.pagina {
+    padding: 24px 32px 20px;
+}
+
+
+/* =====================================================
+   INTRO
+===================================================== */
+
+.introducao {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 22px;
+
+    gap: 40px;
+}
+
+.caminho-navegacao {
+    color: var(--roxo);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .5px;
+
+    margin-bottom: 9px;
+}
+
+.caminho-navegacao span {
+    color: #b2b5ba;
+}
+
+h1 {
+    font-size: 27px;
+    line-height: 1.1;
+
+    margin-bottom: 7px;
+
+    color: #29232d;
+}
+
+.introducao > div:first-child p {
+    color: #6e747d;
+
+    font-size: 11px;
+
+    max-width: 850px;
+
+    line-height: 1.5;
+}
+
+
+/* Tip */
+
+.dica {
+    width: 325px;
+
+    min-width: 325px;
+
+    background: #fbfcfd;
+
+    border: 1px solid #e3e7eb;
+
+    border-radius: 9px;
+
+    padding: 13px;
+
+    display: flex;
+
+    gap: 11px;
+}
+
+.icone-dica {
+    width: 27px;
+    height: 27px;
+
+    background: #fff3ca;
+
+    border-radius: 7px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+}
+
+.dica strong {
+    font-size: 10px;
+
+    color: #56525a;
+}
+
+.dica p {
+    font-size: 9px;
+
+    line-height: 1.45;
+
+    color: #777d84;
+
+    margin-top: 4px;
+}
+
+
+/* =====================================================
+   WORKSPACE
+===================================================== */
+
+.area-trabalho {
+    display: grid;
+
+    grid-template-columns: 305px minmax(0, 1fr);
+
+    gap: 18px;
+
+    align-items: start;
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.barra-lateral {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.cartao-lateral,
+.cartao-ia,
+.distribuicao {
+    background: white;
+
+    border: 1px solid #e2e7ed;
+
+    border-radius: 12px;
+}
+
+
+/* Card title */
+
+.cartao-lateral {
+    padding: 15px;
+}
+
+.titulo-cartao {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    border-bottom: 1px solid #edf0f3;
+
+    padding-bottom: 11px;
+
+    margin-bottom: 13px;
+}
+
+.titulo-cartao span {
+    color: #9aa1aa;
+}
+
+.titulo-cartao strong {
+    font-size: 10px;
+    color: #59606a;
+}
+
+.titulo-cartao small {
+    margin-left: auto;
+
+    background: #f3f5f7;
+
+    color: #adb2b8;
+
+    padding: 3px 5px;
+
+    font-size: 7px;
+
+    border-radius: 3px;
+
+    font-weight: bold;
+}
+
+.descricao {
+    color: #858b93;
+
+    font-size: 9px;
+
+    line-height: 1.45;
+
+    margin-bottom: 12px;
+}
+
+
+/* Routine blocks */
+
+.rotina {
+    min-height: 61px;
+
+    border-radius: 9px;
+
+    border: 1px solid;
+
+    margin-bottom: 8px;
+
+    padding: 9px;
+
+    display: grid;
+
+    grid-template-columns: 29px 1fr auto;
+
+    grid-template-rows: 1fr 1fr;
+
+    column-gap: 7px;
+
+    position: relative;
+    cursor: grab;
+    transition: opacity .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.rotina:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 9px rgba(48, 35, 58, .1);
+}
+
+.rotina:active,
+.rotina.arrastando {
+    cursor: grabbing;
+    opacity: .55;
+}
+
+.icone-rotina {
+    width: 27px;
+    height: 27px;
+
+    grid-row: span 2;
+
+    border-radius: 7px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rotina div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+}
+
+.rotina strong {
+    font-size: 10px;
+}
+
+.rotina small {
+    color: #8b9198;
+    font-size: 8px;
+    margin-top: 2px;
+}
+
+.rotina > span {
+    color: #858b93;
+    font-size: 8px;
+}
+
+.rotina label {
+    align-self: center;
+    justify-self: end;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+    padding: 4px 6px;
+
+    border-radius: 4px;
+}
+
+
+/* Purple */
+
+.rotina.roxo {
+    border-color: #e4d6ee;
+    background: #fbf7fd;
+}
+
+.rotina.roxo .icone-rotina {
+    background: var(--roxo);
+    color: white;
+}
+
+.rotina.roxo label {
+    background: #eee2f3;
+    color: var(--roxo);
+}
+
+
+/* Blue */
+
+.rotina.azul {
+    border-color: #cce8f6;
+    background: #f7fcff;
+}
+
+.rotina.azul .icone-rotina {
+    background: #0b8ac8;
+    color: white;
+}
+
+.rotina.azul label {
+    background: #dceff8;
+    color: #1376a5;
+}
+
+
+/* Dark */
+
+.rotina.escuro {
+    border-color: #dce2e8;
+    background: #fafbfd;
+}
+
+.rotina.escuro .icone-rotina {
+    background: #303a49;
+    color: white;
+}
+
+.rotina.escuro label {
+    background: #edf0f3;
+    color: #626b76;
+}
+
+
+/* Green */
+
+.rotina.verde {
+    border-color: #c9efdf;
+    background: #f6fffb;
+}
+
+.rotina.verde .icone-rotina {
+    background: #18b989;
+    color: white;
+}
+
+.rotina.verde label {
+    background: #dff6ed;
+    color: #15946d;
+}
+
+
+/* Yellow */
+
+.rotina.amarelo {
+    border-color: #f1df9c;
+    background: #fffdf5;
+}
+
+.rotina.amarelo .icone-rotina {
+    background: #e3a600;
+    color: white;
+}
+
+.rotina.amarelo label {
+    background: #fff1bf;
+    color: #ae8000;
+}
+
+
+/* Travel */
+
+.rotina.deslocamento {
+    border-color: #d8e0f1;
+    background: #fafbfe;
+}
+
+.rotina.deslocamento .icone-rotina {
+    background: #6552c7;
+    color: white;
+}
+
+.rotina.deslocamento label {
+    background: #e7e3fb;
+    color: #6654bc;
+}
+
+
+/* Custom */
+
+.botao-personalizado {
+    width: 100%;
+
+    height: 33px;
+
+    border-radius: 8px;
+
+    border: 1px dashed #d1d6dc;
+
+    background: white;
+
+    color: #747b84;
+
+    font-size: 9px;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   AI CARD
+===================================================== */
+
+.cartao-ia {
+    padding: 14px;
+
+    border-color: #e2d4ea;
+
+    background: linear-gradient(
+        145deg,
+        #fff,
+        #faf6fc
+    );
+}
+
+.cartao-ia h3 {
+    font-size: 11px;
+
+    color: #4d315c;
+
+    margin-bottom: 7px;
+}
+
+.cartao-ia p {
+    color: #747b83;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+
+    margin-bottom: 12px;
+}
+
+.cartao-ia button {
+    width: 100%;
+
+    border: none;
+
+    border-radius: 7px;
+
+    height: 33px;
+
+    background: var(--roxo);
+
+    color: white;
+
+    font-weight: 700;
+
+    font-size: 9px;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   DISTRIBUTION
+===================================================== */
+
+.distribuicao {
+    padding: 13px;
+}
+
+.cabecalho-distribuicao {
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 9px;
+
+    color: #656b74;
+
+    margin-bottom: 9px;
+}
+
+.cabecalho-distribuicao span {
+    font-weight: 700;
+
+    color: #8b9199;
+}
+
+.progresso {
+    width: 100%;
+
+    height: 8px;
+
+    display: flex;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #f0f2f4;
+}
+
+.progresso span {
+    display: block;
+}
+
+.progresso .sono {
+    width: 33%;
+    background: #4b5563;
+}
+
+.progresso .aula {
+    width: 14%;
+    background: #58316d;
+}
+
+.progresso .trabalho {
+    width: 10%;
+    background: #087fbd;
+}
+
+.progresso .saude {
+    width: 3%;
+    background: #18b989;
+}
+
+.progresso .refeicao {
+    width: 5%;
+    background: #e7bd35;
+}
+
+.progresso .estudo {
+    width: 35%;
+    background: #d7dde4;
+}
+
+.legenda {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 7px;
+
+    margin-top: 11px;
+
+    color: #737a82;
+
+    font-size: 8px;
+}
+
+.legenda div {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.ponto {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+}
+
+.ponto-sono {
+    background: #4b5563;
+}
+
+.ponto-aula {
+    background: #58316d;
+}
+
+.ponto-trabalho {
+    background: #087fbd;
+}
+
+.ponto-estudo {
+    background: #18b989;
+}
+
+
+/* =====================================================
+   CALENDAR AREA
+===================================================== */
+
+.area-calendario {
+    min-width: 0;
+}
+
+
+/* Calendar header */
+
+.cabecalho-calendario {
+    background: white;
+
+    border: 1px solid #e2e7ed;
+
+    border-radius: 12px 12px 0 0;
+
+    padding: 14px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.titulo-calendario {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+.icone-calendario {
+    width: 28px;
+    height: 28px;
+
+    border-radius: 7px;
+
+    background: #f0e8f5;
+
+    color: var(--roxo);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.titulo-calendario h2 {
+    font-size: 12px;
+
+    color: #37313b;
+
+    margin-bottom: 2px;
+}
+
+.titulo-calendario small {
+    font-size: 8px;
+
+    color: #868c94;
+}
+
+.info-calendario {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #8a9199;
+
+    font-size: 8px;
+}
+
+.info-calendario .fixo {
+    background: #e9f8f2;
+
+    color: #188767;
+
+    padding: 7px 9px;
+
+    border-radius: 14px;
+
+    font-weight: 700;
+}
+
+.info-calendario .livre {
+    color: #188767;
+}
+
+.info-calendario .semana {
+    background: #f1f3f5;
+
+    padding: 7px 9px;
+
+    border-radius: 5px;
+
+    color: #616872;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   CALENDAR GRID
+===================================================== */
+
+.calendario {
+    background: white;
+
+    border: 1px solid #e2e7ed;
+
+    border-top: none;
+
+    display: grid;
+
+    grid-template-columns: 70px repeat(7, minmax(90px, 1fr));
+
+    grid-template-rows: 44px;
+
+    grid-auto-rows: 38px;
+
+    align-content: start;
+
+    max-height: min(72vh, 900px);
+
+    overflow: auto;
+
+    border-radius: 0 0 10px 10px;
+}
+
+.quadro-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none;
+}
+
+.quadro-modal.ativo { pointer-events: auto; }
+
+.calendario.pronto-para-soltar {
+    outline: 2px dashed #9b73ac;
+    outline-offset: -3px;
+}
+
+.faixa-calendario {
+    background: #fff;
+    transition: background .12s ease;
+}
+
+.calendario.pronto-para-soltar .faixa-calendario {
+    background: #fcf9fd;
+}
+
+.faixa-calendario.destino-soltura {
+    background: #e9dcf0 !important;
+    box-shadow: inset 0 0 0 2px #8b62a0;
+}
+
+.faixa-calendario.conflito-horario {
+    background: #fff0f1;
+    box-shadow: inset 0 0 0 2px #d75c67;
+}
+
+.evento-calendario.conflito-horario {
+    outline: 2px solid #d75c67;
+}
+
+
+/* Cada célula */
+
+.calendario > * {
+    border-right: 1px solid #edf0f3;
+
+    border-bottom: 1px solid #edf0f3;
+
+    position: relative;
+}
+
+
+/* Corner */
+
+.canto {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    color: #9299a2;
+
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+
+/* Day */
+
+.dia {
+    background: #fafbfd;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 3px;
+}
+
+.dia small {
+    font-size: 8px;
+
+    color: #9299a2;
+
+    font-weight: 700;
+}
+
+.dia strong {
+    font-size: 10px;
+
+    color: #5d626b;
+}
+
+.dia.selecionado {
+    background: #f9f5fb;
+}
+
+.dia.selecionado small,
+.dia.selecionado strong {
+    color: var(--roxo);
+}
+
+
+/* Time */
+
+.horario {
+    display: flex;
+
+    justify-content: center;
+
+    padding-top: 11px;
+
+    color: #a4abb3;
+
+    font-size: 8px;
+}
+
+
+/* Empty cells */
+
+.vazio,
+.faixa-livre {
+    background: #fff;
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+.compromisso {
+    margin: 5px;
+
+    border-radius: 8px;
+
+    padding: 7px;
+
+    font-size: 8px;
+
+    overflow: hidden;
+
+    z-index: 2;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+    cursor: grab;
+    user-select: none;
+}
+
+.evento-calendario {
+    min-height: 0;
+    height: auto;
+    touch-action: none;
+    padding-bottom: 14px;
+}
+
+.evento-calendario.redimensionando {
+    z-index: 6;
+    outline: 2px solid #8b62a0;
+}
+
+.alca-ajuste {
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    z-index: 5;
+    width: 24px;
+    height: 6px;
+    border-radius: 4px;
+    background: currentColor;
+    opacity: .48;
+    transform: translateX(-50%);
+    cursor: ns-resize;
+    touch-action: none;
+}
+
+.alca-ajuste:hover,
+.evento-calendario.redimensionando .alca-ajuste {
+    opacity: 1;
+}
+
+.compromisso:active,
+.compromisso.arrastando { cursor: grabbing; opacity: .55; }
+
+.compromisso small {
+    font-size: 7px;
+}
+
+.evento-adicionado {
+    z-index: 4;
+    min-width: 0;
+    margin: 5px;
+    padding: 6px;
+    border: 1px solid;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    font-size: 8px;
+    cursor: grab;
+    user-select: none;
+    transition: opacity .15s ease;
+}
+
+.evento-adicionado:active,
+.evento-adicionado.arrastando { cursor: grabbing; opacity: .55; }
+
+.evento-adicionado span,
+.evento-adicionado small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.evento-adicionado small { font-size: 7px; opacity: .75; }
+.evento-adicionado.roxo { background: #f1eafa; border-color: #ddcce9; color: #56306b; }
+.evento-adicionado.azul { background: #e6f4fc; border-color: #cce8f6; color: #087fbd; }
+.evento-adicionado.escuro { background: #edf0f3; border-color: #dce2e8; color: #303a49; }
+.evento-adicionado.verde { background: #e6f8f2; border-color: #c9efdf; color: #138a67; }
+.evento-adicionado.amarelo { background: #fff8df; border-color: #f1df9c; color: #9a7412; }
+.evento-adicionado.deslocamento { background: #eff1ff; border-color: #d8e0f1; color: #5c51a6; }
+
+
+/* Sono */
+
+.evento-sono {
+    background: #f0f3f7;
+
+    color: #7e8792;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-direction: row;
+
+    margin: 4px;
+}
+
+
+/* Treino */
+
+.exercicio {
+    background: #dcf7ed;
+
+    border: 1px solid #b9ecd9;
+
+    color: #138a67;
+}
+
+.exercicio small {
+    color: #548d7a;
+}
+
+
+/* Transporte */
+
+.evento-deslocamento {
+    background: #eff1ff;
+
+    color: #5c51a6;
+
+    border: 1px solid #dcd9fa;
+
+    justify-content: center;
+}
+
+
+/* Café */
+
+.cafe-da-manha {
+    background: #fff9dd;
+
+    color: #a98016;
+
+    border: 1px solid #f4e5a3;
+
+    justify-content: center;
+}
+
+
+/* Aula */
+
+.evento-aula {
+    background: #56306b;
+
+    color: white;
+
+    padding: 9px;
+
+    margin: 5px;
+
+    box-shadow: 0 2px 5px rgba(60, 30, 70, .12);
+}
+
+.evento-aula strong {
+    font-size: 7px;
+
+    letter-spacing: .3px;
+
+    opacity: .75;
+}
+
+.evento-aula b {
+    font-size: 10px;
+
+    line-height: 1.1;
+
+    margin-top: 2px;
+}
+
+.evento-aula small {
+    opacity: .75;
+}
+
+.evento-aula span {
+    font-size: 7px;
+
+    opacity: .75;
+}
+
+.evento-aula em {
+    font-style: normal;
+
+    font-size: 7px;
+
+    margin-top: auto;
+
+    opacity: .8;
+}
+
+
+/* Janela */
+
+.janela-livre {
+    margin: 5px;
+
+    border-radius: 8px;
+
+    background: #fbfafc;
+
+    border: 1px dashed #d9d4df;
+
+    color: #696270;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    font-size: 8px;
+
+    line-height: 1.4;
+}
+
+.janela-livre.grande {
+    color: #77727b;
+
+    background: #faf9fb;
+}
+
+
+/* Almoço */
+
+.almoco {
+    background: #fff9e5;
+
+    border: 1px solid #f2e3a9;
+
+    color: #90721d;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: row;
+}
+
+
+/* Estudo livre */
+
+.estudo-livre {
+    margin: 5px;
+
+    background: #fbf7fc;
+
+    color: #77727c;
+
+    border-radius: 7px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    font-size: 8px;
+
+    line-height: 1.3;
+}
+
+
+/* Estágio */
+
+.estagio {
+    background: #087fbd;
+
+    color: white;
+
+    margin: 5px;
+
+    padding: 8px;
+
+    border-radius: 7px;
+}
+
+.estagio strong {
+    font-size: 7px;
+
+    opacity: .75;
+}
+
+.estagio b {
+    font-size: 9px;
+
+    line-height: 1.1;
+}
+
+.estagio small {
+    opacity: .8;
+
+    font-size: 7px;
+}
+
+.estagio em {
+    font-style: normal;
+
+    font-size: 7px;
+
+    margin-top: auto;
+}
+
+
+/* Sono noturno */
+
+.sono-noturno {
+    background: #eef1f5;
+
+    color: #737c87;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-direction: row;
+}
+
+
+/* =====================================================
+   CALENDAR FOOTER
+===================================================== */
+
+.rodape-calendario {
+    height: 37px;
+
+    border: 1px solid #e2e7ed;
+
+    border-top: none;
+
+    background: white;
+
+    border-radius: 0 0 10px 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 14px;
+
+    color: #8b929b;
+
+    font-size: 8px;
+}
+
+.legenda-rodape {
+    display: flex;
+
+    gap: 13px;
+}
+
+.legenda-rodape span {
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+}
+
+.legenda-rodape i {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+}
+
+.ponto-roxo {
+    background: var(--roxo);
+}
+
+.ponto-azul {
+    background: var(--azul);
+}
+
+.ponto-verde {
+    background: var(--verde);
+}
+
+.ponto-escuro {
+    background: #4b5563;
+}
+
+
+/* =====================================================
+   BOTTOM
+===================================================== */
+
+.rodape {
+    margin-top: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+.estado {
+    color: #808790;
+
+    font-size: 9px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+.estado strong {
+    color: #687079;
+}
+
+.acoes-rodape {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+}
+
+.voltar {
+    border: none;
+
+    background: transparent;
+
+    color: #b0b4ba;
+
+    font-size: 10px;
+}
+
+.proximo {
+    border: none;
+
+    background: var(--roxo);
+
+    color: white;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 8px rgba(86, 48, 107, .15);
+}
+
+.proximo span {
+    margin-left: 8px;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   HOVER
+===================================================== */
+
+.rotina,
+.compromisso,
+.botao-personalizado,
+.cartao-ia button,
+.proximo {
+    transition: .2s ease;
+}
+
+.rotina:hover {
+    transform: translateY(-1px);
+
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .05);
+}
+
+.botao-personalizado:hover {
+    background: #fafafa;
+
+    border-color: #aaa;
+}
+
+.cartao-ia button:hover,
+.proximo:hover {
+    background: var(--roxo-escuro);
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   RESPONSIVIDADE
+===================================================== */
+
+@media (max-width: 1250px) {
+
+    .barra-superior {
+        padding: 0 20px;
+    }
+
+    .marca {
+        min-width: 260px;
+    }
+
+    .etapas {
+        gap: 15px;
+    }
+
+    .acoes-cabecalho button {
+        display: none;
+    }
+
+    .pagina {
+        padding: 20px;
+    }
+
+    .area-trabalho {
+        grid-template-columns: 260px minmax(0, 1fr);
+    }
+
+    .calendario {
+        grid-template-columns: 55px repeat(7, minmax(80px, 1fr));
+    }
+
+}
+
+
+@media (max-width: 1000px) {
+
+    .etapas {
+        display: none;
+    }
+
+    .introducao {
+        flex-direction: column;
+    }
+
+    .dica {
+        width: 100%;
+    }
+
+    .area-trabalho {
+        grid-template-columns: 1fr;
+    }
+
+    .barra-lateral {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cartao-lateral {
+        grid-column: span 2;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .barra-superior {
+        height: 65px;
+    }
+
+    .integracao {
+        display: none;
+    }
+
+    .marca {
+        min-width: 0;
+    }
+
+    .acoes-cabecalho {
+        margin-left: auto;
+    }
+
+    .pagina {
+        padding: 15px;
+    }
+
+    .barra-lateral {
+        display: flex;
+    }
+
+    .area-calendario {
+        overflow-x: auto;
+    }
+
+    .calendario {
+        min-width: 850px;
+    }
+
+    .cabecalho-calendario {
+        min-width: 850px;
+    }
+
+    .rodape-calendario {
+        min-width: 850px;
+    }
+
+    .rodape {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .acoes-rodape {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+}
