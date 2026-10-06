@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Disciplinas & Blocos de Horário</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/layout.css?v=11">
+    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=11">
+</head>
+
+<body>
+
+    <div id="cabecalho-raiz"></div>
+    <div id="barra-lateral-raiz"></div>
+
+
+    <!-- ================= CONTEÚDO ================= -->
+
+    <main class="principal">
+
+        <div class="conteiner">
+
+            <!-- ================= CABEÇALHO DA PÁGINA ================= -->
+
+            <section class="cabecalho-pagina">
+
+                <div class="titulos">
+
+                    <h1>Disciplinas & Blocos de Horário</h1>
+
+                    <p>
+                        Cadastre suas disciplinas universitárias, gerencie pesos acadêmicos e defina seus <br>blocos recorrentes para que o motor preditivo Sofia organize seus estudos sem <br>conflitos.
+                    </p>
+
+                </div>
+
+                <div class="acoes-pagina">
+
+                    <button type="button" class="botao-claro">
+                        <img src="assets/icons/disciplinas/exportar.svg" alt="" width="13.33" height="13.33">
+                        <span>Exportar Grade (.PDF)</span>
+                    </button>
+
+                    <button type="button" class="botao-roxo">
+                        <img src="assets/icons/disciplinas/mais.svg" alt="" width="9.33" height="9.33">
+                        <span>Nova Disciplina</span>
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= DISCIPLINAS EM CURSO ================= -->
+
+            <section class="secao-disciplinas">
+
+                <div class="cabecalho-secao">
+
+                    <div class="titulo-secao">
+                        <h2>Disciplinas em Curso (Semestre Atual)</h2>
+                        <span class="selo-lilas">4 Disciplinas Ativas</span>
+                    </div>
+
+                    <div class="filtros">
+                        <select id="filtrar-area" class="seletor seletor-area" aria-label="Filtrar por área">
+                            <option value="todas">Filtrar por Área</option>
+                            <option value="exatas">Ciências Exatas</option>
+                            <option value="engenharia">Engenharia de Software</option>
+                            <option value="projeto">Projeto Final</option>
+                            <option value="distribuidos">Sistemas Distribuídos</option>
+                        </select>
+
+                        <select id="ordenar-disciplinas" class="seletor seletor-ordem" aria-label="Ordenar disciplinas">
+                            <option value="horas">Mais Horas Alocadas</option>
+                            <option value="progresso">Maior Progresso</option>
+                            <option value="nome">Nome (A-Z)</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="cartoes-disciplinas" id="cartoes-disciplinas">
+
+                    <!-- Cálculo I -->
+
+                    <article class="cartao-disciplina" style="--cor: #4F3466" data-area="exatas" data-horas="4" data-progresso="72" data-nome="Cálculo I">
+
+                        <div class="cartao-conteudo">
+
+                            <div class="cartao-topo">
+                                <span class="etiqueta etiqueta-lilas">Ciências Exatas</span>
+
+                                <div class="cartao-acoes">
+                                    <button type="button" aria-label="Editar disciplina">
+                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5" height="10.5">
+                                    </button>
+                                    <button type="button" aria-label="Mais opções">
+                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33" height="9.33">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <h3>Cálculo I (Diferencial e Integral)</h3>
+
+                            <div class="cartao-info">
+                                <p class="creditos">6 créditos • 4h/sem alocadas</p>
+                                <p class="professor">Prof. Dr. Ricardo Arona • Sala 304 - Bloco B</p>
+                            </div>
+
+                        </div>
+
+                        <div class="cartao-progresso">
+                            <div class="progresso-topo">
+                                <span>Progresso do Semestre</span>
+                                <strong style="color: #4F3466">72%</strong>
+                            </div>
+
+                            <div class="trilha">
+                                <span style="width: 72%; background: #4F3466"></span>
+                            </div>
+                        </div>
+
+                    </article>
+
+
+                    <!-- Estrutura de Dados -->
+
+                    <article class="cartao-disciplina" style="--cor: #63597C" data-area="engenharia" data-horas="6" data-progresso="85" data-nome="Estrutura de Dados & Algoritmos">
+
+                        <div class="cartao-conteudo">
+
+                            <div class="cartao-topo">
+                                <span class="etiqueta etiqueta-violeta">Engenharia de Software</span>
+
+                                <div class="cartao-acoes">
+                                    <button type="button" aria-label="Editar disciplina">
+                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5" height="10.5">
+                                    </button>
+                                    <button type="button" aria-label="Mais opções">
+                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33" height="9.33">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <h3>Estrutura de Dados & Algoritmos</h3>
+
+                            <div class="cartao-info">
+                                <p class="creditos">4 créditos • 6h/sem alocadas</p>
+                                <p class="professor">Profa. Dra. Renata Silveira • Lab BD 02</p>
+                            </div>
+
+                        </div>
+
+                        <div class="cartao-progresso">
+                            <div class="progresso-topo">
+                                <span>Progresso do Semestre</span>
+                                <strong style="color: #63597C">85%</strong>
+                            </div>
+
+                            <div class="trilha">
+                                <span style="width: 85%; background: #63597C"></span>
+                            </div>
+                        </div>
+
+                    </article>
+
+
+                    <!-- TCC -->
+
+                    <article class="cartao-disciplina" style="--cor: #C9A74D" data-area="projeto" data-horas="5" data-progresso="0" data-nome="Trabalho de Conclusão (TCC I)">
+
+                        <div class="cartao-conteudo">
+
+                            <div class="cartao-topo">
+                                <span class="etiqueta etiqueta-ambar">Projeto Final</span>
+
+                                <div class="cartao-acoes">
+                                    <button type="button" aria-label="Editar disciplina">
+                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5" height="10.5">
+                                    </button>
+                                    <button type="button" aria-label="Mais opções">
+                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33" height="9.33">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <h3>Trabalho de Conclusão (TCC I)</h3>
+
+                            <div class="cartao-info">
+                                <p class="creditos">8 créditos • 5h/sem alocadas</p>
+                                <p class="professor">Prof. Marcos Valente • Sala Virtual Meet</p>
+                            </div>
+
+                        </div>
+
+                        <div class="cartao-progresso">
+                            <div class="progresso-topo">
+                                <span>Etapa de Desenvolvimento</span>
+                                <strong style="color: #765B00">Sprint 4</strong>
+                            </div>
+
+                            <div class="faixa-fase">Fase de Definição - Sprint 4</div>
+                        </div>
+
+                    </article>
+
+
+                    <!-- Sistemas Distribuídos -->
+
+                    <article class="cartao-disciplina" style="--cor: #6750A4" data-area="distribuidos" data-horas="3" data-progresso="60" data-nome="Sistemas Operacionais & Redes">
+
+                        <div class="cartao-conteudo">
+
+                            <div class="cartao-topo">
+                                <span class="etiqueta etiqueta-cinza">Sistemas Distribuídos</span>
+
+                                <div class="cartao-acoes">
+                                    <button type="button" aria-label="Editar disciplina">
+                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5" height="10.5">
+                                    </button>
+                                    <button type="button" aria-label="Mais opções">
+                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33" height="9.33">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <h3>Sistemas Operacionais & Redes</h3>
+
+                            <div class="cartao-info">
+                                <p class="creditos">4 créditos • 3h/sem alocadas</p>
+                                <p class="professor">Prof. Carlos Eduardo • Lab Redes</p>
+                            </div>
+
+                        </div>
+
+                        <div class="cartao-progresso">
+                            <div class="progresso-topo">
+                                <span>Progresso do Semestre</span>
+                                <strong style="color: #4F3466">60%</strong>
+                            </div>
+
+                            <div class="trilha">
+                                <span style="width: 60%; background: #6750A4"></span>
+                            </div>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Indicadores -->
+
+                <div class="indicadores">
+
+                    <article class="indicador">
+                        <div class="indicador-icone" style="background: #E1D4FD">
+                            <img src="assets/icons/disciplinas/horas-total.svg" alt="" width="22" height="16">
+                        </div>
+
+                        <div class="indicador-texto">
+                            <span class="indicador-rotulo">Total de Horas Acadêmicas</span>
+                            <strong>18h / semana</strong>
+                            <span class="indicador-nota">Distribuição equilibrada em 4 matérias</span>
+                        </div>
+                    </article>
+
+                    <article class="indicador">
+                        <div class="indicador-icone" style="background: #FFDF93">
+                            <img src="assets/icons/disciplinas/horas-livres.svg" alt="" width="16" height="20">
+                        </div>
+
+                        <div class="indicador-texto">
+                            <span class="indicador-rotulo">Horas Livres Identificadas</span>
+                            <strong>24h disponíveis</strong>
+                            <span class="indicador-nota">Janelas ótimas para revisão e exercícios</span>
+                        </div>
+                    </article>
+
+                    <article class="indicador">
+                        <div class="indicador-icone" style="background: #ECE6EE">
+                            <img src="assets/icons/disciplinas/alocacao-sofia.svg" alt="" width="22" height="22">
+                        </div>
+
+                        <div class="indicador-texto">
+                            <span class="indicador-rotulo">Alocação Inteligente Sofia</span>
+                            <strong style="color: #4F3466">94% Otimizada</strong>
+                            <span class="indicador-nota">Sem conflito de provas ou blocos fixos</span>
+                        </div>
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= BLOCOS FIXOS ================= -->
+
+            <section class="secao-blocos">
+
+                <div class="cabecalho-secao cabecalho-blocos">
+
+                    <div class="titulo-blocos">
+
+                        <div class="titulo-secao">
+                            <h2>Blocos Fixos de Horário (Rotina Recorrente)</h2>
+                            <span class="selo-vermelho">38h Bloqueadas / semana</span>
+                        </div>
+
+                        <p>
+                            Mapeie seus compromissos fixos e inegociáveis. A Sofia bloqueará automaticamente essas janelas para não agendar estudos<br>nelas.
+                        </p>
+
+                    </div>
+
+                    <button type="button" class="botao-roxo">
+                        <img src="assets/icons/disciplinas/adicionar-bloco.svg" alt="" width="12.67" height="14.67">
+                        <span>+ Adicionar Bloco Fixo</span>
+                    </button>
+
+                </div>
+
+
+                <!-- Legenda -->
+
+                <div class="legenda">
+
+                    <span class="legenda-titulo">Legenda de Categorias:</span>
+
+                    <span class="legenda-item">
+                        <i style="background: #4F3466"></i>
+                        <span>Aulas da Faculdade</span>
+                    </span>
+
+                    <span class="legenda-item">
+                        <i style="background: #1F1635"></i>
+                        <span>Trabalho / Estágio</span>
+                    </span>
+
+                    <span class="legenda-item">
+                        <i style="background: #CDC0E9"></i>
+                        <span>Sono & Descanso (Inegociável)</span>
+                    </span>
+
+                    <span class="legenda-item">
+                        <i style="background: #C9A74D"></i>
+                        <span>Refeições & Academia</span>
+                    </span>
+
+                </div>
+
+
+                <!-- Tabela -->
+
+                <div class="tabela">
+
+                    <div class="tabela-rolagem">
+
+                        <div class="tabela-cabecalho">
+                            <div style="--w: 112px; padding: 12px 16px">Horários</div>
+                            <div style="--w: 124.28px">Segunda</div>
+                            <div style="--w: 119.03px">Terça</div>
+                            <div style="--w: 124.28px">Quarta</div>
+                            <div style="--w: 121.47px">Quinta</div>
+                            <div style="--w: 121.44px">Sexta</div>
+                            <div style="--w: 108.27px">Sábado</div>
+                            <div style="--w: 121.23px">Domingo</div>
+                        </div>
+
+
+                        <div class="tabela-corpo">
+
+                            <!-- 07:00 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 18px 16px 18.5px">07:00</div>
+
+                                <div class="celula celula-faixa" style="--w: 824px; background: rgba(255, 223, 147, .3)">
+                                    <div class="faixa-titulo" style="color: #503D00">
+                                        <img src="assets/icons/disciplinas/cafe.svg" alt="" width="11.67" height="10.5">
+                                        <span>Rotina Matinal & Café da Manhã</span>
+                                    </div>
+
+                                    <span class="faixa-nota" style="color: #503D00; opacity: .75">Todos os dias • Recorrente Fixo (7h semanais)</span>
+                                </div>
+                            </div>
+
+
+                            <!-- 08:00 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 40.5px 16px">08:00</div>
+
+                                <div class="celula celula-aula fundo-roxo" style="--w: 108.28px; --pad: 8px">
+                                    <strong style="color: #4F3466">Cálculo I</strong>
+                                    <span>08:00 - 10:00 •<br>Teórica</span>
+                                </div>
+
+                                <div class="celula celula-livre" style="--w: 111.03px"><span class="texto-sofia">Janela Sofia<br>Livre</span></div>
+
+                                <div class="celula celula-aula fundo-roxo" style="--w: 116.28px">
+                                    <strong style="color: #4F3466">Cálculo I</strong>
+                                    <span>08:00 - 10:00 •<br>Teórica</span>
+                                </div>
+
+                                <div class="celula celula-livre" style="--w: 113.47px"><span class="texto-sofia">Janela Sofia<br>Livre</span></div>
+
+                                <div class="celula celula-aula fundo-cinza" style="--w: 113.44px">
+                                    <strong style="color: #63597C">Estrutura de<br>Dados</strong>
+                                    <span>08:00 - 12:00 •<br>Lab</span>
+                                </div>
+
+                                <div class="celula celula-livre" style="--w: 100.27px"><span class="texto-livre">Livre / Flexível</span></div>
+
+                                <div class="celula celula-livre" style="--w: 113.23px"><span class="texto-livre">Descanso<br>Semanal</span></div>
+                            </div>
+
+
+                            <!-- 09:00 - 12:00 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 32.5px 16px">09:00 -<br>12:00</div>
+
+                                <div class="bloco fundo-cinza" style="--w: 108.28px">
+                                    <strong style="color: #63597C">Algoritmos Lab</strong>
+                                    <span>Presencial • Lab<br>BD 02</span>
+                                </div>
+
+                                <div class="bloco" style="--w: 103.03px; --ml: 8px; background: rgba(103, 80, 164, .1)">
+                                    <strong style="color: #6750A4">Sistemas<br>Operac.</strong>
+                                    <span>Presencial • Lab<br>Redes</span>
+                                </div>
+
+                                <div class="bloco fundo-cinza" style="--w: 108.28px; --ml: 8px">
+                                    <strong style="color: #63597C">Algoritmos Lab</strong>
+                                    <span>Presencial • Lab<br>BD 02</span>
+                                </div>
+
+                                <div class="bloco" style="--w: 105.47px; --ml: 8px; background: rgba(255, 223, 147, .4)">
+                                    <strong style="color: #503D00">Orientação<br>TCC I</strong>
+                                    <span>Virtual Meet •<br>Sprint 4</span>
+                                </div>
+
+                                <div class="bloco fundo-roxo" style="--w: 105.44px; --ml: 8px">
+                                    <strong style="color: #4F3466">Aulas Teóricas</strong>
+                                    <span>Bloco B • Sala 304</span>
+                                </div>
+
+                                <div class="bloco bloco-centro" style="--w: 100.27px; background: #F8F2FA">
+                                    <strong style="color: #4F3466">Revisões<br>Sofia</strong>
+                                    <span>Sessão Livre</span>
+                                </div>
+
+                                <div class="bloco bloco-centro" style="--w: 113.23px; background: #F2ECF4">
+                                    <strong class="descanso">Descanso</strong>
+                                    <span>Recuperação</span>
+                                </div>
+                            </div>
+
+
+                            <!-- 12:00 - 13:00 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 12.5px 16px">12:00 -<br>13:00</div>
+
+                                <div class="celula celula-centro" style="--w: 594.5px; --pad: 6px 12px; background: rgba(255, 223, 147, .2)">
+                                    <span class="texto-medio" style="color: #503D00">Almoço & Descompressão (Seg a Sex • Bloco Fixo Protegido)</span>
+                                </div>
+
+                                <div class="celula celula-centro celula-livre" style="--w: 221.5px; --pad: 6px 12px 6px 20px">
+                                    <span class="texto-medio">Almoço Família / Livre</span>
+                                </div>
+                            </div>
+
+
+                            <!-- 14:00 - 18:00 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 28.5px 16px">14:00 -<br>18:00</div>
+
+                                <div class="celula celula-faixa" style="--w: 594.5px; --pad: 12px; background: rgba(31, 22, 53, .1)">
+                                    <div class="faixa-titulo">
+                                        <img src="assets/icons/disciplinas/trabalho.svg" alt="" width="13.33" height="12.67">
+
+                                        <div class="faixa-textos">
+                                            <strong style="color: #1F1635">Estágio Tech / Trabalho Remoto</strong>
+                                            <span class="faixa-nota">Recorrente Fixo • 20h semanais • Bloco inegociável bloqueado pela Sofia</span>
+                                        </div>
+                                    </div>
+
+                                    <span class="selo-bloqueado">Bloqueado</span>
+                                </div>
+
+                                <div class="celula celula-centro celula-livre" style="--w: 221.5px; --pad: 12px 12px 12px 20px">
+                                    <span class="texto-medio" style="color: #4F3466">Janela Livre Disponível para<br>Simulados</span>
+                                    <span class="texto-pequeno">Oportunidade de estudo recomendada</span>
+                                </div>
+                            </div>
+
+
+                            <!-- 18:30 - 19:30 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 16.5px 16px">18:30 -<br>19:30</div>
+
+                                <div class="celula celula-centro fundo-ambar" style="--w: 108.28px; --pad: 8px"><span class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
+                                <div class="celula celula-centro celula-livre" style="--w: 111.03px"><span class="texto-medio" style="color: #4F3466">Foco Sofia<br>(Livre)</span></div>
+                                <div class="celula celula-centro fundo-ambar" style="--w: 116.28px"><span class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
+                                <div class="celula celula-centro celula-livre" style="--w: 113.47px"><span class="texto-medio" style="color: #4F3466">Foco Sofia<br>(Livre)</span></div>
+                                <div class="celula celula-centro fundo-ambar" style="--w: 113.44px"><span class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
+                                <div class="celula celula-centro celula-livre" style="--w: 100.27px"><span class="texto-medio">Livre</span></div>
+                                <div class="celula celula-centro celula-livre" style="--w: 113.23px"><span class="texto-medio">Livre</span></div>
+                            </div>
+
+
+                            <!-- 23:00 - 07:00 -->
+
+                            <div class="linha">
+                                <div class="hora" style="padding: 12px 16px">23:00 -<br>07:00</div>
+
+                                <div class="celula celula-faixa" style="--w: 824px; background: rgba(225, 212, 253, .4)">
+                                    <div class="faixa-titulo" style="color: #645A7D">
+                                        <img src="assets/icons/disciplinas/sono.svg" alt="" width="11.67" height="11.67">
+                                        <strong>Sono & Recuperação (Dormir) - Protegido</strong>
+                                    </div>
+
+                                    <span class="faixa-nota" style="color: #645A7D">8h diárias inegociáveis para consolidação de memória • 56h / semana</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= SUGESTÃO PREDITIVA ================= -->
+
+            <section class="sugestao">
+
+                <div class="sugestao-esquerda">
+
+                    <div class="sugestao-icone">
+                        <img src="assets/icons/disciplinas/sugestao-sofia.svg" alt="" width="15.84" height="16.67">
+                    </div>
+
+                    <div class="sugestao-texto">
+
+                        <div class="sugestao-titulo">
+                            <h4>Sugestão Preditiva da Sofia</h4>
+                            <span class="selo-violeta">Otimização Ativa</span>
+                        </div>
+
+                        <p>
+                            Seus blocos de Trabalho e Aulas deixam janelas ideais de estudo nas terças e <br>quintas entre 19:30 e 22:00. Gostaria que a IA pré-aloque revisões espaçadas de <br>Cálculo I e Algoritmos nesses intervalos?
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="sugestao-acoes">
+                    <button type="button" class="botao-suave">Personalizar</button>
+
+                    <button type="button" class="botao-aprovar">
+                        <img src="assets/icons/disciplinas/aprovar.svg" alt="" width="9.51" height="7.01">
+                        <span>Aprovar Sugestão</span>
+                    </button>
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <script src="JS/componentes/layout.js?v=11"></script>
+    <script src="JS/script_disciplinas.js?v=11"></script>
+
+</body>
+</html>
