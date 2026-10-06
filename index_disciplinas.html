@@ -8,16 +8,163 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=11">
-    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=11">
+    <link rel="stylesheet" href="CSS/style_disciplinas.css">
 </head>
 
 <body>
 
-    <div id="cabecalho-raiz"></div>
-    <div id="barra-lateral-raiz"></div>
+    <!-- ================= HEADER ================= -->
+
+    <header class="cabecalho-principal">
+
+        <img class="logo" src="assets/icons/disciplinas/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+
+        <nav class="abas">
+            <a href="index_calendario.html">Grade</a>
+            <a href="index_metas.html" class="ativo" aria-current="page">Metas</a>
+            <a href="index_disciplinas.html">Disciplinas</a>
+            <a href="#">Relatórios</a>
+            <a href="#">Métricas</a>
+        </nav>
+
+        <div class="itens-direita">
+
+            <div class="alternador" role="group" aria-label="Visualização">
+                <button type="button" class="ativo">Semana</button>
+                <button type="button">Mês</button>
+            </div>
+
+            <div class="progresso-tarefas">
+                <img src="assets/icons/disciplinas/progresso-tarefas.svg" alt="" width="15" height="15">
+
+                <div class="progresso-texto">
+                    <span>Tarefas: <strong>18/24 •</strong></span>
+                    <strong>75%</strong>
+                </div>
+
+                <div class="trilha-mini">
+                    <span style="width: 75%"></span>
+                </div>
+            </div>
+
+            <button type="button" class="botao-ia">
+                <img src="assets/icons/disciplinas/ia-preencher.svg" alt="" width="16.5" height="16.5">
+                <span>Preencher Vagas<br>com IA</span>
+            </button>
+
+            <button type="button" class="botao-notificacao" aria-label="Notificações">
+                <img src="assets/icons/disciplinas/notificacao.svg" alt="" width="13.33" height="16.67">
+                <span class="alerta-notificacao"></span>
+            </button>
+
+            <span class="divisor-vertical"></span>
+
+            <button type="button" class="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha">
+                <img src="assets/icons/disciplinas/avatar-704c8e.png" alt="">
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="barra-lateral">
+
+        <div class="barra-lateral-topo">
+
+            <div class="grupo-lateral">
+                <p class="rotulo-lateral">Ações Rápidas</p>
+
+                <button type="button" class="botao-sessao">
+                    <img src="assets/icons/disciplinas/iniciar.svg" alt="" width="13.33" height="13.33">
+                    <span>Iniciar Sessão</span>
+                </button>
+            </div>
+
+
+            <div class="grupo-lateral">
+                <p class="rotulo-lateral">Navegação</p>
+
+                <nav class="navegacao">
+                    <a href="index_calendario.html">
+                        <img src="assets/icons/disciplinas/nav-cronograma.svg" alt="" width="13.5" height="15">
+                        <span>Cronograma Semanal</span>
+                    </a>
+
+                    <a href="index_metas.html">
+                        <img src="assets/icons/disciplinas/nav-metas.svg" alt="" width="15" height="15">
+                        <span>Tarefas & Metas</span>
+                    </a>
+
+                    <a href="index_disciplinas.html" class="ativo" aria-current="page">
+                        <img src="assets/icons/disciplinas/nav-disciplinas.svg" alt="" width="13.5" height="13.5">
+                        <span>Disciplinas & Blocos</span>
+                    </a>
+
+                    <a href="#">
+                        <img src="assets/icons/disciplinas/nav-relatorios.svg" alt="" width="13.5" height="13.5">
+                        <span>Relatórios Acadêmicos</span>
+                    </a>
+
+                    <a href="#">
+                        <img src="assets/icons/disciplinas/nav-rendimento.svg" alt="" width="15" height="15">
+                        <span>Rendimento & Foco</span>
+                    </a>
+                </nav>
+            </div>
+
+
+            <div class="grupo-lateral">
+                <p class="rotulo-lateral">Disciplinas Ativas</p>
+
+                <div class="lista-disciplinas">
+
+                    <div class="disciplina">
+                        <div>
+                            <span class="ponto-disciplina" style="background: #4F3466"></span>
+                            <span>Algoritmos & ED</span>
+                        </div>
+                        <span class="horas">4h</span>
+                    </div>
+
+                    <div class="disciplina">
+                        <div>
+                            <span class="ponto-disciplina" style="background: #7A589E"></span>
+                            <span>Sistemas Operac.</span>
+                        </div>
+                        <span class="horas">3h</span>
+                    </div>
+
+                    <div class="disciplina">
+                        <div>
+                            <span class="ponto-disciplina" style="background: #B89840"></span>
+                            <span>Bancos de Dados</span>
+                        </div>
+                        <span class="horas">2.5h</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="rodape-lateral">
+            <div class="pomodoro">
+                <div>
+                    <img src="assets/icons/disciplinas/pomodoro.svg" alt="" width="12" height="14">
+                    <span>Pomodoro: 25:00</span>
+                </div>
+
+                <button type="button">Configurar</button>
+            </div>
+        </div>
+
+    </aside>
 
 
     <!-- ================= CONTEÚDO ================= -->
@@ -31,6 +178,12 @@
             <section class="cabecalho-pagina">
 
                 <div class="titulos">
+
+                    <div class="linha-contexto">
+                        <span>Administração Acadêmica</span>
+                        <span class="ponto-contexto">•</span>
+                        <span>Gestão de Cursos & Rotina</span>
+                    </div>
 
                     <h1>Disciplinas & Blocos de Horário</h1>
 
@@ -91,7 +244,7 @@
 
                     <!-- Cálculo I -->
 
-                    <article class="cartao-disciplina" style="--cor: #4F3466" data-area="exatas" data-horas="4" data-progresso="72" data-nome="Cálculo I">
+                    <article class="cartao-disciplina" style="--cor: #4F378A" data-area="exatas" data-horas="4" data-progresso="72" data-nome="Cálculo I">
 
                         <div class="cartao-conteudo">
 
@@ -108,11 +261,11 @@
                                 </div>
                             </div>
 
-                            <h3>Cálculo I (Diferencial e Integral)</h3>
+                            <h3>Cálculo I (Diferencial e<br>Integral)</h3>
 
                             <div class="cartao-info">
                                 <p class="creditos">6 créditos • 4h/sem alocadas</p>
-                                <p class="professor">Prof. Dr. Ricardo Arona • Sala 304 - Bloco B</p>
+                                <p class="professor">Prof. Dr. Ricardo Arona • Sala 304<br>- Bloco B</p>
                             </div>
 
                         </div>
@@ -120,11 +273,11 @@
                         <div class="cartao-progresso">
                             <div class="progresso-topo">
                                 <span>Progresso do Semestre</span>
-                                <strong style="color: #4F3466">72%</strong>
+                                <strong style="color: #4F378A">72%</strong>
                             </div>
 
                             <div class="trilha">
-                                <span style="width: 72%; background: #4F3466"></span>
+                                <span style="width: 72%; background: #4F378A"></span>
                             </div>
                         </div>
 
@@ -138,7 +291,7 @@
                         <div class="cartao-conteudo">
 
                             <div class="cartao-topo">
-                                <span class="etiqueta etiqueta-violeta">Engenharia de Software</span>
+                                <span class="etiqueta etiqueta-violeta" style="padding-right: 40.75px">Engenharia de<br>Software</span>
 
                                 <div class="cartao-acoes">
                                     <button type="button" aria-label="Editar disciplina">
@@ -150,11 +303,11 @@
                                 </div>
                             </div>
 
-                            <h3>Estrutura de Dados & Algoritmos</h3>
+                            <h3>Estrutura de Dados &<br>Algoritmos</h3>
 
                             <div class="cartao-info">
                                 <p class="creditos">4 créditos • 6h/sem alocadas</p>
-                                <p class="professor">Profa. Dra. Renata Silveira • Lab BD 02</p>
+                                <p class="professor">Profa. Dra. Renata Silveira • Lab<br>BD 02</p>
                             </div>
 
                         </div>
@@ -192,19 +345,19 @@
                                 </div>
                             </div>
 
-                            <h3>Trabalho de Conclusão (TCC I)</h3>
+                            <h3>Trabalho de Conclusão<br>(TCC I)</h3>
 
                             <div class="cartao-info">
                                 <p class="creditos">8 créditos • 5h/sem alocadas</p>
-                                <p class="professor">Prof. Marcos Valente • Sala Virtual Meet</p>
+                                <p class="professor">Prof. Marcos Valente • Sala<br>Virtual Meet</p>
                             </div>
 
                         </div>
 
                         <div class="cartao-progresso">
                             <div class="progresso-topo">
-                                <span>Etapa de Desenvolvimento</span>
-                                <strong style="color: #765B00">Sprint 4</strong>
+                                <span style="padding-right: 49.43px">Etapa de<br>Desenvolvimento</span>
+                                <strong style="color: #765B00; padding-right: 9.75px">Sprint<br>4</strong>
                             </div>
 
                             <div class="faixa-fase">Fase de Definição - Sprint 4</div>
@@ -220,7 +373,7 @@
                         <div class="cartao-conteudo">
 
                             <div class="cartao-topo">
-                                <span class="etiqueta etiqueta-cinza">Sistemas Distribuídos</span>
+                                <span class="etiqueta etiqueta-cinza" style="padding-right: 53.86px">Sistemas<br>Distribuídos</span>
 
                                 <div class="cartao-acoes">
                                     <button type="button" aria-label="Editar disciplina">
@@ -232,7 +385,7 @@
                                 </div>
                             </div>
 
-                            <h3>Sistemas Operacionais & Redes</h3>
+                            <h3>Sistemas Operacionais<br>& Redes</h3>
 
                             <div class="cartao-info">
                                 <p class="creditos">4 créditos • 3h/sem alocadas</p>
@@ -244,7 +397,7 @@
                         <div class="cartao-progresso">
                             <div class="progresso-topo">
                                 <span>Progresso do Semestre</span>
-                                <strong style="color: #4F3466">60%</strong>
+                                <strong style="color: #4F378A">60%</strong>
                             </div>
 
                             <div class="trilha">
@@ -292,7 +445,7 @@
 
                         <div class="indicador-texto">
                             <span class="indicador-rotulo">Alocação Inteligente Sofia</span>
-                            <strong style="color: #4F3466">94% Otimizada</strong>
+                            <strong style="color: #4F378A">94% Otimizada</strong>
                             <span class="indicador-nota">Sem conflito de provas ou blocos fixos</span>
                         </div>
                     </article>
@@ -336,7 +489,7 @@
                     <span class="legenda-titulo">Legenda de Categorias:</span>
 
                     <span class="legenda-item">
-                        <i style="background: #4F3466"></i>
+                        <i style="background: #4F378A"></i>
                         <span>Aulas da Faculdade</span>
                     </span>
 
@@ -400,14 +553,14 @@
                                 <div class="hora" style="padding: 40.5px 16px">08:00</div>
 
                                 <div class="celula celula-aula fundo-roxo" style="--w: 108.28px; --pad: 8px">
-                                    <strong style="color: #4F3466">Cálculo I</strong>
+                                    <strong style="color: #4F378A">Cálculo I</strong>
                                     <span>08:00 - 10:00 •<br>Teórica</span>
                                 </div>
 
                                 <div class="celula celula-livre" style="--w: 111.03px"><span class="texto-sofia">Janela Sofia<br>Livre</span></div>
 
                                 <div class="celula celula-aula fundo-roxo" style="--w: 116.28px">
-                                    <strong style="color: #4F3466">Cálculo I</strong>
+                                    <strong style="color: #4F378A">Cálculo I</strong>
                                     <span>08:00 - 10:00 •<br>Teórica</span>
                                 </div>
 
@@ -450,12 +603,12 @@
                                 </div>
 
                                 <div class="bloco fundo-roxo" style="--w: 105.44px; --ml: 8px">
-                                    <strong style="color: #4F3466">Aulas Teóricas</strong>
+                                    <strong style="color: #4F378A">Aulas Teóricas</strong>
                                     <span>Bloco B • Sala 304</span>
                                 </div>
 
                                 <div class="bloco bloco-centro" style="--w: 100.27px; background: #F8F2FA">
-                                    <strong style="color: #4F3466">Revisões<br>Sofia</strong>
+                                    <strong style="color: #4F378A">Revisões<br>Sofia</strong>
                                     <span>Sessão Livre</span>
                                 </div>
 
@@ -500,7 +653,7 @@
                                 </div>
 
                                 <div class="celula celula-centro celula-livre" style="--w: 221.5px; --pad: 12px 12px 12px 20px">
-                                    <span class="texto-medio" style="color: #4F3466">Janela Livre Disponível para<br>Simulados</span>
+                                    <span class="texto-medio" style="color: #4F378A">Janela Livre Disponível para<br>Simulados</span>
                                     <span class="texto-pequeno">Oportunidade de estudo recomendada</span>
                                 </div>
                             </div>
@@ -512,9 +665,9 @@
                                 <div class="hora" style="padding: 16.5px 16px">18:30 -<br>19:30</div>
 
                                 <div class="celula celula-centro fundo-ambar" style="--w: 108.28px; --pad: 8px"><span class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
-                                <div class="celula celula-centro celula-livre" style="--w: 111.03px"><span class="texto-medio" style="color: #4F3466">Foco Sofia<br>(Livre)</span></div>
+                                <div class="celula celula-centro celula-livre" style="--w: 111.03px"><span class="texto-medio" style="color: #4F378A">Foco Sofia<br>(Livre)</span></div>
                                 <div class="celula celula-centro fundo-ambar" style="--w: 116.28px"><span class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
-                                <div class="celula celula-centro celula-livre" style="--w: 113.47px"><span class="texto-medio" style="color: #4F3466">Foco Sofia<br>(Livre)</span></div>
+                                <div class="celula celula-centro celula-livre" style="--w: 113.47px"><span class="texto-medio" style="color: #4F378A">Foco Sofia<br>(Livre)</span></div>
                                 <div class="celula celula-centro fundo-ambar" style="--w: 113.44px"><span class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
                                 <div class="celula celula-centro celula-livre" style="--w: 100.27px"><span class="texto-medio">Livre</span></div>
                                 <div class="celula celula-centro celula-livre" style="--w: 113.23px"><span class="texto-medio">Livre</span></div>
@@ -585,8 +738,7 @@
 
     </main>
 
-    <script src="JS/componentes/layout.js?v=11"></script>
-    <script src="JS/script_disciplinas.js?v=11"></script>
+    <script src="JS/script_disciplinas.js"></script>
 
 </body>
 </html>
