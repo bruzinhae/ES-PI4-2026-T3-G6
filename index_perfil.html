@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Perfil do Usuário</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/layout.css?v=11">
+    <link rel="stylesheet" href="CSS/style_perfil.css">
+</head>
+
+<body>
+
+    <div id="cabecalho-raiz"></div>
+    <div id="barra-lateral-raiz"></div>
+
+
+    <main class="principal">
+
+        <div class="conteiner">
+
+            <section class="cabecalho-pagina">
+
+                <div class="titulos">
+
+                    <p class="migalha">
+                        Configurações de Conta <span>›</span> <strong>Perfil Acadêmico</strong>
+                    </p>
+
+                    <h1>Perfil do Usuário</h1>
+
+                    <p>
+                        Gerencie suas informações acadêmicas, preferências de estudo e foto de perfil no AçaíStudy.
+                    </p>
+
+                </div>
+
+                <div class="controles-acoes">
+                    <button type="button" class="botao-fantasma" id="botao-descartar">Descartar</button>
+
+                    <button type="button" class="botao-roxo" id="botao-salvar">
+                        <img src="assets/icons/perfil/check.svg" alt="" width="14" height="14">
+                        <span>Salvar Alterações</span>
+                    </button>
+                </div>
+
+            </section>
+
+
+            <div class="grade-perfil">
+
+                <div class="coluna-principal">
+
+                    <section class="cartao">
+
+                        <div class="cartao-cabecalho">
+                            <div class="titulo-com-icone">
+                                <img src="assets/icons/perfil/usuario.svg" alt="" width="16" height="16">
+                                <h2>Dados Acadêmicos &amp; Pessoais</h2>
+                            </div>
+
+                            <span class="selo-ativo">● Ativo</span>
+                        </div>
+
+                        <div class="bloco-foto">
+                            <img class="foto-perfil" src="assets/icons/perfil/avatar-704c8e.png" alt="Foto de Mariana Rocha" width="72" height="72">
+
+                            <div class="info-foto">
+                                <strong>Mariana Rocha</strong>
+                                <span>Engenharia de Software • 6º Semestre Noturno</span>
+
+                                <div class="acoes-foto">
+                                    <button type="button" class="link-acao">
+                                        <img src="assets/icons/perfil/upload.svg" alt="" width="12" height="12">
+                                        <span>Alterar Foto</span>
+                                    </button>
+
+                                    <button type="button" class="link-acao perigo">Remover</button>
+                                </div>
+
+                                <small>PNG, JPG até 5MB</small>
+                            </div>
+                        </div>
+
+                        <div class="grade-campos">
+
+                            <label class="campo">
+                                <span class="rotulo-campo">Nome Completo</span>
+                                <span class="controle-campo">
+                                    <img src="assets/icons/perfil/usuario.svg" alt="" width="14" height="14">
+                                    <input type="text" name="nome" value="Mariana Rocha">
+                                </span>
+                            </label>
+
+                            <label class="campo">
+                                <span class="rotulo-campo">E-mail Universitário</span>
+                                <span class="controle-campo">
+                                    <img src="assets/icons/perfil/email.svg" alt="" width="14" height="14">
+                                    <input type="email" name="email" value="mariana.rocha@universidade.edu.br">
+                                    <span class="selo-verificado">
+                                        <img src="assets/icons/perfil/check-verde.svg" alt="" width="12" height="12">
+                                        Verificado
+                                    </span>
+                                </span>
+                            </label>
+
+                            <label class="campo">
+                                <span class="rotulo-campo">Instituição de Ensino Superior (Universidade)</span>
+                                <span class="controle-campo">
+                                    <img src="assets/icons/perfil/edificio.svg" alt="" width="14" height="14">
+                                    <input type="text" name="instituicao" value="Universidade Federal de Tecnologia (UTFPR) – Câmpus Central">
+                                </span>
+                            </label>
+
+                            <label class="campo">
+                                <span class="rotulo-campo">Curso de Graduação</span>
+                                <span class="controle-campo">
+                                    <img src="assets/icons/perfil/graduacao.svg" alt="" width="14" height="14">
+                                    <input type="text" name="curso" value="Engenharia de Software">
+                                </span>
+                            </label>
+
+                            <label class="campo">
+                                <span class="rotulo-campo">Semestre &amp; Turno</span>
+                                <span class="controle-campo">
+                                    <input type="text" name="semestre" value="6º Semestre • Noturno">
+                                </span>
+                            </label>
+
+                            <label class="campo">
+                                <span class="rotulo-campo">Meta Semanal de Estudo Focado</span>
+                                <span class="controle-campo meta-semanal">
+                                    <span class="trilha-meta">
+                                        <span style="width: 70%"></span>
+                                    </span>
+                                    <strong>28h / semana</strong>
+                                </span>
+                            </label>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="cartao">
+
+                        <div class="cartao-cabecalho">
+                            <div class="titulo-com-icone">
+                                <img src="assets/icons/perfil/cadeado.svg" alt="" width="14" height="14">
+                                <h2>Segurança &amp; Autenticação</h2>
+                            </div>
+                        </div>
+
+                        <div class="lista-seguranca">
+
+                            <div class="linha-seguranca">
+                                <div>
+                                    <strong>Senha de Acesso</strong>
+                                    <p>Última atualização realizada há 7 meses (criptografada)</p>
+                                </div>
+
+                                <button type="button" class="botao-claro">Alterar Senha</button>
+                            </div>
+
+                            <div class="linha-seguranca">
+                                <div>
+                                    <strong>Sessões Ativas</strong>
+                                    <p>MacBook Pro 14” (Curitiba, Brasil) • Sessão Atual</p>
+                                </div>
+
+                                <button type="button" class="link-acao perigo">Encerrar Outras</button>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="cartao cartao-compacto">
+
+                        <div class="linha-portabilidade">
+                            <div>
+                                <strong>Portabilidade &amp; Privacidade</strong>
+                                <p>Baixe seu histórico de Pomodoros e métricas em JSON/CSV.</p>
+                            </div>
+
+                            <div class="acoes-portabilidade">
+                                <button type="button" class="link-acao">Exportar Dados</button>
+                                <button type="button" class="link-acao perigo">Excluir Conta</button>
+                            </div>
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+                <aside class="coluna-lateral">
+
+                    <section class="cartao cartao-plano">
+
+                        <div class="plano-topo">
+                            <span class="rotulo-plano">Plano de Assinatura</span>
+                            <span class="selo-gratuito">Gratuito</span>
+                        </div>
+
+                        <h3>Essencial Estudante</h3>
+
+                        <div class="usos-plano">
+
+                            <div class="uso-item">
+                                <div class="uso-topo">
+                                    <span>Otimizações por IA</span>
+                                    <strong>3 de 5/mês</strong>
+                                </div>
+                                <div class="trilha-uso">
+                                    <span style="width: 60%"></span>
+                                </div>
+                            </div>
+
+                            <div class="uso-item">
+                                <div class="uso-topo">
+                                    <span>Disciplinas Ativas</span>
+                                    <strong>4 de 6</strong>
+                                </div>
+                                <div class="trilha-uso">
+                                    <span style="width: 66%"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <p class="nota-plano">Você tem mais 2 slots livres para esse semestre.</p>
+
+                    </section>
+
+
+                    <section class="cartao-pro">
+
+                        <div class="pro-selos">
+                            <span class="selo-recomendado">Recomendado</span>
+                            <span class="selo-publico">Para Universitários</span>
+                        </div>
+
+                        <h3>Evolua para o AçaíStudy Pro</h3>
+
+                        <ul class="lista-beneficios">
+                            <li>
+                                <img src="assets/icons/perfil/check-verde.svg" alt="" width="12" height="12">
+                                <span>Sincronização em tempo real entre dispositivos</span>
+                            </li>
+                            <li>
+                                <img src="assets/icons/perfil/check-verde.svg" alt="" width="12" height="12">
+                                <span>Sofia IA ilimitada para otimização de grade</span>
+                            </li>
+                            <li>
+                                <img src="assets/icons/perfil/check-verde.svg" alt="" width="12" height="12">
+                                <span>Alertas avançados de prevenção de burnout</span>
+                            </li>
+                        </ul>
+
+                        <button type="button" class="botao-upgrade">
+                            Fazer Upgrade • R$ 19,90/mês
+                        </button>
+
+                        <p class="nota-pro">Cancele quando quiser • Desconto semestral de 25%</p>
+
+                    </section>
+
+
+                    <div class="ajuda-plano">
+                        <img src="assets/icons/perfil/ajuda.svg" alt="" width="16" height="16">
+
+                        <div>
+                            <strong>Dúvidas sobre o plano educacional?</strong>
+                            <p>
+                                Estudantes de instituições parceiras podem ter subsídio parcial.
+                                <a href="#">Consultar convênio da universidade ›</a>
+                            </p>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="JS/componentes/layout.js?v=11"></script>
+    <script src="JS/script_perfil.js"></script>
+
+</body>
+</html>
