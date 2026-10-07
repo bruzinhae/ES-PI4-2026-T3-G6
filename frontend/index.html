@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy — Organização de estudos sem esforço</title>
+    <meta name="description" content="IA que monta seu cronograma automaticamente. Grade, metas, disciplinas e a Sofia no AçaíStudy.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_home.css">
+</head>
+
+<body>
+
+    <header class="topo">
+        <a href="index.html" class="marca" aria-label="AçaíStudy">
+            <img src="assets/icons/layout/logo.png" alt="AçaíStudy" width="190" height="49">
+        </a>
+
+        <nav class="nav-topo" aria-label="Seções">
+            <a href="#problema">Problema</a>
+            <a href="#solucao">Sofia IA</a>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#produto">Produto</a>
+        </nav>
+
+        <div class="topo-acoes">
+            <a href="index_login.html" class="btn-texto">Entrar</a>
+            <a href="index_criar_conta.html" class="btn-borda">Criar conta</a>
+        </div>
+    </header>
+
+
+    <section class="hero">
+        <img class="hero-img" src="assets/images/hero-home.jpg" alt="">
+        <div class="hero-veil" aria-hidden="true"></div>
+
+        <div class="hero-box">
+            <span class="chip-ia">
+                <img src="assets/icons/home/spark.svg" alt="" width="14" height="14">
+                Powered by Sofia IA
+            </span>
+
+            <p class="hero-marca">AçaíStudy</p>
+            <h1>Organização de estudos sem esforço.</h1>
+            <p class="hero-desc">
+                A IA que monta seu cronograma automaticamente — prioriza por impacto, protege horários fixos e reorganiza a semana em tempo real.
+            </p>
+
+            <div class="hero-acoes">
+                <a href="index_criar_conta.html" class="btn-roxo">
+                    Começar agora
+                    <img src="assets/icons/home/seta.svg" alt="" width="16" height="16">
+                </a>
+                <a href="#como-funciona" class="btn-ghost">Ver como funciona</a>
+            </div>
+
+            <ul class="hero-pilulas" aria-label="Destaques">
+                <li>
+                    <img src="assets/icons/home/auto.svg" alt="" width="16" height="16">
+                    Zero preenchimento manual
+                </li>
+                <li>
+                    <img src="assets/icons/home/alvo.svg" alt="" width="16" height="16">
+                    Prioridade por impacto
+                </li>
+                <li>
+                    <img src="assets/icons/home/sincronizar.svg" alt="" width="16" height="16">
+                    Ajuste em tempo real
+                </li>
+            </ul>
+        </div>
+    </section>
+
+
+    <section class="secao" id="problema">
+        <div class="conteiner">
+            <header class="cabecalho-secao">
+                <p class="rotulo">
+                    <img src="assets/icons/home/analise.svg" alt="" width="16" height="16">
+                    O problema real
+                </p>
+                <h2>Por que a maioria dos apps de estudo falha</h2>
+            </header>
+
+            <div class="grade-stats">
+                <article class="stat">
+                    <div class="stat-topo">
+                        <span class="icone-badge alerta">
+                            <img src="assets/icons/home/celular.svg" alt="" width="22" height="22">
+                        </span>
+                        <strong>75%</strong>
+                    </div>
+                    <h3>Abandonam apps de produtividade</h3>
+                    <p>Porque exigem tempo demais de preenchimento manual.</p>
+                </article>
+
+                <article class="stat">
+                    <div class="stat-topo">
+                        <span class="icone-badge alerta">
+                            <img src="assets/icons/home/alvo.svg" alt="" width="22" height="22">
+                        </span>
+                        <strong>80%</strong>
+                    </div>
+                    <h3>Priorizam errado</h3>
+                    <p>Organizam só pelo prazo mais próximo — nunca pelo impacto acadêmico real.</p>
+                </article>
+
+                <article class="stat">
+                    <div class="stat-topo">
+                        <span class="icone-badge ok">
+                            <img src="assets/icons/home/progresso.svg" alt="" width="22" height="22">
+                        </span>
+                        <strong>1%</strong>
+                    </div>
+                    <h3>Cumpre tudo o que planejou</h3>
+                    <p>Falta método estratégico para completar 100% do planejado.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="secao secao-mesh" id="dores">
+        <div class="conteiner">
+            <header class="cabecalho-secao">
+                <p class="rotulo">
+                    <img src="assets/icons/home/balanca.svg" alt="" width="16" height="16">
+                    As dores identificadas
+                </p>
+                <h2>O que trava a rotina do estudante</h2>
+            </header>
+
+            <div class="grade-tres">
+                <article class="tile">
+                    <span class="icone-badge">
+                        <img src="assets/icons/home/celular.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Distração digital</h3>
+                    <p>Celular e redes sociais quebram o planejamento antes mesmo de começar.</p>
+                </article>
+                <article class="tile">
+                    <span class="icone-badge">
+                        <img src="assets/icons/home/sino.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Sem lembretes inteligentes</h3>
+                    <p>Falta consolidação automática de prazos e notificações que realmente ajudam.</p>
+                </article>
+                <article class="tile">
+                    <span class="icone-badge">
+                        <img src="assets/icons/home/balanca.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Sobrecarga total</h3>
+                    <p>Trabalho, estudo e vida pessoal sem visão clara do que cabe na semana.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="secao" id="solucao">
+        <div class="conteiner">
+            <header class="cabecalho-secao">
+                <p class="rotulo">
+                    <img src="assets/icons/home/ia.svg" alt="" width="16" height="16">
+                    A solução com IA
+                </p>
+                <h2>Sofia elimina o esforço manual</h2>
+                <p class="sub">A dor #1 da pesquisa: apps que pedem preenchimento constante. A Sofia trabalha por você.</p>
+            </header>
+
+            <div class="painel-ia">
+                <div class="painel-ia-topo">
+                    <span class="chip-ia escuro">
+                        <img src="assets/icons/home/spark.svg" alt="" width="14" height="14">
+                        Sofia IA · Motor preditivo
+                    </span>
+                    <p>Automação inteligente para a semana acadêmica</p>
+                </div>
+
+                <div class="grade-dois">
+                    <article class="tile ia">
+                        <span class="icone-badge ia">
+                            <img src="assets/icons/home/cadeado-hora.svg" alt="" width="22" height="22">
+                        </span>
+                        <h3>Bloqueia horários fixos</h3>
+                        <p>Aulas, trabalho e sono protegidos automaticamente — sem conflitos na grade.</p>
+                    </article>
+                    <article class="tile ia">
+                        <span class="icone-badge ia">
+                            <img src="assets/icons/home/alvo.svg" alt="" width="22" height="22">
+                        </span>
+                        <h3>Prioriza por impacto</h3>
+                        <p>Aloca tarefas pelo impacto acadêmico real, não só pelo prazo mais próximo.</p>
+                    </article>
+                    <article class="tile ia">
+                        <span class="icone-badge ia">
+                            <img src="assets/icons/home/sincronizar.svg" alt="" width="22" height="22">
+                        </span>
+                        <h3>Reorganiza em tempo real</h3>
+                        <p>Imprevistos acontecem — a Sofia adapta o cronograma sem você refazer tudo.</p>
+                    </article>
+                    <article class="tile ia">
+                        <span class="icone-badge ia">
+                            <img src="assets/icons/home/auto.svg" alt="" width="22" height="22">
+                        </span>
+                        <h3>Zero preenchimento manual</h3>
+                        <p>Você informa uma vez. Ela organiza a semana automaticamente.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="secao secao-clara" id="como-funciona">
+        <div class="conteiner">
+            <header class="cabecalho-secao">
+                <p class="rotulo">
+                    <img src="assets/icons/home/sincronizar.svg" alt="" width="16" height="16">
+                    Como funciona
+                </p>
+                <h2>Quatro etapas, zero esforço repetitivo</h2>
+            </header>
+
+            <ol class="fluxo">
+                <li>
+                    <span class="fluxo-num">01</span>
+                    <span class="icone-badge">
+                        <img src="assets/icons/home/cadastro.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Cadastro inicial</h3>
+                    <p>Disciplinas, metas e horários fixos — só uma vez.</p>
+                </li>
+                <li class="fluxo-seta" aria-hidden="true">
+                    <img src="assets/icons/home/seta.svg" alt="" width="18" height="18">
+                </li>
+                <li>
+                    <span class="fluxo-num">02</span>
+                    <span class="icone-badge ia">
+                        <img src="assets/icons/home/analise.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Análise Sofia</h3>
+                    <p>Prazo, dificuldade e impacto acadêmico em segundos.</p>
+                </li>
+                <li class="fluxo-seta" aria-hidden="true">
+                    <img src="assets/icons/home/seta.svg" alt="" width="18" height="18">
+                </li>
+                <li>
+                    <span class="fluxo-num">03</span>
+                    <span class="icone-badge">
+                        <img src="assets/icons/home/cronograma.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Cronograma gerado</h3>
+                    <p>Semana otimizada automaticamente, sem esforço manual.</p>
+                </li>
+                <li class="fluxo-seta" aria-hidden="true">
+                    <img src="assets/icons/home/seta.svg" alt="" width="18" height="18">
+                </li>
+                <li>
+                    <span class="fluxo-num">04</span>
+                    <span class="icone-badge ok">
+                        <img src="assets/icons/home/progresso.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Progresso em tempo real</h3>
+                    <p>Consistência, padrões e recomendações personalizadas.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+
+    <section class="secao" id="produto">
+        <div class="conteiner">
+            <header class="cabecalho-secao">
+                <p class="rotulo">
+                    <img src="assets/icons/home/visao.svg" alt="" width="16" height="16">
+                    O produto em ação
+                </p>
+                <h2>O que você encontra no AçaíStudy</h2>
+                <p class="sub">Interface limpa, intuitiva e com a IA organizando a semana automaticamente.</p>
+            </header>
+
+            <div class="grade-tres">
+                <article class="tile destaque">
+                    <span class="icone-badge ia">
+                        <img src="assets/icons/home/blocos.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Blocos automáticos</h3>
+                    <p>Aulas e trabalho protegidos sem configuração manual constante.</p>
+                </article>
+                <article class="tile destaque">
+                    <span class="icone-badge ia">
+                        <img src="assets/icons/home/cronograma.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Cronograma inteligente</h3>
+                    <p>Distribui tarefas por impacto real, não só por prazo.</p>
+                </article>
+                <article class="tile destaque">
+                    <span class="icone-badge ia">
+                        <img src="assets/icons/home/visao.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Visão semanal clara</h3>
+                    <p>Progresso, consistência e recomendações em um só lugar.</p>
+                </article>
+            </div>
+
+            <div class="modulos">
+                <a href="index_calendario.html">
+                    <img src="assets/icons/layout/nav-cronograma.svg" alt="" width="14" height="14">
+                    Grade semanal
+                </a>
+                <a href="index_metas.html">
+                    <img src="assets/icons/layout/nav-metas.svg" alt="" width="14" height="14">
+                    Metas &amp; tarefas
+                </a>
+                <a href="index_disciplinas.html">
+                    <img src="assets/icons/layout/nav-disciplinas.svg" alt="" width="14" height="14">
+                    Disciplinas &amp; blocos
+                </a>
+                <a href="index_relatorios.html">
+                    <img src="assets/icons/layout/nav-relatorios.svg" alt="" width="14" height="14">
+                    Relatórios
+                </a>
+                <a href="index_configuracoes.html">
+                    <img src="assets/icons/home/ia.svg" alt="" width="14" height="14">
+                    Sofia &amp; integrações
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="secao secao-clara" id="diferenciais">
+        <div class="conteiner">
+            <header class="cabecalho-secao">
+                <p class="rotulo">
+                    <img src="assets/icons/home/spark.svg" alt="" width="14" height="14">
+                    Diferenciais
+                </p>
+                <h2>Não é mais um app para preencher</h2>
+            </header>
+
+            <div class="grade-dois">
+                <article class="tile">
+                    <span class="icone-badge ia">
+                        <img src="assets/icons/home/ia.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Automação inteligente</h3>
+                    <p>Um assistente que trabalha para você — não mais uma lista para alimentar todo dia.</p>
+                </article>
+                <article class="tile">
+                    <span class="icone-badge ia">
+                        <img src="assets/icons/home/alvo.svg" alt="" width="22" height="22">
+                    </span>
+                    <h3>Priorização por impacto</h3>
+                    <p>Não só cumpre prazos: distribui a carga com inteligência acadêmica.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="secao convite">
+        <div class="conteiner convite-box">
+            <span class="chip-ia escuro">
+                <img src="assets/icons/home/spark.svg" alt="" width="14" height="14">
+                Sofia pronta para montar sua semana
+            </span>
+            <h2>Educação organizada, inteligente e sem estresse</h2>
+            <p>Crie sua conta e deixe a IA montar a primeira semana por você.</p>
+            <div class="hero-acoes centro">
+                <a href="index_criar_conta.html" class="btn-roxo">
+                    Criar conta gratuita
+                    <img src="assets/icons/home/seta.svg" alt="" width="16" height="16">
+                </a>
+                <a href="index_login.html" class="btn-claro">Já tenho conta</a>
+            </div>
+        </div>
+    </section>
+
+
+    <footer class="rodape">
+        <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
+    </footer>
+
+</body>
+</html>

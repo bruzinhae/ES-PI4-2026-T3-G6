@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Iniciar Sessão</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_login.css">
+</head>
+
+<body class="pagina-login">
+
+    <header class="cabecalho-login">
+
+        <a class="marca" href="index.html" aria-label="AçaíStudy - página inicial">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+        </a>
+
+        <div class="acoes-cabecalho">
+            <span>Ainda não tem conta?</span>
+            <a class="botao-criar-conta" href="index_criar_conta.html">
+                <span>Criar conta</span>
+                <img src="assets/icons/login/seta.svg" alt="" width="12" height="12">
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="principal-login">
+
+        <section class="cartao-login" aria-labelledby="titulo-login">
+
+            <div class="titulos-login">
+                <h1 id="titulo-login">Iniciar Sessão</h1>
+                <p>Bem-vindo(a) de volta! Acesse suas rotinas, grade semanal e metas inteligentes.</p>
+            </div>
+
+            <form class="formulario-login" id="formulario-login" novalidate>
+
+                <label class="campo">
+                    <span class="rotulo-campo">E-mail</span>
+                    <span class="controle-campo">
+                        <img src="assets/icons/login/email.svg" alt="" width="16" height="16">
+                        <input
+                            type="email"
+                            id="campo-email"
+                            name="email"
+                            placeholder="email@email.com"
+                            autocomplete="email"
+                            required
+                        >
+                    </span>
+                </label>
+
+                <label class="campo">
+                    <span class="rotulo-campo">Senha</span>
+                    <span class="controle-campo">
+                        <img src="assets/icons/login/cadeado.svg" alt="" width="16" height="16">
+                        <input
+                            type="password"
+                            id="campo-senha"
+                            name="senha"
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button type="button" class="botao-visibilidade" id="botao-visibilidade" aria-label="Mostrar senha" aria-pressed="false">
+                            <img src="assets/icons/login/olho.svg" alt="" width="16" height="16" data-icone-olho>
+                        </button>
+                    </span>
+                </label>
+
+                <div class="opcoes-formulario">
+                    <label class="lembrar">
+                        <input type="checkbox" name="lembrar" id="campo-lembrar">
+                        <span class="caixa-lembrar" aria-hidden="true"></span>
+                        <span>Lembrar de mim</span>
+                    </label>
+
+                    <a class="link-senha" href="index_recuperar_senha.html">Esqueceu a Senha?</a>
+                </div>
+
+                <button type="submit" class="botao-entrar">
+                    <span>Entrar</span>
+                    <img src="assets/icons/login/entrar.svg" alt="" width="16" height="16">
+                </button>
+
+            </form>
+
+            <div class="divisor" role="separator" aria-label="Ou continue com">
+                <span>Ou continue com</span>
+            </div>
+
+            <button type="button" class="botao-google" id="botao-google">
+                <img src="assets/icons/login/google.svg" alt="" width="18" height="18">
+                <span>Continuar com Google</span>
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <footer class="rodape-login">
+        <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
+    </footer>
+
+    <script src="JS/script_login.js"></script>
+</body>
+</html>

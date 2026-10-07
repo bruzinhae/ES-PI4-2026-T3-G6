@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Criar Nova Conta</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_login.css">
+</head>
+
+<body class="pagina-login">
+
+    <header class="cabecalho-login">
+
+        <a class="marca" href="index.html" aria-label="AçaíStudy - página inicial">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+        </a>
+
+        <div class="acoes-cabecalho">
+            <span>Já tem uma conta?</span>
+            <a class="botao-criar-conta" href="index_login.html">
+                <span>Fazer login</span>
+                <img src="assets/icons/login/seta.svg" alt="" width="12" height="12">
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="principal-login">
+
+        <section class="cartao-login" aria-labelledby="titulo-criar-conta">
+
+            <div class="titulos-login">
+                <h1 id="titulo-criar-conta">Criar Nova Conta</h1>
+                <p>Comece a organizar suas matérias, projetos e rotinas com o AçaíStudy em poucos segundos.</p>
+            </div>
+
+            <form class="formulario-login" id="formulario-criar-conta" novalidate>
+
+                <label class="campo">
+                    <span class="rotulo-campo">Nome</span>
+                    <span class="controle-campo">
+                        <img src="assets/icons/login/usuario.svg" alt="" width="16" height="16">
+                        <input
+                            type="text"
+                            id="campo-nome"
+                            name="nome"
+                            placeholder="Seu nome completo"
+                            autocomplete="name"
+                            required
+                        >
+                    </span>
+                </label>
+
+                <label class="campo">
+                    <span class="rotulo-campo">E-mail</span>
+                    <span class="controle-campo">
+                        <img src="assets/icons/login/email.svg" alt="" width="16" height="16">
+                        <input
+                            type="email"
+                            id="campo-email"
+                            name="email"
+                            placeholder="seu.email@universidade.edu.br"
+                            autocomplete="email"
+                            required
+                        >
+                    </span>
+                    <span class="dica-campo">Aceitamos e-mails acadêmicos e pessoais.</span>
+                </label>
+
+                <label class="campo">
+                    <span class="rotulo-com-dica">
+                        <span class="rotulo-campo">Senha</span>
+                        <span class="dica-inline">Mínimo 8 caracteres</span>
+                    </span>
+                    <span class="controle-campo">
+                        <img src="assets/icons/login/cadeado.svg" alt="" width="16" height="16">
+                        <input
+                            type="password"
+                            id="campo-senha"
+                            name="senha"
+                            placeholder="••••••••"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <button type="button" class="botao-visibilidade" id="botao-visibilidade" aria-label="Mostrar senha" aria-pressed="false">
+                            <img src="assets/icons/login/olho.svg" alt="" width="16" height="16" data-icone-olho>
+                        </button>
+                    </span>
+                </label>
+
+                <label class="lembrar termos">
+                    <input type="checkbox" name="termos" id="campo-termos" required>
+                    <span class="caixa-lembrar" aria-hidden="true"></span>
+                    <span>
+                        Li e concordo com os
+                        <a href="#" class="link-termos">Termos de Serviço</a>
+                        e com a
+                        <a href="#" class="link-termos">Política de Privacidade</a>.
+                    </span>
+                </label>
+
+                <button type="submit" class="botao-entrar">
+                    <span>Registrar</span>
+                    <img src="assets/icons/login/seta.svg" alt="" width="12" height="12" class="icone-seta-clara">
+                </button>
+
+            </form>
+
+            <div class="divisor" role="separator" aria-label="Ou cadastre-se com">
+                <span>Ou cadastre-se com</span>
+            </div>
+
+            <button type="button" class="botao-google" id="botao-google">
+                <img src="assets/icons/login/google.svg" alt="" width="18" height="18">
+                <span>Continuar com Google</span>
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <footer class="rodape-login">
+        <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
+    </footer>
+
+    <script src="JS/script_criar_conta.js"></script>
+</body>
+</html>

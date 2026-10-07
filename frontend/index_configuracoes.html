@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Configurações</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/layout.css?v=12">
+    <link rel="stylesheet" href="CSS/style_configuracoes.css">
+</head>
+
+<body>
+
+    <div id="cabecalho-raiz"></div>
+    <div id="barra-lateral-raiz"></div>
+
+
+    <main class="principal">
+
+        <div class="conteiner">
+
+            <section class="cabecalho-pagina">
+
+                <div class="titulos">
+
+                    <h1>Configurações: Integrações e Motor de Prioridade</h1>
+
+                    <p>
+                        Conecte seus ecossistemas de dados acadêmicos externos e calibre a inteligência preditiva Sofia para otimizar sua rotina sem fricção cognitiva.
+                    </p>
+
+                </div>
+
+                <div class="controles-acoes">
+                    <span class="status-auto" id="status-auto">
+                        <span class="ponto-verde"></span>
+                        Salvo automaticamente há 2 min
+                    </span>
+
+                    <button type="button" class="botao-fantasma" id="botao-descartar">Descartar</button>
+
+                    <button type="button" class="botao-roxo" id="botao-salvar">
+                        <img src="assets/icons/configuracoes/salvar.svg" alt="" width="14" height="14">
+                        <span>Salvar Alterações</span>
+                    </button>
+                </div>
+
+            </section>
+
+
+            <div class="grade-configuracoes">
+
+                <div class="coluna-principal">
+
+                    <!-- Aplicativos -->
+
+                    <section class="cartao">
+
+                        <div class="cartao-cabecalho">
+                            <div class="titulo-com-icone">
+                                <img src="assets/icons/configuracoes/apps.svg" alt="" width="16" height="16">
+                                <h2>Aplicativos &amp; Fontes de Sincronia</h2>
+                            </div>
+
+                            <span class="selo-neutro">2 Conectados • 1 Disponível</span>
+                        </div>
+
+                        <div class="lista-integracoes">
+
+                            <article class="cartao-integracao">
+                                <div class="integracao-topo">
+                                    <div class="integracao-identidade">
+                                        <img src="assets/icons/configuracoes/google-calendar.svg" alt="" width="28" height="28">
+                                        <div>
+                                            <div class="integracao-titulo">
+                                                <h3>Google Calendar</h3>
+                                                <span class="selo-sucesso">Sincronização Ativa</span>
+                                            </div>
+                                            <p>Sincronização bidirecional de aulas, provas e compromissos acadêmicos com a grade semanal.</p>
+                                        </div>
+                                    </div>
+
+                                    <label class="interruptor">
+                                        <input type="checkbox" name="sync-google" checked>
+                                        <span class="trilha"><span class="bolinha"></span></span>
+                                    </label>
+                                </div>
+
+                                <div class="integracao-rodape">
+                                    <span class="info-conta">Conta: mariana.rocha@gmail.com</span>
+                                    <div class="acoes-integracao">
+                                        <button type="button" class="link-acao">Gerenciar</button>
+                                        <button type="button" class="link-acao perigo">Desconectar</button>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="cartao-integracao">
+                                <div class="integracao-topo">
+                                    <div class="integracao-identidade">
+                                        <img src="assets/icons/configuracoes/notion.svg" alt="" width="28" height="28">
+                                        <div>
+                                            <div class="integracao-titulo">
+                                                <h3>Notion Workspace</h3>
+                                                <span class="selo-info">Banco de Dados Ativo</span>
+                                            </div>
+                                            <p>Importação de disciplinas, tarefas e notas de bancos de Engenharia de Software.</p>
+                                        </div>
+                                    </div>
+
+                                    <label class="interruptor">
+                                        <input type="checkbox" name="sync-notion" checked>
+                                        <span class="trilha"><span class="bolinha"></span></span>
+                                    </label>
+                                </div>
+
+                                <div class="integracao-rodape">
+                                    <span class="info-conta">Workspace: Mariana Rocha • 3 Tabelas Vinculadas</span>
+                                    <div class="acoes-integracao">
+                                        <button type="button" class="link-acao">Propriedades</button>
+                                        <button type="button" class="link-acao perigo">Desconectar</button>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="cartao-integracao disponivel">
+                                <div class="integracao-topo">
+                                    <div class="integracao-identidade">
+                                        <img src="assets/icons/configuracoes/graduacao.svg" alt="" width="28" height="28">
+                                        <div>
+                                            <div class="integracao-titulo">
+                                                <h3>Canvas LMS &amp; Moodle Universitário</h3>
+                                                <span class="selo-neutro">Disponível</span>
+                                            </div>
+                                            <p>Importação automática de notas, prazos e calendário oficial da sua instituição.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="integracao-rodape">
+                                    <span class="info-conta">Conecte o ambiente acadêmico da sua universidade</span>
+                                    <button type="button" class="botao-claro" id="botao-conectar-lms">Conectar Ambiente</button>
+                                </div>
+                            </article>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- Motor Sofia -->
+
+                    <section class="cartao">
+
+                        <div class="cartao-cabecalho">
+                            <div class="titulo-com-icone">
+                                <img src="assets/icons/configuracoes/sofia.svg" alt="" width="16" height="16">
+                                <h2>Motor de Prioridade &amp; Configurações de IA (Sofia)</h2>
+                            </div>
+
+                            <span class="selo-info">Ativo v2.4</span>
+                        </div>
+
+                        <div class="grade-motor">
+
+                            <article class="cartao-configuracao">
+                                <div class="configuracao-topo">
+                                    <div class="configuracao-titulo">
+                                        <img src="assets/icons/configuracoes/escudo.svg" alt="" width="16" height="16">
+                                        <h3>Proteção Antifadiga</h3>
+                                    </div>
+                                    <label class="interruptor">
+                                        <input type="checkbox" name="config-antifadiga" checked>
+                                        <span class="trilha"><span class="bolinha"></span></span>
+                                    </label>
+                                </div>
+                                <p>Redistribui blocos densos automaticamente quando detecta sobrecarga cognitiva na semana.</p>
+                                <span class="meta-configuracao">Limite seguro contínuo: 90 min</span>
+                            </article>
+
+                            <article class="cartao-configuracao">
+                                <div class="configuracao-topo">
+                                    <div class="configuracao-titulo">
+                                        <img src="assets/icons/configuracoes/sol.svg" alt="" width="16" height="16">
+                                        <h3>Picos de Foco Matinal</h3>
+                                    </div>
+                                    <label class="interruptor">
+                                        <input type="checkbox" name="config-foco" checked>
+                                        <span class="trilha"><span class="bolinha"></span></span>
+                                    </label>
+                                </div>
+                                <p>Aloca disciplinas de alta densidade cognitiva na sua janela de maior desempenho.</p>
+                                <span class="meta-configuracao">Janela calibrada: 08:30 – 12:00</span>
+                            </article>
+
+                            <article class="cartao-configuracao">
+                                <div class="configuracao-topo">
+                                    <div class="configuracao-titulo">
+                                        <img src="assets/icons/configuracoes/repeticao.svg" alt="" width="16" height="16">
+                                        <h3>Repetições Espaçadas</h3>
+                                    </div>
+                                    <label class="interruptor">
+                                        <input type="checkbox" name="config-repeticao" checked>
+                                        <span class="trilha"><span class="bolinha"></span></span>
+                                    </label>
+                                </div>
+                                <p>Agenda sessões de revisão com base na curva de Ebbinghaus para retenção de longo prazo.</p>
+                                <span class="meta-configuracao">Ciclos de repetição: D+1, D+4, D+13</span>
+                            </article>
+
+                            <article class="cartao-configuracao">
+                                <div class="configuracao-topo">
+                                    <div class="configuracao-titulo">
+                                        <img src="assets/icons/configuracoes/ajuste.svg" alt="" width="16" height="16">
+                                        <h3>Ajuste Dinâmico Real</h3>
+                                    </div>
+                                    <label class="interruptor">
+                                        <input type="checkbox" name="config-dinamico" checked>
+                                        <span class="trilha"><span class="bolinha"></span></span>
+                                    </label>
+                                </div>
+                                <p>Recalcula a semana de forma invisível quando há atraso, ausência ou mudança de prioridade.</p>
+                                <span class="meta-configuracao">Tempo de resposta: &lt; 350ms</span>
+                            </article>
+
+                        </div>
+
+                        <div class="bloco-rigidez">
+                            <div class="rigidez-texto">
+                                <h3>Rigidez &amp; Intervenção do Motor</h3>
+                                <p>Define com que frequência a Sofia sugere mudanças na sua grade semanal.</p>
+                            </div>
+
+                            <div class="seletor-rigidez" role="group" aria-label="Nível de intervenção da Sofia">
+                                <button type="button" data-rigidez="flexivel">Flexível</button>
+                                <button type="button" class="ativo" data-rigidez="equilibrado">Equilibrado (Ideal)</button>
+                                <button type="button" data-rigidez="intensivo">Intensivo</button>
+                            </div>
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+                <aside class="coluna-lateral">
+
+                    <section class="cartao">
+
+                        <div class="cartao-cabecalho">
+                            <div class="titulo-com-icone">
+                                <img src="assets/icons/configuracoes/raio.svg" alt="" width="16" height="16">
+                                <h2>Status do Motor Sofia</h2>
+                            </div>
+
+                            <span class="selo-sucesso">● 98.4% Harmonia</span>
+                        </div>
+
+                        <div class="bloco-grafico">
+                            <div class="grafico-topo">
+                                <span>Equilíbrio Semanal Estimado</span>
+                                <span class="selo-excelente">Excelente</span>
+                            </div>
+
+                            <svg class="grafico-linha" viewBox="0 0 260 90" role="img" aria-label="Gráfico de equilíbrio semanal">
+                                <defs>
+                                    <linearGradient id="gradiente-sofia" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#4F3466" stop-opacity=".22"/>
+                                        <stop offset="100%" stop-color="#4F3466" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0 58 C30 52, 45 30, 70 34 C95 38, 110 62, 135 48 C160 34, 180 22, 205 28 C230 34, 245 40, 260 36 L260 90 L0 90 Z" fill="url(#gradiente-sofia)"/>
+                                <path d="M0 58 C30 52, 45 30, 70 34 C95 38, 110 62, 135 48 C160 34, 180 22, 205 28 C230 34, 245 40, 260 36" fill="none" stroke="#4F3466" stroke-width="2.2" stroke-linecap="round"/>
+                            </svg>
+
+                            <div class="eixos-dias">
+                                <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
+                            </div>
+                        </div>
+
+                        <ul class="lista-status">
+                            <li>
+                                <span>Janela Áurea de Atenção</span>
+                                <strong>08:30 – 12:00</strong>
+                            </li>
+                            <li>
+                                <span>Pausa Sugerida</span>
+                                <strong>A cada 90 min</strong>
+                            </li>
+                            <li>
+                                <span>Sessões Programadas</span>
+                                <strong>24 blocos</strong>
+                            </li>
+                            <li>
+                                <span>Conflitos Mitigados</span>
+                                <strong>5 nesta semana</strong>
+                            </li>
+                        </ul>
+
+                        <button type="button" class="botao-claro botao-largo" id="botao-recalibrar">
+                            <img src="assets/icons/configuracoes/atualizar.svg" alt="" width="14" height="14">
+                            <span>Recalibrar Parâmetros</span>
+                        </button>
+
+                    </section>
+
+
+                    <section class="cartao">
+
+                        <div class="cartao-cabecalho">
+                            <div class="titulo-com-icone">
+                                <img src="assets/icons/configuracoes/chave.svg" alt="" width="16" height="16">
+                                <h2>Chave de Acesso REST</h2>
+                            </div>
+                        </div>
+
+                        <p class="texto-chave">
+                            Conecte extensões de terceiros, como Obsidian ou atalhos do iOS, à sua conta AçaíStudy.
+                        </p>
+
+                        <div class="campo-chave">
+                            <code id="chave-api">chk_live_9f3a••••••••c21b</code>
+                            <button type="button" class="link-acao" id="botao-copiar">
+                                <img src="assets/icons/configuracoes/copiar.svg" alt="" width="12" height="12">
+                                <span>Copiar</span>
+                            </button>
+                        </div>
+
+                        <div class="rodape-chave">
+                            <span>Criada em: 14/03/2025</span>
+                            <button type="button" class="link-acao perigo" id="botao-revogar">Revogar Chave</button>
+                        </div>
+
+                    </section>
+
+
+                    <section class="cartao cartao-dica">
+
+                        <div class="titulo-com-icone">
+                            <img src="assets/icons/configuracoes/lampada.svg" alt="" width="16" height="16">
+                            <h2>Dica de Produtividade</h2>
+                        </div>
+
+                        <p>
+                            Estudantes de Engenharia que mantêm a sincronização com o Notion ativo reduzem em média
+                            <strong>37% do tempo</strong> gasto com organização manual da semana.
+                        </p>
+
+                    </section>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="JS/componentes/layout.js?v=12"></script>
+    <script src="JS/script_configuracoes.js"></script>
+
+</body>
+</html>
