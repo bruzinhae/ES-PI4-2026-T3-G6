@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Recuperar Senha</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_login.css">
+</head>
+
+<body class="pagina-login">
+
+    <header class="cabecalho-login">
+
+        <a class="marca" href="index.html" aria-label="AçaíStudy - página inicial">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+        </a>
+
+        <div class="acoes-cabecalho">
+            <span>Lembrou a senha?</span>
+            <a class="botao-criar-conta" href="index_login.html">
+                <span>Entrar</span>
+                <img src="assets/icons/login/seta.svg" alt="" width="12" height="12">
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="principal-login">
+
+        <section class="cartao-login cartao-recuperar" aria-labelledby="titulo-recuperar">
+
+            <div class="icone-recuperar" aria-hidden="true">
+                <img src="assets/icons/login/chave.svg" alt="" width="22" height="22">
+            </div>
+
+            <div class="titulos-login">
+                <h1 id="titulo-recuperar">Recuperar Senha</h1>
+                <p>Digite seu e-mail cadastrado para receber as instruções e recuperar seu acesso aos estudos.</p>
+            </div>
+
+            <form class="formulario-login" id="formulario-recuperar" novalidate>
+
+                <label class="campo">
+                    <span class="rotulo-campo">E-mail</span>
+                    <span class="controle-campo">
+                        <img src="assets/icons/login/email.svg" alt="" width="16" height="16">
+                        <input
+                            type="email"
+                            id="campo-email"
+                            name="email"
+                            placeholder="email@email.com"
+                            autocomplete="email"
+                            required
+                        >
+                    </span>
+                </label>
+
+                <p class="dica-recuperar">
+                    <img src="assets/icons/login/info.svg" alt="" width="14" height="14">
+                    <span>Enviaremos um link temporário válido por 30 minutos.</span>
+                </p>
+
+                <button type="submit" class="botao-entrar">
+                    <span>Enviar Link de Recuperação</span>
+                    <img src="assets/icons/login/seta.svg" alt="" width="12" height="12" class="icone-seta-clara">
+                </button>
+
+            </form>
+
+            <a class="link-voltar" href="index_login.html">
+                <img src="assets/icons/login/seta-voltar.svg" alt="" width="12" height="12">
+                <span>Voltar para o Login</span>
+            </a>
+
+            <p class="ajuda-conta">
+                Precisa de ajuda com sua conta?
+                <a href="#">Fale com o Suporte</a>
+            </p>
+
+            <div class="feedback-recuperar" id="feedback-recuperar" hidden>
+                <p>Se o e-mail estiver cadastrado, enviamos um link de recuperação. Verifique sua caixa de entrada.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="rodape-login">
+        <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
+    </footer>
+
+    <script src="JS/script_recuperar_senha.js"></script>
+</body>
+</html>
