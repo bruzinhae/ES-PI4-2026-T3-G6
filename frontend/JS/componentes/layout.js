@@ -43,14 +43,6 @@ const NAV_LATERAL = [
         largura: 12,
         altura: 15,
     },
-    {
-        id: 'rendimento',
-        href: '#',
-        icone: 'nav-rendimento.svg',
-        rotulo: 'Rendimento & Foco',
-        largura: 16.5,
-        altura: 12.75,
-    },
 ];
 
 const DISCIPLINAS_ATIVAS = [
@@ -92,8 +84,8 @@ function renderHeader({ paginaAtiva, pastaIcones }) {
         <div class="itens-direita">
 
             <div class="alternador" role="group" aria-label="Visualização">
-                <button type="button" class="ativo">Semana</button>
-                <button type="button">Mês</button>
+                <button type="button" class="ativo" data-visao="semana" id="visao-semana">Semana</button>
+                <button type="button" data-visao="mes" id="visao-mes">Mês</button>
             </div>
 
             <div class="progresso-tarefas">
@@ -281,14 +273,18 @@ function aplicarEstadoSidebar(recolhida) {
     localStorage.setItem(CHAVE_SIDEBAR, recolhida ? '1' : '0');
 }
 
-function inicializarSidebar() {
+function inicializarSidebar(recolhidaPadrao) {
     const botao = document.getElementById('botao-recolher-sidebar');
 
     if (!botao) {
         return;
     }
 
-    aplicarEstadoSidebar(sidebarRecolhida());
+    const recolhida = typeof recolhidaPadrao === 'boolean'
+        ? recolhidaPadrao
+        : sidebarRecolhida();
+
+    aplicarEstadoSidebar(recolhida);
 
     botao.addEventListener('click', () => {
         aplicarEstadoSidebar(!document.body.classList.contains('sidebar-recolhida'));
@@ -397,11 +393,12 @@ function renderLayout(config = {}) {
         pastaIcones = PASTA_ICONES_PADRAO,
         cabecalhoSeletor = '#cabecalho-raiz',
         barraSeletor = '#barra-lateral-raiz',
+        sidebarRecolhida: sidebarRecolhidaPadrao,
     } = config;
 
     substituirRaiz(cabecalhoSeletor, renderHeader({ paginaAtiva, pastaIcones }));
     substituirRaiz(barraSeletor, renderSidebar({ paginaAtiva, pastaIcones }));
-    inicializarSidebar();
+    inicializarSidebar(sidebarRecolhidaPadrao);
 
     const menus = {
         notificacoes: null,
