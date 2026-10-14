@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Onboarding · Configurações de Foco</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_onboarding.css?v=3">
+    <link rel="stylesheet" href="CSS/style_onboarding_foco.css?v=1">
+</head>
+
+<body>
+
+    <header class="barra-superior">
+
+        <div class="marca">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+            <span class="selo-onboarding">Onboarding</span>
+        </div>
+
+        <nav class="etapas" aria-label="Etapas do onboarding">
+
+            <div class="etapa concluido">
+                <span>✓</span>
+                <strong>Horários Fixos</strong>
+            </div>
+
+            <div class="etapa concluido">
+                <span>✓</span>
+                <strong>Metas Acadêmicas</strong>
+            </div>
+
+            <div class="etapa ativo" aria-current="step">
+                <span>3</span>
+                <strong>Configurações de Foco</strong>
+            </div>
+
+        </nav>
+
+        <div class="acoes-cabecalho">
+            <button type="button" class="botao-texto">Salvar e sair</button>
+            <button type="button" class="botao-texto" id="pular-onboarding">Pular onboarding</button>
+
+            <span class="divisor-vertical" aria-hidden="true"></span>
+
+            <div class="menu-ajuda">
+                <button type="button" class="ajuda" id="botao-ajuda" aria-label="Ajuda" aria-expanded="false" aria-controls="painel-ajuda">?</button>
+
+                <div class="painel-ajuda" id="painel-ajuda" hidden>
+                    <strong>Como funciona este passo</strong>
+                    <ul>
+                        <li>Calibre como a Sofia distribui blocos de estudo na semana.</li>
+                        <li>Escolha sua janela de pico e a duração ideal de foco.</li>
+                        <li>Ative proteções contra fadiga e revisão espaçada.</li>
+                        <li>Você pode recalibrar tudo depois em Configurações.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="menu-perfil">
+                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha" aria-expanded="false" aria-controls="painel-perfil">
+                    <img src="assets/icons/layout/avatar-704c8e.png" alt="">
+                </button>
+
+                <div class="painel-perfil" id="painel-perfil" hidden>
+                    <div class="painel-perfil-cabecalho">
+                        <img src="assets/icons/layout/avatar-704c8e.png" alt="" width="40" height="40">
+                        <div>
+                            <strong>Mariana Rocha</strong>
+                            <span>Engenharia de Software</span>
+                        </div>
+                    </div>
+
+                    <nav class="lista-perfil">
+                        <a href="index_perfil.html">Meu perfil</a>
+                        <a href="index_configuracoes.html">Configurações</a>
+                        <a href="#">Assinatura</a>
+                        <a href="#">Ajuda</a>
+                    </nav>
+
+                    <a href="index_login.html" class="botao-sair">Sair da conta</a>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+
+    <main class="pagina">
+
+        <section class="introducao">
+
+            <div>
+                <div class="caminho-navegacao">
+                    ● &nbsp; PASSO 3 DE 3 &nbsp;•&nbsp; PLANEJAMENTO BASE
+                    <span>•</span>
+                    Semestre Letivo 2026.2
+                </div>
+
+                <h1>Configurar Preferências de Foco</h1>
+
+                <p>
+                    Agora a Sofia sabe seus horários fixos e suas metas. Neste último passo, defina
+                    como você rende melhor — janela de pico, duração das sessões e o nível de
+                    intervenção do motor preditivo na grade semanal.
+                </p>
+            </div>
+
+            <div class="dica">
+                <div class="icone-dica">🧠</div>
+                <div>
+                    <strong>Dica de Ritmo Sustentável</strong>
+                    <p>
+                        Sessões entre 50 e 90 minutos com pausas fixas aumentam a retenção.
+                        A proteção antifadiga evita sobrecarga nas semanas de prova.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="area-trabalho">
+
+            <aside class="painel-perfis">
+
+                <div class="titulo-cartao">
+                    <strong>PERFIS RÁPIDOS</strong>
+                    <small>APLICAR</small>
+                </div>
+
+                <p class="descricao-painel">
+                    Escolha um perfil para preencher as configurações.
+                    Depois ajuste o que quiser.
+                </p>
+
+                <div class="lista-perfis" id="lista-perfis">
+
+                    <button type="button" class="perfil-foco ativo" data-perfil="equilibrado">
+                        <span class="icone-perfil">
+                            <img src="assets/icons/configuracoes/sofia.svg" alt="" width="16" height="16">
+                        </span>
+                        <span>
+                            <strong>Equilibrado</strong>
+                            <small>Recomendado para a maioria dos semestres.</small>
+                        </span>
+                    </button>
+
+                    <button type="button" class="perfil-foco" data-perfil="matinal">
+                        <span class="icone-perfil">
+                            <img src="assets/icons/configuracoes/sol.svg" alt="" width="16" height="16">
+                        </span>
+                        <span>
+                            <strong>Pico matinal</strong>
+                            <small>Alta densidade cognitiva entre 08:30 e 12:00.</small>
+                        </span>
+                    </button>
+
+                    <button type="button" class="perfil-foco" data-perfil="noturno">
+                        <span class="icone-perfil">
+                            <img src="assets/icons/configuracoes/raio.svg" alt="" width="16" height="16">
+                        </span>
+                        <span>
+                            <strong>Rotina noturna</strong>
+                            <small>Foco após as aulas, entre 19:00 e 22:30.</small>
+                        </span>
+                    </button>
+
+                    <button type="button" class="perfil-foco" data-perfil="intensivo">
+                        <span class="icone-perfil">
+                            <img src="assets/icons/configuracoes/escudo.svg" alt="" width="16" height="16">
+                        </span>
+                        <span>
+                            <strong>Reta final</strong>
+                            <small>Mais intervenção da Sofia em semanas de prova.</small>
+                        </span>
+                    </button>
+
+                </div>
+
+            </aside>
+
+
+            <section class="painel-foco">
+
+                <div class="cabecalho-painel">
+                    <div>
+                        <h2>Motor Sofia — calibração inicial</h2>
+                        <p>Essas preferências guiam a montagem automática do cronograma.</p>
+                    </div>
+                    <span class="selo-motor">● Pronto para calibrar</span>
+                </div>
+
+                <div class="grade-opcoes">
+
+                    <div class="bloco-opcao">
+                        <h3>Janela de pico de foco</h3>
+                        <p>Quando a Sofia deve alocar disciplinas de maior densidade cognitiva.</p>
+                        <div class="chips" id="chips-janela" role="group" aria-label="Janela de pico">
+                            <button type="button" class="chip" data-janela="manha">Manhã · 08:30–12:00</button>
+                            <button type="button" class="chip ativo" data-janela="tarde">Tarde · 14:00–18:00</button>
+                            <button type="button" class="chip" data-janela="noite">Noite · 19:00–22:30</button>
+                        </div>
+                    </div>
+
+                    <div class="bloco-opcao">
+                        <h3>Duração da sessão</h3>
+                        <p>Tamanho padrão dos blocos de estudo e do ciclo Pomodoro.</p>
+                        <div class="chips" id="chips-duracao" role="group" aria-label="Duração da sessão">
+                            <button type="button" class="chip" data-duracao="25">25 min</button>
+                            <button type="button" class="chip ativo" data-duracao="50">50 min</button>
+                            <button type="button" class="chip" data-duracao="90">90 min</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="grade-toggles">
+
+                    <article class="cartao-toggle">
+                        <div class="toggle-topo">
+                            <div class="toggle-titulo">
+                                <img src="assets/icons/configuracoes/escudo.svg" alt="">
+                                <h3>Proteção Antifadiga</h3>
+                            </div>
+                            <label class="interruptor">
+                                <input type="checkbox" id="config-antifadiga" checked>
+                                <span class="trilha"><span class="bolinha"></span></span>
+                            </label>
+                        </div>
+                        <p>Redistribui blocos densos quando detecta sobrecarga cognitiva na semana.</p>
+                        <span class="meta-toggle" id="meta-antifadiga">Limite contínuo: 90 min</span>
+                    </article>
+
+                    <article class="cartao-toggle">
+                        <div class="toggle-topo">
+                            <div class="toggle-titulo">
+                                <img src="assets/icons/configuracoes/repeticao.svg" alt="">
+                                <h3>Repetições Espaçadas</h3>
+                            </div>
+                            <label class="interruptor">
+                                <input type="checkbox" id="config-repeticao" checked>
+                                <span class="trilha"><span class="bolinha"></span></span>
+                            </label>
+                        </div>
+                        <p>Agenda revisões com base na curva de esquecimento para retenção.</p>
+                        <span class="meta-toggle">Ciclos: D+1, D+4, D+13</span>
+                    </article>
+
+                    <article class="cartao-toggle">
+                        <div class="toggle-topo">
+                            <div class="toggle-titulo">
+                                <img src="assets/icons/configuracoes/ajuste.svg" alt="">
+                                <h3>Ajuste Dinâmico</h3>
+                            </div>
+                            <label class="interruptor">
+                                <input type="checkbox" id="config-dinamico" checked>
+                                <span class="trilha"><span class="bolinha"></span></span>
+                            </label>
+                        </div>
+                        <p>Recalcula a semana quando há atraso, ausência ou mudança de prioridade.</p>
+                        <span class="meta-toggle">Resposta: &lt; 350ms</span>
+                    </article>
+
+                </div>
+
+                <div class="bloco-rigidez">
+                    <div>
+                        <h3>Rigidez &amp; intervenção da Sofia</h3>
+                        <p>Com que frequência a IA sugere mudanças na sua grade semanal.</p>
+                    </div>
+
+                    <div class="seletor-rigidez" id="seletor-rigidez" role="group" aria-label="Nível de intervenção">
+                        <button type="button" data-rigidez="flexivel">Flexível</button>
+                        <button type="button" class="ativo" data-rigidez="equilibrado">Equilibrado</button>
+                        <button type="button" data-rigidez="intensivo">Intensivo</button>
+                    </div>
+                </div>
+
+                <div class="resumo-sofia" id="resumo-sofia">
+                    <div class="item-resumo">
+                        <span>Janela áurea</span>
+                        <strong id="resumo-janela">14:00 – 18:00</strong>
+                    </div>
+                    <div class="item-resumo">
+                        <span>Sessão padrão</span>
+                        <strong id="resumo-duracao">50 min</strong>
+                    </div>
+                    <div class="item-resumo">
+                        <span>Pausa sugerida</span>
+                        <strong id="resumo-pausa">A cada 50 min</strong>
+                    </div>
+                    <div class="item-resumo">
+                        <span>Intervenção</span>
+                        <strong id="resumo-rigidez">Equilibrado</strong>
+                    </div>
+                </div>
+
+                <div class="nota-sofia">
+                    <img src="assets/icons/metas/sofia-nota.svg" alt="">
+                    <p>
+                        Sofia IA:
+                        <span id="nota-sofia-texto">Com esse perfil, priorizo blocos de alto impacto na tarde e protejo pausas para evitar fadiga.</span>
+                    </p>
+                </div>
+
+            </section>
+
+        </section>
+
+
+        <footer class="rodape">
+
+            <div class="estado">
+                ⓘ
+                <strong>Passo 3 de 3</strong>
+                • Último ajuste antes da Sofia montar sua grade
+            </div>
+
+            <div class="acoes-rodape">
+                <button type="button" class="voltar" id="botao-voltar">Voltar</button>
+                <button type="button" class="proximo" id="botao-concluir">
+                    Concluir onboarding
+                    <span>✓</span>
+                </button>
+            </div>
+
+        </footer>
+
+    </main>
+
+    <script src="JS/componentes/onboarding.js?v=1"></script>
+    <script src="JS/script_onboarding_foco.js?v=2"></script>
+
+</body>
+</html>

@@ -1,0 +1,706 @@
+/* =====================================================
+   ONBOARDING COMPARTILHADO — HEADER, INTRO, RODAPÉ
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Arial, sans-serif;
+
+    background: var(--fundo);
+    color: var(--tinta);
+
+    font-size: 13px;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+img {
+    display: block;
+}
+
+a {
+    text-decoration: none;
+}
+
+:root {
+    --fundo: #f8fafc;
+    --cinza-50: #f8fafc;
+    --cinza-100: #f1f5f9;
+    --cinza-200: #e2e8f0;
+    --cinza-300: #d4dae2;
+    --cinza-400: #a6afba;
+    --cinza-500: #64748b;
+    --cinza-600: #475569;
+
+    --branco: #ffffff;
+
+    --tinta: #1b1e36;
+    --titulo: #14111f;
+    --texto: #475569;
+
+    --roxo: #4f3466;
+    --roxo-escuro: #4F3466;
+    --roxo-claro: #f1eafa;
+
+    --verde: #18b989;
+    --verde-claro: #e6f8f2;
+
+    --azul: #087fbd;
+    --azul-claro: #e6f4fc;
+
+    --amarelo: #e7bd35;
+    --amarelo-claro: #fff8df;
+
+    --vermelho: #dc2626;
+    --ambar: #c9a74d;
+
+    --sombra-pequena: 0 1px 2px rgba(0, 0, 0, .05);
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.barra-superior {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+
+    height: 64px;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    background: var(--branco);
+    border-bottom: 1px solid var(--cinza-200);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .02);
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-width: 280px;
+    flex-shrink: 0;
+}
+
+.marca .logo {
+    width: 209px;
+    height: 54px;
+    object-fit: contain;
+}
+
+.selo-onboarding {
+    padding: 4px 8px;
+
+    border-radius: 6px;
+
+    background: var(--roxo-claro);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+
+    color: var(--roxo);
+}
+
+.etapas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    flex: 1;
+}
+
+.etapa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    color: var(--cinza-500);
+
+    white-space: nowrap;
+}
+
+.etapa span {
+    width: 22px;
+    height: 22px;
+
+    border-radius: 50%;
+
+    background: var(--cinza-100);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.etapa strong {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.etapa.ativo {
+    background: var(--roxo);
+    color: var(--branco);
+
+    box-shadow: var(--sombra-pequena);
+}
+
+.etapa.ativo span {
+    background: rgba(255, 255, 255, .22);
+    color: var(--branco);
+}
+
+.etapa.ativo strong {
+    font-weight: 600;
+}
+
+.etapa.concluido {
+    color: var(--roxo);
+}
+
+.etapa.concluido span {
+    background: var(--roxo-claro);
+    color: var(--roxo);
+}
+
+.acoes-cabecalho {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.botao-texto {
+    border: 0;
+    background: transparent;
+
+    padding: 8px 10px;
+    border-radius: 6px;
+
+    color: var(--cinza-600);
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.botao-texto:hover {
+    background: var(--cinza-100);
+    color: var(--tinta);
+}
+
+.divisor-vertical {
+    width: 1px;
+    height: 24px;
+
+    background: var(--cinza-200);
+}
+
+.menu-ajuda,
+.menu-perfil {
+    position: relative;
+}
+
+.ajuda {
+    width: 32px;
+    height: 32px;
+
+    border: 1px solid var(--cinza-200);
+    border-radius: 50%;
+
+    background: transparent;
+    color: var(--cinza-500);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.ajuda:hover,
+.menu-ajuda.aberto .ajuda {
+    border-color: var(--roxo);
+    color: var(--roxo);
+    background: var(--roxo-claro);
+}
+
+.painel-ajuda {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 40;
+
+    width: 300px;
+
+    padding: 14px 16px;
+
+    background: var(--branco);
+    border: 1px solid var(--cinza-200);
+    border-radius: 12px;
+
+    box-shadow: 0 12px 32px rgba(27, 30, 54, .12);
+
+    white-space: normal;
+}
+
+.painel-ajuda strong {
+    display: block;
+
+    margin-bottom: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--titulo, var(--tinta));
+}
+
+.painel-ajuda ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding-left: 16px;
+}
+
+.painel-ajuda li {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--cinza-600);
+}
+
+.botao-perfil {
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+    overflow: hidden;
+
+    border: 1px solid var(--cinza-200);
+    border-radius: 50%;
+
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.botao-perfil:hover,
+.menu-perfil.aberto .botao-perfil {
+    border-color: var(--roxo);
+}
+
+.botao-perfil img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.painel-perfil {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 40;
+
+    width: 260px;
+
+    overflow: hidden;
+
+    background: var(--branco);
+    border: 1px solid var(--cinza-200);
+    border-radius: 12px;
+
+    box-shadow: 0 12px 32px rgba(27, 30, 54, .12);
+
+    white-space: normal;
+}
+
+.painel-perfil-cabecalho {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--cinza-100);
+}
+
+.painel-perfil-cabecalho img {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 9999px;
+    object-fit: cover;
+
+    border: 1px solid var(--cinza-200);
+}
+
+.painel-perfil-cabecalho strong {
+    display: block;
+
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+
+    color: var(--titulo, var(--tinta));
+}
+
+.painel-perfil-cabecalho span {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 11px;
+    line-height: 14px;
+
+    color: var(--cinza-500);
+}
+
+.lista-perfil {
+    display: flex;
+    flex-direction: column;
+
+    padding: 6px 0;
+}
+
+.lista-perfil a {
+    padding: 10px 16px;
+
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+
+    color: var(--tinta);
+}
+
+.lista-perfil a:hover {
+    background: var(--cinza-100);
+    color: var(--roxo);
+}
+
+.botao-sair {
+    display: block;
+    width: 100%;
+
+    padding: 12px 16px;
+
+    border: 0;
+    border-top: 1px solid var(--cinza-100);
+
+    background: transparent;
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: left;
+
+    color: var(--vermelho);
+}
+
+.botao-sair:hover {
+    background: rgba(239, 68, 68, .06);
+}
+
+
+/* =====================================================
+   PÁGINA / INTRO
+===================================================== */
+
+.pagina {
+    padding: 24px 32px 20px;
+}
+
+.introducao {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+
+    margin-bottom: 22px;
+}
+
+.introducao > div:first-child {
+    min-width: 0;
+    flex: 1;
+}
+
+.caminho-navegacao {
+    color: var(--roxo);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+
+    margin-bottom: 10px;
+}
+
+.introducao h1 {
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+
+    color: var(--titulo);
+
+    margin-bottom: 10px;
+}
+
+.introducao > div > p {
+    max-width: 560px;
+
+    font-size: 13px;
+    line-height: 1.55;
+
+    color: var(--cinza-600);
+}
+
+.dica {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+
+    width: 325px;
+    min-width: 280px;
+    max-width: 100%;
+    padding: 13px;
+
+    background: #fbfcfd;
+    border: 1px solid #e3e7eb;
+    border-radius: 9px;
+
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.icone-dica {
+    width: 27px;
+    height: 27px;
+
+    border-radius: 7px;
+
+    background: #fff3ca;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    font-size: 14px;
+    line-height: 1;
+}
+
+.dica > div:last-child {
+    min-width: 0;
+    flex: 1;
+}
+
+.dica strong {
+    display: block;
+
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #56525a;
+}
+
+.dica p {
+    margin-top: 4px;
+
+    font-size: 9px;
+    line-height: 1.45;
+
+    color: #777d84;
+}
+
+
+/* =====================================================
+   RODAPÉ
+===================================================== */
+
+.rodape {
+    margin-top: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.estado {
+    color: #808790;
+
+    font-size: 11px;
+
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.estado strong {
+    color: #687079;
+}
+
+.acoes-rodape {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.voltar {
+    border: 1px solid var(--cinza-200);
+    border-radius: 8px;
+
+    background: var(--branco);
+
+    padding: 10px 16px;
+
+    color: var(--cinza-600);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.voltar:hover {
+    background: var(--cinza-100);
+    color: var(--tinta);
+}
+
+.proximo {
+    border: none;
+    border-radius: 8px;
+
+    background: var(--roxo);
+    color: white;
+
+    padding: 10px 18px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    box-shadow: 0 3px 8px rgba(86, 48, 107, .15);
+
+    transition: .2s ease;
+}
+
+.proximo:hover:not(:disabled) {
+    background: var(--roxo-escuro);
+    transform: translateY(-1px);
+}
+
+.proximo:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.proximo span {
+    margin-left: 8px;
+}
+
+
+/* =====================================================
+   RESPONSIVO HEADER
+===================================================== */
+
+@media (max-width: 1250px) {
+    .barra-superior {
+        padding: 0 20px;
+        gap: 16px;
+    }
+
+    .marca {
+        min-width: 0;
+    }
+
+    .marca .logo {
+        width: 180px;
+        height: auto;
+    }
+
+    .etapa strong {
+        display: none;
+    }
+
+    .botao-texto {
+        display: none;
+    }
+
+    .divisor-vertical {
+        display: none;
+    }
+
+    .pagina {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .etapas {
+        display: none;
+    }
+
+    .introducao {
+        flex-direction: column;
+    }
+
+    .dica {
+        width: 100%;
+    }
+}
+
+@media (max-width: 700px) {
+    .selo-onboarding {
+        display: none;
+    }
+
+    .marca .logo {
+        width: 150px;
+        height: auto;
+    }
+
+    .pagina {
+        padding: 15px;
+    }
+
+    .rodape {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .acoes-rodape {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
