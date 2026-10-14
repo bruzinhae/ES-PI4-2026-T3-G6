@@ -99,11 +99,11 @@
             localStorage.removeItem('acaistudy-lembrar-email');
         }
 
-        window.location.href = 'index_calendario.html';
+        window.location.href = 'index_onboarding_horarios.html';
     });
 
     botaoGoogle?.addEventListener('click', () => {
-        window.location.href = 'index_calendario.html';
+        window.location.href = 'index_onboarding_horarios.html';
     });
 
     const emailSalvo = localStorage.getItem('acaistudy-lembrar-email');
