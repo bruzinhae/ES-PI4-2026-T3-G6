@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Onboarding · Metas Acadêmicas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_onboarding.css?v=3">
+    <link rel="stylesheet" href="CSS/style_onboarding_metas.css?v=1">
+</head>
+
+<body>
+
+    <header class="barra-superior">
+
+        <div class="marca">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+            <span class="selo-onboarding">Onboarding</span>
+        </div>
+
+        <nav class="etapas" aria-label="Etapas do onboarding">
+
+            <div class="etapa concluido">
+                <span>✓</span>
+                <strong>Horários Fixos</strong>
+            </div>
+
+            <div class="etapa ativo" aria-current="step">
+                <span>2</span>
+                <strong>Metas Acadêmicas</strong>
+            </div>
+
+            <div class="etapa">
+                <span>3</span>
+                <strong>Configurações de Foco</strong>
+            </div>
+
+        </nav>
+
+        <div class="acoes-cabecalho">
+            <button type="button" class="botao-texto">Salvar e sair</button>
+            <button type="button" class="botao-texto" id="pular-onboarding">Pular onboarding</button>
+
+            <span class="divisor-vertical" aria-hidden="true"></span>
+
+            <div class="menu-ajuda">
+                <button type="button" class="ajuda" id="botao-ajuda" aria-label="Ajuda" aria-expanded="false" aria-controls="painel-ajuda">?</button>
+
+                <div class="painel-ajuda" id="painel-ajuda" hidden>
+                    <strong>Como funciona este passo</strong>
+                    <ul>
+                        <li>Cadastre as metas que a Sofia deve priorizar na grade.</li>
+                        <li>Use as sugestões rápidas ou crie uma meta personalizada.</li>
+                        <li>Defina prazo e prioridade para calcular o impacto acadêmico.</li>
+                        <li>Você pode editar essas metas depois em Metas & Objetivos.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="menu-perfil">
+                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha" aria-expanded="false" aria-controls="painel-perfil">
+                    <img src="assets/icons/layout/avatar-704c8e.png" alt="">
+                </button>
+
+                <div class="painel-perfil" id="painel-perfil" hidden>
+                    <div class="painel-perfil-cabecalho">
+                        <img src="assets/icons/layout/avatar-704c8e.png" alt="" width="40" height="40">
+                        <div>
+                            <strong>Mariana Rocha</strong>
+                            <span>Engenharia de Software</span>
+                        </div>
+                    </div>
+
+                    <nav class="lista-perfil">
+                        <a href="index_perfil.html">Meu perfil</a>
+                        <a href="index_configuracoes.html">Configurações</a>
+                        <a href="#">Assinatura</a>
+                        <a href="#">Ajuda</a>
+                    </nav>
+
+                    <a href="index_login.html" class="botao-sair">Sair da conta</a>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+
+    <main class="pagina">
+
+        <section class="introducao">
+
+            <div>
+                <div class="caminho-navegacao">
+                    ● &nbsp; PASSO 2 DE 3 &nbsp;•&nbsp; PLANEJAMENTO BASE
+                    <span>•</span>
+                    Semestre Letivo 2026.2
+                </div>
+
+                <h1>Definir Metas Acadêmicas</h1>
+
+                <p>
+                    Informe os objetivos do semestre para a Sofia priorizar blocos de estudo por impacto,
+                    não só por prazo. Comece com 2 a 4 metas — o suficiente para montar um cronograma
+                    realista sem sobrecarregar a semana.
+                </p>
+            </div>
+
+            <div class="dica">
+                <div class="icone-dica">🎯</div>
+                <div>
+                    <strong>Dica de Priorização Inteligente</strong>
+                    <p>
+                        Metas com prazo crítico e alto impacto acadêmico recebem mais blocos de foco.
+                        Alunos que definem 3 metas claras concluem até 27% mais entregas no semestre.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="area-trabalho">
+
+            <aside class="painel-sugestoes">
+
+                <div class="titulo-cartao">
+                    <strong>SUGESTÕES DA SOFIA</strong>
+                    <small>CLIQUE</small>
+                </div>
+
+                <p class="descricao-painel">
+                    Modelos alinhados ao perfil de Engenharia de Software.
+                    Clique para adicionar e ajuste o prazo se precisar.
+                </p>
+
+                <div class="lista-sugestoes" id="lista-sugestoes">
+
+                    <button type="button" class="sugestao" data-titulo="Passar em todas as matérias com CR > 8.0" data-tipo="geral" data-prioridade="alta" data-prazo="2026-12-15" data-cor="roxo" data-icone="assets/icons/metas/card-bandeira.svg">
+                        <span class="icone-sugestao roxo">
+                            <img src="assets/icons/metas/card-bandeira.svg" alt="" width="10" height="18">
+                        </span>
+                        <span>
+                            <strong>CR acima de 8.0</strong>
+                            <small>Objetivo geral do semestre com acompanhamento contínuo.</small>
+                            <span class="etiqueta-tipo geral">Objetivo Geral</span>
+                        </span>
+                    </button>
+
+                    <button type="button" class="sugestao" data-titulo="Concluir capítulos 1 e 2 do TCC I" data-tipo="projeto" data-prioridade="alta" data-prazo="2026-11-04" data-cor="verde" data-icone="assets/icons/metas/card-tcc.svg">
+                        <span class="icone-sugestao verde">
+                            <img src="assets/icons/metas/card-tcc.svg" alt="" width="15" height="18">
+                        </span>
+                        <span>
+                            <strong>Capítulos do TCC</strong>
+                            <small>Entrega crítica com revisão do orientador.</small>
+                            <span class="etiqueta-tipo projeto">Projeto Final</span>
+                        </span>
+                    </button>
+
+                    <button type="button" class="sugestao" data-titulo="Dominar Estrutura de Dados e Grafos" data-tipo="disciplina" data-prioridade="media" data-prazo="2026-10-28" data-cor="azul" data-icone="assets/icons/metas/card-codigo.svg">
+                        <span class="icone-sugestao azul">
+                            <img src="assets/icons/metas/card-codigo.svg" alt="" width="18" height="11">
+                        </span>
+                        <span>
+                            <strong>Dominar uma disciplina</strong>
+                            <small>Foco em exercícios e revisão espaçada.</small>
+                            <span class="etiqueta-tipo disciplina">Disciplina</span>
+                        </span>
+                    </button>
+
+                    <button type="button" class="sugestao" data-titulo="Manter consistência de 5 blocos de estudo por semana" data-tipo="habito" data-prioridade="media" data-prazo="2026-12-20" data-cor="ambar" data-icone="assets/icons/metas/card-habito.svg">
+                        <span class="icone-sugestao ambar">
+                            <img src="assets/icons/metas/card-habito.svg" alt="" width="16" height="18">
+                        </span>
+                        <span>
+                            <strong>Consistência semanal</strong>
+                            <small>Hábito de estudo para a Sofia proteger na grade.</small>
+                            <span class="etiqueta-tipo habito">Hábito</span>
+                        </span>
+                    </button>
+
+                </div>
+
+            </aside>
+
+
+            <section class="painel-metas">
+
+                <div class="cabecalho-painel">
+                    <div>
+                        <h2>Metas do semestre</h2>
+                        <p>Adicione pelo menos uma meta para a Sofia montar sua priorização.</p>
+                    </div>
+                    <span class="contador-metas" id="contador-metas">0 metas</span>
+                </div>
+
+                <form class="formulario-meta" id="formulario-meta">
+
+                    <div class="campo">
+                        <label for="titulo-meta">Título da meta</label>
+                        <input type="text" id="titulo-meta" name="titulo" placeholder="Ex.: Entregar lista de Algoritmos" required maxlength="120">
+                    </div>
+
+                    <div class="campo">
+                        <label for="tipo-meta">Tipo</label>
+                        <select id="tipo-meta" name="tipo">
+                            <option value="geral">Objetivo Geral</option>
+                            <option value="disciplina">Disciplina</option>
+                            <option value="projeto">Projeto / TCC</option>
+                            <option value="habito">Hábito</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="prioridade-meta">Prioridade</label>
+                        <select id="prioridade-meta" name="prioridade">
+                            <option value="alta">Alta</option>
+                            <option value="media" selected>Média</option>
+                            <option value="baixa">Baixa</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="prazo-meta">Prazo</label>
+                        <input type="date" id="prazo-meta" name="prazo" required>
+                    </div>
+
+                    <button type="submit" class="botao-adicionar">+ Adicionar meta</button>
+
+                </form>
+
+                <div class="lista-metas-onboarding" id="lista-metas"></div>
+
+                <div class="nota-sofia">
+                    <img src="assets/icons/metas/sofia-nota.svg" alt="">
+                    <p>
+                        Sofia IA:
+                        <span>Com suas metas definidas, priorizo blocos de alto impacto nas janelas livres dos horários fixos.</span>
+                    </p>
+                </div>
+
+            </section>
+
+        </section>
+
+
+        <footer class="rodape">
+
+            <div class="estado" id="estado-rodape">
+                ⓘ
+                <strong>Passo 2 de 3</strong>
+                • Adicione ao menos 1 meta para continuar
+            </div>
+
+            <div class="acoes-rodape">
+                <button type="button" class="voltar" id="botao-voltar">Voltar</button>
+                <button type="button" class="proximo" id="botao-proximo" disabled>
+                    Avançar para Foco
+                    <span>→</span>
+                </button>
+            </div>
+
+        </footer>
+
+    </main>
+
+    <script src="JS/componentes/onboarding.js?v=1"></script>
+    <script src="JS/script_onboarding_metas.js?v=1"></script>
+
+</body>
+</html>
