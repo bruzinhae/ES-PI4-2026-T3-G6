@@ -1,0 +1,74 @@
+/**
+ * Menus do header de onboarding (ajuda e perfil).
+ */
+function criarMenuSuspenso({ menuSeletor, botaoId, painelId, aoAbrir }) {
+    const menu = document.querySelector(menuSeletor);
+    const botao = document.getElementById(botaoId);
+    const painel = document.getElementById(painelId);
+
+    if (!menu || !botao || !painel) {
+        return null;
+    }
+
+    function fechar() {
+        painel.hidden = true;
+        botao.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('aberto');
+    }
+
+    function abrir() {
+        aoAbrir?.();
+        painel.hidden = false;
+        botao.setAttribute('aria-expanded', 'true');
+        menu.classList.add('aberto');
+    }
+
+    botao.addEventListener('click', (evento) => {
+        evento.stopPropagation();
+
+        if (painel.hidden) {
+            abrir();
+        } else {
+            fechar();
+        }
+    });
+
+    painel.addEventListener('click', (evento) => {
+        evento.stopPropagation();
+    });
+
+    document.addEventListener('click', fechar);
+
+    document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape') {
+            fechar();
+        }
+    });
+
+    return { abrir, fechar };
+}
+
+function inicializarMenusOnboarding() {
+    const menus = {
+        ajuda: null,
+        perfil: null,
+    };
+
+    menus.ajuda = criarMenuSuspenso({
+        menuSeletor: '.menu-ajuda',
+        botaoId: 'botao-ajuda',
+        painelId: 'painel-ajuda',
+        aoAbrir: () => menus.perfil?.fechar(),
+    });
+
+    menus.perfil = criarMenuSuspenso({
+        menuSeletor: '.menu-perfil',
+        botaoId: 'botao-perfil',
+        painelId: 'painel-perfil',
+        aoAbrir: () => menus.ajuda?.fechar(),
+    });
+
+    return menus;
+}
+
+window.inicializarMenusOnboarding = inicializarMenusOnboarding;
