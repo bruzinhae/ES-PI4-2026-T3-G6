@@ -27,3 +27,13 @@ alternadorSemana.forEach((botao) => {
         botao.classList.add('ativo');
     });
 });
+
+function calcularPorcentagemProgresso(estudado, total) {
+    if (total <= 0) return 0;
+    if (estudado >= total) return 100;
+    return Math.round((estudado / total) * 100);
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { calcularPorcentagemProgresso };
+}
