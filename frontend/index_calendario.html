@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AçaíStudy - Cronograma Semanal</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/layout.css?v=15">
+    <link rel="stylesheet" href="CSS/style_calendario.css?v=6">
+</head>
+
+<body class="sidebar-recolhida">
+
+    <div id="cabecalho-raiz"></div>
+    <div id="barra-lateral-raiz"></div>
+
+
+    <main class="principal">
+
+        <div class="conteiner conteiner-grade">
+
+            <section class="grade-layout">
+
+                <!-- ================= TAREFAS ================= -->
+
+                <aside class="painel-tarefas">
+
+                    <div class="tarefas-cabecalho">
+                        <h2>Tarefas Pendentes</h2>
+                        <span class="selo-pendentes" id="selo-pendentes">6 pendentes</span>
+                    </div>
+
+                    <label class="campo-busca">
+                        <img src="assets/icons/home/visao.svg" alt="" width="14" height="14">
+                        <input type="search" id="busca-tarefas" placeholder="Buscar tarefas..." aria-label="Buscar tarefas">
+                    </label>
+
+                    <div class="filtros-tarefas" role="tablist" aria-label="Filtrar tarefas">
+                        <button type="button" class="filtro ativo" data-filtro="todos">Todos</button>
+                        <button type="button" class="filtro" data-filtro="estudos">Estudos</button>
+                        <button type="button" class="filtro" data-filtro="pessoal">Pessoal</button>
+                        <button type="button" class="filtro" data-filtro="alta">Alta Prioridade</button>
+                    </div>
+
+                    <div class="lista-tarefas" id="lista-tarefas">
+
+                        <article class="tarefa" draggable="true" data-id="1" data-filtro="estudos alta" data-titulo="Revisar código em C#" data-duracao="2h" data-tag="Programação">
+                            <div class="tarefa-topo">
+                                <strong>Revisar código em C#</strong>
+                                <span class="duracao">2h</span>
+                            </div>
+                            <div class="tarefa-meta">
+                                <span class="tag estudos">#Programação</span>
+                                <span class="prazo">Sexta</span>
+                            </div>
+                        </article>
+
+                        <article class="tarefa urgente" draggable="true" data-id="2" data-filtro="estudos alta" data-titulo="Entrega de Cálculo IV" data-duracao="1h 30m" data-tag="Exatas">
+                            <div class="tarefa-topo">
+                                <strong>Entrega de Cálculo IV</strong>
+                                <span class="duracao">1h 30m</span>
+                            </div>
+                            <div class="tarefa-meta">
+                                <span class="tag estudos">#Exatas</span>
+                                <span class="prazo critico">hoje 23:59</span>
+                            </div>
+                        </article>
+
+                        <article class="tarefa" draggable="true" data-id="3" data-filtro="estudos" data-titulo="Ler paper de SO" data-duracao="1h" data-tag="Sistemas">
+                            <div class="tarefa-topo">
+                                <strong>Ler paper de SO</strong>
+                                <span class="duracao">1h</span>
+                            </div>
+                            <div class="tarefa-meta">
+                                <span class="tag estudos">#Sistemas</span>
+                                <span class="prazo">Quinta</span>
+                            </div>
+                        </article>
+
+                        <article class="tarefa" draggable="true" data-id="4" data-filtro="estudos" data-titulo="Preparar demo do TCC" data-duracao="3h" data-tag="Projeto">
+                            <div class="tarefa-topo">
+                                <strong>Preparar demo do TCC</strong>
+                                <span class="duracao">3h</span>
+                            </div>
+                            <div class="tarefa-meta">
+                                <span class="tag estudos">#Projeto</span>
+                                <span class="prazo">Sábado</span>
+                            </div>
+                        </article>
+
+                        <article class="tarefa" draggable="true" data-id="5" data-filtro="pessoal" data-titulo="Treino academia" data-duracao="1h" data-tag="Saúde">
+                            <div class="tarefa-topo">
+                                <strong>Treino academia</strong>
+                                <span class="duracao">1h</span>
+                            </div>
+                            <div class="tarefa-meta">
+                                <span class="tag pessoal">#Saúde</span>
+                                <span class="prazo">Hoje</span>
+                            </div>
+                        </article>
+
+                        <article class="tarefa" draggable="true" data-id="6" data-filtro="estudos" data-titulo="Configurar CI no GitHub" data-duracao="45m" data-tag="DevOps">
+                            <div class="tarefa-topo">
+                                <strong>Configurar CI no GitHub</strong>
+                                <span class="duracao">45m</span>
+                            </div>
+                            <div class="tarefa-meta">
+                                <span class="tag estudos">#DevOps</span>
+                                <span class="prazo">Domingo</span>
+                            </div>
+                        </article>
+
+                    </div>
+
+                    <button type="button" class="botao-nova-tarefa" id="botao-nova-tarefa">
+                        <span>+ Nova Tarefa</span>
+                        <kbd>Ctrl + N</kbd>
+                    </button>
+
+                </aside>
+
+
+                <!-- ================= CALENDÁRIO ================= -->
+
+                <section class="painel-calendario">
+
+                    <div class="toolbar-calendario">
+
+                        <div class="nav-semana">
+                            <button type="button" class="botao-hoje" id="botao-hoje">Hoje</button>
+                            <button type="button" class="botao-nav" id="semana-anterior" aria-label="Semana anterior">‹</button>
+                            <button type="button" class="botao-nav" id="semana-proxima" aria-label="Próxima semana">›</button>
+                            <h1 id="titulo-semana">12 a 18 de Outubro, 2026 <span>(Semana 42)</span></h1>
+                        </div>
+
+                        <div class="toolbar-direita">
+                            <div class="legenda">
+                                <span><i class="ponto aulas"></i> Aulas</span>
+                                <span><i class="ponto estudos"></i> Estudos</span>
+                                <span><i class="ponto pessoal"></i> Pessoal</span>
+                            </div>
+                            <button type="button" class="botao-camadas">Camadas</button>
+                        </div>
+
+                    </div>
+
+                    <div class="grade-envoltorio" id="visao-semana-painel">
+
+                        <div class="cabecalho-dias" id="cabecalho-dias">
+                            <div class="canto-vazio"></div>
+                            <div class="dia-coluna"><span>SEG</span><strong>12</strong></div>
+                            <div class="dia-coluna"><span>TER</span><strong>13</strong></div>
+                            <div class="dia-coluna"><span>QUA</span><strong>14</strong></div>
+                            <div class="dia-coluna hoje"><span>QUI</span><strong>15</strong><em>HOJE</em></div>
+                            <div class="dia-coluna"><span>SEX</span><strong>16</strong></div>
+                            <div class="dia-coluna"><span>SÁB</span><strong>17</strong></div>
+                            <div class="dia-coluna"><span>DOM</span><strong>18</strong></div>
+                        </div>
+
+                        <div class="grade-corpo">
+
+                            <div class="eixo-horas" id="eixo-horas" aria-hidden="true"></div>
+
+                            <div class="grade-dias" id="grade-dias">
+
+                                <div class="coluna-dia" data-dia="0">
+                                    <div class="evento aula" draggable="true" data-id="e1" data-tipo="aulas" data-titulo="Arquitetura de Software" data-detalhe="Sala 304 · Prof. Lima" data-tag="Presencial" data-duracao="2h" data-prioridade="5" style="--inicio: 2; --duracao: 2">
+                                        <strong>Arquitetura de Software</strong>
+                                        <small>Sala 304 · Prof. Lima</small>
+                                        <span>Presencial</span>
+                                    </div>
+                                    <div class="evento estudo" draggable="true" data-id="e2" data-tipo="estudos" data-titulo="Revisão BDD" data-detalhe="Bloco Sofia" data-tag="Sofia" data-duracao="2h" data-prioridade="6" style="--inicio: 8; --duracao: 2">
+                                        <strong>Revisão BDD</strong>
+                                        <small>Bloco Sofia</small>
+                                    </div>
+                                </div>
+
+                                <div class="coluna-dia" data-dia="1">
+                                    <div class="evento aula" draggable="true" data-id="e3" data-tipo="aulas" data-titulo="Banco de Dados II" data-detalhe="Lab 2 · Prof. Souza" data-tag="Presencial" data-duracao="2h" data-prioridade="5" style="--inicio: 1; --duracao: 2">
+                                        <strong>Banco de Dados II</strong>
+                                        <small>Lab 2 · Prof. Souza</small>
+                                        <span>Presencial</span>
+                                    </div>
+                                    <div class="evento pessoal" draggable="true" data-id="e4" data-tipo="pessoal" data-titulo="Treino" data-detalhe="Academia" data-tag="Saúde" data-duracao="1h" data-prioridade="4" style="--inicio: 10; --duracao: 1">
+                                        <strong>Treino</strong>
+                                        <small>Academia</small>
+                                    </div>
+                                </div>
+
+                                <div class="coluna-dia" data-dia="2">
+                                    <div class="evento aula" draggable="true" data-id="e5" data-tipo="aulas" data-titulo="Sistemas Operacionais" data-detalhe="Sala 210 · EAD" data-tag="Online" data-duracao="2h" data-prioridade="5" style="--inicio: 3; --duracao: 2">
+                                        <strong>Sistemas Operacionais</strong>
+                                        <small>Sala 210 · EAD</small>
+                                        <span>Online</span>
+                                    </div>
+                                    <div class="evento estudo" draggable="true" data-id="e6" data-tipo="estudos" data-titulo="Exercícios de Grafos" data-detalhe="Algoritmos" data-tag="Algoritmos" data-duracao="2h" data-prioridade="7" style="--inicio: 7; --duracao: 2">
+                                        <strong>Exercícios de Grafos</strong>
+                                        <small>Algoritmos</small>
+                                    </div>
+                                </div>
+
+                                <div class="coluna-dia hoje" data-dia="3">
+                                    <div class="evento estudo concluido" draggable="true" data-id="e7" data-tipo="estudos" data-titulo="Algoritmos & Complexidade" data-detalhe="Concluído" data-tag="Estudo" data-duracao="2h" data-prioridade="8" style="--inicio: 1; --duracao: 2">
+                                        <strong>Algoritmos &amp; Complexidade</strong>
+                                        <small>Concluído</small>
+                                        <span class="selo-ok">✓</span>
+                                    </div>
+                                    <div class="evento estudo sugestao" data-id="e8" data-tipo="estudos" data-titulo="Alocação Inteligente Sofia" data-detalhe="14:00 – 16:00 · 2h livres" data-tag="Sofia" data-duracao="2h" data-prioridade="9" style="--inicio: 7; --duracao: 2" id="sugestao-sofia">
+                                        <strong>Alocação Inteligente Sofia</strong>
+                                        <small>14:00 – 16:00 · 2h livres</small>
+                                        <em>Foco: ALTO · Sem conflitos</em>
+                                    </div>
+                                </div>
+
+                                <div class="coluna-dia" data-dia="4">
+                                    <div class="evento aula" draggable="true" data-id="e9" data-tipo="aulas" data-titulo="Engenharia de Software" data-detalhe="Auditório · Prof. Rocha" data-tag="Presencial" data-duracao="3h" data-prioridade="6" style="--inicio: 2; --duracao: 3">
+                                        <strong>Engenharia de Software</strong>
+                                        <small>Auditório · Prof. Rocha</small>
+                                        <span>Presencial</span>
+                                    </div>
+                                </div>
+
+                                <div class="coluna-dia" data-dia="5">
+                                    <div class="evento estudo" draggable="true" data-id="e10" data-tipo="estudos" data-titulo="Capítulo 2 — TCC" data-detalhe="Escrita + referências" data-tag="Projeto" data-duracao="3h" data-prioridade="9" style="--inicio: 3; --duracao: 3">
+                                        <strong>Capítulo 2 — TCC</strong>
+                                        <small>Escrita + referências</small>
+                                    </div>
+                                </div>
+
+                                <div class="coluna-dia" data-dia="6">
+                                    <div class="evento pessoal" draggable="true" data-id="e11" data-tipo="pessoal" data-titulo="Descanso ativo" data-detalhe="Bloqueio leve" data-tag="Saúde" data-duracao="2h" data-prioridade="3" style="--inicio: 4; --duracao: 2">
+                                        <strong>Descanso ativo</strong>
+                                        <small>Bloqueio leve</small>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="visao-mes" id="visao-mes-painel" hidden>
+                        <div class="mes-ajuda">
+                            <span>Semana atual destacada</span>
+                            <span>Clique no bloco para editar · clique no dia para criar</span>
+                        </div>
+                        <div class="mes-cabecalho">
+                            <span class="fim-semana">Dom</span>
+                            <span>Seg</span>
+                            <span>Ter</span>
+                            <span>Qua</span>
+                            <span>Qui</span>
+                            <span>Sex</span>
+                            <span class="fim-semana">Sáb</span>
+                        </div>
+                        <div class="mes-grade" id="mes-grade"></div>
+                    </div>
+
+                    <footer class="rodape-grade">
+                        <div class="stat">
+                            <span>Carga horária semanal</span>
+                            <strong>24h alocadas / 32h meta</strong>
+                            <div class="trilha"><span style="width: 75%"></span></div>
+                        </div>
+                        <div class="stat foco">
+                            <img src="assets/icons/configuracoes/raio.svg" alt="" width="14" height="14">
+                            <span>Índice de Foco: <strong>88% (Alto)</strong></span>
+                        </div>
+                        <div class="stat sync">
+                            <span class="ponto-sync"></span>
+                            <span>Sincronizado com Google Agenda</span>
+                        </div>
+                    </footer>
+
+                </section>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <div class="fantasma-arrasto" id="fantasma-arrasto" hidden></div>
+
+    <div class="modal-fundo" id="modal-tarefa" aria-hidden="true">
+        <section class="modal-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-tarefa">
+            <header class="modal-cabecalho">
+                <div class="modal-icone">＋</div>
+                <div class="modal-texto">
+                    <h2 id="titulo-modal-tarefa">Nova tarefa</h2>
+                    <div class="modal-subtitulo-linha">
+                        <p id="subtitulo-modal-tarefa">Defina o bloco para a Sofia priorizar na grade semanal.</p>
+                        <span class="modal-etiqueta" id="etiqueta-modal">Novo</span>
+                    </div>
+                </div>
+                <button class="modal-fechar" type="button" id="fechar-modal" aria-label="Fechar">×</button>
+            </header>
+
+            <form id="formulario-tarefa">
+                <input type="hidden" id="tarefa-id" name="id" value="">
+                <input type="hidden" id="tarefa-origem" name="origem" value="lista">
+
+                <div class="campo-modal campo-inteiro">
+                    <div class="rotulo-com-contador">
+                        <label for="titulo-tarefa">Título <b>*</b></label>
+                        <small><span id="contador-titulo">0</span>/80</small>
+                    </div>
+                    <input id="titulo-tarefa" name="titulo" type="text" maxlength="80" placeholder="Ex.: Revisar prova de Cálculo IV" required>
+                </div>
+
+                <div class="grade-modal">
+                    <div class="campo-modal">
+                        <label for="tipo-tarefa">Categoria <b>*</b></label>
+                        <select id="tipo-tarefa" name="tipo" required>
+                            <option value="estudos">Estudos</option>
+                            <option value="aulas">Aulas</option>
+                            <option value="pessoal">Pessoal</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-modal">
+                        <label for="tag-tarefa">Tag / disciplina</label>
+                        <input id="tag-tarefa" name="tag" type="text" maxlength="40" placeholder="Ex.: Algoritmos, Saúde, TCC">
+                    </div>
+
+                    <div class="campo-modal">
+                        <label for="dia-tarefa">Dia na grade</label>
+                        <select id="dia-tarefa" name="dia">
+                            <option value="">Só na lista (pendente)</option>
+                            <option value="0">Segunda</option>
+                            <option value="1">Terça</option>
+                            <option value="2">Quarta</option>
+                            <option value="3">Quinta</option>
+                            <option value="4">Sexta</option>
+                            <option value="5">Sábado</option>
+                            <option value="6">Domingo</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-modal">
+                        <label for="horario-tarefa">Horário</label>
+                        <input id="horario-tarefa" name="horario" type="time" min="07:00" max="20:00" step="1800" value="14:00">
+                    </div>
+
+                    <div class="campo-modal">
+                        <label for="prazo-tarefa">Prazo</label>
+                        <input id="prazo-tarefa" name="prazo" type="datetime-local">
+                    </div>
+
+                    <div class="campo-modal">
+                        <label for="local-tarefa">Local / detalhe</label>
+                        <input id="local-tarefa" name="detalhe" type="text" maxlength="60" placeholder="Ex.: Sala 304, Lab 2, Casa">
+                    </div>
+                </div>
+
+                <section class="ajuste-modal">
+                    <div class="ajuste-titulo">
+                        <div>
+                            <strong>◷ &nbsp; Duração estimada</strong>
+                            <small>Usada pela Sofia para encaixar o bloco na grade.</small>
+                        </div>
+                        <output id="valor-duracao" for="duracao-tarefa">1h</output>
+                    </div>
+                    <input id="duracao-tarefa" type="range" min="1" max="8" step="1" value="2">
+                    <div class="escala-modal"><span>30 min</span><span>2h</span><span>4h</span></div>
+                </section>
+
+                <section class="ajuste-modal impacto-modal">
+                    <div class="ajuste-titulo">
+                        <div>
+                            <strong>☆ &nbsp; Prioridade acadêmica</strong>
+                            <small>Impacta a ordem de alocação automática.</small>
+                        </div>
+                        <output id="valor-prioridade" for="prioridade-tarefa">5/10</output>
+                    </div>
+                    <input id="prioridade-tarefa" type="range" min="1" max="10" step="1" value="5">
+                    <div class="escala-modal"><span>Baixa</span><span>Normal</span><span>Alta</span></div>
+                </section>
+
+                <div class="campo-modal campo-inteiro" style="margin-top: 14px">
+                    <label for="notas-tarefa">Notas</label>
+                    <textarea id="notas-tarefa" name="notas" rows="3" maxlength="240" placeholder="Contexto, materiais ou observação para a Sofia..."></textarea>
+                </div>
+
+                <div class="recomendacao-modal">
+                    <span>✦</span>
+                    <div>
+                        <strong>Como a Sofia usa isso</strong>
+                        <p>Categorias Aulas/Estudos/Pessoal e a prioridade ajudam a proteger horários fixos e preencher janelas livres sem conflito.</p>
+                    </div>
+                </div>
+
+                <footer class="acoes-modal">
+                    <button class="botao-excluir-modal" type="button" id="excluir-tarefa" hidden>Excluir</button>
+                    <button class="botao-cancelar-modal" type="button" id="cancelar-modal">Cancelar</button>
+                    <button class="botao-salvar-modal" type="submit" id="salvar-tarefa">＋ &nbsp; Salvar tarefa</button>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    <script src="JS/componentes/layout.js?v=16"></script>
+    <script src="JS/script_calendario.js?v=5"></script>
+
+</body>
+</html>
