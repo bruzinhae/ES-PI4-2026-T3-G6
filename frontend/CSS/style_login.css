@@ -875,6 +875,25 @@ img {
     color: #dc2626;
 }
 
+.auth-feedback {
+    margin: 14px 0 0;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.auth-feedback.erro {
+    color: #b42318;
+}
+
+.auth-feedback.sucesso {
+    color: #16794b;
+}
+
+.botao-entrar:disabled {
+    cursor: wait;
+    opacity: .72;
+}
+
 
 /* =====================================================
    RESPONSIVIDADE
