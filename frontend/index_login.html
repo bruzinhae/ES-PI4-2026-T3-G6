@@ -80,7 +80,7 @@
                     <label class="lembrar">
                         <input type="checkbox" name="lembrar" id="campo-lembrar">
                         <span class="caixa-lembrar" aria-hidden="true"></span>
-                        <span>Lembrar de mim</span>
+                        <span>Lembrar meu e-mail</span>
                     </label>
 
                     <a class="link-senha" href="index_recuperar_senha.html">Esqueceu a Senha?</a>
@@ -92,6 +92,8 @@
                 </button>
 
             </form>
+
+            <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite" hidden></p>
 
             <div class="divisor" role="separator" aria-label="Ou continue com">
                 <span>Ou continue com</span>
@@ -111,6 +113,7 @@
         <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
     </footer>
 
+    <script src="JS/componentes/auth_websocket.js"></script>
     <script src="JS/script_login.js"></script>
 </body>
 </html>
