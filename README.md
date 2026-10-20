@@ -83,16 +83,3 @@ Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/
     ├── pom.xml
     └── src/main/java/...             # Spring Boot + ping MongoDB
 ```
-
-## Autenticação local via WebSocket
-
-O cadastro e o login usam mensagens JSON pelo endpoint WebSocket `ws://localhost:8080/ws`; o backend não expõe rotas REST para autenticação. O handshake inicial do próprio protocolo WebSocket continua sendo necessário.
-
-1. Inicie um MongoDB local com Docker: `cd backend; docker compose up -d`.
-2. Em outro terminal, inicie o backend: `cd backend; .\mvnw.cmd spring-boot:run`.
-3. Sirva `frontend/` pelo VS Code Live Server na porta `5500` (não abra as páginas como `file://`).
-4. Abra `index_criar_conta.html`, crie a conta e depois teste o login em `index_login.html`.
-
-O protocolo aceita `auth.register`, `auth.login`, `auth.me` e `auth.logout`. Cada mensagem contém `requestId`, `type` e `payload`; a resposta repete o `requestId` e informa `success`, `data` ou `error`. Senhas são armazenadas com BCrypt. A sessão expira em sete dias; o token do navegador fica em `sessionStorage` e o MongoDB mantém somente seu hash.
-
-Em produção, sirva o site por HTTPS e use `wss://`. A entrada com Google ainda não está integrada. A senha do Atlas foi exposta no arquivo local `backend/.env.example`; rotacione-a no painel Atlas. Mantenha esse arquivo com placeholders e configure a URI real somente como variável de ambiente, nunca em arquivos versionados.

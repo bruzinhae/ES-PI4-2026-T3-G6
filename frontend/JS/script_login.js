@@ -8,8 +8,6 @@
     const campoSenha = document.getElementById('campo-senha');
     const botaoVisibilidade = document.getElementById('botao-visibilidade');
     const botaoGoogle = document.getElementById('botao-google');
-    const feedback = document.getElementById('auth-feedback');
-    const botaoEnviar = formulario?.querySelector('[type="submit"]');
 
     const ICONE_OLHO = 'assets/icons/login/olho.svg';
     const ICONE_OLHO_OCULTO = 'assets/icons/login/olho-oculto.svg';
@@ -42,13 +40,6 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
     }
 
-    function mostrarFeedback(texto, sucesso = false) {
-        if (!feedback) return;
-        feedback.textContent = texto;
-        feedback.className = `auth-feedback ${sucesso ? 'sucesso' : 'erro'}`;
-        feedback.hidden = false;
-    }
-
     botaoVisibilidade?.addEventListener('click', () => {
         const visivel = campoSenha.type === 'text';
         const icone = botaoVisibilidade.querySelector('[data-icone-olho]');
@@ -70,11 +61,7 @@
         limparErro(campoSenha.closest('.controle-campo'));
     });
 
-    [campoEmail, campoSenha].forEach((campo) => campo?.addEventListener('input', () => {
-        if (feedback) feedback.hidden = true;
-    }));
-
-    formulario?.addEventListener('submit', async (evento) => {
+    formulario?.addEventListener('submit', (evento) => {
         evento.preventDefault();
 
         const email = campoEmail.value.trim();
@@ -97,8 +84,8 @@
         if (!senha) {
             marcarErro(controleSenha, 'Informe sua senha.');
             valido = false;
-        } else if (senha.length < 8) {
-            marcarErro(controleSenha, 'A senha deve ter ao menos 8 caracteres.');
+        } else if (senha.length < 6) {
+            marcarErro(controleSenha, 'A senha deve ter ao menos 6 caracteres.');
             valido = false;
         }
 
@@ -106,28 +93,17 @@
             return;
         }
 
-        if (botaoEnviar) botaoEnviar.disabled = true;
-        if (feedback) feedback.hidden = true;
-        try {
-            const resultado = await window.AuthWebSocket.enviar('auth.login', { email, password: senha });
-            window.AuthWebSocket.salvarToken(resultado.token);
-
-            if (document.getElementById('campo-lembrar')?.checked) {
-                localStorage.setItem('acaistudy-lembrar-email', email);
-            } else {
-                localStorage.removeItem('acaistudy-lembrar-email');
-            }
-
-            window.location.href = 'index_onboarding_horarios.html';
-        } catch (erro) {
-            mostrarFeedback(erro.message);
-        } finally {
-            if (botaoEnviar) botaoEnviar.disabled = false;
+        if (document.getElementById('campo-lembrar')?.checked) {
+            localStorage.setItem('acaistudy-lembrar-email', email);
+        } else {
+            localStorage.removeItem('acaistudy-lembrar-email');
         }
+
+        window.location.href = 'index_onboarding_horarios.html';
     });
 
     botaoGoogle?.addEventListener('click', () => {
-        mostrarFeedback('A entrada com Google ainda não está configurada. Use seu e-mail e senha.');
+        window.location.href = 'index_onboarding_horarios.html';
     });
 
     const emailSalvo = localStorage.getItem('acaistudy-lembrar-email');

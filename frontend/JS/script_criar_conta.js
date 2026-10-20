@@ -10,8 +10,6 @@
     const campoTermos = document.getElementById('campo-termos');
     const botaoVisibilidade = document.getElementById('botao-visibilidade');
     const botaoGoogle = document.getElementById('botao-google');
-    const feedback = document.getElementById('auth-feedback');
-    const botaoEnviar = formulario?.querySelector('[type="submit"]');
 
     const ICONE_OLHO = 'assets/icons/login/olho.svg';
     const ICONE_OLHO_OCULTO = 'assets/icons/login/olho-oculto.svg';
@@ -44,13 +42,6 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
     }
 
-    function mostrarFeedback(texto) {
-        if (!feedback) return;
-        feedback.textContent = texto;
-        feedback.className = 'auth-feedback erro';
-        feedback.hidden = false;
-    }
-
     botaoVisibilidade?.addEventListener('click', () => {
         const visivel = campoSenha.type === 'text';
         const icone = botaoVisibilidade.querySelector('[data-icone-olho]');
@@ -67,11 +58,10 @@
     [campoNome, campoEmail, campoSenha].forEach((campo) => {
         campo?.addEventListener('input', () => {
             limparErro(campo.closest('.controle-campo'));
-            if (feedback) feedback.hidden = true;
         });
     });
 
-    formulario?.addEventListener('submit', async (evento) => {
+    formulario?.addEventListener('submit', (evento) => {
         evento.preventDefault();
 
         const nome = campoNome.value.trim();
@@ -114,25 +104,15 @@
             return;
         }
 
-        if (botaoEnviar) botaoEnviar.disabled = true;
-        if (feedback) feedback.hidden = true;
-        try {
-            const resultado = await window.AuthWebSocket.enviar('auth.register', {
-                name: nome,
-                email,
-                password: senha,
-                acceptedTerms: campoTermos.checked,
-            });
-            window.AuthWebSocket.salvarToken(resultado.token);
-            window.location.href = 'index_onboarding_horarios.html';
-        } catch (erro) {
-            mostrarFeedback(erro.message);
-        } finally {
-            if (botaoEnviar) botaoEnviar.disabled = false;
-        }
+        localStorage.setItem(
+            'acaistudy-usuario',
+            JSON.stringify({ nome, email })
+        );
+
+        window.location.href = 'index_onboarding_horarios.html';
     });
 
     botaoGoogle?.addEventListener('click', () => {
-        mostrarFeedback('O cadastro com Google ainda não está configurado. Use seu e-mail e senha.');
+        window.location.href = 'index_onboarding_horarios.html';
     });
 })();
