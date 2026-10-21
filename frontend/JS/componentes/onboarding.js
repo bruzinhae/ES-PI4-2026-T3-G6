@@ -72,3 +72,12 @@ function inicializarMenusOnboarding() {
 }
 
 window.inicializarMenusOnboarding = inicializarMenusOnboarding;
+
+// Quem já concluiu o onboarding (flag no banco) não vê mais estas telas: vai para a grade.
+if (window.AcaiApi) {
+    AcaiApi.onboardingConcluido().then((concluido) => {
+        if (concluido) {
+            window.location.replace('index_calendario.html');
+        }
+    });
+}
