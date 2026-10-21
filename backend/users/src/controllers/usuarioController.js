@@ -23,6 +23,12 @@ export async function criar(req, res) {
     res.status(201).json({ usuario });
 }
 
+// POST /api/usuarios/login — confere e-mail e senha e devolve o usuário (404 se o e-mail não tem conta, 401 se a senha não conferir).
+export async function entrar(req, res) {
+    const usuario = await usuarioService.autenticar(req.body);
+    res.json({ usuario });
+}
+
 // GET /api/usuarios — devolve todos os usuários (o status padrão já é 200 = OK).
 export async function listar(_req, res) {
     const usuarios = await usuarioService.listar();
