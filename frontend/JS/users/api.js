@@ -60,6 +60,13 @@ const AcaiApi = (function () {
         return guardarUsuario(usuario);
     }
 
+    // Login: confere e-mail e senha no banco e passa a usar esse usuário nesta máquina.
+    async function entrar(email, senha) {
+        const { usuario } = await requisitar('/usuarios/login', { metodo: 'POST', corpo: { email, senha } });
+
+        return guardarUsuario(usuario);
+    }
+
     async function listarUsuarios() {
         const { usuarios } = await requisitar('/usuarios');
 
@@ -131,6 +138,7 @@ const AcaiApi = (function () {
 
     return {
         criarUsuario,
+        entrar,
         listarUsuarios,
         obterUsuario,
         atualizarUsuario,
