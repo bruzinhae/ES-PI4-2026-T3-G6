@@ -194,12 +194,24 @@ document.getElementById('botao-voltar').addEventListener('click', () => {
     window.location.href = 'index_onboarding_metas.html';
 });
 
-document.getElementById('botao-concluir').addEventListener('click', async () => {
+document.getElementById('botao-concluir').addEventListener('click', async (evento) => {
+    const botao = evento.currentTarget;
+
     localStorage.setItem('acaistudy-onboarding-completo', '1');
     salvarEstado();
 
+    // Marca no banco que o onboarding foi concluído; a partir daí o usuário vai direto para a grade.
     if (AcaiApi.temUsuarioAtual()) {
-        await AcaiApi.atualizarUsuarioAtual({ onboardingConcluido: true }).catch(() => {});
+        botao.disabled = true;
+
+        try {
+            await AcaiApi.atualizarUsuarioAtual({ onboardingConcluido: true });
+        } catch (erro) {
+            alert(`Não foi possível concluir o onboarding: ${erro.message}`);
+            return;
+        } finally {
+            botao.disabled = false;
+        }
     }
 
     window.location.href = 'index_calendario.html';
