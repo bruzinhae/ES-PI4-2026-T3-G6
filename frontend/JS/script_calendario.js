@@ -761,6 +761,61 @@ document.getElementById('semana-proxima').addEventListener('click', () => {
     }
 });
 
+/* Semana montada no onboarding */
+
+const TIPOS_ONBOARDING = {
+    aula: { tipo: 'aulas', tag: 'Aula' },
+    trabalho: { tipo: 'pessoal', tag: 'Trabalho' },
+    estudo: { tipo: 'estudos', tag: 'Sofia' },
+};
+
+function minutosDe(horario) {
+    const [h, m] = horario.split(':').map(Number);
+    return h * 60 + m;
+}
+
+// Se a pessoa organizou a semana no onboarding, esses blocos substituem os de exemplo.
+function carregarSemanaDoOnboarding() {
+    let semana = null;
+
+    try {
+        semana = JSON.parse(localStorage.getItem('acaistudy-onboarding-semana'));
+    } catch {
+        semana = null;
+    }
+
+    if (!Array.isArray(semana) || semana.length === 0) return;
+
+    gradeDias.querySelectorAll('.evento').forEach((evento) => evento.remove());
+
+    const inicioGrade = HORA_INICIAL * 60;
+    const fimGrade = inicioGrade + TOTAL_HORAS * 60;
+
+    semana.forEach((bloco) => {
+        const coluna = gradeDias.querySelector(`.coluna-dia[data-dia="${DIAS.indexOf(bloco.dia)}"]`);
+        const inicio = Math.max(minutosDe(bloco.inicio), inicioGrade);
+        const fim = Math.min(minutosDe(bloco.fim), fimGrade);
+
+        // Fora do horário exibido na grade (07:00 – 21:00).
+        if (!coluna || fim <= inicio) return;
+
+        const { tipo, tag } = TIPOS_ONBOARDING[bloco.tipo] || TIPOS_ONBOARDING.estudo;
+        const evento = criarEventoGrade({
+            titulo: bloco.titulo,
+            tipo,
+            tag,
+            detalhe: `${bloco.inicio} – ${bloco.fim}`,
+            inicio: (inicio - inicioGrade) / 60,
+            faixas: (fim - inicio) / 30,
+            alocado: !bloco.fixo,
+        });
+
+        evento.style.setProperty('--duracao', String((fim - inicio) / 60));
+        coluna.appendChild(evento);
+    });
+}
+
 montarEixoHoras();
+carregarSemanaDoOnboarding();
 atualizarContador();
 alternarVisao('semana');
