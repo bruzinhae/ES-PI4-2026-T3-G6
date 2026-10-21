@@ -66,7 +66,29 @@ function sidebarRecolhida() {
     return localStorage.getItem(CHAVE_SIDEBAR) === '1';
 }
 
+function escaparHtml(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+// Usuário salvo pelo login (JS/servicos/api.js); fallback para o mock.
+function usuarioDoCabecalho(pastaIcones) {
+    let usuario = null;
+
+    try {
+        usuario = JSON.parse(localStorage.getItem('acaistudy-usuario'));
+    } catch {
+        usuario = null;
+    }
+
+    return {
+        nome: escaparHtml(usuario?.nome || 'Mariana Rocha'),
+        curso: escaparHtml(usuario ? usuario.curso || '' : 'Engenharia de Software'),
+        avatar: escaparHtml(usuario?.urlAvatar || icone(pastaIcones, 'avatar-704c8e.png')),
+    };
+}
+
 function renderHeader({ paginaAtiva, pastaIcones }) {
+    const usuario = usuarioDoCabecalho(pastaIcones);
     const abas = ABAS.map(
         (aba) =>
             `<a href="${aba.href}"${classeAtiva(paginaAtiva, aba.id)}>${aba.rotulo}</a>`
@@ -150,16 +172,16 @@ function renderHeader({ paginaAtiva, pastaIcones }) {
             <span class="divisor-vertical"></span>
 
             <div class="menu-perfil">
-                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha" aria-expanded="false" aria-controls="painel-perfil">
-                    <img src="${icone(pastaIcones, 'avatar-704c8e.png')}" alt="">
+                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e Configurações - ${usuario.nome}" aria-expanded="false" aria-controls="painel-perfil">
+                    <img src="${usuario.avatar}" alt="">
                 </button>
 
                 <div class="painel-perfil" id="painel-perfil" hidden>
                     <div class="painel-perfil-cabecalho">
-                        <img src="${icone(pastaIcones, 'avatar-704c8e.png')}" alt="" width="40" height="40">
+                        <img src="${usuario.avatar}" alt="" width="40" height="40">
                         <div>
-                            <strong>Mariana Rocha</strong>
-                            <span>Engenharia de Software</span>
+                            <strong>${usuario.nome}</strong>
+                            <span>${usuario.curso}</span>
                         </div>
                     </div>
 
@@ -368,12 +390,21 @@ function inicializarNotificacoes(aoAbrir) {
 }
 
 function inicializarPerfil(aoAbrir) {
-    return criarMenuSuspenso({
+    const controle = criarMenuSuspenso({
         menuSeletor: '.menu-perfil',
         botaoId: 'botao-perfil',
         painelId: 'painel-perfil',
         aoAbrir,
     });
+
+    // Esquece o usuário salvo neste navegador antes de voltar ao login.
+    controle?.painel.querySelector('.botao-sair')?.addEventListener('click', () => {
+        if (typeof AcaiApi !== 'undefined') {
+            AcaiApi.esquecerUsuario();
+        }
+    });
+
+    return controle;
 }
 
 function substituirRaiz(seletor, html) {

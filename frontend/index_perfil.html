@@ -68,19 +68,19 @@
                         </div>
 
                         <div class="bloco-foto">
-                            <img class="foto-perfil" src="assets/icons/perfil/avatar-704c8e.png" alt="Foto de Mariana Rocha" width="72" height="72">
+                            <img class="foto-perfil" id="foto-perfil" src="assets/icons/perfil/avatar-704c8e.png" alt="Foto de perfil" width="72" height="72">
 
                             <div class="info-foto">
-                                <strong>Mariana Rocha</strong>
-                                <span>Engenharia de Software • 6º Semestre Noturno</span>
+                                <strong id="resumo-nome">Carregando…</strong>
+                                <span id="resumo-curso"></span>
 
                                 <div class="acoes-foto">
-                                    <button type="button" class="link-acao">
+                                    <button type="button" class="link-acao" id="botao-alterar-foto">
                                         <img src="assets/icons/perfil/upload.svg" alt="" width="12" height="12">
                                         <span>Alterar Foto</span>
                                     </button>
 
-                                    <button type="button" class="link-acao perigo">Remover</button>
+                                    <button type="button" class="link-acao perigo" id="botao-remover-foto">Remover</button>
                                 </div>
 
                                 <small>PNG, JPG até 5MB</small>
@@ -93,7 +93,7 @@
                                 <span class="rotulo-campo">Nome Completo</span>
                                 <span class="controle-campo">
                                     <img src="assets/icons/perfil/usuario.svg" alt="" width="14" height="14">
-                                    <input type="text" name="nome" value="Mariana Rocha">
+                                    <input type="text" name="nome" autocomplete="name">
                                 </span>
                             </label>
 
@@ -101,8 +101,8 @@
                                 <span class="rotulo-campo">E-mail Universitário</span>
                                 <span class="controle-campo">
                                     <img src="assets/icons/perfil/email.svg" alt="" width="14" height="14">
-                                    <input type="email" name="email" value="mariana.rocha@universidade.edu.br">
-                                    <span class="selo-verificado">
+                                    <input type="email" name="email" autocomplete="email">
+                                    <span class="selo-verificado" id="selo-verificado" hidden>
                                         <img src="assets/icons/perfil/check-verde.svg" alt="" width="12" height="12">
                                         Verificado
                                     </span>
@@ -113,7 +113,7 @@
                                 <span class="rotulo-campo">Instituição de Ensino Superior (Universidade)</span>
                                 <span class="controle-campo">
                                     <img src="assets/icons/perfil/edificio.svg" alt="" width="14" height="14">
-                                    <input type="text" name="instituicao" value="Universidade Federal de Tecnologia (UTFPR) – Câmpus Central">
+                                    <input type="text" name="instituicao" placeholder="Ex.: PUC-Campinas">
                                 </span>
                             </label>
 
@@ -121,24 +121,32 @@
                                 <span class="rotulo-campo">Curso de Graduação</span>
                                 <span class="controle-campo">
                                     <img src="assets/icons/perfil/graduacao.svg" alt="" width="14" height="14">
-                                    <input type="text" name="curso" value="Engenharia de Software">
+                                    <input type="text" name="curso" placeholder="Ex.: Engenharia de Software">
                                 </span>
                             </label>
 
-                            <label class="campo">
+                            <div class="campo">
                                 <span class="rotulo-campo">Semestre &amp; Turno</span>
                                 <span class="controle-campo">
-                                    <input type="text" name="semestre" value="6º Semestre • Noturno">
+                                    <input type="number" name="semestre" min="1" max="12" step="1" placeholder="Semestre" aria-label="Semestre">
+                                    <select name="turno" aria-label="Turno">
+                                        <option value="">Turno</option>
+                                        <option value="matutino">Matutino</option>
+                                        <option value="vespertino">Vespertino</option>
+                                        <option value="noturno">Noturno</option>
+                                        <option value="integral">Integral</option>
+                                    </select>
                                 </span>
-                            </label>
+                            </div>
 
                             <label class="campo">
                                 <span class="rotulo-campo">Meta Semanal de Estudo Focado</span>
                                 <span class="controle-campo meta-semanal">
                                     <span class="trilha-meta">
-                                        <span style="width: 70%"></span>
+                                        <span id="trilha-meta-preenchida" style="width: 0%"></span>
                                     </span>
-                                    <strong>28h / semana</strong>
+                                    <input type="number" name="metaSemanalHoras" min="0" max="168" step="1" aria-label="Horas por semana">
+                                    <strong>h / semana</strong>
                                 </span>
                             </label>
 
@@ -191,7 +199,7 @@
 
                             <div class="acoes-portabilidade">
                                 <button type="button" class="link-acao">Exportar Dados</button>
-                                <button type="button" class="link-acao perigo">Excluir Conta</button>
+                                <button type="button" class="link-acao perigo" id="botao-excluir-conta">Excluir Conta</button>
                             </div>
                         </div>
 
@@ -293,8 +301,9 @@
 
     </main>
 
-    <script src="JS/componentes/layout.js?v=16"></script>
-    <script src="JS/script_perfil.js"></script>
+    <script src="JS/servicos/api.js?v=1"></script>
+    <script src="JS/componentes/layout.js?v=17"></script>
+    <script src="JS/script_perfil.js?v=2"></script>
 
 </body>
 </html>
