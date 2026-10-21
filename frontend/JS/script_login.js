@@ -61,7 +61,7 @@
         limparErro(campoSenha.closest('.controle-campo'));
     });
 
-    formulario?.addEventListener('submit', (evento) => {
+    formulario?.addEventListener('submit', async (evento) => {
         evento.preventDefault();
 
         const email = campoEmail.value.trim();
@@ -99,11 +99,11 @@
             localStorage.removeItem('acaistudy-lembrar-email');
         }
 
-        window.location.href = 'index_onboarding_horarios.html';
+        window.location.href = await AcaiApi.paginaInicial();
     });
 
-    botaoGoogle?.addEventListener('click', () => {
-        window.location.href = 'index_onboarding_horarios.html';
+    botaoGoogle?.addEventListener('click', async () => {
+        window.location.href = await AcaiApi.paginaInicial();
     });
 
     const emailSalvo = localStorage.getItem('acaistudy-lembrar-email');
