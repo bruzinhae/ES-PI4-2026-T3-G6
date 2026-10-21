@@ -108,6 +108,27 @@ const AcaiApi = (function () {
         return Boolean(obterIdAtual());
     }
 
+    // Consulta o banco: true se o usuário atual já concluiu o onboarding.
+    // Sem usuário ou sem API, assume false (o onboarding é mostrado).
+    async function onboardingConcluido() {
+        if (!temUsuarioAtual()) {
+            return false;
+        }
+
+        try {
+            const usuario = await obterUsuarioAtual();
+
+            return usuario.onboardingConcluido === true;
+        } catch {
+            return false;
+        }
+    }
+
+    // Página para onde o usuário vai depois de entrar: grade normal ou onboarding.
+    async function paginaInicial() {
+        return (await onboardingConcluido()) ? 'index_calendario.html' : 'index_onboarding_horarios.html';
+    }
+
     return {
         criarUsuario,
         listarUsuarios,
@@ -118,6 +139,8 @@ const AcaiApi = (function () {
         atualizarUsuarioAtual,
         excluirUsuarioAtual,
         temUsuarioAtual,
+        onboardingConcluido,
+        paginaInicial,
         esquecerUsuario,
     };
 })();
