@@ -1,0 +1,172 @@
+[
+  {
+    "_id": "672004000000000000000001",
+    "usuarioId": "672001000000000000000001",
+    "nome": "Cálculo II",
+    "area": "Ciências Exatas",
+    "professor": "Prof. Ricardo Arona",
+    "local": "Sala 304 - Bloco B",
+    "creditos": 6,
+    "peso": 4,
+    "dificuldade": 5,
+    "cor": "roxo",
+    "periodoLetivo": "2026/2",
+    "situacao": "ativa",
+    "conteudos": [
+      {
+        "_id": "672005000000000000000001",
+        "titulo": "Integrais duplas",
+        "dificuldade": null,
+        "situacao": "concluido",
+        "ordem": 1,
+        "minutosEstimados": 240,
+        "concluidoEm": "2026-09-18T23:10:00Z"
+      },
+      {
+        "_id": "672005000000000000000002",
+        "titulo": "Integrais triplas",
+        "dificuldade": null,
+        "situacao": "em_andamento",
+        "ordem": 2,
+        "minutosEstimados": 240,
+        "concluidoEm": null
+      },
+      {
+        "_id": "672005000000000000000003",
+        "titulo": "Mudança de variáveis",
+        "dificuldade": null,
+        "situacao": "pendente",
+        "ordem": 3,
+        "minutosEstimados": 180,
+        "concluidoEm": null
+      },
+      {
+        "_id": "672005000000000000000004",
+        "titulo": "Séries numéricas",
+        "dificuldade": 5,
+        "situacao": "pendente",
+        "ordem": 4,
+        "minutosEstimados": 300,
+        "concluidoEm": null
+      }
+    ],
+    "criadoEm": "2026-08-03T13:30:00Z",
+    "atualizadoEm": "2026-10-27T00:30:00Z"
+  },
+  {
+    "_id": "672004000000000000000002",
+    "usuarioId": "672001000000000000000001",
+    "nome": "Estrutura de Dados",
+    "area": "Engenharia de Software",
+    "professor": "Profa. Renata Silveira",
+    "local": "Lab BD 02",
+    "creditos": 4,
+    "peso": 5,
+    "dificuldade": 4,
+    "cor": "azul",
+    "periodoLetivo": "2026/2",
+    "situacao": "ativa",
+    "conteudos": [
+      {
+        "_id": "672005000000000000000005",
+        "titulo": "Listas e pilhas",
+        "dificuldade": 2,
+        "situacao": "concluido",
+        "ordem": 1,
+        "minutosEstimados": 180,
+        "concluidoEm": "2026-08-29T00:00:00Z"
+      },
+      {
+        "_id": "672005000000000000000006",
+        "titulo": "Árvores binárias",
+        "dificuldade": null,
+        "situacao": "concluido",
+        "ordem": 2,
+        "minutosEstimados": 240,
+        "concluidoEm": "2026-09-25T23:45:00Z"
+      },
+      {
+        "_id": "672005000000000000000007",
+        "titulo": "Grafos — BFS e DFS",
+        "dificuldade": 5,
+        "situacao": "em_andamento",
+        "ordem": 3,
+        "minutosEstimados": 300,
+        "concluidoEm": null
+      },
+      {
+        "_id": "672005000000000000000008",
+        "titulo": "Algoritmos de ordenação",
+        "dificuldade": null,
+        "situacao": "pendente",
+        "ordem": 4,
+        "minutosEstimados": 240,
+        "concluidoEm": null
+      }
+    ],
+    "criadoEm": "2026-08-03T13:32:00Z",
+    "atualizadoEm": "2026-10-28T01:00:00Z"
+  },
+  {
+    "_id": "672004000000000000000003",
+    "usuarioId": "672001000000000000000001",
+    "nome": "Banco de Dados",
+    "area": "Engenharia de Software",
+    "professor": "Prof. Marcos Valente",
+    "local": "Lab 2",
+    "creditos": 4,
+    "peso": 3,
+    "dificuldade": 3,
+    "cor": "verde",
+    "periodoLetivo": "2026/2",
+    "situacao": "ativa",
+    "conteudos": [
+      {
+        "_id": "672005000000000000000009",
+        "titulo": "Modelagem entidade-relacionamento",
+        "dificuldade": null,
+        "situacao": "concluido",
+        "ordem": 1,
+        "minutosEstimados": 180,
+        "concluidoEm": "2026-09-10T22:50:00Z"
+      },
+      {
+        "_id": "67200500000000000000000a",
+        "titulo": "MongoDB e modelagem de documentos",
+        "dificuldade": null,
+        "situacao": "em_andamento",
+        "ordem": 2,
+        "minutosEstimados": 240,
+        "concluidoEm": null
+      },
+      {
+        "_id": "67200500000000000000000b",
+        "titulo": "Índices e desempenho",
+        "dificuldade": null,
+        "situacao": "pendente",
+        "ordem": 3,
+        "minutosEstimados": 120,
+        "concluidoEm": null
+      }
+    ],
+    "criadoEm": "2026-08-03T13:35:00Z",
+    "atualizadoEm": "2026-10-28T18:00:00Z"
+  },
+  {
+    "_id": "672004000000000000000004",
+    "usuarioId": "672001000000000000000002",
+    "nome": "Física I",
+    "area": "Ciências Exatas",
+    "professor": null,
+    "local": null,
+    "creditos": null,
+    "peso": 3,
+    "dificuldade": 3,
+    "cor": "ambar",
+    "periodoLetivo": "2026/2",
+    "situacao": "ativa",
+    "conteudos": [],
+    "criadoEm": "2026-10-19T18:04:00Z",
+    "atualizadoEm": "2026-10-19T18:04:00Z"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "672001000000000000000001",
+    "nome": "Larissa Prado",
+    "email": "Larissa.Prado@puc-campinas.edu.br",
+    "hashSenha": "$2b$10$8Jtpoj8t.H4CElWF5VxpoO6DuLAcnkDlD1hFH5K9Q/NQ3YMSw0lnW",
+    "provedorAutenticacao": "local",
+    "emailVerificado": true,
+    "urlAvatar": null,
+    "instituicao": "PUC-Campinas",
+    "curso": "Engenharia de Software",
+    "semestre": 4,
+    "turno": "matutino",
+    "metaSemanalHoras": 20,
+    "onboardingConcluido": true,
+    "criadoEm": "2026-08-03T13:12:00Z",
+    "atualizadoEm": "2026-10-21T00:40:00Z"
+  },
+  {
+    "_id": "672001000000000000000002",
+    "nome": "Caio Mendes",
+    "email": "caio.mendes@gmail.com",
+    "emailNormalizado": "caio.mendes@gmail.com",
+    "hashSenha": null,
+    "provedorAutenticacao": "google",
+    "emailVerificado": true,
+    "termosAceitosEm": "2026-10-19T18:02:00Z",
+    "urlAvatar": "https://lh3.googleusercontent.com/a/exemplo-caio",
+    "instituicao": null,
+    "curso": null,
+    "semestre": null,
+    "turno": null,
+    "metaSemanalHoras": 10,
+    "onboardingConcluido": false,
+    "criadoEm": "2026-10-19T18:02:00Z",
+    "atualizadoEm": "2026-10-19T18:05:00Z"
+  }
+]

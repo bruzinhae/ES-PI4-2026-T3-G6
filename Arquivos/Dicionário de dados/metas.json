@@ -1,0 +1,95 @@
+[
+  {
+    "_id": "67200a000000000000000001",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "titulo": "Passar em todas as matérias com média acima de 7",
+    "tipo": "geral",
+    "prioridade": "alta",
+    "prazo": "2026-12-15T00:00:00Z",
+    "situacao": "ativa",
+    "metaSemanalHoras": null,
+    "marcos": [
+      {
+        "_id": "67200b000000000000000001",
+        "titulo": "P1 Cálculo II",
+        "atingido": true,
+        "atingidoEm": "2026-09-24T13:00:00Z",
+        "nota": 7.5
+      },
+      {
+        "_id": "67200b000000000000000002",
+        "titulo": "P1 Estrutura de Dados",
+        "atingido": true,
+        "atingidoEm": "2026-09-26T13:00:00Z",
+        "nota": 9.0
+      },
+      {
+        "_id": "67200b000000000000000003",
+        "titulo": "P2 Cálculo II",
+        "atingido": false,
+        "atingidoEm": null,
+        "nota": null
+      },
+      {
+        "_id": "67200b000000000000000004",
+        "titulo": "Trabalho de Banco de Dados",
+        "atingido": false,
+        "atingidoEm": null,
+        "nota": null
+      }
+    ],
+    "criadoEm": "2026-08-03T13:50:00Z",
+    "atualizadoEm": "2026-09-26T21:00:00Z"
+  },
+  {
+    "_id": "67200a000000000000000002",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": "672004000000000000000002",
+    "titulo": "Dominar grafos antes da P2",
+    "tipo": "disciplina",
+    "prioridade": "media",
+    "prazo": "2026-11-20T00:00:00Z",
+    "situacao": "ativa",
+    "metaSemanalHoras": null,
+    "marcos": [
+      {
+        "_id": "67200b000000000000000005",
+        "titulo": "Lista 1 de Grafos",
+        "atingido": true,
+        "atingidoEm": "2026-10-10T00:00:00Z",
+        "nota": null
+      },
+      {
+        "_id": "67200b000000000000000006",
+        "titulo": "Lista 2 de Grafos",
+        "atingido": true,
+        "atingidoEm": "2026-10-17T23:30:00Z",
+        "nota": null
+      },
+      {
+        "_id": "67200b000000000000000007",
+        "titulo": "Lista 3 de Grafos",
+        "atingido": false,
+        "atingidoEm": null,
+        "nota": null
+      }
+    ],
+    "criadoEm": "2026-10-01T22:00:00Z",
+    "atualizadoEm": "2026-10-17T23:30:00Z"
+  },
+  {
+    "_id": "67200a000000000000000003",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "titulo": "Estudar 20 horas por semana",
+    "tipo": "habito",
+    "prioridade": "media",
+    "prazo": null,
+    "situacao": "ativa",
+    "metaSemanalHoras": 20,
+    "marcos": [],
+    "criadoEm": "2026-08-03T13:52:00Z",
+    "atualizadoEm": "2026-08-03T13:52:00Z"
+  }
+]
