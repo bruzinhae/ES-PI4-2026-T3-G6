@@ -60,11 +60,19 @@ docker compose up -d
 
 ## Backend (escopo atual)
 
-Neste momento o backend **não** expõe API REST nem WebSocket — apenas sobe o Spring Boot e valida a conexão com um `ping` no MongoDB.
+O Spring Boot apenas sobe e valida a conexão com um `ping` no MongoDB.
+
+A API de usuários (CRUD) fica em `backend/users/`, em Node.js. Veja [backend/users/README.md](backend/users/README.md):
+
+```bash
+cd backend/users
+npm install
+npm run dev   # http://localhost:3001/api
+```
 
 ## Frontend
 
-Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Ainda não há integração com o backend.
+Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Criar conta e perfil usam a API de usuários (`frontend/JS/servicos/api.js`); login e as demais telas ainda são mock.
 
 Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/index_login.html`.
 
@@ -81,5 +89,6 @@ Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/
     ├── docker-compose.yml            # MongoDB local (opcional)
     ├── .env.example                  # modelo da URI Atlas
     ├── pom.xml
-    └── src/main/java/...             # Spring Boot + ping MongoDB
+    ├── src/main/java/...             # Spring Boot + ping MongoDB
+    └── users/                        # API de usuários (Node.js + Mongoose)
 ```

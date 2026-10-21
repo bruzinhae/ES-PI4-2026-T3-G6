@@ -194,9 +194,14 @@ document.getElementById('botao-voltar').addEventListener('click', () => {
     window.location.href = 'index_onboarding_metas.html';
 });
 
-document.getElementById('botao-concluir').addEventListener('click', () => {
+document.getElementById('botao-concluir').addEventListener('click', async () => {
     localStorage.setItem('acaistudy-onboarding-completo', '1');
     salvarEstado();
+
+    if (AcaiApi.temUsuarioAtual()) {
+        await AcaiApi.atualizarUsuarioAtual({ onboardingConcluido: true }).catch(() => {});
+    }
+
     window.location.href = 'index_calendario.html';
 });
 

@@ -426,6 +426,31 @@ img {
     color: var(--tinta);
 }
 
+.controle-campo select {
+    flex-shrink: 0;
+
+    border: 0;
+    background: transparent;
+    outline: none;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+
+    color: var(--tinta);
+    cursor: pointer;
+}
+
+.meta-semanal input {
+    width: 48px;
+    text-align: right;
+}
+
+.selo-verificado[hidden],
+.link-acao[hidden] {
+    display: none;
+}
+
 .selo-verificado {
     display: inline-flex;
     align-items: center;
