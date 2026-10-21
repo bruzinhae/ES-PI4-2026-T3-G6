@@ -468,12 +468,6 @@ img {
     color: var(--cinza-600);
 }
 
-.acoes-integracao {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
 .link-acao {
     display: inline-flex;
     align-items: center;
@@ -753,29 +747,6 @@ img {
 
     font-size: 11px;
     color: var(--cinza-500);
-}
-
-
-/* Dica */
-
-.cartao-dica {
-    background: linear-gradient(180deg, #f8f6fa 0%, var(--branco) 100%);
-}
-
-.cartao-dica .titulo-com-icone {
-    margin-bottom: 12px;
-}
-
-.cartao-dica p {
-    font-size: 12px;
-    line-height: 18px;
-
-    color: var(--cinza-600);
-}
-
-.cartao-dica strong {
-    color: var(--roxo);
-    font-weight: 700;
 }
 
 

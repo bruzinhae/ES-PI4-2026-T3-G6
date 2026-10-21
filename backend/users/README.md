@@ -25,7 +25,7 @@ API de usuários rodando em http://localhost:3001/api
 ```
 
 Depois abra o frontend (Live Server em `frontend/`) e crie uma conta em `index_criar_conta.html`.
-Para apontar o frontend para outra URL, defina `window.ACAISTUDY_API_URL` antes de carregar `JS/servicos/api.js`.
+Para apontar o frontend para outra URL, defina `window.ACAISTUDY_API_URL` antes de carregar `JS/users/api.js`.
 
 ## Endpoints
 
@@ -34,6 +34,7 @@ Erros sempre voltam como `{ "mensagem": "..." }`.
 | Método | Rota | Descrição |
 | ------ | ---- | --------- |
 | POST | `/api/usuarios` | **Create** — `{ nome, email, senha, aceitouTermos, ...campos do perfil }` → `{ usuario }` |
+| POST | `/api/usuarios/login` | **Login** — `{ email, senha }` → `{ usuario }` (404 se o e-mail não tem conta, 401 se a senha não conferir) |
 | GET | `/api/usuarios` | **Read** — lista todos → `{ usuarios }` |
 | GET | `/api/usuarios/:id` | **Read** — um usuário → `{ usuario }` |
 | PATCH | `/api/usuarios/:id` | **Update** — qualquer campo do perfil e/ou `senha` → `{ usuario }` |
