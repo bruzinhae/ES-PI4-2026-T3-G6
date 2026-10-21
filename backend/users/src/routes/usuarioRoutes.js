@@ -19,6 +19,7 @@ import * as controller from '../controllers/usuarioController.js';
 export const usuarioRoutes = Router();
 
 usuarioRoutes.post('/', controller.criar);              // POST   /api/usuarios      → cria conta (tela "Criar Nova Conta")
+usuarioRoutes.post('/login', controller.entrar);        // POST   /api/usuarios/login → confere e-mail e senha (tela de login)
 usuarioRoutes.get('/', controller.listar);              // GET    /api/usuarios      → lista todos os usuários
 usuarioRoutes.get('/:id', controller.buscarPorId);      // GET    /api/usuarios/:id  → busca um usuário (tela de perfil)
 usuarioRoutes.patch('/:id', controller.atualizar);      // PATCH  /api/usuarios/:id  → altera dados do perfil e/ou senha

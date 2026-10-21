@@ -97,6 +97,32 @@ export async function criar(dados = {}) {
 }
 
 /**
+ * LOGIN — confere e-mail e senha (usado pela tela de login).
+ *
+ * Busca pelo emailNormalizado e compara a senha com o hash usando `bcrypt.compare`.
+ *   - e-mail sem conta → 404 (Not Found) "Usuário não encontrado.";
+ *   - senha errada     → 401 (Unauthorized). Contas só do Google não têm hashSenha,
+ *                        então também caem aqui.
+ */
+export async function autenticar({ email, senha } = {}) {
+    const usuario = await Usuario.findOne({ emailNormalizado: normalizarEmail(email) });
+
+    if (!usuario) {
+        throw new ErroApi(404, 'Usuário não encontrado.');
+    }
+
+    const senhaConfere = typeof senha === 'string'
+        && Boolean(usuario.hashSenha)
+        && await bcrypt.compare(senha, usuario.hashSenha);
+
+    if (!senhaConfere) {
+        throw new ErroApi(401, 'E-mail ou senha incorretos.');
+    }
+
+    return usuario;
+}
+
+/**
  * READ (todos) — lista os usuários, do mais recente para o mais antigo (-1 = decrescente).
  * Atenção: como a API ainda não tem autenticação, qualquer um consegue chamar esta rota.
  */
