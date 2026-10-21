@@ -1,5 +1,5 @@
 /**
- * Criar conta — validação mock e redirecionamento.
+ * Criar conta — validação e criação do usuário via API (JS/servicos/api.js).
  */
 
 (function () {
@@ -61,7 +61,7 @@
         });
     });
 
-    formulario?.addEventListener('submit', (evento) => {
+    formulario?.addEventListener('submit', async (evento) => {
         evento.preventDefault();
 
         const nome = campoNome.value.trim();
@@ -104,10 +104,19 @@
             return;
         }
 
-        localStorage.setItem(
-            'acaistudy-usuario',
-            JSON.stringify({ nome, email })
-        );
+        const botaoCriar = formulario.querySelector('[type="submit"]');
+
+        botaoCriar.disabled = true;
+
+        try {
+            await AcaiApi.criarUsuario({ nome, email, senha, aceitouTermos: true });
+        } catch (erro) {
+            // 409 = e-mail já cadastrado; demais erros aparecem no campo de senha.
+            marcarErro(erro.status === 409 ? cEmail : cSenha, erro.message);
+            return;
+        } finally {
+            botaoCriar.disabled = false;
+        }
 
         window.location.href = 'index_onboarding_horarios.html';
     });
