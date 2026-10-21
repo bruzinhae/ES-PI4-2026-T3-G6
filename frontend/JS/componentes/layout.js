@@ -70,7 +70,7 @@ function escaparHtml(texto) {
     return String(texto ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-// Usuário salvo pelo login (JS/servicos/api.js); fallback para o mock.
+// Usuário salvo pelo login (JS/users/api.js); fallback para o mock.
 function usuarioDoCabecalho(pastaIcones) {
     let usuario = null;
 

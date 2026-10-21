@@ -1,5 +1,5 @@
 /**
- * Perfil do usuário — carrega e salva os dados via API (JS/servicos/api.js).
+ * Perfil do usuário — carrega e salva os dados via API (JS/users/api.js).
  */
 
 renderLayout({

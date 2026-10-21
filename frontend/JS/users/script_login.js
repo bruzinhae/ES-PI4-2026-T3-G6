@@ -1,15 +1,12 @@
 /**
- * Criar conta — validação e criação do usuário via API (JS/servicos/api.js).
+ * Tela de login — toggle de senha e envio do formulário (confere e-mail e senha na API).
  */
 
 (function () {
-    const formulario = document.getElementById('formulario-criar-conta');
-    const campoNome = document.getElementById('campo-nome');
+    const formulario = document.getElementById('formulario-login');
     const campoEmail = document.getElementById('campo-email');
     const campoSenha = document.getElementById('campo-senha');
-    const campoTermos = document.getElementById('campo-termos');
     const botaoVisibilidade = document.getElementById('botao-visibilidade');
-    const botaoGoogle = document.getElementById('botao-google');
 
     const ICONE_OLHO = 'assets/icons/login/olho.svg';
     const ICONE_OLHO_OCULTO = 'assets/icons/login/olho-oculto.svg';
@@ -55,73 +52,79 @@
         }
     });
 
-    [campoNome, campoEmail, campoSenha].forEach((campo) => {
-        campo?.addEventListener('input', () => {
-            limparErro(campo.closest('.controle-campo'));
-        });
+    campoEmail?.addEventListener('input', () => {
+        limparErro(campoEmail.closest('.controle-campo'));
+    });
+
+    campoSenha?.addEventListener('input', () => {
+        limparErro(campoSenha.closest('.controle-campo'));
     });
 
     formulario?.addEventListener('submit', async (evento) => {
         evento.preventDefault();
 
-        const nome = campoNome.value.trim();
         const email = campoEmail.value.trim();
         const senha = campoSenha.value;
-
-        const cNome = campoNome.closest('.controle-campo');
-        const cEmail = campoEmail.closest('.controle-campo');
-        const cSenha = campoSenha.closest('.controle-campo');
-
-        [cNome, cEmail, cSenha].forEach(limparErro);
-
+        const controleEmail = campoEmail.closest('.controle-campo');
+        const controleSenha = campoSenha.closest('.controle-campo');
         let valido = true;
 
-        if (nome.length < 3) {
-            marcarErro(cNome, 'Informe seu nome completo.');
-            valido = false;
-        }
+        limparErro(controleEmail);
+        limparErro(controleSenha);
 
         if (!email) {
-            marcarErro(cEmail, 'Informe seu e-mail.');
+            marcarErro(controleEmail, 'Informe seu e-mail.');
             valido = false;
         } else if (!emailValido(email)) {
-            marcarErro(cEmail, 'Digite um e-mail válido.');
+            marcarErro(controleEmail, 'Digite um e-mail válido.');
             valido = false;
         }
 
-        if (senha.length < 8) {
-            marcarErro(cSenha, 'A senha deve ter ao menos 8 caracteres.');
+        if (!senha) {
+            marcarErro(controleSenha, 'Informe sua senha.');
             valido = false;
-        }
-
-        if (!campoTermos.checked) {
+        } else if (senha.length < 6) {
+            marcarErro(controleSenha, 'A senha deve ter ao menos 6 caracteres.');
             valido = false;
-            campoTermos.focus();
-            alert('É necessário aceitar os Termos de Serviço e a Política de Privacidade.');
         }
 
         if (!valido) {
             return;
         }
 
-        const botaoCriar = formulario.querySelector('[type="submit"]');
+        const botaoEntrar = formulario.querySelector('[type="submit"]');
 
-        botaoCriar.disabled = true;
+        botaoEntrar.disabled = true;
 
         try {
-            await AcaiApi.criarUsuario({ nome, email, senha, aceitouTermos: true });
+            await AcaiApi.entrar(email, senha);
         } catch (erro) {
-            // 409 = e-mail já cadastrado; demais erros aparecem no campo de senha.
-            marcarErro(erro.status === 409 ? cEmail : cSenha, erro.message);
+            // 404 = e-mail sem conta (mensagem no campo de e-mail); 401 = senha errada e
+            // demais erros (ex.: API fora do ar) aparecem no campo de senha.
+            marcarErro(erro.status === 404 ? controleEmail : controleSenha, erro.message);
             return;
         } finally {
-            botaoCriar.disabled = false;
+            botaoEntrar.disabled = false;
         }
 
-        window.location.href = 'index_onboarding_horarios.html';
+        if (document.getElementById('campo-lembrar')?.checked) {
+            localStorage.setItem('acaistudy-lembrar-email', email);
+        } else {
+            localStorage.removeItem('acaistudy-lembrar-email');
+        }
+
+        window.location.href = await AcaiApi.paginaInicial();
     });
 
-    botaoGoogle?.addEventListener('click', () => {
-        window.location.href = 'index_onboarding_horarios.html';
-    });
+    const emailSalvo = localStorage.getItem('acaistudy-lembrar-email');
+
+    if (emailSalvo && campoEmail) {
+        campoEmail.value = emailSalvo;
+
+        const lembrar = document.getElementById('campo-lembrar');
+
+        if (lembrar) {
+            lembrar.checked = true;
+        }
+    }
 })();

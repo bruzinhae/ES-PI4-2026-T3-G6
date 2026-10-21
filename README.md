@@ -72,7 +72,7 @@ npm run dev   # http://localhost:3001/api
 
 ## Frontend
 
-Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Criar conta e perfil usam a API de usuários (`frontend/JS/servicos/api.js`); login e as demais telas ainda são mock.
+Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Criar conta e perfil usam a API de usuários (`frontend/JS/users/api.js`); login e as demais telas ainda são mock.
 
 Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/index_login.html`.
 
@@ -83,7 +83,7 @@ Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/
 │   ├── index.html                    # homepage
 │   ├── index_*.html                  # app e autenticação
 │   ├── CSS/                          # estilos
-│   ├── JS/                           # scripts
+│   ├── JS/                           # scripts (JS/users/: login, cadastro, perfil, onboarding e cliente da API de usuários)
 │   └── assets/                       # ícones e imagens
 └── backend/
     ├── docker-compose.yml            # MongoDB local (opcional)
