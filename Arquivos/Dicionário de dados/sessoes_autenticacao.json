@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "-Pb6hxnAKy50ZA6Ae1fPtN-RMOvDXNHY-ndUtFDRRVY",
+    "usuarioId": "672001000000000000000001",
+    "criadoEm": "2026-10-21T00:38:00Z",
+    "expiraEm": "2026-10-28T00:38:00Z"
+  },
+  {
+    "_id": "5qFGsqzwg5QYYs7ZF7wAZEcXFbv5nsE8ihx-LkKAA-Y",
+    "usuarioId": "672001000000000000000002",
+    "criadoEm": "2026-10-19T18:02:00Z",
+    "expiraEm": "2026-10-26T18:02:00Z"
+  }
+]

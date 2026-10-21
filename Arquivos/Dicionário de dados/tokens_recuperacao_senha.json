@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "zBo5_VKubVmri6Mf-c274Qn79RRBlAVwr3HElORo7hc",
+    "usuarioId": "672001000000000000000001",
+    "criadoEm": "2026-09-14T11:05:00Z",
+    "expiraEm": "2026-09-14T11:35:00Z",
+    "usadoEm": "2026-09-14T11:11:00Z"
+  },
+  {
+    "_id": "83LYYYDE3jYb07GS3nskHFOR-UcEit5CEJmYQZA8W9I",
+    "usuarioId": "672001000000000000000001",
+    "criadoEm": "2026-10-21T11:30:00Z",
+    "expiraEm": "2026-10-21T12:00:00Z",
+    "usadoEm": null
+  }
+]

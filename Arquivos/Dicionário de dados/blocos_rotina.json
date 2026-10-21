@@ -1,0 +1,188 @@
+[
+  {
+    "_id": "672008000000000000000001",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": "672004000000000000000001",
+    "nome": "Aula de Cálculo II",
+    "categoria": "aulas",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      0,
+      2
+    ],
+    "data": null,
+    "horaInicio": "08:00",
+    "duracaoMinutos": 120,
+    "prioridade": 9,
+    "fixo": true,
+    "local": "Sala 304 - Bloco B",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000002",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": "672004000000000000000002",
+    "nome": "Aula de Estrutura de Dados",
+    "categoria": "aulas",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      1,
+      3
+    ],
+    "data": null,
+    "horaInicio": "08:00",
+    "duracaoMinutos": 120,
+    "prioridade": 9,
+    "fixo": true,
+    "local": "Lab BD 02",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000003",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": "672004000000000000000003",
+    "nome": "Aula de Banco de Dados",
+    "categoria": "aulas",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      4
+    ],
+    "data": null,
+    "horaInicio": "08:00",
+    "duracaoMinutos": 120,
+    "prioridade": 9,
+    "fixo": true,
+    "local": "Lab 2",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000004",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Estágio",
+    "categoria": "trabalho",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      1,
+      3,
+      4
+    ],
+    "data": null,
+    "horaInicio": "14:00",
+    "duracaoMinutos": 240,
+    "prioridade": 10,
+    "fixo": true,
+    "local": "Escritório",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000005",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Translado para o estágio",
+    "categoria": "translado",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      1,
+      3,
+      4
+    ],
+    "data": null,
+    "horaInicio": "13:00",
+    "duracaoMinutos": 60,
+    "prioridade": 6,
+    "fixo": true,
+    "local": null,
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000006",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Almoço",
+    "categoria": "pausa",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "data": null,
+    "horaInicio": "12:00",
+    "duracaoMinutos": 60,
+    "prioridade": 5,
+    "fixo": false,
+    "local": null,
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000007",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Academia",
+    "categoria": "saude",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      0,
+      2
+    ],
+    "data": null,
+    "horaInicio": "18:30",
+    "duracaoMinutos": 60,
+    "prioridade": 4,
+    "fixo": false,
+    "local": "Smart Fit",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000008",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Sono",
+    "categoria": "sono",
+    "recorrencia": "semanal",
+    "diasSemana": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "data": null,
+    "horaInicio": "23:00",
+    "duracaoMinutos": 480,
+    "prioridade": 10,
+    "fixo": true,
+    "local": null,
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "672008000000000000000009",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Dentista",
+    "categoria": "outro",
+    "recorrencia": "unico",
+    "diasSemana": [],
+    "data": "2026-10-31T00:00:00Z",
+    "horaInicio": "10:00",
+    "duracaoMinutos": 60,
+    "prioridade": 7,
+    "fixo": true,
+    "local": "Clínica Sorriso",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  }
+]

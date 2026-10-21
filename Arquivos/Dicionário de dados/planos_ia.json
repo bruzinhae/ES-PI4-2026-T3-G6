@@ -1,0 +1,66 @@
+[
+  {
+    "_id": "672009000000000000000001",
+    "usuarioId": "672001000000000000000001",
+    "tipo": "plano_semanal",
+    "inicioSemana": "2026-10-26T00:00:00Z",
+    "situacao": "aprovada",
+    "mensagem": "Montei sua semana priorizando a P2 de Cálculo II e a Lista 3 de Grafos, usando as noites de segunda e terça e a tarde livre de quarta.",
+    "sessoesPropostas": [
+      {
+        "tarefaId": "672006000000000000000001",
+        "disciplinaId": "672004000000000000000001",
+        "titulo": "Revisar integrais triplas",
+        "inicio": "2026-10-26T23:00:00Z",
+        "fim": "2026-10-27T00:30:00Z"
+      },
+      {
+        "tarefaId": "672006000000000000000002",
+        "disciplinaId": "672004000000000000000002",
+        "titulo": "Lista 3 de Grafos",
+        "inicio": "2026-10-27T22:00:00Z",
+        "fim": "2026-10-27T23:30:00Z"
+      },
+      {
+        "tarefaId": null,
+        "disciplinaId": "672004000000000000000003",
+        "titulo": "Revisão: modelagem ER",
+        "inicio": "2026-10-28T17:00:00Z",
+        "fim": "2026-10-28T18:00:00Z"
+      }
+    ],
+    "avisos": [],
+    "modelo": "claude-haiku-5-5",
+    "versaoPrompt": "v1.0",
+    "tokensEntrada": 3120,
+    "tokensSaida": 640,
+    "criadoEm": "2026-10-25T21:00:00Z",
+    "decididoEm": "2026-10-25T21:07:00Z"
+  },
+  {
+    "_id": "672009000000000000000002",
+    "usuarioId": "672001000000000000000001",
+    "tipo": "ajuste_atraso",
+    "inicioSemana": "2026-10-26T00:00:00Z",
+    "situacao": "pendente",
+    "mensagem": "A sessão de Grafos de terça não foi feita. Posso mover 1h30 para quinta às 20:00, depois do estágio e antes do prazo de sexta à noite?",
+    "sessoesPropostas": [
+      {
+        "tarefaId": "672006000000000000000002",
+        "disciplinaId": "672004000000000000000002",
+        "titulo": "Lista 3 de Grafos (reagendada)",
+        "inicio": "2026-10-29T23:00:00Z",
+        "fim": "2026-10-30T00:30:00Z"
+      }
+    ],
+    "avisos": [
+      "Quinta à noite fica sem tempo livre depois desse ajuste."
+    ],
+    "modelo": "claude-haiku-5-5",
+    "versaoPrompt": "v1.0",
+    "tokensEntrada": 1980,
+    "tokensSaida": 310,
+    "criadoEm": "2026-10-28T10:00:00Z",
+    "decididoEm": null
+  }
+]
