@@ -97,6 +97,18 @@ export async function criar(dados = {}) {
 }
 
 /**
+ * Define uma senha nova para o usuário (usado pela recuperação de senha, que não passa pelo
+ * PATCH do perfil). Valida o tamanho e salva só o hash.
+ */
+export async function trocarSenha(id, senhaNova) {
+    validarSenha(senhaNova);
+
+    const usuario = await buscarPorId(id);
+    usuario.hashSenha = await bcrypt.hash(senhaNova, BCRYPT_CUSTO);
+    await usuario.save();
+}
+
+/**
  * READ (todos) — lista os usuários, do mais recente para o mais antigo (-1 = decrescente).
  * Atenção: a rota exige login, mas devolve os dados de todos os usuários para qualquer
  * usuário logado. Restrinja antes de usar com dados reais.
