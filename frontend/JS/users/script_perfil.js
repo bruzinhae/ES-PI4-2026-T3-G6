@@ -6,7 +6,7 @@ renderLayout({
     paginaAtiva: '',
 });
 
-const AVATAR_PADRAO = 'assets/icons/avatar-padrao.svg';
+const FOTO_PADRAO = 'assets/icons/avatar-padrao.svg';
 const HORAS_BARRA_CHEIA = 40;
 const CAMPOS_NUMERICOS = ['semestre', 'metaSemanalHoras'];
 
@@ -46,11 +46,11 @@ function preencherTela(usuario) {
     });
 
     const foto = document.getElementById('foto-perfil');
-    foto.src = usuario.urlAvatar || AVATAR_PADRAO;
+    foto.src = usuario.urlAvatar || FOTO_PADRAO;
     foto.alt = `Foto de ${usuario.nome}`;
 
     document.querySelectorAll('.botao-perfil img, .painel-perfil-cabecalho img').forEach((imagem) => {
-        imagem.src = usuario.urlAvatar || AVATAR_PADRAO;
+        imagem.src = usuario.urlAvatar || FOTO_PADRAO;
     });
 
     document.getElementById('resumo-nome').textContent = usuario.nome;
