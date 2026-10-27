@@ -342,7 +342,7 @@
     border: 1px solid var(--cinza-200);
     border-radius: 50%;
 
-    background: transparent;
+    background: #F3EEF8;
     flex-shrink: 0;
 }
 

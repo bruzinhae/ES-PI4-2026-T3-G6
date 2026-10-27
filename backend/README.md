@@ -43,10 +43,13 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | GET | `/api/usuarios` 🔒 | **Read** — lista todos → `{ usuarios }` |
 | GET | `/api/usuarios/:id` 🔒 | **Read** — um usuário → `{ usuario }` (só o próprio; senão 403) |
 | PATCH | `/api/usuarios/:id` 🔒 | **Update** — campos do perfil e/ou `senha` → `{ usuario }` (só o próprio; trocar a senha encerra as outras sessões) |
+| POST | `/api/usuarios/:id/avatar` 🔒 | **Foto** — formulário com o arquivo no campo `foto` (PNG ou JPG, até 5 MB) → `{ usuario }` com `urlAvatar` apontando para a imagem |
+| DELETE | `/api/usuarios/:id/avatar` 🔒 | **Remove a foto** — apaga o arquivo e volta `urlAvatar` para `null` → `{ usuario }` |
 | DELETE | `/api/usuarios/:id` 🔒 | **Delete** — exclui a conta e as sessões (só o próprio) |
 | GET | `/api/saude` | Health check |
 
-Campos do perfil: `nome, email, urlAvatar, instituicao, curso, semestre, turno, metaSemanalHoras, onboardingConcluido`.
+Campos do perfil: `nome, email, instituicao, curso, semestre, turno, metaSemanalHoras, onboardingConcluido`.
+A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`. Sem foto, `urlAvatar` é `null` e o frontend mostra o ícone padrão.
 
 ## Regras importantes
 

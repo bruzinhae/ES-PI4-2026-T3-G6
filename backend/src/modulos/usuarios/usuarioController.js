@@ -16,6 +16,7 @@
 
 import * as usuarioService from './usuarioService.js';
 import * as authService from '../auth/authService.js';
+import { apresentarUsuario, apresentarUsuarios } from './apresentarUsuario.js';
 
 // POST /api/usuarios — cria um usuário com os dados do formulário de cadastro e já abre a
 // sessão dele (devolve o token, então não precisa fazer login em seguida).
@@ -23,19 +24,19 @@ import * as authService from '../auth/authService.js';
 export async function criar(req, res) {
     const usuario = await usuarioService.criar(req.body);
     const { token, expiraEm } = await authService.criarSessao(usuario._id);
-    res.status(201).json({ usuario, token, expiraEm });
+    res.status(201).json({ usuario: apresentarUsuario(req, usuario), token, expiraEm });
 }
 
 // GET /api/usuarios — devolve todos os usuários (o status padrão já é 200 = OK).
-export async function listar(_req, res) {
+export async function listar(req, res) {
     const usuarios = await usuarioService.listar();
-    res.json({ usuarios });
+    res.json({ usuarios: apresentarUsuarios(req, usuarios) });
 }
 
 // GET /api/usuarios/:id — devolve um único usuário pelo id.
 export async function buscarPorId(req, res) {
     const usuario = await usuarioService.buscarPorId(req.params.id);
-    res.json({ usuario });
+    res.json({ usuario: apresentarUsuario(req, usuario) });
 }
 
 // PATCH /api/usuarios/:id — atualiza só os campos enviados e devolve o usuário já atualizado.
@@ -45,7 +46,20 @@ export async function atualizar(req, res) {
     if (req.body?.senha !== undefined) {
         await authService.encerrarSessoesDoUsuario(usuario._id, req.sessao.id);
     }
-    res.json({ usuario });
+    res.json({ usuario: apresentarUsuario(req, usuario) });
+}
+
+// POST /api/usuarios/:id/avatar — recebe o arquivo (campo `foto`) e devolve o usuário
+// com urlAvatar apontando para a imagem salva.
+export async function definirAvatar(req, res) {
+    const usuario = await usuarioService.definirAvatar(req.params.id, req.file);
+    res.json({ usuario: apresentarUsuario(req, usuario) });
+}
+
+// DELETE /api/usuarios/:id/avatar — remove a foto. urlAvatar volta a null.
+export async function removerAvatar(req, res) {
+    const usuario = await usuarioService.removerAvatar(req.params.id);
+    res.json({ usuario: apresentarUsuario(req, usuario) });
 }
 
 // DELETE /api/usuarios/:id — exclui o usuário e todas as sessões dele.

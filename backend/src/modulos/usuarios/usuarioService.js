@@ -12,6 +12,7 @@
 
 import bcrypt from 'bcryptjs';
 import { Usuario } from './Usuario.js';
+import { apagarFotos, gravarFoto } from './avatarArquivo.js';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { normalizarEmail, selecionarCampos, validarSenha } from '../../utils/validacoes.js';
 
@@ -22,12 +23,13 @@ const BCRYPT_CUSTO = 10;
 
 // Campos de perfil que podem ser enviados no cadastro e na atualização.
 // Funciona como "lista branca" (ver selecionarCampos): qualquer outro campo do corpo da
-// requisição é ignorado. Campos sensíveis como hashSenha, emailVerificado e
-// provedorAutenticacao ficam de fora de propósito — só o próprio servidor altera esses.
+// requisição é ignorado. A foto de perfil também fica de fora: ela só muda pela rota
+// de upload (/avatar), não por um link colado no JSON. Campos sensíveis como hashSenha,
+// emailVerificado e provedorAutenticacao ficam de fora de propósito — só o próprio
+// servidor altera esses.
 const CAMPOS_PERFIL = [
     'nome',
     'email',
-    'urlAvatar',
     'instituicao',
     'curso',
     'semestre',
@@ -170,6 +172,35 @@ export async function atualizar(id, dados = {}) {
 }
 
 /**
+ * Define a foto de perfil a partir do arquivo enviado na rota de upload.
+ * Grava o arquivo no disco e guarda em urlAvatar só o caminho público.
+ */
+export async function definirAvatar(id, arquivo) {
+    const usuario = await buscarPorId(id);
+    usuario.urlAvatar = await gravarFoto(id, arquivo);
+    await usuario.save();
+
+    return usuario;
+}
+
+/**
+ * Tira a foto de perfil: apaga o arquivo local (se houver) e volta urlAvatar para null.
+ * Um link externo (ex.: Google) só é esquecido — não existe arquivo nosso para apagar.
+ */
+export async function removerAvatar(id) {
+    const usuario = await buscarPorId(id);
+
+    if (typeof usuario.urlAvatar === 'string' && usuario.urlAvatar.startsWith('/uploads/avatares/')) {
+        await apagarFotos(id);
+    }
+
+    usuario.urlAvatar = null;
+    await usuario.save();
+
+    return usuario;
+}
+
+/**
  * DELETE — exclui o usuário pelo id.
  * `deleteOne` informa quantos documentos apagou; se foi 0, o id não existia → 404.
  */
@@ -179,4 +210,6 @@ export async function excluir(id) {
     if (deletedCount === 0) {
         throw new ErroApi(404, 'Usuário não encontrado.');
     }
+
+    await apagarFotos(id);
 }
