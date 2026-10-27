@@ -151,6 +151,30 @@ const AcaiApi = (function () {
         }
     }
 
+    async function listarBlocosFixos() {
+        const { blocos } = await requisitar('/blocos-fixos');
+        return blocos;
+    }
+
+    async function criarBlocoFixo(dados) {
+        const { bloco } = await requisitar('/blocos-fixos', { metodo: 'POST', corpo: dados });
+        return bloco;
+    }
+
+    async function atualizarBlocoFixo(id, alteracoes) {
+        const { bloco } = await requisitar(`/blocos-fixos/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        return bloco;
+    }
+
+    async function excluirBlocoFixo(id) {
+        await requisitar(`/blocos-fixos/${id}`, { metodo: 'DELETE' });
+    }
+
+    async function listarDisciplinasAtivas() {
+        const { disciplinas } = await requisitar('/disciplinas');
+        return disciplinas;
+    }
+
     // ----- Usuário logado neste navegador -----
 
     async function obterUsuarioAtual() {
@@ -212,6 +236,11 @@ const AcaiApi = (function () {
         obterUsuario,
         atualizarUsuario,
         excluirUsuario,
+        listarBlocosFixos,
+        criarBlocoFixo,
+        atualizarBlocoFixo,
+        excluirBlocoFixo,
+        listarDisciplinasAtivas,
         obterUsuarioAtual,
         atualizarUsuarioAtual,
         excluirUsuarioAtual,
