@@ -130,6 +130,16 @@ botaoSalvar?.addEventListener('click', async () => {
 });
 
 const arquivoFoto = document.getElementById('arquivo-foto');
+const erroFoto = document.getElementById('erro-foto');
+
+function mostrarErroFoto(texto) {
+    if (!erroFoto) {
+        return;
+    }
+
+    erroFoto.textContent = texto;
+    erroFoto.hidden = !texto;
+}
 
 document.getElementById('botao-alterar-foto')?.addEventListener('click', () => {
     arquivoFoto?.click();
@@ -143,28 +153,32 @@ arquivoFoto?.addEventListener('change', async () => {
         return;
     }
 
+    mostrarErroFoto('');
+
     if (!['image/png', 'image/jpeg'].includes(arquivo.type)) {
-        alert('Envie uma imagem PNG ou JPG.');
+        mostrarErroFoto('Envie uma imagem PNG ou JPG.');
         return;
     }
 
     if (arquivo.size > 5 * 1024 * 1024) {
-        alert('A foto deve ter no máximo 5 MB.');
+        mostrarErroFoto('A foto deve ter no máximo 5 MB.');
         return;
     }
 
     try {
         preencherTela(await AcaiApi.enviarFotoAtual(arquivo));
+        mostrarErroFoto('');
     } catch (erro) {
-        alert(erro.message);
+        mostrarErroFoto(erro.message);
     }
 });
 
 document.getElementById('botao-remover-foto')?.addEventListener('click', async () => {
     try {
         preencherTela(await AcaiApi.removerFotoAtual());
+        mostrarErroFoto('');
     } catch (erro) {
-        alert(erro.message);
+        mostrarErroFoto(erro.message);
     }
 });
 

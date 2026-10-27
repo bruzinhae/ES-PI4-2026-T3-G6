@@ -49,7 +49,10 @@ const AcaiApi = (function () {
         try {
             resposta = await fetch(`${URL_BASE}${caminho}`, {
                 method: metodo,
-                keepalive: true, // deixa o pedido terminar mesmo se a página navegar logo depois
+                // keepalive deixa o pedido terminar mesmo se a página navegar logo depois.
+                // Não vale para arquivo: o navegador recusa corpo maior que 64 KB com essa opção
+                // e a foto de perfil (até 5 MB) cairia como falha de conexão.
+                keepalive: !arquivo,
                 headers: {
                     ...(arquivo ? {} : { 'Content-Type': 'application/json' }),
                     ...(token && { Authorization: `Bearer ${token}` }),
