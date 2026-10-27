@@ -270,6 +270,10 @@ document.getElementById('botao-proximo')?.addEventListener('click', () => {
     window.location.href = 'index_onboarding_metas.html';
 });
 
+document.getElementById('pular-onboarding')?.addEventListener('click', (evento) => {
+    finalizarOnboarding(evento.currentTarget);
+});
+
 document.getElementById('botao-voltar')?.addEventListener('click', () => {
     window.history.back();
 });
