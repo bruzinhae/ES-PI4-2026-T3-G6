@@ -16,7 +16,7 @@
 
     <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=1">
     <link rel="stylesheet" href="CSS/layout.css?v=12">
-    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=12">
+    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=16">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -329,13 +329,12 @@
                     <div class="titulo-blocos">
 
                         <div class="titulo-secao">
-                            <h2>Blocos Fixos de Horário (Rotina Recorrente)</h2>
-                            <span class="selo-vermelho">38h Bloqueadas / semana</span>
+                            <h2>Blocos Fixos de Horário</h2>
+                            <span class="selo-vermelho" id="horas-bloqueadas-semana">0h bloqueadas / semana</span>
                         </div>
 
                         <p>
-                            Mapeie seus compromissos fixos e inegociáveis. A Sofia bloqueará automaticamente essas
-                            janelas para não agendar estudos<br>nelas.
+                            Consulte seus compromissos e veja como eles se distribuem ao longo da semana.
                         </p>
 
                     </div>
@@ -346,18 +345,6 @@
                     </button>
 
                 </div>
-
-
-                <section class="lista-blocos-fixos" aria-labelledby="titulo-lista-blocos">
-                    <div class="lista-blocos-cabecalho">
-                        <div>
-                            <h3 id="titulo-lista-blocos">Compromissos cadastrados</h3>
-                            <p>Edite ou remova os blocos que compõem sua rotina recorrente.</p>
-                        </div>
-                        <span id="total-blocos">0 blocos</span>
-                    </div>
-                    <div id="cartoes-blocos-fixos" class="cartoes-blocos-fixos"></div>
-                </section>
 
 
                 <!-- Legenda -->
@@ -383,219 +370,40 @@
 
                     <span class="legenda-item">
                         <i style="background: #C9A74D"></i>
-                        <span>Refeições & Academia</span>
+                        <span>Saúde / Refeições</span>
+                    </span>
+
+                    <span class="legenda-item">
+                        <i style="background: #5788B0"></i>
+                        <span>Deslocamento</span>
+                    </span>
+
+                    <span class="legenda-item">
+                        <i style="background: #63597C"></i>
+                        <span>Outros</span>
                     </span>
 
                 </div>
 
 
-                <!-- Tabela -->
-
-                <div class="tabela">
-
-                    <div class="tabela-rolagem">
-
-                        <div class="tabela-cabecalho">
-                            <div style="--w: 112px; padding: 12px 16px">Horários</div>
-                            <div style="--w: 124.28px">Segunda</div>
-                            <div style="--w: 119.03px">Terça</div>
-                            <div style="--w: 124.28px">Quarta</div>
-                            <div style="--w: 121.47px">Quinta</div>
-                            <div style="--w: 121.44px">Sexta</div>
-                            <div style="--w: 108.27px">Sábado</div>
-                            <div style="--w: 121.23px">Domingo</div>
-                        </div>
-
-
-                        <div class="tabela-corpo">
-
-                            <!-- 07:00 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 18px 16px 18.5px">07:00</div>
-
-                                <div class="celula celula-faixa"
-                                    style="--w: 824px; background: rgba(255, 223, 147, .3)">
-                                    <div class="faixa-titulo" style="color: #503D00">
-                                        <img src="assets/icons/disciplinas/cafe.svg" alt="" width="11.67" height="10.5">
-                                        <span>Rotina Matinal & Café da Manhã</span>
-                                    </div>
-
-                                    <span class="faixa-nota" style="color: #503D00; opacity: .75">Todos os dias •
-                                        Recorrente Fixo (7h semanais)</span>
-                                </div>
-                            </div>
-
-
-                            <!-- 08:00 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 40.5px 16px">08:00</div>
-
-                                <div class="celula celula-aula fundo-roxo" style="--w: 108.28px; --pad: 8px">
-                                    <strong style="color: #4F3466">Cálculo I</strong>
-                                    <span>08:00 - 10:00 •<br>Teórica</span>
-                                </div>
-
-                                <div class="celula celula-livre" style="--w: 111.03px"><span class="texto-sofia">Janela
-                                        Sofia<br>Livre</span></div>
-
-                                <div class="celula celula-aula fundo-roxo" style="--w: 116.28px">
-                                    <strong style="color: #4F3466">Cálculo I</strong>
-                                    <span>08:00 - 10:00 •<br>Teórica</span>
-                                </div>
-
-                                <div class="celula celula-livre" style="--w: 113.47px"><span class="texto-sofia">Janela
-                                        Sofia<br>Livre</span></div>
-
-                                <div class="celula celula-aula fundo-cinza" style="--w: 113.44px">
-                                    <strong style="color: #63597C">Estrutura de<br>Dados</strong>
-                                    <span>08:00 - 12:00 •<br>Lab</span>
-                                </div>
-
-                                <div class="celula celula-livre" style="--w: 100.27px"><span class="texto-livre">Livre /
-                                        Flexível</span></div>
-
-                                <div class="celula celula-livre" style="--w: 113.23px"><span
-                                        class="texto-livre">Descanso<br>Semanal</span></div>
-                            </div>
-
-
-                            <!-- 09:00 - 12:00 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 32.5px 16px">09:00 -<br>12:00</div>
-
-                                <div class="bloco fundo-cinza" style="--w: 108.28px">
-                                    <strong style="color: #63597C">Algoritmos Lab</strong>
-                                    <span>Presencial • Lab<br>BD 02</span>
-                                </div>
-
-                                <div class="bloco" style="--w: 103.03px; --ml: 8px; background: rgba(103, 80, 164, .1)">
-                                    <strong style="color: #6750A4">Sistemas<br>Operac.</strong>
-                                    <span>Presencial • Lab<br>Redes</span>
-                                </div>
-
-                                <div class="bloco fundo-cinza" style="--w: 108.28px; --ml: 8px">
-                                    <strong style="color: #63597C">Algoritmos Lab</strong>
-                                    <span>Presencial • Lab<br>BD 02</span>
-                                </div>
-
-                                <div class="bloco"
-                                    style="--w: 105.47px; --ml: 8px; background: rgba(255, 223, 147, .4)">
-                                    <strong style="color: #503D00">Orientação<br>TCC I</strong>
-                                    <span>Virtual Meet •<br>Sprint 4</span>
-                                </div>
-
-                                <div class="bloco fundo-roxo" style="--w: 105.44px; --ml: 8px">
-                                    <strong style="color: #4F3466">Aulas Teóricas</strong>
-                                    <span>Bloco B • Sala 304</span>
-                                </div>
-
-                                <div class="bloco bloco-centro" style="--w: 100.27px; background: #F8F2FA">
-                                    <strong style="color: #4F3466">Revisões<br>Sofia</strong>
-                                    <span>Sessão Livre</span>
-                                </div>
-
-                                <div class="bloco bloco-centro" style="--w: 113.23px; background: #F2ECF4">
-                                    <strong class="descanso">Descanso</strong>
-                                    <span>Recuperação</span>
-                                </div>
-                            </div>
-
-
-                            <!-- 12:00 - 13:00 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 12.5px 16px">12:00 -<br>13:00</div>
-
-                                <div class="celula celula-centro"
-                                    style="--w: 594.5px; --pad: 6px 12px; background: rgba(255, 223, 147, .2)">
-                                    <span class="texto-medio" style="color: #503D00">Almoço & Descompressão (Seg a Sex •
-                                        Bloco Fixo Protegido)</span>
-                                </div>
-
-                                <div class="celula celula-centro celula-livre"
-                                    style="--w: 221.5px; --pad: 6px 12px 6px 20px">
-                                    <span class="texto-medio">Almoço Família / Livre</span>
-                                </div>
-                            </div>
-
-
-                            <!-- 14:00 - 18:00 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 28.5px 16px">14:00 -<br>18:00</div>
-
-                                <div class="celula celula-faixa"
-                                    style="--w: 594.5px; --pad: 12px; background: rgba(31, 22, 53, .1)">
-                                    <div class="faixa-titulo">
-                                        <img src="assets/icons/disciplinas/trabalho.svg" alt="" width="13.33"
-                                            height="12.67">
-
-                                        <div class="faixa-textos">
-                                            <strong style="color: #1F1635">Estágio Tech / Trabalho Remoto</strong>
-                                            <span class="faixa-nota">Recorrente Fixo • 20h semanais • Bloco inegociável
-                                                bloqueado pela Sofia</span>
-                                        </div>
-                                    </div>
-
-                                    <span class="selo-bloqueado">Bloqueado</span>
-                                </div>
-
-                                <div class="celula celula-centro celula-livre"
-                                    style="--w: 221.5px; --pad: 12px 12px 12px 20px">
-                                    <span class="texto-medio" style="color: #4F3466">Janela Livre Disponível
-                                        para<br>Simulados</span>
-                                    <span class="texto-pequeno">Oportunidade de estudo recomendada</span>
-                                </div>
-                            </div>
-
-
-                            <!-- 18:30 - 19:30 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 16.5px 16px">18:30 -<br>19:30</div>
-
-                                <div class="celula celula-centro fundo-ambar" style="--w: 108.28px; --pad: 8px"><span
-                                        class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
-                                <div class="celula celula-centro celula-livre" style="--w: 111.03px"><span
-                                        class="texto-medio" style="color: #4F3466">Foco Sofia<br>(Livre)</span></div>
-                                <div class="celula celula-centro fundo-ambar" style="--w: 116.28px"><span
-                                        class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
-                                <div class="celula celula-centro celula-livre" style="--w: 113.47px"><span
-                                        class="texto-medio" style="color: #4F3466">Foco Sofia<br>(Livre)</span></div>
-                                <div class="celula celula-centro fundo-ambar" style="--w: 113.44px"><span
-                                        class="texto-medio" style="color: #503D00">Academia /<br>Treino</span></div>
-                                <div class="celula celula-centro celula-livre" style="--w: 100.27px"><span
-                                        class="texto-medio">Livre</span></div>
-                                <div class="celula celula-centro celula-livre" style="--w: 113.23px"><span
-                                        class="texto-medio">Livre</span></div>
-                            </div>
-
-
-                            <!-- 23:00 - 07:00 -->
-
-                            <div class="linha">
-                                <div class="hora" style="padding: 12px 16px">23:00 -<br>07:00</div>
-
-                                <div class="celula celula-faixa"
-                                    style="--w: 824px; background: rgba(225, 212, 253, .4)">
-                                    <div class="faixa-titulo" style="color: #645A7D">
-                                        <img src="assets/icons/disciplinas/sono.svg" alt="" width="11.67"
-                                            height="11.67">
-                                        <strong>Sono & Recuperação (Dormir) - Protegido</strong>
-                                    </div>
-
-                                    <span class="faixa-nota" style="color: #645A7D">8h diárias inegociáveis para
-                                        consolidação de memória • 56h / semana</span>
-                                </div>
-                            </div>
-
-                        </div>
-
+                <div class="agenda-semana-controles">
+                    <div class="agenda-titulo">
+                        <h3 id="titulo-agenda-semana">Grade semanal</h3>
+                        <span id="total-blocos" class="agenda-total-blocos">0 blocos</span>
                     </div>
-
+                    <div class="agenda-navegacao" aria-label="Navegação da semana">
+                        <button type="button" id="semana-anterior" aria-label="Semana anterior">‹</button>
+                        <span id="semana-visivel" aria-live="polite"></span>
+                        <button type="button" id="semana-proxima" aria-label="Próxima semana">›</button>
+                        <button type="button" id="semana-atual">Hoje</button>
+                    </div>
+                </div>
+                <div class="tabela">
+                    <div class="tabela-rolagem">
+                        <div id="agenda-semana" class="agenda-semana" role="region"
+                            aria-labelledby="titulo-agenda-semana"></div>
+                    </div>
+                    <p id="agenda-vazia" class="agenda-vazia" hidden></p>
                 </div>
 
             </section>
@@ -619,9 +427,8 @@
                         </div>
 
                         <p>
-                            Seus blocos de Trabalho e Aulas deixam janelas ideais de estudo nas terças e <br>quintas
-                            entre 19:30 e 22:00. Gostaria que a IA pré-aloque revisões espaçadas de <br>Cálculo I e
-                            Algoritmos nesses intervalos?
+                            Cadastre seus compromissos fixos para que a Sofia possa identificar janelas disponíveis
+                            e ajudar a organizar seus estudos.
                         </p>
 
                     </div>
@@ -724,9 +531,9 @@
         </section>
     </div>
 
-    <script src="JS/users/api.js?v=6"></script>
-    <script src="JS/componentes/layout.js?v=19"></script>
-    <script src="JS/script_disciplinas.js?v=12"></script>
+    <script src="JS/users/api.js?v=8"></script>
+    <script src="JS/componentes/layout.js?v=18"></script>
+    <script src="JS/script_disciplinas.js?v=20"></script>
 
 </body>
 
