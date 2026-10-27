@@ -159,6 +159,18 @@ const AcaiApi = (function () {
         return Boolean(obterIdAtual() && obterToken());
     }
 
+    // Confere na API se a sessão ainda vale e atualiza o usuário guardado. Se não valer, o
+    // requisitar já limpa tudo e volta ao login. Sem API, não faz nada (a página continua aberta).
+    async function verificarSessao() {
+        try {
+            const { usuario } = await requisitar('/auth/eu');
+
+            guardarUsuario(usuario);
+        } catch {
+            // 401 já foi tratado em requisitar; erros de conexão são ignorados aqui
+        }
+    }
+
     // Consulta o banco: true se o usuário atual já concluiu o onboarding.
     // Sem usuário ou sem API, assume false (o onboarding é mostrado).
     async function onboardingConcluido() {
@@ -194,6 +206,7 @@ const AcaiApi = (function () {
         temUsuarioAtual,
         onboardingConcluido,
         paginaInicial,
+        verificarSessao,
         esquecerUsuario,
     };
 })();
