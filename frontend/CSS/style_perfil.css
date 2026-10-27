@@ -293,6 +293,7 @@ img {
     border-radius: 18px;
     object-fit: cover;
 
+    background: #F3EEF8;
     border: 1px solid var(--cinza-200);
     flex-shrink: 0;
 }

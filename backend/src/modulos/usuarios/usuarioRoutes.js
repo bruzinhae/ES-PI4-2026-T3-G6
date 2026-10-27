@@ -15,6 +15,7 @@
 
 import { Router } from 'express';
 import * as controller from './usuarioController.js';
+import { receberFoto } from './avatarArquivo.js';
 import { exigirAutenticacao, exigirProprioUsuario } from '../../middlewares/autenticacao.js';
 
 export const usuarioRoutes = Router();
@@ -24,5 +25,7 @@ export const usuarioRoutes = Router();
 usuarioRoutes.post('/', controller.criar);                                                       // POST   /api/usuarios      → cria conta e abre a sessão (tela "Criar Nova Conta")
 usuarioRoutes.get('/', exigirAutenticacao, controller.listar);                                   // GET    /api/usuarios      → lista todos os usuários (exige login)
 usuarioRoutes.get('/:id', exigirAutenticacao, exigirProprioUsuario, controller.buscarPorId);     // GET    /api/usuarios/:id  → busca um usuário (tela de perfil)
+usuarioRoutes.post('/:id/avatar', exigirAutenticacao, exigirProprioUsuario, receberFoto, controller.definirAvatar); // POST /api/usuarios/:id/avatar → envia a foto (PNG/JPG, até 5 MB)
+usuarioRoutes.delete('/:id/avatar', exigirAutenticacao, exigirProprioUsuario, controller.removerAvatar); // DELETE /api/usuarios/:id/avatar → tira a foto
 usuarioRoutes.patch('/:id', exigirAutenticacao, exigirProprioUsuario, controller.atualizar);     // PATCH  /api/usuarios/:id  → altera dados do perfil e/ou senha
 usuarioRoutes.delete('/:id', exigirAutenticacao, exigirProprioUsuario, controller.excluir);      // DELETE /api/usuarios/:id  → exclui a conta

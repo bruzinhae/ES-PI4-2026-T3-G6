@@ -52,6 +52,7 @@ const DISCIPLINAS_ATIVAS = [
 ];
 
 const PASTA_ICONES_PADRAO = 'assets/icons/layout';
+const AVATAR_PADRAO = 'assets/icons/avatar-padrao.svg';
 const CHAVE_SIDEBAR = 'acaistudy-sidebar-recolhida';
 
 function icone(pasta, arquivo) {
@@ -71,7 +72,7 @@ function escaparHtml(texto) {
 }
 
 // Usuário salvo pelo login (JS/users/api.js); fallback para o mock.
-function usuarioDoCabecalho(pastaIcones) {
+function usuarioDoCabecalho() {
     let usuario = null;
 
     try {
@@ -83,12 +84,12 @@ function usuarioDoCabecalho(pastaIcones) {
     return {
         nome: escaparHtml(usuario?.nome || 'Mariana Rocha'),
         curso: escaparHtml(usuario ? usuario.curso || '' : 'Engenharia de Software'),
-        avatar: escaparHtml(usuario?.urlAvatar || icone(pastaIcones, 'avatar-704c8e.png')),
+        avatar: escaparHtml(usuario?.urlAvatar || AVATAR_PADRAO),
     };
 }
 
 function renderHeader({ paginaAtiva, pastaIcones }) {
-    const usuario = usuarioDoCabecalho(pastaIcones);
+    const usuario = usuarioDoCabecalho();
     const abas = ABAS.map(
         (aba) =>
             `<a href="${aba.href}"${classeAtiva(paginaAtiva, aba.id)}>${aba.rotulo}</a>`

@@ -42,7 +42,7 @@ const AcaiApi = (function () {
 
     // `publica: true` para login e cadastro: não enviam token e, se der 401, mostram o erro
     // na tela em vez de redirecionar.
-    async function requisitar(caminho, { metodo = 'GET', corpo, publica = false } = {}) {
+    async function requisitar(caminho, { metodo = 'GET', corpo, publica = false, arquivo = false } = {}) {
         let resposta;
         const token = publica ? null : obterToken();
 
@@ -51,10 +51,10 @@ const AcaiApi = (function () {
                 method: metodo,
                 keepalive: true, // deixa o pedido terminar mesmo se a página navegar logo depois
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...(arquivo ? {} : { 'Content-Type': 'application/json' }),
                     ...(token && { Authorization: `Bearer ${token}` }),
                 },
-                body: corpo === undefined ? undefined : JSON.stringify(corpo),
+                body: arquivo ? corpo : (corpo === undefined ? undefined : JSON.stringify(corpo)),
             });
         } catch {
             throw new Error('Não foi possível conectar ao servidor. Verifique se a API está rodando.');
@@ -161,6 +161,28 @@ const AcaiApi = (function () {
         return atualizarUsuario(obterIdAtual(), alteracoes);
     }
 
+    // Envia a foto escolhida no perfil (campo `foto`). O navegador monta o multipart;
+    // não definimos Content-Type aqui para o boundary ir junto.
+    async function enviarFotoAtual(arquivo) {
+        const corpo = new FormData();
+        corpo.append('foto', arquivo);
+
+        const { usuario } = await requisitar(`/usuarios/${obterIdAtual()}/avatar`, {
+            metodo: 'POST',
+            corpo,
+            arquivo: true,
+        });
+
+        return guardarUsuario(usuario);
+    }
+
+    // Tira a foto. A API responde o usuário com urlAvatar null.
+    async function removerFotoAtual() {
+        const { usuario } = await requisitar(`/usuarios/${obterIdAtual()}/avatar`, { metodo: 'DELETE' });
+
+        return guardarUsuario(usuario);
+    }
+
     function excluirUsuarioAtual() {
         return excluirUsuario(obterIdAtual());
     }
@@ -214,6 +236,8 @@ const AcaiApi = (function () {
         excluirUsuario,
         obterUsuarioAtual,
         atualizarUsuarioAtual,
+        enviarFotoAtual,
+        removerFotoAtual,
         excluirUsuarioAtual,
         temUsuarioAtual,
         onboardingConcluido,

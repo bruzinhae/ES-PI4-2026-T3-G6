@@ -9,6 +9,7 @@ hs_err_pid*
 
 # Node
 node_modules/
+backend/uploads/
 
 # IDEs
 .idea/

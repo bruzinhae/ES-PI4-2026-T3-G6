@@ -4,11 +4,12 @@
  */
 
 import * as authService from './authService.js';
+import { apresentarUsuario } from '../usuarios/apresentarUsuario.js';
 
 // POST /api/auth/login — devolve o usuário e o token da nova sessão.
 export async function entrar(req, res) {
     const { usuario, token, expiraEm } = await authService.entrar(req.body);
-    res.json({ usuario, token, expiraEm });
+    res.json({ usuario: apresentarUsuario(req, usuario), token, expiraEm });
 }
 
 // POST /api/auth/recuperar-senha — pede o link de recuperação. Responde sempre 200 com a mesma
@@ -32,5 +33,5 @@ export async function sair(req, res) {
 
 // GET /api/auth/eu — devolve o usuário dono do token (o middleware já o carregou).
 export function eu(req, res) {
-    res.json({ usuario: req.usuario });
+    res.json({ usuario: apresentarUsuario(req, req.usuario) });
 }

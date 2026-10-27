@@ -16,6 +16,7 @@ import express from 'express';
 import { env } from './config/env.js';
 import { rotaNaoEncontrada, tratarErros } from './middlewares/tratarErros.js';
 import { authRoutes } from './modulos/auth/authRoutes.js';
+import { PASTA_AVATARES } from './modulos/usuarios/avatarArquivo.js';
 import { usuarioRoutes } from './modulos/usuarios/usuarioRoutes.js';
 
 export const app = express();
@@ -33,6 +34,13 @@ app.use(cors({
 // O limite de 100kb evita que alguém mande um corpo gigante para travar/encher a memória do servidor
 // (um cadastro de usuário nunca chega perto disso).
 app.use(express.json({ limit: '100kb' }));
+
+// Fotos de perfil enviadas pelo usuário. O <img> do frontend pede o arquivo direto,
+// sem o token, por isso esta pasta é pública. O nome do arquivo é o id do usuário.
+app.use('/uploads/avatares', express.static(PASTA_AVATARES, {
+    index: false,
+    dotfiles: 'deny',
+}));
 
 // Health check ("checagem de saúde"): rota simples para saber se a API está no ar,
 // sem tocar no banco. Útil para testar rapidamente: `curl http://localhost:3001/api/saude`.
