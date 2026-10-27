@@ -11,7 +11,7 @@
  */
 
 import mongoose from 'mongoose';
-import { emailValido, normalizarEmail } from '../utils/validacoes.js';
+import { emailValido, normalizarEmail } from '../../utils/validacoes.js';
 
 // Valores aceitos em campos de "lista fechada". Exportados para poderem ser reaproveitados
 // em outros arquivos (ex.: validações ou opções de formulário) sem repetir os textos.
