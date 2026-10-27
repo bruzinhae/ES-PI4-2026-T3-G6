@@ -1,5 +1,5 @@
 /**
- * server.js — PONTO DE ENTRADA da API de usuários.
+ * server.js — PONTO DE ENTRADA da API do AçaíStudy.
  *
  * É o arquivo executado por `npm start` / `npm run dev` (ver "main" e "scripts" no package.json).
  * Ele tem só duas responsabilidades:
@@ -16,7 +16,7 @@ import { conectarBanco } from './config/database.js';
 import { env } from './config/env.js';
 
 // Conecta no banco ANTES de subir o servidor: não faz sentido aceitar requisições
-// se não conseguimos salvar nem ler usuários.
+// se não conseguimos salvar nem ler dados.
 // O `await` aqui fora de uma função funciona porque o projeto usa ES Modules
 // ("type": "module" no package.json), que permitem "top-level await".
 try {
@@ -29,8 +29,8 @@ try {
     process.exit(1);
 }
 
-// Começa a escutar requisições HTTP. O frontend (JS/servicos/api.js) chama
+// Começa a escutar requisições HTTP. O frontend (JS/users/api.js) chama
 // http://localhost:3001/api por padrão, por isso a porta padrão é 3001.
 app.listen(env.porta, () => {
-    console.log(`API de usuários rodando em http://localhost:${env.porta}/api`);
+    console.log(`API AçaíStudy rodando em http://localhost:${env.porta}/api`);
 });
