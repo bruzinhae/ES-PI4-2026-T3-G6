@@ -227,8 +227,8 @@ botaoProximo.addEventListener('click', () => {
     window.location.href = 'index_onboarding_foco.html';
 });
 
-document.getElementById('pular-onboarding').addEventListener('click', () => {
-    window.location.href = 'index_calendario.html';
+document.getElementById('pular-onboarding').addEventListener('click', (evento) => {
+    finalizarOnboarding(evento.currentTarget);
 });
 
 renderizarMetas();
