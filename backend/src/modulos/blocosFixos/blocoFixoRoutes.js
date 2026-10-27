@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { exigirAutenticacao } from '../../middlewares/autenticacao.js';
+import * as controller from './blocoFixoController.js';
+export const blocoFixoRoutes = Router();
+blocoFixoRoutes.use(exigirAutenticacao);
+blocoFixoRoutes.get('/', controller.listar);
+blocoFixoRoutes.post('/', controller.criar);
+blocoFixoRoutes.get('/:id', controller.buscarPorId);
+blocoFixoRoutes.patch('/:id', controller.atualizar);
+blocoFixoRoutes.delete('/:id', controller.excluir);
