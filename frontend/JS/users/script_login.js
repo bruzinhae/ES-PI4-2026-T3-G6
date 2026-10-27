@@ -99,9 +99,9 @@
         try {
             await AcaiApi.entrar(email, senha);
         } catch (erro) {
-            // 404 = e-mail sem conta (mensagem no campo de e-mail); 401 = senha errada e
-            // demais erros (ex.: API fora do ar) aparecem no campo de senha.
-            marcarErro(erro.status === 404 ? controleEmail : controleSenha, erro.message);
+            // A API responde igual para e-mail sem conta e senha errada (não revela quais
+            // e-mails existem), então qualquer erro aparece no campo de senha.
+            marcarErro(controleSenha, erro.message);
             return;
         } finally {
             botaoEntrar.disabled = false;
