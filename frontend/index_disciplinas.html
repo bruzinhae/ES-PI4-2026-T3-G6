@@ -87,7 +87,6 @@
 
                 </div>
 
-
                 <div class="cartoes-disciplinas" id="cartoes-disciplinas">
 
                     <!-- Cálculo I -->
@@ -322,12 +321,24 @@
 
                     </div>
 
-                    <button type="button" class="botao-roxo">
+                    <button type="button" class="botao-roxo" id="abrir-cadastro-bloco">
                         <img src="assets/icons/disciplinas/adicionar-bloco.svg" alt="" width="12.67" height="14.67">
                         <span>+ Adicionar Bloco Fixo</span>
                     </button>
 
                 </div>
+
+
+                <section class="lista-blocos-fixos" aria-labelledby="titulo-lista-blocos">
+                    <div class="lista-blocos-cabecalho">
+                        <div>
+                            <h3 id="titulo-lista-blocos">Compromissos cadastrados</h3>
+                            <p>Edite ou remova os blocos que compõem sua rotina recorrente.</p>
+                        </div>
+                        <span id="total-blocos">0 blocos</span>
+                    </div>
+                    <div id="cartoes-blocos-fixos" class="cartoes-blocos-fixos"></div>
+                </section>
 
 
                 <!-- Legenda -->
@@ -586,9 +597,35 @@
 
     </main>
 
+    <div class="modal-bloco-fixo" id="modal-bloco-fixo" aria-hidden="true">
+        <section class="dialogo-bloco-fixo" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-bloco-fixo">
+            <header class="dialogo-bloco-cabecalho">
+                <div><span class="dialogo-bloco-icone">✦</span><div><h2 id="titulo-modal-bloco-fixo">Novo bloco fixo</h2><p>Informe os dados do compromisso e quando ele acontece.</p></div></div>
+                <button type="button" class="fechar-modal-bloco" aria-label="Fechar">×</button>
+            </header>
+            <form id="form-bloco-fixo">
+                <div class="form-bloco-grade">
+                    <div class="campo-bloco campo-bloco-largo"><label for="bloco-nome">Nome do compromisso <b>*</b></label><input id="bloco-nome" name="nome" maxlength="80" placeholder="Ex.: Aula de cálculo, trabalho, academia" required></div>
+                    <div class="campo-bloco"><label for="bloco-categoria">Categoria <b>*</b></label><select id="bloco-categoria" name="categoria" required><option value="aulas">Aulas e faculdade</option><option value="trabalho">Trabalho e estágio</option><option value="sono">Sono e descanso</option><option value="saude">Saúde e exercício</option><option value="pausa">Refeições e pausas</option><option value="translado">Deslocamento</option><option value="outro">Outro compromisso</option></select></div>
+                    <div class="campo-bloco"><label for="bloco-disciplina">Disciplina relacionada</label><select id="bloco-disciplina" name="disciplinaId"><option value="">Nenhuma</option></select></div>
+                    <fieldset class="campo-bloco campo-bloco-largo dias-bloco"><legend>Dias da semana <b>*</b></legend><div class="opcoes-dias"> <label><input type="checkbox" name="diasSemana" value="0"><span>Seg</span></label><label><input type="checkbox" name="diasSemana" value="1"><span>Ter</span></label><label><input type="checkbox" name="diasSemana" value="2"><span>Qua</span></label><label><input type="checkbox" name="diasSemana" value="3"><span>Qui</span></label><label><input type="checkbox" name="diasSemana" value="4"><span>Sex</span></label><label><input type="checkbox" name="diasSemana" value="5"><span>Sáb</span></label><label><input type="checkbox" name="diasSemana" value="6"><span>Dom</span></label></div></fieldset>
+                    <div class="campo-bloco"><label for="bloco-recorrencia">Recorrência</label><select id="bloco-recorrencia" name="recorrencia"><option value="semanal">Toda semana</option><option value="unico">Uma única data</option></select></div>
+                    <div class="campo-bloco campo-data-bloco" hidden><label for="bloco-data">Data <b>*</b></label><input id="bloco-data" name="data" type="date"></div>
+                    <div class="campo-bloco"><label for="bloco-hora">Horário de início <b>*</b></label><input id="bloco-hora" name="horaInicio" type="time" required></div>
+                    <div class="campo-bloco"><label for="bloco-duracao">Duração <b>*</b></label><div class="entrada-sufixo"><input id="bloco-duracao" name="duracaoMinutos" type="number" min="15" max="1440" step="15" value="60" required><span>minutos</span></div></div>
+                    <div class="campo-bloco"><label for="bloco-prioridade">Prioridade <b>*</b></label><select id="bloco-prioridade" name="prioridade"><option value="1">1 · Baixa</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5 · Normal</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10 · Alta</option></select></div>
+                    <div class="campo-bloco"><label for="bloco-local">Local</label><input id="bloco-local" name="local" maxlength="120" placeholder="Sala, endereço ou link"></div>
+                </div>
+                <label class="fixo-bloco"><input type="checkbox" name="fixo" checked><span><strong>Compromisso inegociável</strong><small>Marque para a Sofia bloquear este horário ao sugerir estudos.</small></span></label>
+                <p class="erro-form-bloco" id="erro-form-bloco" role="alert"></p>
+                <footer class="acoes-form-bloco"><button type="button" class="botao-cancelar-bloco">Cancelar</button><button type="submit" class="botao-salvar-bloco">Salvar bloco</button></footer>
+            </form>
+        </section>
+    </div>
+
     <script src="JS/users/api.js?v=6"></script>
     <script src="JS/componentes/layout.js?v=18"></script>
-    <script src="JS/script_disciplinas.js?v=12"></script>
+    <script src="JS/script_disciplinas.js?v=13"></script>
 
 </body>
 </html>

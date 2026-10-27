@@ -1055,3 +1055,5 @@ h2 {
     }
 
 }
+
+.campo-data-bloco[hidden] { display: none; }
