@@ -27,6 +27,155 @@ img {
     display: block;
 }
 
+/* Boas-vindas do onboarding */
+body.boas-vindas-abertas { overflow: hidden; }
+
+.boas-vindas-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(27, 30, 54, .56);
+    backdrop-filter: blur(3px);
+}
+
+.boas-vindas-fundo[hidden] { display: none; }
+
+.boas-vindas-modal {
+    position: relative;
+    width: min(100%, 510px);
+    padding: 38px 42px 32px;
+    border: 1px solid var(--cinza-200);
+    border-radius: 20px;
+    background: var(--branco);
+    box-shadow: 0 24px 70px rgba(27, 30, 54, .24);
+    text-align: center;
+    animation: boas-vindas-entrar .22s ease-out;
+}
+
+.boas-vindas-fechar {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--cinza-100);
+    color: var(--cinza-600);
+    font-size: 24px;
+    line-height: 1;
+}
+
+.boas-vindas-icone {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 17px;
+    border-radius: 17px;
+    background: var(--roxo-claro);
+    color: var(--roxo);
+    font-size: 28px;
+}
+
+.boas-vindas-etiqueta {
+    color: var(--roxo);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.boas-vindas-modal h2 {
+    margin: 9px 0 11px;
+    color: var(--titulo);
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-size: 25px;
+    line-height: 1.25;
+}
+
+.boas-vindas-modal > p {
+    color: var(--cinza-600);
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.boas-vindas-pontos {
+    display: grid;
+    gap: 11px;
+    margin: 22px 0 24px;
+    text-align: left;
+    color: var(--tinta);
+    font-size: 12px;
+}
+
+.boas-vindas-pontos span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.boas-vindas-pontos i {
+    display: grid;
+    place-items: center;
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+    border-radius: 50%;
+    background: var(--verde-claro);
+    color: var(--verde);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.boas-vindas-acao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-radius: 11px;
+    background: var(--roxo);
+    color: var(--branco);
+    font-size: 13px;
+    font-weight: 700;
+    transition: background .15s ease, transform .15s ease;
+}
+
+.boas-vindas-acao:hover {
+    background: #3f2853;
+    transform: translateY(-1px);
+}
+
+.boas-vindas-acao span { font-size: 18px; }
+
+.boas-vindas-modal > small {
+    display: block;
+    margin-top: 14px;
+    color: var(--cinza-500);
+    font-size: 10px;
+}
+
+@keyframes boas-vindas-entrar {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 540px) {
+    .boas-vindas-modal { padding: 34px 24px 26px; }
+    .boas-vindas-modal h2 { font-size: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .boas-vindas-modal { animation: none; }
+    .boas-vindas-acao { transition: none; }
+}
+
 
 /* =====================================================
    CORES
