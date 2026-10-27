@@ -82,7 +82,9 @@ const usuarioSchema = new mongoose.Schema(
 
         // ---- Campos de perfil (opcionais; null = não preenchido) ----
 
-        // Link da foto de perfil.
+        // Foto de perfil. null = sem foto (o frontend mostra o ícone padrão).
+        // Pode ser um caminho da API (/uploads/avatares/<id>.jpg), gravado pelo upload,
+        // ou um link externo. Não entra no PATCH genérico: a troca é pela rota de avatar.
         urlAvatar: {
             type: String,
             trim: true,

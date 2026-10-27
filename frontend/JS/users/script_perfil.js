@@ -6,7 +6,7 @@ renderLayout({
     paginaAtiva: '',
 });
 
-const AVATAR_PADRAO = 'assets/icons/perfil/avatar-704c8e.png';
+const AVATAR_PADRAO = 'assets/icons/avatar-padrao.svg';
 const HORAS_BARRA_CHEIA = 40;
 const CAMPOS_NUMERICOS = ['semestre', 'metaSemanalHoras'];
 
@@ -48,6 +48,10 @@ function preencherTela(usuario) {
     const foto = document.getElementById('foto-perfil');
     foto.src = usuario.urlAvatar || AVATAR_PADRAO;
     foto.alt = `Foto de ${usuario.nome}`;
+
+    document.querySelectorAll('.botao-perfil img, .painel-perfil-cabecalho img').forEach((imagem) => {
+        imagem.src = usuario.urlAvatar || AVATAR_PADRAO;
+    });
 
     document.getElementById('resumo-nome').textContent = usuario.nome;
     document.getElementById('resumo-curso').textContent = descreverCurso(usuario);
@@ -125,15 +129,32 @@ botaoSalvar?.addEventListener('click', async () => {
     }
 });
 
-document.getElementById('botao-alterar-foto')?.addEventListener('click', async () => {
-    const url = prompt('Cole o link (URL) da sua nova foto de perfil:', usuarioAtual?.urlAvatar ?? '');
+const arquivoFoto = document.getElementById('arquivo-foto');
 
-    if (url === null) {
+document.getElementById('botao-alterar-foto')?.addEventListener('click', () => {
+    arquivoFoto?.click();
+});
+
+arquivoFoto?.addEventListener('change', async () => {
+    const arquivo = arquivoFoto.files?.[0];
+    arquivoFoto.value = '';
+
+    if (!arquivo) {
+        return;
+    }
+
+    if (!['image/png', 'image/jpeg'].includes(arquivo.type)) {
+        alert('Envie uma imagem PNG ou JPG.');
+        return;
+    }
+
+    if (arquivo.size > 5 * 1024 * 1024) {
+        alert('A foto deve ter no máximo 5 MB.');
         return;
     }
 
     try {
-        preencherTela(await AcaiApi.atualizarUsuarioAtual({ urlAvatar: url.trim() || null }));
+        preencherTela(await AcaiApi.enviarFotoAtual(arquivo));
     } catch (erro) {
         alert(erro.message);
     }
@@ -141,7 +162,7 @@ document.getElementById('botao-alterar-foto')?.addEventListener('click', async (
 
 document.getElementById('botao-remover-foto')?.addEventListener('click', async () => {
     try {
-        preencherTela(await AcaiApi.atualizarUsuarioAtual({ urlAvatar: null }));
+        preencherTela(await AcaiApi.removerFotoAtual());
     } catch (erro) {
         alert(erro.message);
     }

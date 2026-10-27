@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/icons/favicon.png" type="image/png">
 
     <title>AçaíStudy - Perfil do Usuário</title>
 
@@ -11,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="CSS/layout.css?v=12">
-    <link rel="stylesheet" href="CSS/style_perfil.css">
+    <link rel="stylesheet" href="CSS/style_perfil.css?v=2">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -69,7 +70,8 @@
                         </div>
 
                         <div class="bloco-foto">
-                            <img class="foto-perfil" id="foto-perfil" src="assets/icons/perfil/avatar-704c8e.png" alt="Foto de perfil" width="72" height="72">
+                            <img class="foto-perfil" id="foto-perfil" src="assets/icons/avatar-padrao.svg" alt="Foto de perfil" width="72" height="72">
+                            <input type="file" id="arquivo-foto" accept="image/png,image/jpeg,.png,.jpg,.jpeg" hidden>
 
                             <div class="info-foto">
                                 <strong id="resumo-nome">Carregando…</strong>
@@ -81,7 +83,7 @@
                                         <span>Alterar Foto</span>
                                     </button>
 
-                                    <button type="button" class="link-acao perigo" id="botao-remover-foto">Remover</button>
+                                    <button type="button" class="link-acao perigo" id="botao-remover-foto" hidden>Remover</button>
                                 </div>
 
                                 <small>PNG, JPG até 5MB</small>
@@ -302,9 +304,9 @@
 
     </main>
 
-    <script src="JS/users/api.js?v=6"></script>
-    <script src="JS/componentes/layout.js?v=18"></script>
-    <script src="JS/users/script_perfil.js?v=2"></script>
+    <script src="JS/users/api.js?v=7"></script>
+    <script src="JS/componentes/layout.js?v=19"></script>
+    <script src="JS/users/script_perfil.js?v=3"></script>
 
 </body>
 </html>
