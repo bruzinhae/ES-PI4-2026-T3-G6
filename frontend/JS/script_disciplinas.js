@@ -41,7 +41,6 @@ alternadorSemana.forEach((botao) => {
 // CRUD de blocos fixos via API autenticada.
 (() => {
     const dias = ['Segunda', 'Ter\u00e7a', 'Quarta', 'Quinta', 'Sexta', 'S\u00e1bado', 'Domingo'];
-    const categorias = { aulas: 'Aulas e faculdade', trabalho: 'Trabalho e est\u00e1gio', sono: 'Sono e descanso', saude: 'Sa\u00fade e exerc\u00edcio', pausa: 'Refei\u00e7\u00f5es e pausas', translado: 'Deslocamento', outro: 'Outro compromisso' };
     const formulario = document.querySelector('#form-bloco-fixo');
     const modal = document.querySelector('#modal-bloco-fixo');
     const recorrencia = document.querySelector('#bloco-recorrencia');
@@ -96,6 +95,34 @@ alternadorSemana.forEach((botao) => {
     function formatarDuracao(minutos) {
         const h = Math.floor(minutos / 60), m = minutos % 60;
         return [h ? `${h}h` : '', m ? `${m}min` : ''].filter(Boolean).join(' ');
+    }
+
+    // Divide a largura apenas entre compromissos que realmente se sobrepõem.
+    // Assim cada bloco mantém a posição vertical do horário e deixa de cobrir o outro.
+    function posicionarFaixas(ocorrencias) {
+        const ordenadas = [...ocorrencias].sort((a, b) => a.inicio - b.inicio || b.fim - a.fim);
+        const posicionadas = [];
+        let indice = 0;
+        while (indice < ordenadas.length) {
+            const grupo = [ordenadas[indice++]];
+            let fimGrupo = grupo[0].fim;
+            while (indice < ordenadas.length && ordenadas[indice].inicio < fimGrupo) {
+                grupo.push(ordenadas[indice]);
+                fimGrupo = Math.max(fimGrupo, ordenadas[indice].fim);
+                indice += 1;
+            }
+
+            const fimFaixa = [];
+            const atribuicoes = grupo.map(ocorrencia => {
+                let faixa = fimFaixa.findIndex(fim => fim <= ocorrencia.inicio);
+                if (faixa === -1) faixa = fimFaixa.length;
+                fimFaixa[faixa] = ocorrencia.fim;
+                return { ...ocorrencia, faixa };
+            });
+            const totalFaixas = fimFaixa.length;
+            posicionadas.push(...atribuicoes.map(item => ({ ...item, totalFaixas })));
+        }
+        return posicionadas;
     }
     function ocorrenciasDaSemana() {
         const diasDaSemana = Array.from({ length: 7 }, (_, indice) => {
@@ -155,10 +182,12 @@ alternadorSemana.forEach((botao) => {
         const corpo = document.createElement('div');
         corpo.className = 'agenda-corpo';
         corpo.style.setProperty('--horas-visiveis', totalHoras);
-        corpo.style.setProperty('--altura-agenda', `${totalHoras * 72}px`);
+        corpo.style.setProperty('--altura-agenda', `${totalHoras * 60}px`);
 
         const colunaHoras = document.createElement('div');
         colunaHoras.className = 'agenda-horas';
+        colunaHoras.style.gridColumn = '1';
+        colunaHoras.style.gridRow = '1';
         colunaHoras.setAttribute('aria-hidden', 'true');
         for (let hora = inicioMinutos; hora < fimMinutos; hora += 60) {
             const marca = document.createElement('span');
@@ -167,83 +196,107 @@ alternadorSemana.forEach((botao) => {
         }
         corpo.append(colunaHoras);
 
+        const eventosPorDia = diasDaSemana.map((data, indice) =>
+            posicionarFaixas(ocorrencias.filter(ocorrencia => chaveData(ocorrencia.data) === chaveData(data))
+                .map(ocorrencia => ({ ...ocorrencia, indiceDia: indice })))
+        );
         diasDaSemana.forEach((data, indice) => {
             const coluna = document.createElement('div');
             coluna.className = 'agenda-dia';
+            coluna.style.gridColumn = String(indice + 2);
+            coluna.style.gridRow = '1';
             coluna.setAttribute('role', 'group');
             coluna.setAttribute('aria-label', `${dias[indice]} ${chaveData(data)}`);
-            ocorrencias.filter(ocorrencia => chaveData(ocorrencia.data) === chaveData(data)).forEach(ocorrencia => {
-                const compromisso = document.createElement('article');
-                compromisso.className = `agenda-compromisso categoria-${ocorrencia.bloco.categoria || 'outro'}${ocorrencia.bloco.fixo ? ' inegociavel' : ''}${ocorrencia.fim - ocorrencia.inicio <= 30 ? ' compacto' : ''}`;
-                compromisso.style.top = `${(ocorrencia.inicio - inicioMinutos) * 1.2}px`;
-                compromisso.style.height = `${Math.max(18, (ocorrencia.fim - ocorrencia.inicio) * 1.2)}px`;
-                compromisso.title = `${ocorrencia.bloco.nome}, ${formatarHora(ocorrencia.inicio)} a ${formatarHora(ocorrencia.fim)}${ocorrencia.bloco.local ? `, ${ocorrencia.bloco.local}` : ''}`;
-                compromisso.setAttribute('aria-label', compromisso.title);
-                const conteudo = document.createElement('div');
-                conteudo.className = 'agenda-compromisso-conteudo';
-                const nome = document.createElement('strong');
-                nome.textContent = ocorrencia.bloco.nome;
-                const categoria = document.createElement('span');
-                categoria.className = 'agenda-compromisso-categoria';
-                categoria.textContent = categorias[ocorrencia.bloco.categoria] || 'Outro compromisso';
-                const horario = document.createElement('span');
-                horario.className = 'agenda-compromisso-horario';
-                horario.textContent = `${formatarHora(ocorrencia.inicio)}–${formatarHora(ocorrencia.fim)}`;
-                conteudo.append(nome, categoria, horario);
-                if (ocorrencia.bloco.local) {
-                    const local = document.createElement('span');
-                    local.className = 'agenda-compromisso-local';
-                    local.textContent = ocorrencia.bloco.local;
-                    conteudo.append(local);
-                }
-                compromisso.append(conteudo);
-
-                const menu = document.createElement('div');
-                menu.className = 'agenda-menu';
-                const botaoMenu = document.createElement('button');
-                botaoMenu.className = 'agenda-menu-alternador';
-                botaoMenu.type = 'button';
-                botaoMenu.textContent = '⋯';
-                botaoMenu.setAttribute('aria-label', `Opções para ${ocorrencia.bloco.nome}`);
-                botaoMenu.setAttribute('aria-expanded', 'false');
-                const opcoes = document.createElement('div');
-                opcoes.className = 'agenda-menu-opcoes';
-                opcoes.hidden = true;
-                const botaoEditar = document.createElement('button');
-                botaoEditar.type = 'button';
-                botaoEditar.textContent = 'Editar bloco';
-                botaoEditar.addEventListener('click', () => {
-                    opcoes.hidden = true;
-                    botaoMenu.setAttribute('aria-expanded', 'false');
-                    abrirModal(idDo(ocorrencia.bloco));
-                });
-                const botaoExcluir = document.createElement('button');
-                botaoExcluir.type = 'button';
-                botaoExcluir.className = 'agenda-acao-excluir';
-                botaoExcluir.textContent = 'Excluir bloco';
-                botaoExcluir.addEventListener('click', async () => {
-                    if (!window.confirm(`Excluir o bloco “${ocorrencia.bloco.nome}”?`)) return;
-                    try {
-                        await AcaiApi.excluirBlocoFixo(idDo(ocorrencia.bloco));
-                        await carregar();
-                    } catch (erro) {
-                        window.alert(erro.message);
-                    }
-                });
-                opcoes.append(botaoEditar, botaoExcluir);
-                botaoMenu.addEventListener('click', () => {
-                    const abrir = opcoes.hidden;
-                    agenda.querySelectorAll('.agenda-menu-opcoes').forEach(outro => { outro.hidden = true; });
-                    agenda.querySelectorAll('.agenda-menu-alternador').forEach(outro => outro.setAttribute('aria-expanded', 'false'));
-                    opcoes.hidden = !abrir;
-                    botaoMenu.setAttribute('aria-expanded', String(abrir));
-                });
-                menu.append(botaoMenu, opcoes);
-                compromisso.append(menu);
-                coluna.append(compromisso);
-            });
             corpo.append(coluna);
         });
+        const eventosAgrupados = [];
+        eventosPorDia.forEach((eventosDoDia, indiceDia) => {
+            eventosDoDia.forEach(ocorrencia => {
+                const anterior = ocorrencia.totalFaixas === 1 && ocorrencia.bloco.recorrencia === 'semanal'
+                    ? [...eventosAgrupados].reverse().find(grupo =>
+                        idDo(grupo.bloco) === idDo(ocorrencia.bloco)
+                        && grupo.diaFim === indiceDia - 1
+                        && grupo.inicio === ocorrencia.inicio
+                        && grupo.fim === ocorrencia.fim
+                        && grupo.totalFaixas === 1
+                    )
+                    : null;
+                if (anterior) anterior.diaFim = indiceDia;
+                else eventosAgrupados.push({ ...ocorrencia, diaInicio: indiceDia, diaFim: indiceDia });
+            });
+        });
+
+        const camadaEventos = document.createElement('div');
+        camadaEventos.className = 'agenda-eventos';
+        camadaEventos.style.gridColumn = '2 / 9';
+        camadaEventos.style.gridRow = '1';
+        eventosAgrupados.forEach(ocorrencia => {
+            const compromisso = document.createElement('article');
+            compromisso.className = `agenda-compromisso categoria-${ocorrencia.bloco.categoria || 'outro'}${ocorrencia.bloco.fixo ? ' inegociavel' : ''}${ocorrencia.fim - ocorrencia.inicio <= 30 ? ' compacto' : ''}`;
+            compromisso.style.top = `${ocorrencia.inicio - inicioMinutos}px`;
+            compromisso.style.height = `${Math.max(15, ocorrencia.fim - ocorrencia.inicio)}px`;
+            const quantidadeDias = ocorrencia.diaFim - ocorrencia.diaInicio + 1;
+            const inicioHorizontal = (ocorrencia.diaInicio + ocorrencia.faixa / ocorrencia.totalFaixas) * 100 / 7;
+            const larguraHorizontal = quantidadeDias * 100 / (7 * ocorrencia.totalFaixas);
+            compromisso.style.left = `calc(${inicioHorizontal}% + 2px)`;
+            compromisso.style.width = `calc(${larguraHorizontal}% - 4px)`;
+            compromisso.title = `${ocorrencia.bloco.nome}, ${formatarHora(ocorrencia.inicio)} a ${formatarHora(ocorrencia.fim)}${ocorrencia.bloco.local ? `, ${ocorrencia.bloco.local}` : ''}`;
+            compromisso.setAttribute('aria-label', compromisso.title);
+            const conteudo = document.createElement('div');
+            conteudo.className = 'agenda-compromisso-conteudo';
+            const nome = document.createElement('strong');
+            nome.textContent = ocorrencia.bloco.nome;
+            const horario = document.createElement('span');
+            horario.className = 'agenda-compromisso-horario';
+            horario.textContent = `${formatarHora(ocorrencia.inicio)}\u2013${formatarHora(ocorrencia.fim)}`;
+            conteudo.append(nome, horario);
+            compromisso.append(conteudo);
+
+            const menu = document.createElement('div');
+            menu.className = 'agenda-menu';
+            const botaoMenu = document.createElement('button');
+            botaoMenu.className = 'agenda-menu-alternador';
+            botaoMenu.type = 'button';
+            botaoMenu.textContent = '\u22ef';
+            botaoMenu.setAttribute('aria-label', `Op\u00e7\u00f5es para ${ocorrencia.bloco.nome}`);
+            botaoMenu.setAttribute('aria-expanded', 'false');
+            const opcoes = document.createElement('div');
+            opcoes.className = 'agenda-menu-opcoes';
+            opcoes.hidden = true;
+            const botaoEditar = document.createElement('button');
+            botaoEditar.type = 'button';
+            botaoEditar.textContent = 'Editar bloco';
+            botaoEditar.addEventListener('click', () => {
+                opcoes.hidden = true;
+                botaoMenu.setAttribute('aria-expanded', 'false');
+                abrirModal(idDo(ocorrencia.bloco));
+            });
+            const botaoExcluir = document.createElement('button');
+            botaoExcluir.type = 'button';
+            botaoExcluir.className = 'agenda-acao-excluir';
+            botaoExcluir.textContent = 'Excluir bloco';
+            botaoExcluir.addEventListener('click', async () => {
+                if (!window.confirm(`Excluir o bloco ?${ocorrencia.bloco.nome}??`)) return;
+                try {
+                    await AcaiApi.excluirBlocoFixo(idDo(ocorrencia.bloco));
+                    await carregar();
+                } catch (erro) {
+                    window.alert(erro.message);
+                }
+            });
+            opcoes.append(botaoEditar, botaoExcluir);
+            botaoMenu.addEventListener('click', () => {
+                const abrir = opcoes.hidden;
+                agenda.querySelectorAll('.agenda-menu-opcoes').forEach(outro => { outro.hidden = true; });
+                agenda.querySelectorAll('.agenda-menu-alternador').forEach(outro => outro.setAttribute('aria-expanded', 'false'));
+                opcoes.hidden = !abrir;
+                botaoMenu.setAttribute('aria-expanded', String(abrir));
+            });
+            menu.append(botaoMenu, opcoes);
+            compromisso.append(menu);
+            camadaEventos.append(compromisso);
+        });
+        corpo.append(camadaEventos);
 
         agenda.append(cabecalho, corpo);
         avisoAgenda.hidden = ocorrencias.length > 0;
