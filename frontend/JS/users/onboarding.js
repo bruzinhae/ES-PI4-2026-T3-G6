@@ -71,7 +71,31 @@ function inicializarMenusOnboarding() {
     return menus;
 }
 
+// Encerra o onboarding (botões "Concluir" e "Pular"): grava onboardingConcluido no banco e
+// segue para o calendário. Se a API falhar, avisa e fica na tela (o usuário pode tentar de novo).
+async function finalizarOnboarding(botao) {
+    if (botao) {
+        botao.disabled = true;
+    }
+
+    try {
+        await AcaiApi.atualizarUsuarioAtual({ onboardingConcluido: true });
+    } catch (erro) {
+        alert(`Não foi possível concluir o onboarding: ${erro.message}`);
+
+        if (botao) {
+            botao.disabled = false;
+        }
+
+        return;
+    }
+
+    localStorage.setItem('acaistudy-onboarding-completo', '1');
+    window.location.href = 'index_calendario.html';
+}
+
 window.inicializarMenusOnboarding = inicializarMenusOnboarding;
+window.finalizarOnboarding = finalizarOnboarding;
 
 // Quem já concluiu o onboarding (flag no banco) não vê mais estas telas: vai para a grade.
 if (window.AcaiApi) {
