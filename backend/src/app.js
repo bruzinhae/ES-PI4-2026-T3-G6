@@ -18,6 +18,8 @@ import { rotaNaoEncontrada, tratarErros } from './middlewares/tratarErros.js';
 import { authRoutes } from './modulos/auth/authRoutes.js';
 import { PASTA_AVATARES } from './modulos/usuarios/avatarArquivo.js';
 import { usuarioRoutes } from './modulos/usuarios/usuarioRoutes.js';
+import { blocoFixoRoutes } from './modulos/blocosFixos/blocoFixoRoutes.js';
+import { disciplinaRoutes } from './modulos/disciplinas/disciplinaRoutes.js';
 
 export const app = express();
 
@@ -51,6 +53,8 @@ app.get('/api/saude', (_req, res) => {
 // Todas as URLs que começam com /api/usuarios são repassadas para o roteador de usuários
 // (modulos/usuarios/usuarioRoutes.js), que cuida do resto do caminho (/, /:id, ...).
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/blocos-fixos', blocoFixoRoutes);
+app.use('/api/disciplinas', disciplinaRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);
