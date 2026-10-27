@@ -30,14 +30,18 @@ Para apontar o frontend para outra URL, defina `window.ACAISTUDY_API_URL` antes 
 
 Erros sempre voltam como `{ "mensagem": "..." }`.
 
+Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o token vem do login ou do cadastro).
+
 | Método | Rota | Descrição |
 | ------ | ---- | --------- |
-| POST | `/api/usuarios` | **Create** — `{ nome, email, senha, aceitouTermos, ...campos do perfil }` → `{ usuario }` |
-| POST | `/api/usuarios/login` | **Login** — `{ email, senha }` → `{ usuario }` (404 se o e-mail não tem conta, 401 se a senha não conferir) |
-| GET | `/api/usuarios` | **Read** — lista todos → `{ usuarios }` |
-| GET | `/api/usuarios/:id` | **Read** — um usuário → `{ usuario }` |
-| PATCH | `/api/usuarios/:id` | **Update** — qualquer campo do perfil e/ou `senha` → `{ usuario }` |
-| DELETE | `/api/usuarios/:id` | **Delete** — exclui o usuário |
+| POST | `/api/usuarios` | **Create** — `{ nome, email, senha, aceitouTermos, ...campos do perfil }` → `{ usuario, token, expiraEm }` (já abre a sessão) |
+| POST | `/api/auth/login` | **Login** — `{ email, senha }` → `{ usuario, token, expiraEm }` (401 igual para e-mail sem conta e senha errada) |
+| POST | `/api/auth/logout` 🔒 | Encerra a sessão atual (204) |
+| GET | `/api/auth/eu` 🔒 | Usuário dono do token → `{ usuario }` |
+| GET | `/api/usuarios` 🔒 | **Read** — lista todos → `{ usuarios }` |
+| GET | `/api/usuarios/:id` 🔒 | **Read** — um usuário → `{ usuario }` (só o próprio; senão 403) |
+| PATCH | `/api/usuarios/:id` 🔒 | **Update** — campos do perfil e/ou `senha` → `{ usuario }` (só o próprio; trocar a senha encerra as outras sessões) |
+| DELETE | `/api/usuarios/:id` 🔒 | **Delete** — exclui a conta e as sessões (só o próprio) |
 | GET | `/api/saude` | Health check |
 
 Campos do perfil: `nome, email, urlAvatar, instituicao, curso, semestre, turno, metaSemanalHoras, onboardingConcluido`.
@@ -48,8 +52,11 @@ Campos do perfil: `nome, email, urlAvatar, instituicao, curso, semestre, turno, 
 - `emailNormalizado` (minúsculo, sem espaços) é único: não dá para ter duas contas com o mesmo e-mail.
 - Senha com no mínimo 8 caracteres; `turno` ∈ `matutino | vespertino | noturno | integral`; `semestre` inteiro de 1 a 12.
 - Trocar o e-mail volta `emailVerificado` para `false`.
-- A API **não tem autenticação**: qualquer cliente pode ler, alterar ou excluir qualquer usuário.
-  O frontend guarda o `id` do último usuário criado no `localStorage` para abrir o perfil.
+- Sessões ficam na coleção `sessoes_autenticacao` e valem 7 dias. O token é aleatório (43 caracteres) e só o
+  **hash SHA-256** dele é salvo no banco (`_id` da sessão); o token em texto existe só na resposta do login.
+- Para proteger uma rota nova, use `exigirAutenticacao` (`src/middlewares/autenticacao.js`); depois dele,
+  `req.usuario` e `req.sessao` estão disponíveis.
+- O frontend guarda o token em `localStorage` (`acaistudy-token`) e o envia em toda requisição (`JS/users/api.js`).
 
 ## Estrutura
 
@@ -62,9 +69,10 @@ backend/
     ├── server.js                  # conecta no MongoDB e sobe a API
     ├── app.js                     # Express: CORS, JSON, registro das rotas de cada módulo, erros
     ├── config/                    # variáveis de ambiente e conexão (compartilhado)
-    ├── middlewares/               # tratamento de erros (compartilhado)
-    ├── utils/                     # ErroApi e validações (compartilhado)
+    ├── middlewares/               # tratamento de erros e autenticação (compartilhado)
+    ├── utils/                     # ErroApi, validações e tokens (compartilhado)
     └── modulos/
+        ├── auth/                  # Sessao.js, authService.js, authController.js e authRoutes.js
         └── usuarios/              # Usuario.js (schema), usuarioService.js (regras),
                                    # usuarioController.js e usuarioRoutes.js
 
