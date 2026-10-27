@@ -1,12 +1,11 @@
 # PI_IV_AcaiStudy
 
-Aplicação AçaíStudy (PI IV). Frontend estático em `frontend/`; backend Java em `backend/` com conexão ao MongoDB.
+Aplicação AçaíStudy (PI IV). Frontend estático em `frontend/`; backend (API Node.js/Express + MongoDB) em `backend/`.
 
 ## Pré-requisitos
 
-- [JDK 17+](https://adoptium.net/) (ou `brew install openjdk@17`)
+- [Node.js 20+](https://nodejs.org/)
 - Conta MongoDB Atlas (recomendado) **ou** [Docker](https://docs.docker.com/get-docker/) para Mongo local
-- O Maven Wrapper (`./mvnw`) já está no projeto — não é necessário instalar Maven globalmente
 
 ## MongoDB Atlas (oficial do projeto)
 
@@ -22,27 +21,18 @@ cp .env.example .env
 
 2. Edite `backend/.env` e troque `SUA_SENHA` pela senha do usuário Atlas `henrique_db_user`.
 
-3. Suba o backend carregando o `.env`:
+3. Suba a API:
 
 ```bash
 cd backend
-set -a && source .env && set +a
-export JAVA_HOME="$(/usr/libexec/java_home 2>/dev/null || echo /opt/homebrew/opt/openjdk@17)"
-export PATH="$JAVA_HOME/bin:$PATH"
-./mvnw spring-boot:run
+npm install
+npm run dev   # http://localhost:3001/api
 ```
 
 No log, procure por:
 
 ```text
 MongoDB: conexão OK com o banco 'acaistudy'
-```
-
-A URI também pode ser passada direto:
-
-```bash
-export MONGODB_URI='mongodb+srv://henrique_db_user:SENHA@acaistudy.9drrdbe.mongodb.net/acaistudy?retryWrites=true&w=majority'
-./mvnw spring-boot:run
 ```
 
 > Não commite o arquivo `.env` (já está no `.gitignore`).
@@ -55,24 +45,18 @@ Se preferir local em vez do Atlas:
 cd backend
 docker compose up -d
 # sem MONGODB_URI, usa mongodb://localhost:27017/acaistudy
-./mvnw spring-boot:run
+npm run dev
 ```
 
-## Backend (escopo atual)
+## Backend
 
-O Spring Boot apenas sobe e valida a conexão com um `ping` no MongoDB.
+API única em Node.js (`backend/`), organizada em módulos (`backend/src/modulos/`). Veja [backend/README.md](backend/README.md).
 
-A API de usuários (CRUD) fica em `backend/users/`, em Node.js. Veja [backend/users/README.md](backend/users/README.md):
-
-```bash
-cd backend/users
-npm install
-npm run dev   # http://localhost:3001/api
-```
+O servidor de cálculo do calendário (Java, socket) ficará separado e é chamado por esta API.
 
 ## Frontend
 
-Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Criar conta e perfil usam a API de usuários (`frontend/JS/users/api.js`); login e as demais telas ainda são mock.
+Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Criar conta, login e perfil usam a API (`frontend/JS/users/api.js`); as demais telas ainda são mock.
 
 Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/index_login.html`.
 
@@ -88,7 +72,6 @@ Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/
 └── backend/
     ├── docker-compose.yml            # MongoDB local (opcional)
     ├── .env.example                  # modelo da URI Atlas
-    ├── pom.xml
-    ├── src/main/java/...             # Spring Boot + ping MongoDB
-    └── users/                        # API de usuários (Node.js + Mongoose)
+    ├── package.json
+    └── src/                          # API Node.js (config, middlewares, utils, modulos/)
 ```

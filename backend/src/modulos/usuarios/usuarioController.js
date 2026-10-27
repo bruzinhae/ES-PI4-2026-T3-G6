@@ -14,7 +14,7 @@
  * tratarErros.js, que monta a resposta de erro.
  */
 
-import * as usuarioService from '../services/usuarioService.js';
+import * as usuarioService from './usuarioService.js';
 
 // POST /api/usuarios — cria um usuário com os dados do formulário de cadastro.
 // 201 = Created (recurso criado com sucesso).
