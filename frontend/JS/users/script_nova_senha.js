@@ -154,7 +154,10 @@
         atualizarRequisitos();
     });
 
-    formulario?.addEventListener('submit', (evento) => {
+    // O token vem no link enviado por e-mail: index_nova_senha.html?token=...
+    const token = new URLSearchParams(window.location.search).get('token');
+
+    formulario?.addEventListener('submit', async (evento) => {
         evento.preventDefault();
 
         const senha = campoSenha.value;
@@ -178,6 +181,23 @@
 
         if (!valido) {
             return;
+        }
+
+        if (!token) {
+            marcarErro(controleSenha, 'Link inválido. Peça um novo link de recuperação.');
+            return;
+        }
+
+        const botaoSalvar = document.getElementById('botao-salvar');
+        botaoSalvar.disabled = true;
+
+        try {
+            await AcaiApi.redefinirSenha(token, senha);
+        } catch (erro) {
+            marcarErro(controleSenha, erro.message);
+            return;
+        } finally {
+            botaoSalvar.disabled = false;
         }
 
         window.location.href = 'index_login.html';

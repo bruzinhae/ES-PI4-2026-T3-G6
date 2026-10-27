@@ -11,6 +11,19 @@ export async function entrar(req, res) {
     res.json({ usuario, token, expiraEm });
 }
 
+// POST /api/auth/recuperar-senha — pede o link de recuperação. Responde sempre 200 com a mesma
+// mensagem, exista a conta ou não.
+export async function recuperarSenha(req, res) {
+    await authService.solicitarRecuperacaoSenha(req.body);
+    res.json({ mensagem: 'Se o e-mail estiver cadastrado, enviamos um link de recuperação.' });
+}
+
+// POST /api/auth/redefinir-senha — troca a senha usando o token do link. 204 = sem corpo.
+export async function redefinirSenha(req, res) {
+    await authService.redefinirSenha(req.body);
+    res.status(204).end();
+}
+
 // POST /api/auth/logout — encerra a sessão usada na requisição. 204 = sem corpo.
 export async function sair(req, res) {
     await authService.encerrarSessao(req.sessao.id);

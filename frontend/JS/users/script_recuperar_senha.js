@@ -43,7 +43,7 @@
         }
     });
 
-    formulario?.addEventListener('submit', (evento) => {
+    formulario?.addEventListener('submit', async (evento) => {
         evento.preventDefault();
 
         const email = campoEmail.value.trim();
@@ -61,14 +61,22 @@
             return;
         }
 
+        const botaoEnviar = formulario.querySelector('[type="submit"]');
+        botaoEnviar.disabled = true;
+
+        try {
+            await AcaiApi.recuperarSenha(email);
+        } catch (erro) {
+            marcarErro(controleEmail, erro.message);
+            return;
+        } finally {
+            botaoEnviar.disabled = false;
+        }
+
+        // A mensagem é a mesma exista a conta ou não (a tela não revela quais e-mails têm conta).
         if (feedback) {
             feedback.hidden = false;
         }
-
-        // Fluxo mock: após “enviar” o e-mail, segue para criar nova senha
-        window.setTimeout(() => {
-            window.location.href = 'index_nova_senha.html';
-        }, 1200);
     });
 })();
 

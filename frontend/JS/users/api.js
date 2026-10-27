@@ -96,6 +96,16 @@ const AcaiApi = (function () {
         return guardarSessao(resposta);
     }
 
+    // Esqueci minha senha: pede o link de recuperação. A API responde igual exista a conta ou não.
+    function recuperarSenha(email) {
+        return requisitar('/auth/recuperar-senha', { metodo: 'POST', corpo: { email }, publica: true });
+    }
+
+    // Define a senha nova com o token que veio no link (?token=...).
+    function redefinirSenha(token, senha) {
+        return requisitar('/auth/redefinir-senha', { metodo: 'POST', corpo: { token, senha }, publica: true });
+    }
+
     // Logout: encerra a sessão na API e esquece o usuário neste navegador.
     // O pedido sai com o token atual; o estado local é limpo na hora (sem esperar a resposta),
     // porque a página costuma navegar para o login logo em seguida.
@@ -196,6 +206,8 @@ const AcaiApi = (function () {
         criarUsuario,
         entrar,
         sair,
+        recuperarSenha,
+        redefinirSenha,
         listarUsuarios,
         obterUsuario,
         atualizarUsuario,

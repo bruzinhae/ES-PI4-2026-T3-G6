@@ -38,6 +38,9 @@ export const env = {
     // (o do docker-compose.yml do backend).
     mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/acaistudy',
 
+    // Endereço do frontend, usado para montar o link de recuperação de senha.
+    frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:5500').replace(/\/+$/, ''),
+
     // Origens (sites) que podem chamar a API pelo navegador. Ver o uso no app.js.
     corsOrigin: process.env.CORS_ORIGIN || '*',
 };
