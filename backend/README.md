@@ -36,6 +36,8 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | ------ | ---- | --------- |
 | POST | `/api/usuarios` | **Create** — `{ nome, email, senha, aceitouTermos, ...campos do perfil }` → `{ usuario, token, expiraEm }` (já abre a sessão) |
 | POST | `/api/auth/login` | **Login** — `{ email, senha }` → `{ usuario, token, expiraEm }` (401 igual para e-mail sem conta e senha errada) |
+| POST | `/api/auth/recuperar-senha` | **Esqueci minha senha** — `{ email }` → sempre 200 com a mesma mensagem (não revela se a conta existe). Gera um link de uso único, válido por 30 min, que por enquanto aparece só no **console da API** |
+| POST | `/api/auth/redefinir-senha` | `{ token, senha }` → 204; 400 se o link for inválido, usado ou expirado. Troca a senha e encerra todas as sessões do usuário |
 | POST | `/api/auth/logout` 🔒 | Encerra a sessão atual (204) |
 | GET | `/api/auth/eu` 🔒 | Usuário dono do token → `{ usuario }` |
 | GET | `/api/usuarios` 🔒 | **Read** — lista todos → `{ usuarios }` |
@@ -54,6 +56,10 @@ Campos do perfil: `nome, email, urlAvatar, instituicao, curso, semestre, turno, 
 - Trocar o e-mail volta `emailVerificado` para `false`.
 - Sessões ficam na coleção `sessoes_autenticacao` e valem 7 dias. O token é aleatório (43 caracteres) e só o
   **hash SHA-256** dele é salvo no banco (`_id` da sessão); o token em texto existe só na resposta do login.
+- Recuperação de senha: os links ficam na coleção `tokens_recuperacao_senha` (só o hash do token é salvo). O envio de
+  e-mail ainda não existe: o link é impresso no log (`[recuperação de senha] link para ...`); para enviar de verdade,
+  troque o `console.log` em `solicitarRecuperacaoSenha` (`modulos/auth/authService.js`). O endereço do frontend usado
+  no link vem de `FRONTEND_URL` (padrão `http://localhost:5500`).
 - Para proteger uma rota nova, use `exigirAutenticacao` (`src/middlewares/autenticacao.js`); depois dele,
   `req.usuario` e `req.sessao` estão disponíveis.
 - O frontend guarda o token em `localStorage` (`acaistudy-token`) e o envia em toda requisição (`JS/users/api.js`).
@@ -72,7 +78,7 @@ backend/
     ├── middlewares/               # tratamento de erros e autenticação (compartilhado)
     ├── utils/                     # ErroApi, validações e tokens (compartilhado)
     └── modulos/
-        ├── auth/                  # Sessao.js, authService.js, authController.js e authRoutes.js
+        ├── auth/                  # Sessao.js, RecuperacaoSenha.js, authService.js, authController.js e authRoutes.js
         └── usuarios/              # Usuario.js (schema), usuarioService.js (regras),
                                    # usuarioController.js e usuarioRoutes.js
 

@@ -10,6 +10,9 @@
 import bcrypt from 'bcryptjs';
 import { Usuario } from '../usuarios/Usuario.js';
 import { Sessao, DURACAO_SESSAO_MS } from './Sessao.js';
+import { RecuperacaoSenha, DURACAO_RECUPERACAO_MS } from './RecuperacaoSenha.js';
+import { trocarSenha } from '../usuarios/usuarioService.js';
+import { env } from '../../config/env.js';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { gerarToken, hashDoToken } from '../../utils/token.js';
 import { normalizarEmail } from '../../utils/validacoes.js';
@@ -85,4 +88,61 @@ export async function encerrarSessoesDoUsuario(usuarioId, manterSessaoId = null)
         usuarioId,
         ...(manterSessaoId && { _id: { $ne: manterSessaoId } }),
     });
+}
+
+/**
+ * RECUPERAÇÃO DE SENHA — passo 1: o usuário informou o e-mail na tela "Esqueci minha senha".
+ *
+ * Se existir uma conta com senha (conta só do Google não tem), gera um link de uso único
+ * válido por 30 minutos e invalida os links anteriores. A função NÃO diz se o e-mail existe
+ * (a resposta da API é sempre a mesma), para não revelar quais e-mails têm conta.
+ *
+ * Ainda não há envio de e-mail: o link aparece no console do servidor. Para enviar de
+ * verdade, troque só o `console.log` abaixo por uma chamada ao serviço de e-mail.
+ */
+export async function solicitarRecuperacaoSenha({ email } = {}) {
+    if (typeof email !== 'string') {
+        return;
+    }
+
+    const usuario = await Usuario.findOne({ emailNormalizado: normalizarEmail(email) });
+
+    if (!usuario?.hashSenha) {
+        return;
+    }
+
+    await RecuperacaoSenha.deleteMany({ usuarioId: usuario._id, usadoEm: null });
+
+    const token = gerarToken();
+    await RecuperacaoSenha.create({
+        _id: hashDoToken(token),
+        usuarioId: usuario._id,
+        expiraEm: new Date(Date.now() + DURACAO_RECUPERACAO_MS),
+    });
+
+    const link = `${env.frontendUrl}/index_nova_senha.html?token=${token}`;
+    console.log(`[recuperação de senha] link para ${usuario.email} (vale 30 min): ${link}`);
+}
+
+/**
+ * RECUPERAÇÃO DE SENHA — passo 2: o usuário abriu o link e digitou a senha nova.
+ *
+ * Confere se o token existe, não foi usado e não expirou; troca a senha, marca o token como
+ * usado e encerra TODAS as sessões do usuário (quem estava logado com a senha antiga cai).
+ * Qualquer problema com o token dá o mesmo 400, sem detalhar o motivo.
+ */
+export async function redefinirSenha({ token, senha } = {}) {
+    const recuperacao = typeof token === 'string'
+        ? await RecuperacaoSenha.findById(hashDoToken(token))
+        : null;
+
+    if (!recuperacao || recuperacao.usadoEm || recuperacao.expiraEm <= new Date()) {
+        throw new ErroApi(400, 'Link inválido ou expirado. Peça um novo link de recuperação.');
+    }
+
+    await trocarSenha(recuperacao.usuarioId, senha);
+
+    recuperacao.usadoEm = new Date();
+    await recuperacao.save();
+    await encerrarSessoesDoUsuario(recuperacao.usuarioId);
 }
