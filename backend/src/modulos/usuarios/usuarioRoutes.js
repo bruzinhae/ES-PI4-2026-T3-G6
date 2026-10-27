@@ -1,5 +1,5 @@
 /**
- * routes/usuarioRoutes.js — MAPA DAS URLs de usuários.
+ * usuarios/usuarioRoutes.js — MAPA DAS URLs de usuários.
  *
  * Liga cada combinação MÉTODO HTTP + CAMINHO a uma função do controller.
  * Este roteador é montado no app.js em '/api/usuarios', então os caminhos abaixo são
@@ -15,12 +15,14 @@
 
 import { Router } from 'express';
 import * as controller from './usuarioController.js';
+import { exigirAutenticacao, exigirProprioUsuario } from '../../middlewares/autenticacao.js';
 
 export const usuarioRoutes = Router();
 
-usuarioRoutes.post('/', controller.criar);              // POST   /api/usuarios      → cria conta (tela "Criar Nova Conta")
-usuarioRoutes.post('/login', controller.entrar);        // POST   /api/usuarios/login → confere e-mail e senha (tela de login)
-usuarioRoutes.get('/', controller.listar);              // GET    /api/usuarios      → lista todos os usuários
-usuarioRoutes.get('/:id', controller.buscarPorId);      // GET    /api/usuarios/:id  → busca um usuário (tela de perfil)
-usuarioRoutes.patch('/:id', controller.atualizar);      // PATCH  /api/usuarios/:id  → altera dados do perfil e/ou senha
-usuarioRoutes.delete('/:id', controller.excluir);       // DELETE /api/usuarios/:id  → exclui a conta
+// Só o cadastro é público. As demais rotas exigem token (cabeçalho Authorization: Bearer ...);
+// as que têm :id só aceitam o próprio usuário (senão 403).
+usuarioRoutes.post('/', controller.criar);                                                       // POST   /api/usuarios      → cria conta e abre a sessão (tela "Criar Nova Conta")
+usuarioRoutes.get('/', exigirAutenticacao, controller.listar);                                   // GET    /api/usuarios      → lista todos os usuários (exige login)
+usuarioRoutes.get('/:id', exigirAutenticacao, exigirProprioUsuario, controller.buscarPorId);     // GET    /api/usuarios/:id  → busca um usuário (tela de perfil)
+usuarioRoutes.patch('/:id', exigirAutenticacao, exigirProprioUsuario, controller.atualizar);     // PATCH  /api/usuarios/:id  → altera dados do perfil e/ou senha
+usuarioRoutes.delete('/:id', exigirAutenticacao, exigirProprioUsuario, controller.excluir);      // DELETE /api/usuarios/:id  → exclui a conta
