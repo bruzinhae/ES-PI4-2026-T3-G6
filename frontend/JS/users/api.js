@@ -1,5 +1,7 @@
 /**
- * Cliente da API de usuários (backend/users) — CRUD em /api/usuarios.
+ * Cliente da API (backend/) — usuários em /api/usuarios e autenticação em /api/auth.
+ * Depois do login/cadastro a API devolve um token de sessão; ele é guardado aqui e enviado
+ * em todas as requisições (Authorization: Bearer ...).
  * Uso: AcaiApi.criarUsuario({ ... }), AcaiApi.obterUsuarioAtual(), ...
  */
 
@@ -7,9 +9,15 @@ const AcaiApi = (function () {
     const URL_BASE = window.ACAISTUDY_API_URL || 'http://localhost:3001/api';
     const CHAVE_ID = 'acaistudy-usuario-id';
     const CHAVE_USUARIO = 'acaistudy-usuario';
+    const CHAVE_TOKEN = 'acaistudy-token';
+    const PAGINA_LOGIN = 'index_login.html';
 
     function obterIdAtual() {
         return localStorage.getItem(CHAVE_ID);
+    }
+
+    function obterToken() {
+        return localStorage.getItem(CHAVE_TOKEN);
     }
 
     function guardarUsuario(usuario) {
@@ -22,15 +30,30 @@ const AcaiApi = (function () {
     function esquecerUsuario() {
         localStorage.removeItem(CHAVE_ID);
         localStorage.removeItem(CHAVE_USUARIO);
+        localStorage.removeItem(CHAVE_TOKEN);
     }
 
-    async function requisitar(caminho, { metodo = 'GET', corpo } = {}) {
+    // Guarda o usuário e o token que a API devolveu no login/cadastro.
+    function guardarSessao({ usuario, token }) {
+        localStorage.setItem(CHAVE_TOKEN, token);
+
+        return guardarUsuario(usuario);
+    }
+
+    // `publica: true` para login e cadastro: não enviam token e, se der 401, mostram o erro
+    // na tela em vez de redirecionar.
+    async function requisitar(caminho, { metodo = 'GET', corpo, publica = false } = {}) {
         let resposta;
+        const token = publica ? null : obterToken();
 
         try {
             resposta = await fetch(`${URL_BASE}${caminho}`, {
                 method: metodo,
-                headers: { 'Content-Type': 'application/json' },
+                keepalive: true, // deixa o pedido terminar mesmo se a página navegar logo depois
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
                 body: corpo === undefined ? undefined : JSON.stringify(corpo),
             });
         } catch {
@@ -42,6 +65,12 @@ const AcaiApi = (function () {
         }
 
         const dados = await resposta.json().catch(() => ({}));
+
+        // Sessão inválida ou expirada: limpa o que está guardado e volta para o login.
+        if (resposta.status === 401 && !publica) {
+            esquecerUsuario();
+            window.location.replace(PAGINA_LOGIN);
+        }
 
         if (!resposta.ok) {
             const erro = new Error(dados.mensagem || 'Erro inesperado. Tente novamente.');
@@ -55,16 +84,31 @@ const AcaiApi = (function () {
     // ----- CRUD -----
 
     async function criarUsuario(dados) {
-        const { usuario } = await requisitar('/usuarios', { metodo: 'POST', corpo: dados });
+        const resposta = await requisitar('/usuarios', { metodo: 'POST', corpo: dados, publica: true });
 
-        return guardarUsuario(usuario);
+        return guardarSessao(resposta);
     }
 
-    // Login: confere e-mail e senha no banco e passa a usar esse usuário nesta máquina.
+    // Login: confere e-mail e senha na API, que abre uma sessão (token) para este navegador.
     async function entrar(email, senha) {
-        const { usuario } = await requisitar('/usuarios/login', { metodo: 'POST', corpo: { email, senha } });
+        const resposta = await requisitar('/auth/login', { metodo: 'POST', corpo: { email, senha }, publica: true });
 
-        return guardarUsuario(usuario);
+        return guardarSessao(resposta);
+    }
+
+    // Logout: encerra a sessão na API e esquece o usuário neste navegador.
+    // O pedido sai com o token atual; o estado local é limpo na hora (sem esperar a resposta),
+    // porque a página costuma navegar para o login logo em seguida.
+    async function sair() {
+        const pedido = requisitar('/auth/logout', { metodo: 'POST' });
+
+        esquecerUsuario();
+
+        try {
+            await pedido;
+        } catch {
+            // sem API ou sessão já inválida: o estado local já foi limpo
+        }
     }
 
     async function listarUsuarios() {
@@ -97,7 +141,7 @@ const AcaiApi = (function () {
         }
     }
 
-    // ----- Usuário desta máquina (último cadastrado) -----
+    // ----- Usuário logado neste navegador -----
 
     async function obterUsuarioAtual() {
         return guardarUsuario(await obterUsuario(obterIdAtual()));
@@ -112,7 +156,7 @@ const AcaiApi = (function () {
     }
 
     function temUsuarioAtual() {
-        return Boolean(obterIdAtual());
+        return Boolean(obterIdAtual() && obterToken());
     }
 
     // Consulta o banco: true se o usuário atual já concluiu o onboarding.
@@ -139,6 +183,7 @@ const AcaiApi = (function () {
     return {
         criarUsuario,
         entrar,
+        sair,
         listarUsuarios,
         obterUsuario,
         atualizarUsuario,

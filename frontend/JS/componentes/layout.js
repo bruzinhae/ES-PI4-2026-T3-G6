@@ -397,10 +397,10 @@ function inicializarPerfil(aoAbrir) {
         aoAbrir,
     });
 
-    // Esquece o usuário salvo neste navegador antes de voltar ao login.
+    // Encerra a sessão na API e esquece o usuário salvo neste navegador antes de voltar ao login.
     controle?.painel.querySelector('.botao-sair')?.addEventListener('click', () => {
         if (typeof AcaiApi !== 'undefined') {
-            AcaiApi.esquecerUsuario();
+            AcaiApi.sair();
         }
     });
 
