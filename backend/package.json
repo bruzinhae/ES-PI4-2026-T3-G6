@@ -1,7 +1,7 @@
 {
-  "name": "acaistudy-users",
+  "name": "acaistudy-backend",
   "version": "1.0.0",
-  "description": "API de usuários do AçaíStudy (CRUD) com MongoDB",
+  "description": "API do AçaíStudy (Node/Express) com MongoDB",
   "type": "module",
   "main": "src/server.js",
   "scripts": {

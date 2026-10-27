@@ -1,27 +1,26 @@
-# API de Usuários (Node.js + MongoDB)
+# API do AçaíStudy (Node.js + MongoDB)
 
-CRUD de usuários do AçaíStudy. Salva na coleção `usuarios`, seguindo o dicionário de dados
-em `Arquivos/Dicionário de dados/usuarios.json`.
+API única do projeto: cada área é um módulo em `src/modulos/` (hoje só `usuarios`, que salva na
+coleção `usuarios` seguindo `Arquivos/Dicionário de dados/usuarios.json`).
 
 ## Como rodar
 
 Pré-requisito: [Node.js 20+](https://nodejs.org/).
 
 ```bash
-cd backend/users
+cd backend
 npm install
 cp .env.example .env   # preencha a senha do Atlas em MONGODB_URI
 npm run dev            # ou: npm start
 ```
 
-Se `backend/users/.env` não existir, a API usa o `backend/.env` do Spring Boot.
 Sem nenhuma URI, conecta em `mongodb://localhost:27017/acaistudy` (Docker Compose).
 
 No log, procure por:
 
 ```text
 MongoDB: conexão OK com o banco 'acaistudy'
-API de usuários rodando em http://localhost:3001/api
+API AçaíStudy rodando em http://localhost:3001/api
 ```
 
 Depois abra o frontend (Live Server em `frontend/`) e crie uma conta em `index_criar_conta.html`.
@@ -55,17 +54,20 @@ Campos do perfil: `nome, email, urlAvatar, instituicao, curso, semestre, turno, 
 ## Estrutura
 
 ```text
-backend/users/
+backend/
 ├── .env.example
+├── docker-compose.yml             # MongoDB local (opcional)
 ├── package.json
 └── src/
     ├── server.js                  # conecta no MongoDB e sobe a API
-    ├── app.js                     # Express: CORS, JSON, rotas, erros
-    ├── config/                    # variáveis de ambiente e conexão
-    ├── models/Usuario.js          # schema Mongoose da coleção "usuarios"
-    ├── services/usuarioService.js # regras do CRUD
-    ├── controllers/               # recebem a requisição e chamam o service
-    ├── routes/                    # mapeamento das URLs
-    ├── middlewares/               # tratamento de erros
-    └── utils/                     # ErroApi e validações
+    ├── app.js                     # Express: CORS, JSON, registro das rotas de cada módulo, erros
+    ├── config/                    # variáveis de ambiente e conexão (compartilhado)
+    ├── middlewares/               # tratamento de erros (compartilhado)
+    ├── utils/                     # ErroApi e validações (compartilhado)
+    └── modulos/
+        └── usuarios/              # Usuario.js (schema), usuarioService.js (regras),
+                                   # usuarioController.js e usuarioRoutes.js
+
+Novo módulo: crie `src/modulos/<nome>/` com o mesmo padrão (model, service, controller, routes)
+e registre as rotas em `src/app.js`.
 ```

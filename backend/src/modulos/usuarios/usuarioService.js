@@ -11,9 +11,9 @@
  */
 
 import bcrypt from 'bcryptjs';
-import { Usuario } from '../models/Usuario.js';
-import { ErroApi } from '../utils/ErroApi.js';
-import { normalizarEmail, selecionarCampos, validarSenha } from '../utils/validacoes.js';
+import { Usuario } from './Usuario.js';
+import { ErroApi } from '../../utils/ErroApi.js';
+import { normalizarEmail, selecionarCampos, validarSenha } from '../../utils/validacoes.js';
 
 // "Custo" do bcrypt: quantas rodadas (2^10 = 1024) de processamento para gerar o hash.
 // Quanto maior, mais lento para um atacante testar senhas por força bruta — e também mais

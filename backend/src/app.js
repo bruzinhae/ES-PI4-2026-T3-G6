@@ -15,7 +15,7 @@ import cors from 'cors';
 import express from 'express';
 import { env } from './config/env.js';
 import { rotaNaoEncontrada, tratarErros } from './middlewares/tratarErros.js';
-import { usuarioRoutes } from './routes/usuarioRoutes.js';
+import { usuarioRoutes } from './modulos/usuarios/usuarioRoutes.js';
 
 export const app = express();
 
@@ -40,7 +40,7 @@ app.get('/api/saude', (_req, res) => {
 });
 
 // Todas as URLs que começam com /api/usuarios são repassadas para o roteador de usuários
-// (routes/usuarioRoutes.js), que cuida do resto do caminho (/, /:id, ...).
+// (modulos/usuarios/usuarioRoutes.js), que cuida do resto do caminho (/, /:id, ...).
 app.use('/api/usuarios', usuarioRoutes);
 
 // Estes dois precisam ficar POR ÚLTIMO:
