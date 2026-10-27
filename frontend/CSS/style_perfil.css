@@ -361,6 +361,16 @@ img {
     color: var(--cinza-500);
 }
 
+.info-foto .mensagem-erro {
+    margin: 8px 0 0;
+
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+
+    color: var(--vermelho);
+}
+
 
 /* =====================================================
    CAMPOS
