@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/style_login.css">
+    <link rel="stylesheet" href="CSS/style_login.css?v=3">
 </head>
 
 <body class="pagina-login">
@@ -44,6 +44,11 @@
             <div class="titulos-login">
                 <h1 id="titulo-nova-senha">Criar Nova Senha</h1>
                 <p>Crie uma combinação forte e segura para proteger suas rotinas e cronogramas acadêmicos.</p>
+            </div>
+
+            <div class="aviso-link" id="aviso-link" hidden>
+                <p id="texto-aviso-link"></p>
+                <a href="index_recuperar_senha.html">Pedir um novo link</a>
             </div>
 
             <form class="formulario-login" id="formulario-nova-senha" novalidate>
@@ -135,7 +140,7 @@
         <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
     </footer>
 
-    <script src="JS/users/api.js?v=6"></script>
-    <script src="JS/users/script_nova_senha.js?v=2"></script>
+    <script src="JS/users/api.js?v=7"></script>
+    <script src="JS/users/script_nova_senha.js?v=3"></script>
 </body>
 </html>

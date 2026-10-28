@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/style_login.css">
+    <link rel="stylesheet" href="CSS/style_login.css?v=3">
 </head>
 
 <body class="pagina-login">
@@ -40,6 +40,10 @@
             <div class="titulos-login">
                 <h1 id="titulo-login">Iniciar Sessão</h1>
                 <p>Bem-vindo(a) de volta! Acesse suas rotinas, grade semanal e metas inteligentes.</p>
+            </div>
+
+            <div class="feedback-recuperar" id="feedback-senha" hidden>
+                <p>Senha redefinida. Entre com a nova senha.</p>
             </div>
 
             <form class="formulario-login" id="formulario-login" novalidate>
@@ -104,6 +108,6 @@
     </footer>
 
     <script src="JS/users/api.js?v=6"></script>
-    <script src="JS/users/script_login.js?v=5"></script>
+    <script src="JS/users/script_login.js?v=6"></script>
 </body>
 </html>
