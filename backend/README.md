@@ -46,6 +46,12 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | POST | `/api/usuarios/:id/avatar` 🔒 | **Foto** — formulário com o arquivo no campo `foto` (PNG ou JPG, até 5 MB) → `{ usuario }` com `urlAvatar` apontando para a imagem |
 | DELETE | `/api/usuarios/:id/avatar` 🔒 | **Remove a foto** — apaga o arquivo e volta `urlAvatar` para `null` → `{ usuario }` |
 | DELETE | `/api/usuarios/:id` 🔒 | **Delete** — exclui a conta e as sessões (só o próprio) |
+| GET | `/api/blocos-fixos` 🔒 | Lista os blocos fixos do usuário autenticado |
+| POST | `/api/blocos-fixos` 🔒 | Cria um bloco fixo (`nome, categoria, recorrencia, diasSemana/data, horaInicio, duracaoMinutos, prioridade`; `disciplinaId, fixo, local` opcionais) |
+| GET | `/api/blocos-fixos/:id` 🔒 | Busca um bloco pertencente ao usuário autenticado |
+| PATCH | `/api/blocos-fixos/:id` 🔒 | Atualiza os campos enviados e valida novamente o bloco e conflitos |
+| DELETE | `/api/blocos-fixos/:id` 🔒 | Exclui um bloco pertencente ao usuário autenticado (204) |
+| GET | `/api/disciplinas` 🔒 | Lista as disciplinas ativas do usuário para vincular a um bloco |
 | GET | `/api/saude` | Health check |
 
 Campos do perfil: `nome, email, instituicao, curso, semestre, turno, metaSemanalHoras, onboardingConcluido`.
@@ -65,6 +71,8 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   no link vem de `FRONTEND_URL` (padrão `http://localhost:5500`).
 - Para proteger uma rota nova, use `exigirAutenticacao` (`src/middlewares/autenticacao.js`); depois dele,
   `req.usuario` e `req.sessao` estão disponíveis.
+- Blocos fixos são armazenados na coleção `blocos_rotina` (conforme o dicionário de dados), sempre associados a `usuarioId`. A API valida
+  recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
 - O frontend guarda o token em `localStorage` (`acaistudy-token`) e o envia em toda requisição (`JS/users/api.js`).
 
 ## Estrutura
