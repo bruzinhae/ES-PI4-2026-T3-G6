@@ -365,7 +365,7 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
             ordenarLista();
             pintarPainel();
         } catch (erro) {
-            lista.innerHTML = `<p class="metas-vazias">${escapar(erro.message || 'Não foi possível carregar as metas.')}</p>`;
+            lista.innerHTML = `<p class="aviso aviso-erro">${escapar(erro.message || 'Não foi possível carregar as metas.')}</p>`;
             document.getElementById('texto-insight').textContent = 'Não foi possível carregar o resumo das metas.';
         }
     }
@@ -475,13 +475,19 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
         if (!metaEmEdicao) {
             return;
         }
-        if (!window.confirm('Excluir esta meta?')) {
+        const confirmado = await AcaiAvisos.confirmar({
+            titulo: 'Excluir meta',
+            texto: `"${metaEmEdicao.titulo}" sai da sua lista, junto com os marcos dela.`,
+            confirmar: 'Excluir meta',
+        });
+        if (!confirmado) {
             return;
         }
         try {
             await AcaiApi.excluirMeta(metaEmEdicao.id);
             fecharModal();
             await carregar();
+            AcaiAvisos.mostrar('Meta excluída.', 'ok');
         } catch (erro) {
             mostrarErro(erro.message || 'Não foi possível excluir a meta.');
         }

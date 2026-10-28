@@ -1,0 +1,208 @@
+/* Avisos e confirmações no mesmo visual dos diálogos da plataforma. */
+
+.aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    margin: 0;
+    padding: 12px 14px;
+
+    border: 1px solid #eadfef;
+    border-radius: 12px;
+
+    background: #f8f4fb;
+    color: #4f3466;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.aviso::before {
+    content: "";
+    flex: 0 0 8px;
+    width: 8px;
+    height: 8px;
+    margin-top: 5px;
+
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.aviso-erro {
+    border-color: #f3c7ce;
+    background: #fdf2f4;
+    color: #9f3040;
+}
+
+.aviso-ok {
+    border-color: #b7e7d4;
+    background: #f1fbf6;
+    color: #0f7a56;
+}
+
+.aviso-info {
+    border-color: #eadfef;
+    background: #f8f4fb;
+    color: #4f3466;
+}
+
+.aviso:empty,
+.aviso[hidden] {
+    display: none;
+}
+
+.dialogo-bloco-fixo .aviso,
+.modal-meta-cartao .aviso,
+.info-foto .aviso {
+    margin-top: 12px;
+}
+
+.aviso-pilha {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 80;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    width: min(360px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+.aviso-pilha .aviso {
+    pointer-events: auto;
+    box-shadow: 0 12px 32px rgba(31, 20, 43, .12);
+}
+
+.aviso-dialogo {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(31, 22, 53, .52);
+    backdrop-filter: blur(3px);
+}
+
+.aviso-dialogo[hidden] {
+    display: none;
+}
+
+body.aviso-dialogo-aberto {
+    overflow: hidden;
+}
+
+.aviso-dialogo-cartao {
+    box-sizing: border-box;
+    width: min(100%, 440px);
+    padding: 28px;
+
+    border: 1px solid #e8e2ed;
+    border-radius: 16px;
+
+    background: #fff;
+    box-shadow: 0 24px 80px rgba(31, 20, 43, .25);
+}
+
+.aviso-dialogo-icone {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 14px;
+
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: #fdecef;
+    color: #9f3040;
+
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.aviso-dialogo-cartao h2 {
+    margin: 0;
+
+    color: #29232d;
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.aviso-dialogo-cartao p {
+    margin: 8px 0 0;
+
+    color: #6e747d;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.aviso-dialogo-acoes {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-top: 22px;
+}
+
+.aviso-dialogo-acoes button {
+    min-height: 40px;
+    padding: 8px 16px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+
+    cursor: pointer;
+}
+
+.aviso-dialogo-cancelar {
+    border: 1px solid #e8e2ed;
+    background: #fff;
+    color: #514c57;
+}
+
+.aviso-dialogo-cancelar:hover {
+    background: #f8f4fb;
+}
+
+.aviso-dialogo-confirmar {
+    border: 0;
+    background: #9f3040;
+    color: #fff;
+}
+
+.aviso-dialogo-confirmar:hover {
+    filter: brightness(1.05);
+}
+
+.aviso-dialogo-confirmar.neutro {
+    background: #4f3466;
+}
+
+@media (max-width: 700px) {
+    .aviso-pilha {
+        top: auto;
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+        width: auto;
+    }
+}

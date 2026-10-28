@@ -168,6 +168,21 @@ const usuarioSchema = new mongoose.Schema(
             }, { _id: false }),
             default: () => ({}),
         },
+
+        // Conta do Canvas. Os tokens não saem na API (select: false e o toJSON acima).
+        canvas: {
+            type: new mongoose.Schema({
+                instanciaUrl: { type: String, default: null },
+                accessToken: { type: String, default: null, select: false },
+                refreshToken: { type: String, default: null, select: false },
+                expiraEm: { type: Date, default: null },
+                canvasUserId: { type: String, default: null },
+                nome: { type: String, default: null },
+                conectadoEm: { type: Date, default: null },
+                sincronizadoEm: { type: Date, default: null },
+            }, { _id: false }),
+            default: null,
+        },
     },
     {
         // Nome exato da coleção no MongoDB. Sem isso o Mongoose inventaria "usuarios" a partir
@@ -191,6 +206,10 @@ const usuarioSchema = new mongoose.Schema(
                 delete retorno._id;
                 delete retorno.hashSenha;
                 delete retorno.emailNormalizado;
+                if (retorno.canvas) {
+                    delete retorno.canvas.accessToken;
+                    delete retorno.canvas.refreshToken;
+                }
                 return retorno;
             },
         },

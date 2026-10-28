@@ -66,4 +66,12 @@ export const env = {
         pass: process.env.SMTP_PASS || '',
         from: process.env.SMTP_FROM || (usuarioSmtp ? `AçaíStudy <${usuarioSmtp}>` : ''),
     },
+
+    // Canvas LMS. Sem client id e secret, a tela ainda aceita o token que o aluno gera
+    // na própria conta. A URL fixa, quando existe, é a única instituição aceita.
+    canvas: {
+        baseUrl: (process.env.CANVAS_BASE_URL || '').replace(/\/+$/, ''),
+        clientId: process.env.CANVAS_CLIENT_ID || '',
+        clientSecret: process.env.CANVAS_CLIENT_SECRET || '',
+    },
 };

@@ -81,7 +81,7 @@ async function finalizarOnboarding(botao) {
     try {
         await AcaiApi.atualizarUsuarioAtual({ onboardingConcluido: true });
     } catch (erro) {
-        alert(`Não foi possível concluir o onboarding: ${erro.message}`);
+        AcaiAvisos.mostrar(`Não foi possível concluir o onboarding: ${erro.message}`);
 
         if (botao) {
             botao.disabled = false;

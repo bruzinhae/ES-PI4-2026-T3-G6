@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=2">
     <link rel="stylesheet" href="CSS/layout.css?v=17">
     <link rel="stylesheet" href="CSS/style_disciplinas.css?v=17">
+    <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -89,7 +90,7 @@
                 </div>
 
                 <div class="cartoes-disciplinas" id="cartoes-disciplinas"></div>
-                <p class="agenda-vazia" id="disciplinas-vazias" hidden>Nenhuma disciplina cadastrada ainda. Clique em Nova Disciplina para começar.</p>
+                <p class="aviso aviso-info" id="disciplinas-vazias" hidden>Nenhuma disciplina cadastrada ainda. Clique em Nova Disciplina para começar.</p>
 
 
                 <!-- Indicadores -->
@@ -220,7 +221,7 @@
                         <div id="agenda-semana" class="agenda-semana" role="region"
                             aria-labelledby="titulo-agenda-semana"></div>
                     </div>
-                    <p id="agenda-vazia" class="agenda-vazia" hidden></p>
+                    <p id="agenda-vazia" class="aviso aviso-info" hidden></p>
                 </div>
 
             </section>
@@ -347,7 +348,7 @@
                         </select>
                     </div>
                 </div>
-                <p class="erro-form-bloco" id="erro-form-disciplina" role="alert"></p>
+                <p class="aviso aviso-erro" id="erro-form-disciplina" role="alert"></p>
                 <footer class="acoes-form-bloco">
                     <button type="button" class="botao-cancelar-bloco" id="cancelar-disciplina">Cancelar</button>
                     <button type="submit" class="botao-salvar-bloco" id="salvar-disciplina">Salvar disciplina</button>
@@ -430,7 +431,7 @@
                 <label class="fixo-bloco"><input type="checkbox" name="fixo" checked><span><strong>Compromisso
                             inegociável</strong><small>Marque para a Sofia bloquear este horário ao sugerir
                             estudos.</small></span></label>
-                <p class="erro-form-bloco" id="erro-form-bloco" role="alert"></p>
+                <p class="aviso aviso-erro" id="erro-form-bloco" role="alert"></p>
                 <footer class="acoes-form-bloco"><button type="button"
                         class="botao-cancelar-bloco">Cancelar</button><button type="submit"
                         class="botao-salvar-bloco">Salvar bloco</button></footer>
@@ -440,7 +441,8 @@
 
     <script src="JS/users/api.js?v=10"></script>
     <script src="JS/componentes/layout.js?v=21"></script>
-    <script src="JS/script_disciplinas.js?v=23"></script>
+    <script src="JS/componentes/avisos.js?v=1"></script>
+    <script src="JS/script_disciplinas.js?v=24"></script>
 
 </body>
 
