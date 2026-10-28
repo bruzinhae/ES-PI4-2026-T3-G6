@@ -11,8 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=12">
-    <link rel="stylesheet" href="CSS/style_relatorios.css">
+    <link rel="stylesheet" href="CSS/layout.css?v=17">
+    <link rel="stylesheet" href="CSS/style_relatorios.css?v=2">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -45,18 +45,20 @@
 
                 <div class="controles-superiores">
 
-                    <button type="button" class="botao-claro botao-periodo" id="botao-periodo">
+                    <div class="botao-claro botao-periodo navegacao-periodo">
+                        <button type="button" id="periodo-anterior" aria-label="Semana anterior">‹</button>
                         <img src="assets/icons/relatorios/calendario-periodo.svg" alt="" width="14" height="14">
-                        <span>01 Out – 07 Out 2025</span>
-                    </button>
+                        <span id="rotulo-periodo">Esta semana</span>
+                        <button type="button" id="periodo-proxima" aria-label="Próxima semana">›</button>
+                    </div>
 
                     <div class="controles-acoes">
-                        <button type="button" class="botao-roxo">
+                        <button type="button" class="botao-roxo" id="botao-otimizar">
                             <img src="assets/icons/relatorios/otimizar.svg" alt="" width="14" height="14">
-                            <span>Otimizar Cronograma</span>
+                            <span>Ver defasagem</span>
                         </button>
 
-                        <button type="button" class="botao-claro">
+                        <button type="button" class="botao-claro" id="botao-exportar">
                             <img src="assets/icons/relatorios/exportar.svg" alt="" width="14" height="14">
                             <span>Exportar PDF</span>
                         </button>
@@ -83,16 +85,16 @@
 
                     <div class="kpi-corpo">
                         <p class="kpi-valor-linha">
-                            <strong class="kpi-valor">4h 45min</strong>
+                            <strong class="kpi-valor" id="kpi-foco">—</strong>
                         </p>
 
-                        <span class="selo-verde selo-tendencia">
+                        <span class="selo-verde selo-tendencia" id="kpi-variacao" hidden>
                             <img src="assets/icons/relatorios/tendencia.svg" alt="" width="11.67" height="7">
-                            <span>+12% vs média</span>
+                            <span id="kpi-variacao-texto"></span>
                         </span>
                     </div>
 
-                    <p class="kpi-nota">Acima da média das últimas 4 semanas</p>
+                    <p class="kpi-nota" id="kpi-foco-nota">Carregando...</p>
 
                 </article>
 
@@ -108,17 +110,17 @@
                     </div>
 
                     <div class="kpi-corpo kpi-corpo-duplo">
-                        <strong class="kpi-valor">94%</strong>
-                        <span class="kpi-rotulo-medio">23/25 blocos</span>
+                        <strong class="kpi-valor" id="kpi-consistencia">—</strong>
+                        <span class="kpi-rotulo-medio" id="kpi-consistencia-fracao">0/0 sessões</span>
                     </div>
 
                     <div class="kpi-barra-area">
                         <div class="trilha kpi-trilha">
-                            <span style="width: 94%"></span>
+                            <span id="kpi-consistencia-barra" style="width: 0%"></span>
                         </div>
                     </div>
 
-                    <p class="kpi-nota">23 de 25 blocos cumpridos no prazo</p>
+                    <p class="kpi-nota" id="kpi-consistencia-nota">Sessões concluídas entre as já encerradas</p>
 
                 </article>
 
@@ -134,8 +136,8 @@
                     </div>
 
                     <div class="kpi-corpo kpi-corpo-duplo">
-                        <strong class="kpi-valor">18/20</strong>
-                        <span class="selo-roxo">90%</span>
+                        <strong class="kpi-valor" id="kpi-pomodoro">0/0</strong>
+                        <span class="selo-roxo" id="kpi-pomodoro-pct">0%</span>
                     </div>
 
                     <p class="kpi-nota">Ciclos concluídos vs. meta semanal</p>
@@ -146,7 +148,7 @@
                 <article class="cartao-kpi">
 
                     <div class="kpi-topo">
-                        <span class="kpi-titulo">Status do TCC</span>
+                        <span class="kpi-titulo">Disciplina em foco</span>
 
                         <span class="kpi-icone kpi-icone-verde">
                             <img src="assets/icons/relatorios/card-tcc.svg" alt="" width="12" height="15">
@@ -154,11 +156,11 @@
                     </div>
 
                     <div class="kpi-corpo">
-                        <strong class="kpi-destaque">No Prazo</strong>
-                        <span class="selo-verde selo-status">Previsão OK</span>
+                        <strong class="kpi-destaque" id="kpi-destaque-nome">—</strong>
+                        <span class="selo-verde selo-status" id="kpi-destaque-status">—</span>
                     </div>
 
-                    <p class="kpi-nota">Capítulos 1 e 2 em ritmo sustentável</p>
+                    <p class="kpi-nota" id="kpi-destaque-nota">Carregando...</p>
 
                 </article>
 
@@ -191,78 +193,12 @@
 
                     <div class="grafico-barras" aria-label="Gráfico de horas estudadas por dia">
 
-                        <div class="eixo-y" aria-hidden="true">
-                            <span>6h</span>
-                            <span>4h</span>
-                            <span>2h</span>
-                            <span>0h</span>
-                        </div>
-
-                        <div class="barras">
-
-                            <div class="coluna-dia" style="--teorico: 62%; --pratica: 28%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Seg</span>
-                            </div>
-
-                            <div class="coluna-dia" style="--teorico: 48%; --pratica: 35%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Ter</span>
-                            </div>
-
-                            <div class="coluna-dia" style="--teorico: 78%; --pratica: 18%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Qua</span>
-                            </div>
-
-                            <div class="coluna-dia" style="--teorico: 55%; --pratica: 40%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Qui</span>
-                            </div>
-
-                            <div class="coluna-dia" style="--teorico: 70%; --pratica: 22%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Sex</span>
-                            </div>
-
-                            <div class="coluna-dia" style="--teorico: 32%; --pratica: 18%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Sáb</span>
-                            </div>
-
-                            <div class="coluna-dia" style="--teorico: 20%; --pratica: 10%">
-                                <div class="pilha">
-                                    <span class="barra-pratica"></span>
-                                    <span class="barra-teorico"></span>
-                                </div>
-                                <span class="rotulo-dia">Dom</span>
-                            </div>
-
-                        </div>
+                        <div class="eixo-y" id="eixo-horas" aria-hidden="true"></div>
+                        <div class="barras" id="barras-semana"></div>
 
                     </div>
 
-                    <p class="nota-grafico">
-                        Pico de produtividade entre <strong>14h e 16h</strong>. Quarta-feira concentrou o maior volume teórico da semana.
-                    </p>
+                    <p class="nota-grafico" id="nota-grafico">Carregando a semana...</p>
 
                 </article>
 
@@ -278,9 +214,9 @@
 
                     <div class="area-donut">
 
-                        <div class="donut" style="--progresso: 85" aria-label="85% das metas cumpridas">
+                        <div class="donut" id="donut-metas" style="--progresso: 0" aria-label="Cumprimento de metas">
                             <div class="donut-centro">
-                                <strong>85%</strong>
+                                <strong id="metas-percentual">0%</strong>
                                 <span>concluído</span>
                             </div>
                         </div>
@@ -289,44 +225,12 @@
                             <div class="chip-critico">
                                 <span class="ponto-critico"></span>
                                 <div>
-                                    <strong>2 críticas</strong>
-                                    <span>pendentes esta semana</span>
+                                    <strong id="metas-criticas">0 críticas</strong>
+                                    <span>prioridade alta ainda ativas</span>
                                 </div>
                             </div>
 
-                            <div class="lista-prioridades">
-
-                                <div class="prioridade">
-                                    <div class="prioridade-topo">
-                                        <span>Alta</span>
-                                        <strong>72%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 72%; background: #be123c"></span>
-                                    </div>
-                                </div>
-
-                                <div class="prioridade">
-                                    <div class="prioridade-topo">
-                                        <span>Média</span>
-                                        <strong>88%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 88%; background: #2563eb"></span>
-                                    </div>
-                                </div>
-
-                                <div class="prioridade">
-                                    <div class="prioridade-topo">
-                                        <span>Baixa</span>
-                                        <strong>96%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 96%; background: #10b981"></span>
-                                    </div>
-                                </div>
-
-                            </div>
+                            <div class="lista-prioridades" id="lista-prioridades"></div>
                         </div>
 
                     </div>
@@ -343,142 +247,11 @@
                 <div class="cabecalho-secao">
                     <div class="titulo-secao">
                         <h2>Análise de Defasagem por Disciplina</h2>
-                        <span class="selo-roxo">4 disciplinas</span>
+                        <span class="selo-roxo" id="selo-disciplinas">0 disciplinas</span>
                     </div>
                 </div>
 
-                <div class="lista-defasagem">
-
-                    <article class="linha-defasagem">
-
-                        <div class="defasagem-esquerda">
-                            <div class="meta-icone icone-vermelho">
-                                <img src="assets/icons/relatorios/card-atencao.svg" alt="" width="18" height="16">
-                            </div>
-
-                            <div class="defasagem-corpo">
-                                <div class="defasagem-titulo">
-                                    <h3>Algoritmos & Estruturas de Dados</h3>
-                                    <span class="etiqueta etiqueta-rosa">Atraso 4h 15min</span>
-                                </div>
-
-                                <div class="defasagem-progresso">
-                                    <div class="defasagem-progresso-topo">
-                                        <span>Conteúdo Programático</span>
-                                        <strong style="color: #dc2626">58%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 58%; background: #dc2626"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="button" class="botao-acao-linha botao-roxo">
-                            <img src="assets/icons/relatorios/otimizar.svg" alt="" width="14" height="14">
-                            <span>Sugerir Bloco IA</span>
-                        </button>
-
-                    </article>
-
-
-                    <article class="linha-defasagem">
-
-                        <div class="defasagem-esquerda">
-                            <div class="meta-icone icone-verde">
-                                <img src="assets/icons/relatorios/consistencia.svg" alt="" width="16" height="15">
-                            </div>
-
-                            <div class="defasagem-corpo">
-                                <div class="defasagem-titulo">
-                                    <h3>Sistemas Operacionais</h3>
-                                    <span class="etiqueta etiqueta-verde">Em Dia</span>
-                                </div>
-
-                                <div class="defasagem-progresso">
-                                    <div class="defasagem-progresso-topo">
-                                        <span>Conteúdo Programático</span>
-                                        <strong style="color: #10b981">82%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 82%; background: #10b981"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="button" class="botao-acao-linha botao-claro">
-                            <span>Ver Detalhes</span>
-                        </button>
-
-                    </article>
-
-
-                    <article class="linha-defasagem">
-
-                        <div class="defasagem-esquerda">
-                            <div class="meta-icone icone-azul">
-                                <img src="assets/icons/relatorios/card-codigo.svg" alt="" width="18" height="11">
-                            </div>
-
-                            <div class="defasagem-corpo">
-                                <div class="defasagem-titulo">
-                                    <h3>Bancos de Dados</h3>
-                                    <span class="etiqueta etiqueta-verde">Em Dia</span>
-                                </div>
-
-                                <div class="defasagem-progresso">
-                                    <div class="defasagem-progresso-topo">
-                                        <span>Conteúdo Programático</span>
-                                        <strong style="color: #2563eb">76%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 76%; background: #2563eb"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="button" class="botao-acao-linha botao-claro">
-                            <span>Remarcar Lab</span>
-                        </button>
-
-                    </article>
-
-
-                    <article class="linha-defasagem">
-
-                        <div class="defasagem-esquerda">
-                            <div class="meta-icone icone-ambar">
-                                <img src="assets/icons/relatorios/calendario-prazo.svg" alt="" width="14" height="15">
-                            </div>
-
-                            <div class="defasagem-corpo">
-                                <div class="defasagem-titulo">
-                                    <h3>Cálculo Numérico</h3>
-                                    <span class="etiqueta etiqueta-ambar">Atraso 1h 40min</span>
-                                </div>
-
-                                <div class="defasagem-progresso">
-                                    <div class="defasagem-progresso-topo">
-                                        <span>Conteúdo Programático</span>
-                                        <strong style="color: #b45309">45%</strong>
-                                    </div>
-                                    <div class="trilha">
-                                        <span style="width: 45%; background: #b45309"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="button" class="botao-acao-linha botao-roxo">
-                            <img src="assets/icons/relatorios/otimizar.svg" alt="" width="14" height="14">
-                            <span>Sugerir Bloco IA</span>
-                        </button>
-
-                    </article>
-
-                </div>
+                <div class="lista-defasagem" id="lista-defasagem"></div>
 
             </section>
 
@@ -502,23 +275,19 @@
                                 <span class="selo-cinza">Otimização Ativa</span>
                             </div>
 
-                            <p>
-                                Detectei <b>4h15 de atraso em Algoritmos</b>. Posso realocar
-                                <b class="destaque-verde">2 blocos de 1h30 na quinta e sexta</b>
-                                sem comprometer o TCC — deseja aplicar o ajuste automático?
-                            </p>
+                            <p id="texto-insight">Carregando o resumo da semana...</p>
 
                         </div>
 
                     </div>
 
                     <div class="insight-acoes">
-                        <button type="button" class="botao-claro">Personalizar</button>
+                        <a class="botao-claro" href="index_disciplinas.html">Ver disciplinas</a>
 
-                        <button type="button" class="botao-roxo botao-aprovar">
+                        <a class="botao-roxo botao-aprovar" href="index_disciplinas.html">
                             <img src="assets/icons/relatorios/aprovar.svg" alt="" width="17" height="17">
-                            <span>Aplicar Ajuste Automático</span>
-                        </button>
+                            <span>Ajustar grade</span>
+                        </a>
                     </div>
 
                 </div>
@@ -529,9 +298,9 @@
 
     </main>
 
-    <script src="JS/users/api.js?v=6"></script>
-    <script src="JS/componentes/layout.js?v=19"></script>
-    <script src="JS/script_relatorios.js"></script>
+    <script src="JS/users/api.js?v=10"></script>
+    <script src="JS/componentes/layout.js?v=21"></script>
+    <script src="JS/script_relatorios.js?v=2"></script>
 
 </body>
 </html>

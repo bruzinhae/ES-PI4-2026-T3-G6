@@ -14,9 +14,9 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=1">
-    <link rel="stylesheet" href="CSS/layout.css?v=12">
-    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=16">
+    <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=2">
+    <link rel="stylesheet" href="CSS/layout.css?v=17">
+    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=17">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -41,8 +41,7 @@
                     <h1>Disciplinas & Blocos de Horário</h1>
 
                     <p>
-                        Cadastre suas disciplinas universitárias, gerencie pesos acadêmicos e defina seus <br>blocos
-                        recorrentes para que o motor preditivo Sofia organize seus estudos sem <br>conflitos.
+                        Cadastre as matérias do semestre e os horários fixos da semana, como aula e <br>trabalho, para a Sofia montar seus estudos sem conflito de horário.
                     </p>
 
                 </div>
@@ -54,7 +53,7 @@
                         <span>Exportar Grade (.PDF)</span>
                     </button>
 
-                    <button type="button" class="botao-roxo">
+                    <button type="button" class="botao-roxo" id="abrir-cadastro-disciplina">
                         <img src="assets/icons/disciplinas/mais.svg" alt="" width="9.33" height="9.33">
                         <span>Nova Disciplina</span>
                     </button>
@@ -72,16 +71,12 @@
 
                     <div class="titulo-secao">
                         <h2>Disciplinas em Curso (Semestre Atual)</h2>
-                        <span class="selo-lilas">4 Disciplinas Ativas</span>
+                        <span class="selo-lilas" id="selo-disciplinas-ativas">0 disciplinas ativas</span>
                     </div>
 
                     <div class="filtros">
                         <select id="filtrar-area" class="seletor seletor-area" aria-label="Filtrar por área">
                             <option value="todas">Filtrar por Área</option>
-                            <option value="exatas">Ciências Exatas</option>
-                            <option value="engenharia">Engenharia de Software</option>
-                            <option value="projeto">Projeto Final</option>
-                            <option value="distribuidos">Sistemas Distribuídos</option>
                         </select>
 
                         <select id="ordenar-disciplinas" class="seletor seletor-ordem" aria-label="Ordenar disciplinas">
@@ -93,186 +88,8 @@
 
                 </div>
 
-                <div class="cartoes-disciplinas" id="cartoes-disciplinas">
-
-                    <!-- Cálculo I -->
-
-                    <article class="cartao-disciplina" style="--cor: #4F3466" data-area="exatas" data-horas="4"
-                        data-progresso="72" data-nome="Cálculo I">
-
-                        <div class="cartao-conteudo">
-
-                            <div class="cartao-topo">
-                                <span class="etiqueta etiqueta-lilas">Ciências Exatas</span>
-
-                                <div class="cartao-acoes">
-                                    <button type="button" aria-label="Editar disciplina">
-                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5"
-                                            height="10.5">
-                                    </button>
-                                    <button type="button" aria-label="Mais opções">
-                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33"
-                                            height="9.33">
-                                    </button>
-                                </div>
-                            </div>
-
-                            <h3>Cálculo I (Diferencial e Integral)</h3>
-
-                            <div class="cartao-info">
-                                <p class="creditos">6 créditos • 4h/sem alocadas</p>
-                                <p class="professor">Prof. Dr. Ricardo Arona • Sala 304 - Bloco B</p>
-                            </div>
-
-                        </div>
-
-                        <div class="cartao-progresso">
-                            <div class="progresso-topo">
-                                <span>Progresso do Semestre</span>
-                                <strong style="color: #4F3466">72%</strong>
-                            </div>
-
-                            <div class="trilha">
-                                <span style="width: 72%; background: #4F3466"></span>
-                            </div>
-                        </div>
-
-                    </article>
-
-
-                    <!-- Estrutura de Dados -->
-
-                    <article class="cartao-disciplina" style="--cor: #63597C" data-area="engenharia" data-horas="6"
-                        data-progresso="85" data-nome="Estrutura de Dados & Algoritmos">
-
-                        <div class="cartao-conteudo">
-
-                            <div class="cartao-topo">
-                                <span class="etiqueta etiqueta-violeta">Engenharia de Software</span>
-
-                                <div class="cartao-acoes">
-                                    <button type="button" aria-label="Editar disciplina">
-                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5"
-                                            height="10.5">
-                                    </button>
-                                    <button type="button" aria-label="Mais opções">
-                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33"
-                                            height="9.33">
-                                    </button>
-                                </div>
-                            </div>
-
-                            <h3>Estrutura de Dados & Algoritmos</h3>
-
-                            <div class="cartao-info">
-                                <p class="creditos">4 créditos • 6h/sem alocadas</p>
-                                <p class="professor">Profa. Dra. Renata Silveira • Lab BD 02</p>
-                            </div>
-
-                        </div>
-
-                        <div class="cartao-progresso">
-                            <div class="progresso-topo">
-                                <span>Progresso do Semestre</span>
-                                <strong style="color: #63597C">85%</strong>
-                            </div>
-
-                            <div class="trilha">
-                                <span style="width: 85%; background: #63597C"></span>
-                            </div>
-                        </div>
-
-                    </article>
-
-
-                    <!-- TCC -->
-
-                    <article class="cartao-disciplina" style="--cor: #C9A74D" data-area="projeto" data-horas="5"
-                        data-progresso="0" data-nome="Trabalho de Conclusão (TCC I)">
-
-                        <div class="cartao-conteudo">
-
-                            <div class="cartao-topo">
-                                <span class="etiqueta etiqueta-ambar">Projeto Final</span>
-
-                                <div class="cartao-acoes">
-                                    <button type="button" aria-label="Editar disciplina">
-                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5"
-                                            height="10.5">
-                                    </button>
-                                    <button type="button" aria-label="Mais opções">
-                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33"
-                                            height="9.33">
-                                    </button>
-                                </div>
-                            </div>
-
-                            <h3>Trabalho de Conclusão (TCC I)</h3>
-
-                            <div class="cartao-info">
-                                <p class="creditos">8 créditos • 5h/sem alocadas</p>
-                                <p class="professor">Prof. Marcos Valente • Sala Virtual Meet</p>
-                            </div>
-
-                        </div>
-
-                        <div class="cartao-progresso">
-                            <div class="progresso-topo">
-                                <span>Etapa de Desenvolvimento</span>
-                                <strong style="color: #765B00">Sprint 4</strong>
-                            </div>
-
-                            <div class="faixa-fase">Fase de Definição - Sprint 4</div>
-                        </div>
-
-                    </article>
-
-
-                    <!-- Sistemas Distribuídos -->
-
-                    <article class="cartao-disciplina" style="--cor: #6750A4" data-area="distribuidos" data-horas="3"
-                        data-progresso="60" data-nome="Sistemas Operacionais & Redes">
-
-                        <div class="cartao-conteudo">
-
-                            <div class="cartao-topo">
-                                <span class="etiqueta etiqueta-cinza">Sistemas Distribuídos</span>
-
-                                <div class="cartao-acoes">
-                                    <button type="button" aria-label="Editar disciplina">
-                                        <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5"
-                                            height="10.5">
-                                    </button>
-                                    <button type="button" aria-label="Mais opções">
-                                        <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33"
-                                            height="9.33">
-                                    </button>
-                                </div>
-                            </div>
-
-                            <h3>Sistemas Operacionais & Redes</h3>
-
-                            <div class="cartao-info">
-                                <p class="creditos">4 créditos • 3h/sem alocadas</p>
-                                <p class="professor">Prof. Carlos Eduardo • Lab Redes</p>
-                            </div>
-
-                        </div>
-
-                        <div class="cartao-progresso">
-                            <div class="progresso-topo">
-                                <span>Progresso do Semestre</span>
-                                <strong style="color: #4F3466">60%</strong>
-                            </div>
-
-                            <div class="trilha">
-                                <span style="width: 60%; background: #6750A4"></span>
-                            </div>
-                        </div>
-
-                    </article>
-
-                </div>
+                <div class="cartoes-disciplinas" id="cartoes-disciplinas"></div>
+                <p class="agenda-vazia" id="disciplinas-vazias" hidden>Nenhuma disciplina cadastrada ainda. Clique em Nova Disciplina para começar.</p>
 
 
                 <!-- Indicadores -->
@@ -286,8 +103,8 @@
 
                         <div class="indicador-texto">
                             <span class="indicador-rotulo">Total de Horas Acadêmicas</span>
-                            <strong>18h / semana</strong>
-                            <span class="indicador-nota">Distribuição equilibrada em 4 matérias</span>
+                            <strong id="indicador-horas-academicas">0h / semana</strong>
+                            <span class="indicador-nota" id="indicador-horas-nota">Cadastre disciplinas e blocos para ver a distribuição</span>
                         </div>
                     </article>
 
@@ -297,9 +114,9 @@
                         </div>
 
                         <div class="indicador-texto">
-                            <span class="indicador-rotulo">Horas Livres Identificadas</span>
-                            <strong>24h disponíveis</strong>
-                            <span class="indicador-nota">Janelas ótimas para revisão e exercícios</span>
+                            <span class="indicador-rotulo">Na grade</span>
+                            <strong id="indicador-na-grade">0</strong>
+                            <span class="indicador-nota" id="indicador-na-grade-nota">Cada matéria entra no próprio horário</span>
                         </div>
                     </article>
 
@@ -309,9 +126,9 @@
                         </div>
 
                         <div class="indicador-texto">
-                            <span class="indicador-rotulo">Alocação Inteligente Sofia</span>
-                            <strong style="color: #4F3466">94% Otimizada</strong>
-                            <span class="indicador-nota">Sem conflito de provas ou blocos fixos</span>
+                            <span class="indicador-rotulo">Disciplinas ativas</span>
+                            <strong id="indicador-total-ativas" style="color: #4F3466">0</strong>
+                            <span class="indicador-nota" id="indicador-ativas-nota">No semestre atual</span>
                         </div>
                     </article>
 
@@ -450,13 +267,102 @@
 
     </main>
 
+    <div class="modal-bloco-fixo" id="modal-disciplina" aria-hidden="true">
+        <section class="dialogo-bloco-fixo" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-disciplina">
+            <header class="dialogo-bloco-cabecalho">
+                <div>
+                    <span class="dialogo-bloco-icone">📚</span>
+                    <div>
+                        <h2 id="titulo-modal-disciplina">Nova disciplina</h2>
+                        <p>Nome e área bastam para começar. O restante ajuda a Sofia a priorizar essa matéria.</p>
+                    </div>
+                </div>
+                <button type="button" class="fechar-modal-bloco" id="fechar-modal-disciplina" aria-label="Fechar">×</button>
+            </header>
+            <form id="form-disciplina">
+                <div class="form-bloco-grade">
+                    <div class="campo-bloco campo-bloco-largo">
+                        <label for="disciplina-nome">Nome <b>*</b></label>
+                        <input id="disciplina-nome" name="nome" maxlength="120" placeholder="Ex.: Cálculo II" required>
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-area">Área <b>*</b></label>
+                        <input id="disciplina-area" name="area" maxlength="80" placeholder="Ex.: Ciências Exatas" list="lista-areas" required>
+                        <datalist id="lista-areas">
+                            <option value="Ciências Exatas"></option>
+                            <option value="Engenharia de Software"></option>
+                            <option value="Projeto Final"></option>
+                            <option value="Sistemas Distribuídos"></option>
+                            <option value="Humanas"></option>
+                        </datalist>
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-cor">Cor</label>
+                        <select id="disciplina-cor" name="cor">
+                            <option value="roxo">Roxo</option>
+                            <option value="azul">Azul</option>
+                            <option value="verde">Verde</option>
+                            <option value="ambar">Âmbar</option>
+                        </select>
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-professor">Professor</label>
+                        <input id="disciplina-professor" name="professor" maxlength="120" placeholder="Nome do professor">
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-local">Local</label>
+                        <input id="disciplina-local" name="local" maxlength="120" placeholder="Sala, lab ou link">
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-creditos">Créditos</label>
+                        <input id="disciplina-creditos" name="creditos" type="number" min="1" max="20" step="1" placeholder="4">
+                        <small class="dica-campo">Quantos créditos a matéria vale na grade. Deixe em branco se a sua instituição não usa.</small>
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-media">Média desta disciplina</label>
+                        <input id="disciplina-media" name="media" type="number" min="0" max="10" step="0.1" placeholder="7,5">
+                        <small class="dica-campo">Nota só desta matéria, de 0 a 10. Cada disciplina tem a própria média.</small>
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-dificuldade">Dificuldade para você</label>
+                        <select id="disciplina-dificuldade" name="dificuldade">
+                            <option value="1">Tranquila</option>
+                            <option value="2">Leve</option>
+                            <option value="3" selected>Moderada</option>
+                            <option value="4">Puxada</option>
+                            <option value="5">Muito difícil</option>
+                        </select>
+                        <small class="dica-campo">Matérias mais difíceis pedem mais tempo de estudo.</small>
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-periodo">Período letivo</label>
+                        <input id="disciplina-periodo" name="periodoLetivo" maxlength="20" placeholder="2026/2">
+                    </div>
+                    <div class="campo-bloco">
+                        <label for="disciplina-situacao">Situação</label>
+                        <select id="disciplina-situacao" name="situacao">
+                            <option value="ativa" selected>Ativa</option>
+                            <option value="concluida">Concluída</option>
+                            <option value="trancada">Trancada</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="erro-form-bloco" id="erro-form-disciplina" role="alert"></p>
+                <footer class="acoes-form-bloco">
+                    <button type="button" class="botao-cancelar-bloco" id="cancelar-disciplina">Cancelar</button>
+                    <button type="submit" class="botao-salvar-bloco" id="salvar-disciplina">Salvar disciplina</button>
+                </footer>
+            </form>
+        </section>
+    </div>
+
     <div class="modal-bloco-fixo" id="modal-bloco-fixo" aria-hidden="true">
         <section class="dialogo-bloco-fixo" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-bloco-fixo">
             <header class="dialogo-bloco-cabecalho">
                 <div><span class="dialogo-bloco-icone">✦</span>
                     <div>
                         <h2 id="titulo-modal-bloco-fixo">Novo bloco fixo</h2>
-                        <p>Informe os dados do compromisso e quando ele acontece.</p>
+                        <p>Escolha os dias e o horário em que o compromisso começa e termina.</p>
                     </div>
                 </div>
                 <button type="button" class="fechar-modal-bloco" aria-label="Fechar">×</button>
@@ -498,25 +404,26 @@
                         </select></div>
                     <div class="campo-bloco campo-data-bloco" hidden><label for="bloco-data">Data <b>*</b></label><input
                             id="bloco-data" name="data" type="date"></div>
-                    <div class="campo-bloco"><label for="bloco-hora">Horário de início <b>*</b></label><input
+                    <div class="campo-bloco"><label for="bloco-hora">Começa <b>*</b></label><input
                             id="bloco-hora" name="horaInicio" type="time" required></div>
-                    <div class="campo-bloco"><label for="bloco-duracao">Duração <b>*</b></label>
-                        <div class="entrada-sufixo"><input id="bloco-duracao" name="duracaoMinutos" type="number"
-                                min="15" max="1440" step="15" value="60" required><span>minutos</span></div>
-                    </div>
+                    <div class="campo-bloco"><label for="bloco-hora-fim">Termina <b>*</b></label><input
+                            id="bloco-hora-fim" name="horaFim" type="time" required></div>
+                    <p class="dica-campo campo-bloco-largo" id="bloco-duracao-texto">O bloco fica neste intervalo, no mesmo dia.</p>
                     <div class="campo-bloco"><label for="bloco-prioridade">Prioridade <b>*</b></label><select
                             id="bloco-prioridade" name="prioridade">
-                            <option value="1">1 · Baixa</option>
+                            <option value="1">Baixa — fácil de remarcar</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
-                            <option value="5" selected>5 · Normal</option>
+                            <option value="5" selected>Normal</option>
                             <option value="6">6</option>
                             <option value="7">7</option>
                             <option value="8">8</option>
                             <option value="9">9</option>
-                            <option value="10">10 · Alta</option>
-                        </select></div>
+                            <option value="10">Alta — quase não muda</option>
+                        </select>
+                        <small class="dica-campo">Quanto maior, mais a Sofia evita mexer neste horário.</small>
+                    </div>
                     <div class="campo-bloco"><label for="bloco-local">Local</label><input id="bloco-local" name="local"
                             maxlength="120" placeholder="Sala, endereço ou link"></div>
                 </div>
@@ -531,9 +438,9 @@
         </section>
     </div>
 
-    <script src="JS/users/api.js?v=8"></script>
-    <script src="JS/componentes/layout.js?v=18"></script>
-    <script src="JS/script_disciplinas.js?v=20"></script>
+    <script src="JS/users/api.js?v=10"></script>
+    <script src="JS/componentes/layout.js?v=21"></script>
+    <script src="JS/script_disciplinas.js?v=23"></script>
 
 </body>
 
