@@ -116,6 +116,14 @@
         window.location.href = await AcaiApi.paginaInicial();
     });
 
+    if (new URLSearchParams(window.location.search).get('senha') === 'redefinida') {
+        const feedbackSenha = document.getElementById('feedback-senha');
+
+        if (feedbackSenha) {
+            feedbackSenha.hidden = false;
+        }
+    }
+
     const emailSalvo = localStorage.getItem('acaistudy-lembrar-email');
 
     if (emailSalvo && campoEmail) {

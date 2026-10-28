@@ -1,5 +1,5 @@
 /**
- * Recuperação de senha — validação e feedback mock.
+ * Recuperação de senha — pede o link por e-mail se a conta existir.
  */
 
 (function () {

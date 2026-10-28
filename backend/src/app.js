@@ -5,12 +5,14 @@
  * cada uma. Aqui montamos a "esteira" pela qual toda requisição passa, NA ORDEM em que
  * os `app.use`/`app.get` aparecem:
  *
- *   requisição → CORS → leitura do JSON → rotas → 404 (se nenhuma rota respondeu) → tratamento de erros
+ *   requisição → CORS → leitura do JSON → rotas da API → páginas do site → 404 → tratamento de erros
  *
  * Este arquivo não abre porta nem conecta no banco (isso é papel do server.js); ele só
  * exporta o `app` pronto.
  */
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express from 'express';
 import { env } from './config/env.js';
@@ -20,6 +22,9 @@ import { PASTA_AVATARES } from './modulos/usuarios/avatarArquivo.js';
 import { usuarioRoutes } from './modulos/usuarios/usuarioRoutes.js';
 import { blocoFixoRoutes } from './modulos/blocosFixos/blocoFixoRoutes.js';
 import { disciplinaRoutes } from './modulos/disciplinas/disciplinaRoutes.js';
+
+// Pasta frontend/ na raiz do repositório (backend/src → sobe duas pastas).
+const pastaFrontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend');
 
 export const app = express();
 
@@ -58,6 +63,10 @@ app.use('/api/disciplinas', disciplinaRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);
+
+// Páginas do site (HTML, CSS, JS). Fica depois das rotas /api para um arquivo
+// estático nunca esconder um endpoint. A raiz (/) abre o index.html da plataforma.
+app.use(express.static(pastaFrontend));
 
 // Estes dois precisam ficar POR ÚLTIMO:
 // - rotaNaoEncontrada: só é alcançado se nenhuma rota acima respondeu → gera um 404.

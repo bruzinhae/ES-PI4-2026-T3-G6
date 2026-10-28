@@ -16,15 +16,25 @@ npm run dev            # ou: npm start
 
 Sem nenhuma URI, conecta em `mongodb://localhost:27017/acaistudy` (Docker Compose).
 
-No log, procure por:
+No log aparece um quadro com os dois links. Clique na página para abrir o site:
 
 ```text
 MongoDB: conexão OK com o banco 'acaistudy'
-API AçaíStudy rodando em http://localhost:3001/api
+
+╭──────────────────────────────────────────────────────╮
+│                                                      │
+│  AçaíStudy  está no ar                               │
+│                                                      │
+│  Página da plataforma                                │
+│  http://localhost:3001/index.html                    │
+│                                                      │
+│  API                                                 │
+│  http://localhost:3001/api                           │
+│                                                      │
+╰──────────────────────────────────────────────────────╯
 ```
 
-Depois abra o frontend (Live Server em `frontend/`) e crie uma conta em `index_criar_conta.html`.
-Para apontar o frontend para outra URL, defina `window.ACAISTUDY_API_URL` antes de carregar `JS/users/api.js`.
+O mesmo servidor entrega as páginas do `frontend/` e a API.
 
 ## Endpoints
 
@@ -36,7 +46,8 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | ------ | ---- | --------- |
 | POST | `/api/usuarios` | **Create** — `{ nome, email, senha, aceitouTermos, ...campos do perfil }` → `{ usuario, token, expiraEm }` (já abre a sessão) |
 | POST | `/api/auth/login` | **Login** — `{ email, senha }` → `{ usuario, token, expiraEm }` (401 igual para e-mail sem conta e senha errada) |
-| POST | `/api/auth/recuperar-senha` | **Esqueci minha senha** — `{ email }` → sempre 200 com a mesma mensagem (não revela se a conta existe). Gera um link de uso único, válido por 30 min, que por enquanto aparece só no **console da API** |
+| POST | `/api/auth/recuperar-senha` | **Esqueci minha senha** — `{ email }` → 200 com a mesma mensagem se o envio estiver ok (não revela se a conta existe). Se o e-mail estiver cadastrado, manda um link único, válido por 30 min, para `index_nova_senha.html`. 503 se o SMTP falhar |
+| GET | `/api/auth/redefinir-senha?token=` | Confere se o link ainda vale (204) ou se está inválido, usado ou expirado (400). Não consome o token |
 | POST | `/api/auth/redefinir-senha` | `{ token, senha }` → 204; 400 se o link for inválido, usado ou expirado. Troca a senha e encerra todas as sessões do usuário |
 | POST | `/api/auth/logout` 🔒 | Encerra a sessão atual (204) |
 | GET | `/api/auth/eu` 🔒 | Usuário dono do token → `{ usuario }` |
@@ -65,10 +76,11 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
 - Trocar o e-mail volta `emailVerificado` para `false`.
 - Sessões ficam na coleção `sessoes_autenticacao` e valem 7 dias. O token é aleatório (43 caracteres) e só o
   **hash SHA-256** dele é salvo no banco (`_id` da sessão); o token em texto existe só na resposta do login.
-- Recuperação de senha: os links ficam na coleção `tokens_recuperacao_senha` (só o hash do token é salvo). O envio de
-  e-mail ainda não existe: o link é impresso no log (`[recuperação de senha] link para ...`); para enviar de verdade,
-  troque o `console.log` em `solicitarRecuperacaoSenha` (`modulos/auth/authService.js`). O endereço do frontend usado
-  no link vem de `FRONTEND_URL` (padrão `http://localhost:5500`).
+- Recuperação de senha: os links ficam na coleção `tokens_recuperacao_senha` (só o hash do token é salvo). Cada
+  pedido gera um token novo e apaga os links anteriores ainda não usados. O e-mail sai por SMTP
+  (`src/servicos/correio.js`); preencha `SMTP_HOST`, `SMTP_USER` e `SMTP_PASS` no `.env` (no Gmail, use uma
+  senha de app). O endereço do frontend usado no link vem de `FRONTEND_URL` (padrão `http://localhost:3001`,
+  a mesma origem que entrega as páginas).
 - Para proteger uma rota nova, use `exigirAutenticacao` (`src/middlewares/autenticacao.js`); depois dele,
   `req.usuario` e `req.sessao` estão disponíveis.
 - Blocos fixos são armazenados na coleção `blocos_rotina` (conforme o dicionário de dados), sempre associados a `usuarioId`. A API valida
@@ -87,6 +99,7 @@ backend/
     ├── app.js                     # Express: CORS, JSON, registro das rotas de cada módulo, erros
     ├── config/                    # variáveis de ambiente e conexão (compartilhado)
     ├── middlewares/               # tratamento de erros e autenticação (compartilhado)
+    ├── servicos/                  # correio.js — envio do link de redefinição de senha
     ├── utils/                     # ErroApi, validações e tokens (compartilhado)
     └── modulos/
         ├── auth/                  # Sessao.js, RecuperacaoSenha.js, authService.js, authController.js e authRoutes.js

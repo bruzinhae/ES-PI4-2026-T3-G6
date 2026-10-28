@@ -1,5 +1,5 @@
 /**
- * Criar nova senha — força, requisitos e validação mock.
+ * Criar nova senha — o token vem do link do e-mail (?token=...) e só vale uma vez.
  */
 
 (function () {
@@ -156,6 +156,46 @@
 
     // O token vem no link enviado por e-mail: index_nova_senha.html?token=...
     const token = new URLSearchParams(window.location.search).get('token');
+    const botaoSalvar = document.getElementById('botao-salvar');
+    const avisoLink = document.getElementById('aviso-link');
+    const textoAvisoLink = document.getElementById('texto-aviso-link');
+
+    function mostrarLinkInvalido(texto) {
+        if (textoAvisoLink) {
+            textoAvisoLink.textContent = texto;
+        }
+
+        if (avisoLink) {
+            avisoLink.hidden = false;
+        }
+
+        formulario?.querySelectorAll('input, button').forEach((campo) => {
+            campo.disabled = true;
+        });
+    }
+
+    if (botaoSalvar) {
+        botaoSalvar.disabled = true;
+    }
+
+    async function prepararLink() {
+        if (!token) {
+            mostrarLinkInvalido('Este link de recuperação é inválido. Peça um novo.');
+            return;
+        }
+
+        try {
+            await AcaiApi.conferirLinkRedefinicao(token);
+
+            if (botaoSalvar) {
+                botaoSalvar.disabled = false;
+            }
+        } catch (erro) {
+            mostrarLinkInvalido(erro.message);
+        }
+    }
+
+    prepararLink();
 
     formulario?.addEventListener('submit', async (evento) => {
         evento.preventDefault();
@@ -188,8 +228,9 @@
             return;
         }
 
-        const botaoSalvar = document.getElementById('botao-salvar');
-        botaoSalvar.disabled = true;
+        if (botaoSalvar) {
+            botaoSalvar.disabled = true;
+        }
 
         try {
             await AcaiApi.redefinirSenha(token, senha);
@@ -197,10 +238,12 @@
             marcarErro(controleSenha, erro.message);
             return;
         } finally {
-            botaoSalvar.disabled = false;
+            if (botaoSalvar) {
+                botaoSalvar.disabled = false;
+            }
         }
 
-        window.location.href = 'index_login.html';
+        window.location.href = 'index_login.html?senha=redefinida';
     });
 
     atualizarRequisitos();

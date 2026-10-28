@@ -13,6 +13,7 @@ import { Sessao, DURACAO_SESSAO_MS } from './Sessao.js';
 import { RecuperacaoSenha, DURACAO_RECUPERACAO_MS } from './RecuperacaoSenha.js';
 import { trocarSenha } from '../usuarios/usuarioService.js';
 import { env } from '../../config/env.js';
+import { correioConfigurado, enviarLinkRecuperacaoSenha } from '../../servicos/correio.js';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { gerarToken, hashDoToken } from '../../utils/token.js';
 import { normalizarEmail } from '../../utils/validacoes.js';
@@ -90,38 +91,83 @@ export async function encerrarSessoesDoUsuario(usuarioId, manterSessaoId = null)
     });
 }
 
+const MENSAGEM_LINK_INVALIDO = 'Link inválido ou expirado. Peça um novo link de recuperação.';
+const MENSAGEM_ENVIO_INDISPONIVEL = 'Não foi possível enviar o e-mail de recuperação. Tente novamente em instantes.';
+
+/**
+ * Busca o documento do link e recusa token ausente, já usado ou vencido com a mesma
+ * mensagem — sem dizer qual dos três aconteceu.
+ */
+async function buscarRecuperacaoValida(token) {
+    const recuperacao = typeof token === 'string' && token
+        ? await RecuperacaoSenha.findById(hashDoToken(token))
+        : null;
+
+    if (!recuperacao || recuperacao.usadoEm || recuperacao.expiraEm <= new Date()) {
+        throw new ErroApi(400, MENSAGEM_LINK_INVALIDO);
+    }
+
+    return recuperacao;
+}
+
 /**
  * RECUPERAÇÃO DE SENHA — passo 1: o usuário informou o e-mail na tela "Esqueci minha senha".
  *
- * Se existir uma conta com senha (conta só do Google não tem), gera um link de uso único
- * válido por 30 minutos e invalida os links anteriores. A função NÃO diz se o e-mail existe
- * (a resposta da API é sempre a mesma), para não revelar quais e-mails têm conta.
+ * Se o e-mail estiver cadastrado, gera um link novo (uso único, 30 minutos), invalida os
+ * links anteriores ainda não usados e envia o e-mail. Cada pedido tem o seu token: o valor
+ * em texto só vai no link; no banco fica o hash.
  *
- * Ainda não há envio de e-mail: o link aparece no console do servidor. Para enviar de
- * verdade, troque só o `console.log` abaixo por uma chamada ao serviço de e-mail.
+ * E-mail sem conta não gera link e a API responde a mesma mensagem de sucesso, para não
+ * revelar quais endereços existem. Sem SMTP configurado, todo mundo recebe o mesmo erro
+ * (também sem revelar se a conta existe).
  */
 export async function solicitarRecuperacaoSenha({ email } = {}) {
+    if (!correioConfigurado()) {
+        console.error('[recuperação de senha] SMTP não configurado (SMTP_HOST, SMTP_USER, SMTP_PASS).');
+        throw new ErroApi(503, MENSAGEM_ENVIO_INDISPONIVEL);
+    }
+
     if (typeof email !== 'string') {
         return;
     }
 
     const usuario = await Usuario.findOne({ emailNormalizado: normalizarEmail(email) });
 
-    if (!usuario?.hashSenha) {
+    if (!usuario) {
         return;
     }
 
     await RecuperacaoSenha.deleteMany({ usuarioId: usuario._id, usadoEm: null });
 
     const token = gerarToken();
+    const idToken = hashDoToken(token);
+
     await RecuperacaoSenha.create({
-        _id: hashDoToken(token),
+        _id: idToken,
         usuarioId: usuario._id,
         expiraEm: new Date(Date.now() + DURACAO_RECUPERACAO_MS),
     });
 
-    const link = `${env.frontendUrl}/index_nova_senha.html?token=${token}`;
-    console.log(`[recuperação de senha] link para ${usuario.email} (vale 30 min): ${link}`);
+    const link = `${env.frontendUrl}/index_nova_senha.html?token=${encodeURIComponent(token)}`;
+
+    try {
+        await enviarLinkRecuperacaoSenha({
+            destinatario: usuario.email,
+            nome: usuario.nome,
+            link,
+        });
+    } catch (erro) {
+        // O link não chegou: apaga o token para ele não ficar válido sem ter sido entregue.
+        await RecuperacaoSenha.deleteOne({ _id: idToken });
+        throw erro;
+    }
+
+    console.log(`[recuperação de senha] e-mail enviado para ${usuario.email}`);
+}
+
+// A tela de nova senha confere o link ao abrir, antes de pedir a senha.
+export function conferirLinkRedefinicao(token) {
+    return buscarRecuperacaoValida(token);
 }
 
 /**
@@ -132,13 +178,7 @@ export async function solicitarRecuperacaoSenha({ email } = {}) {
  * Qualquer problema com o token dá o mesmo 400, sem detalhar o motivo.
  */
 export async function redefinirSenha({ token, senha } = {}) {
-    const recuperacao = typeof token === 'string'
-        ? await RecuperacaoSenha.findById(hashDoToken(token))
-        : null;
-
-    if (!recuperacao || recuperacao.usadoEm || recuperacao.expiraEm <= new Date()) {
-        throw new ErroApi(400, 'Link inválido ou expirado. Peça um novo link de recuperação.');
-    }
+    const recuperacao = await buscarRecuperacaoValida(token);
 
     await trocarSenha(recuperacao.usuarioId, senha);
 

@@ -83,9 +83,7 @@ img {
     display: flex;
     flex-direction: column;
 
-    height: 100dvh;
-    max-height: 100dvh;
-    overflow: hidden;
+    min-height: 100dvh;
 }
 
 
@@ -161,14 +159,12 @@ img {
 
 .principal-login {
     flex: 1;
-    min-height: 0;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     padding: 12px 20px;
-    overflow: hidden;
 }
 
 .cartao-login {
@@ -530,6 +526,7 @@ img {
 
 .feedback-recuperar {
     margin-top: 16px;
+    margin-bottom: 16px;
     padding: 12px 14px;
 
     background: rgba(16, 185, 129, .08);
@@ -544,6 +541,38 @@ img {
     line-height: 18px;
 
     color: var(--verde-texto);
+}
+
+.aviso-link {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+
+    text-align: left;
+}
+
+.aviso-link p {
+    font-size: 12px;
+    line-height: 18px;
+
+    color: #dc2626;
+}
+
+.aviso-link a {
+    display: inline-block;
+    margin-top: 8px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: var(--roxo);
+}
+
+.aviso-link a:hover {
+    text-decoration: underline;
 }
 
 

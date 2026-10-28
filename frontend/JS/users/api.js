@@ -104,6 +104,13 @@ const AcaiApi = (function () {
         return requisitar('/auth/recuperar-senha', { metodo: 'POST', corpo: { email }, publica: true });
     }
 
+    // A tela de nova senha chama isso ao abrir, para saber se o link ainda vale.
+    function conferirLinkRedefinicao(token) {
+        const consulta = new URLSearchParams({ token });
+
+        return requisitar(`/auth/redefinir-senha?${consulta}`, { publica: true });
+    }
+
     // Define a senha nova com o token que veio no link (?token=...).
     function redefinirSenha(token, senha) {
         return requisitar('/auth/redefinir-senha', { metodo: 'POST', corpo: { token, senha }, publica: true });
@@ -255,6 +262,7 @@ const AcaiApi = (function () {
         entrar,
         sair,
         recuperarSenha,
+        conferirLinkRedefinicao,
         redefinirSenha,
         listarUsuarios,
         obterUsuario,
