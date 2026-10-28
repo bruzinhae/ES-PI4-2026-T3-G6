@@ -22,6 +22,10 @@ import { PASTA_AVATARES } from './modulos/usuarios/avatarArquivo.js';
 import { usuarioRoutes } from './modulos/usuarios/usuarioRoutes.js';
 import { blocoFixoRoutes } from './modulos/blocosFixos/blocoFixoRoutes.js';
 import { disciplinaRoutes } from './modulos/disciplinas/disciplinaRoutes.js';
+import { relatorioRoutes } from './modulos/relatorios/relatorioRoutes.js';
+import { cabecalhoRoutes } from './modulos/cabecalho/cabecalhoRoutes.js';
+import { metaRoutes } from './modulos/metas/metaRoutes.js';
+import { configuracaoRoutes } from './modulos/configuracoes/configuracaoRoutes.js';
 
 // Pasta frontend/ na raiz do repositório (backend/src → sobe duas pastas).
 const pastaFrontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend');
@@ -60,6 +64,10 @@ app.get('/api/saude', (_req, res) => {
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/blocos-fixos', blocoFixoRoutes);
 app.use('/api/disciplinas', disciplinaRoutes);
+app.use('/api/relatorios', relatorioRoutes);
+app.use('/api/cabecalho', cabecalhoRoutes);
+app.use('/api/metas', metaRoutes);
+app.use('/api/configuracoes', configuracaoRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);
