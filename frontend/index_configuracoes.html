@@ -11,8 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=12">
-    <link rel="stylesheet" href="CSS/style_configuracoes.css">
+    <link rel="stylesheet" href="CSS/layout.css?v=17">
+    <link rel="stylesheet" href="CSS/style_configuracoes.css?v=2">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -30,10 +30,10 @@
 
                 <div class="titulos">
 
-                    <h1>Configurações: Integrações e Motor de Prioridade</h1>
+                    <h1>Configurações</h1>
 
                     <p>
-                        Conecte seus ecossistemas de dados acadêmicos externos e calibre a inteligência preditiva Sofia para otimizar sua rotina sem fricção cognitiva.
+                        Ajuste como a Sofia organiza a semana. As preferências ficam salvas na sua conta.
                     </p>
 
                 </div>
@@ -41,7 +41,7 @@
                 <div class="controles-acoes">
                     <span class="status-auto" id="status-auto">
                         <span class="ponto-verde"></span>
-                        Salvo automaticamente há 2 min
+                        Carregando preferências...
                     </span>
 
                     <button type="button" class="botao-fantasma" id="botao-descartar">Descartar</button>
@@ -69,7 +69,7 @@
                                 <h2>Aplicativos &amp; Fontes de Sincronia</h2>
                             </div>
 
-                            <span class="selo-neutro">1 Disponível</span>
+                            <span class="selo-neutro">Em breve</span>
                         </div>
 
                         <div class="lista-integracoes">
@@ -81,7 +81,7 @@
                                         <div>
                                             <div class="integracao-titulo">
                                                 <h3>Canvas LMS &amp; Moodle Universitário</h3>
-                                                <span class="selo-neutro">Disponível</span>
+                                                <span class="selo-neutro">Indisponível</span>
                                             </div>
                                             <p>Importação automática de notas, prazos e calendário oficial da sua instituição.</p>
                                         </div>
@@ -89,8 +89,8 @@
                                 </div>
 
                                 <div class="integracao-rodape">
-                                    <span class="info-conta">Conecte o ambiente acadêmico da sua universidade</span>
-                                    <button type="button" class="botao-claro" id="botao-conectar-lms">Conectar Ambiente</button>
+                                    <span class="info-conta">A conexão com Canvas e Moodle ainda não está disponível.</span>
+                                    <button type="button" class="botao-claro" id="botao-conectar-lms" disabled>Em breve</button>
                                 </div>
                             </article>
 
@@ -109,7 +109,7 @@
                                 <h2>Motor de Prioridade &amp; Configurações de IA (Sofia)</h2>
                             </div>
 
-                            <span class="selo-info">Ativo v2.4</span>
+                            <span class="selo-info" id="selo-motor">Preferências da conta</span>
                         </div>
 
                         <div class="grade-motor">
@@ -126,7 +126,7 @@
                                     </label>
                                 </div>
                                 <p>Redistribui blocos densos automaticamente quando detecta sobrecarga cognitiva na semana.</p>
-                                <span class="meta-configuracao">Limite seguro contínuo: 90 min</span>
+                                <span class="meta-configuracao" id="meta-antifadiga">Limite contínuo: 90 min</span>
                             </article>
 
                             <article class="cartao-configuracao">
@@ -141,7 +141,7 @@
                                     </label>
                                 </div>
                                 <p>Aloca disciplinas de alta densidade cognitiva na sua janela de maior desempenho.</p>
-                                <span class="meta-configuracao">Janela calibrada: 08:30 – 12:00</span>
+                                <span class="meta-configuracao" id="meta-foco">Janela: 08:30 – 12:00</span>
                             </article>
 
                             <article class="cartao-configuracao">
@@ -156,7 +156,7 @@
                                     </label>
                                 </div>
                                 <p>Agenda sessões de revisão com base na curva de Ebbinghaus para retenção de longo prazo.</p>
-                                <span class="meta-configuracao">Ciclos de repetição: D+1, D+4, D+13</span>
+                                <span class="meta-configuracao" id="meta-repeticao">Revisões em D+1, D+4 e D+13</span>
                             </article>
 
                             <article class="cartao-configuracao">
@@ -171,7 +171,7 @@
                                     </label>
                                 </div>
                                 <p>Recalcula a semana de forma invisível quando há atraso, ausência ou mudança de prioridade.</p>
-                                <span class="meta-configuracao">Tempo de resposta: &lt; 350ms</span>
+                                <span class="meta-configuracao" id="meta-dinamico">A semana é recalculada quando algo muda</span>
                             </article>
 
                         </div>
@@ -204,83 +204,34 @@
                                 <h2>Status do Motor Sofia</h2>
                             </div>
 
-                            <span class="selo-sucesso">● 98.4% Harmonia</span>
+                            <span class="selo-sucesso" id="selo-harmonia">Sem base</span>
                         </div>
 
-                        <div class="bloco-grafico">
-                            <div class="grafico-topo">
-                                <span>Equilíbrio Semanal Estimado</span>
-                                <span class="selo-excelente">Excelente</span>
-                            </div>
-
-                            <svg class="grafico-linha" viewBox="0 0 260 90" role="img" aria-label="Gráfico de equilíbrio semanal">
-                                <defs>
-                                    <linearGradient id="gradiente-sofia" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#4F3466" stop-opacity=".22"/>
-                                        <stop offset="100%" stop-color="#4F3466" stop-opacity="0"/>
-                                    </linearGradient>
-                                </defs>
-                                <path d="M0 58 C30 52, 45 30, 70 34 C95 38, 110 62, 135 48 C160 34, 180 22, 205 28 C230 34, 245 40, 260 36 L260 90 L0 90 Z" fill="url(#gradiente-sofia)"/>
-                                <path d="M0 58 C30 52, 45 30, 70 34 C95 38, 110 62, 135 48 C160 34, 180 22, 205 28 C230 34, 245 40, 260 36" fill="none" stroke="#4F3466" stroke-width="2.2" stroke-linecap="round"/>
-                            </svg>
-
-                            <div class="eixos-dias">
-                                <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
-                            </div>
-                        </div>
+                        <p class="nota-status" id="nota-grafico">O equilíbrio da semana aparece quando houver sessões concluídas.</p>
 
                         <ul class="lista-status">
                             <li>
                                 <span>Janela Áurea de Atenção</span>
-                                <strong>08:30 – 12:00</strong>
+                                <strong id="status-janela">08:30 – 12:00</strong>
                             </li>
                             <li>
-                                <span>Pausa Sugerida</span>
-                                <strong>A cada 90 min</strong>
+                                <span>Pausa sugerida</span>
+                                <strong id="status-pausa">A cada 50 min</strong>
                             </li>
                             <li>
-                                <span>Sessões Programadas</span>
-                                <strong>24 blocos</strong>
+                                <span>Sessões desta semana</span>
+                                <strong id="status-sessoes">0</strong>
                             </li>
                             <li>
-                                <span>Conflitos Mitigados</span>
-                                <strong>5 nesta semana</strong>
+                                <span>Horários sobrepostos</span>
+                                <strong id="status-conflitos">0</strong>
                             </li>
                         </ul>
 
                         <button type="button" class="botao-claro botao-largo" id="botao-recalibrar">
                             <img src="assets/icons/configuracoes/atualizar.svg" alt="" width="14" height="14">
-                            <span>Recalibrar Parâmetros</span>
+                            <span>Atualizar status</span>
                         </button>
-
-                    </section>
-
-
-                    <section class="cartao">
-
-                        <div class="cartao-cabecalho">
-                            <div class="titulo-com-icone">
-                                <img src="assets/icons/configuracoes/chave.svg" alt="" width="16" height="16">
-                                <h2>Chave de Acesso REST</h2>
-                            </div>
-                        </div>
-
-                        <p class="texto-chave">
-                            Conecte extensões de terceiros, como Obsidian ou atalhos do iOS, à sua conta AçaíStudy.
-                        </p>
-
-                        <div class="campo-chave">
-                            <code id="chave-api">chk_live_9f3a••••••••c21b</code>
-                            <button type="button" class="link-acao" id="botao-copiar">
-                                <img src="assets/icons/configuracoes/copiar.svg" alt="" width="12" height="12">
-                                <span>Copiar</span>
-                            </button>
-                        </div>
-
-                        <div class="rodape-chave">
-                            <span>Criada em: 14/03/2025</span>
-                            <button type="button" class="link-acao perigo" id="botao-revogar">Revogar Chave</button>
-                        </div>
 
                     </section>
 
@@ -292,9 +243,9 @@
 
     </main>
 
-    <script src="JS/users/api.js?v=6"></script>
-    <script src="JS/componentes/layout.js?v=19"></script>
-    <script src="JS/script_configuracoes.js"></script>
+    <script src="JS/users/api.js?v=12"></script>
+    <script src="JS/componentes/layout.js?v=21"></script>
+    <script src="JS/script_configuracoes.js?v=3"></script>
 
 </body>
 </html>

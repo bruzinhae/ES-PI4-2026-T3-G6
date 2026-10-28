@@ -427,6 +427,27 @@ h2 {
     color: var(--tinta);
 }
 
+.media-disciplina {
+    font-weight: 600;
+    color: var(--roxo);
+}
+
+.botao-grade {
+    align-self: flex-start;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--roxo-20, #e4d4f2);
+    border-radius: 8px;
+    background: var(--branco);
+    color: var(--roxo);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.botao-grade:hover {
+    background: var(--roxo-10, #f6f0fa);
+}
+
 .professor {
     min-height: 32px;
 

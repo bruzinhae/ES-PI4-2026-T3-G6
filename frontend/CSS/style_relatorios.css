@@ -167,7 +167,23 @@ h1 {
 }
 
 .botao-periodo {
-    min-width: 180px;
+    min-width: 220px;
+}
+
+.navegacao-periodo button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+}
+
+a.botao-claro,
+a.botao-roxo {
+    text-decoration: none;
 }
 
 
