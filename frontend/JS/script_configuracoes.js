@@ -1,134 +1,175 @@
-renderLayout({
-    paginaAtiva: '',
-});
+/**
+ * Tela de configurações. As preferências ficam na conta; o status usa sessões e blocos reais.
+ */
+(function () {
+    renderLayout({ paginaAtiva: '' });
 
-const botaoSalvar = document.getElementById('botao-salvar');
-const botaoDescartar = document.getElementById('botao-descartar');
-const statusAuto = document.getElementById('status-auto');
-const botaoCopiar = document.getElementById('botao-copiar');
-const botaoRevogar = document.getElementById('botao-revogar');
-const botaoRecalibrar = document.getElementById('botao-recalibrar');
-const chaveApi = document.getElementById('chave-api');
+    const CAMPOS = {
+        antifadiga: 'config-antifadiga',
+        focoMatinal: 'config-foco',
+        repeticaoEspacada: 'config-repeticao',
+        ajusteDinamico: 'config-dinamico',
+    };
 
-const interruptores = document.querySelectorAll('.interruptor input');
-const botoesRigidez = document.querySelectorAll('.seletor-rigidez button');
+    const JANELA = {
+        manha: '08:30 – 12:00',
+        tarde: '14:00 – 18:00',
+        noite: '19:00 – 22:30',
+    };
 
-const estadoInicial = {
-    checks: new Map(),
-    rigidez: 'equilibrado',
-};
+    const formulario = document.querySelector('.conteiner');
+    const statusAuto = document.getElementById('status-auto');
+    const botaoSalvar = document.getElementById('botao-salvar');
+    const botaoDescartar = document.getElementById('botao-descartar');
+    const botaoAtualizar = document.getElementById('botao-recalibrar');
+    const seletor = document.querySelector('.seletor-rigidez');
 
-interruptores.forEach((input) => {
-    estadoInicial.checks.set(input.name, input.checked);
-});
+    let salva = null;
+    let rigidez = 'equilibrado';
 
-function marcarAlterado() {
-    if (statusAuto) {
-        statusAuto.innerHTML = '<span class="ponto-verde" style="background:#f59e0b"></span> Alterações não salvas';
-    }
-}
-
-function marcarSalvo() {
-    if (statusAuto) {
-        statusAuto.innerHTML = '<span class="ponto-verde"></span> Salvo automaticamente agora';
-    }
-}
-
-interruptores.forEach((input) => {
-    input.addEventListener('change', marcarAlterado);
-});
-
-botoesRigidez.forEach((botao) => {
-    botao.addEventListener('click', () => {
-        botoesRigidez.forEach((item) => item.classList.remove('ativo'));
-        botao.classList.add('ativo');
-        marcarAlterado();
-    });
-});
-
-botaoDescartar?.addEventListener('click', () => {
-    interruptores.forEach((input) => {
-        input.checked = Boolean(estadoInicial.checks.get(input.name));
-    });
-
-    botoesRigidez.forEach((botao) => {
-        botao.classList.toggle('ativo', botao.dataset.rigidez === estadoInicial.rigidez);
-    });
-
-    marcarSalvo();
-});
-
-botaoSalvar?.addEventListener('click', () => {
-    interruptores.forEach((input) => {
-        estadoInicial.checks.set(input.name, input.checked);
-    });
-
-    const ativo = document.querySelector('.seletor-rigidez button.ativo');
-    estadoInicial.rigidez = ativo?.dataset.rigidez || 'equilibrado';
-
-    const texto = botaoSalvar.querySelector('span');
-    const original = texto?.textContent;
-
-    if (texto) {
-        texto.textContent = 'Salvo';
-    }
-
-    botaoSalvar.disabled = true;
-    marcarSalvo();
-
-    window.setTimeout(() => {
-        if (texto && original) {
-            texto.textContent = original;
+    function lerRascunho() {
+        const rascunho = { rigidez };
+        for (const [campo, nome] of Object.entries(CAMPOS)) {
+            rascunho[campo] = Boolean(formulario.querySelector(`[name="${nome}"]`)?.checked);
         }
-
-        botaoSalvar.disabled = false;
-    }, 1400);
-});
-
-botaoCopiar?.addEventListener('click', async () => {
-    const valor = chaveApi?.textContent?.trim() || '';
-    const rotulo = botaoCopiar.querySelector('span');
-
-    try {
-        await navigator.clipboard.writeText(valor);
-    } catch {
-        // fallback silencioso para ambientes sem clipboard
+        return rascunho;
     }
 
-    if (rotulo) {
-        const original = rotulo.textContent;
-        rotulo.textContent = 'Copiado';
-
-        window.setTimeout(() => {
-            rotulo.textContent = original;
-        }, 1200);
-    }
-});
-
-botaoRevogar?.addEventListener('click', () => {
-    if (chaveApi) {
-        chaveApi.textContent = 'chk_live_••••••••••••••••';
-    }
-
-    marcarAlterado();
-});
-
-botaoRecalibrar?.addEventListener('click', () => {
-    const rotulo = botaoRecalibrar.querySelector('span');
-    const original = rotulo?.textContent;
-
-    if (rotulo) {
-        rotulo.textContent = 'Recalibrando…';
-    }
-
-    botaoRecalibrar.disabled = true;
-
-    window.setTimeout(() => {
-        if (rotulo && original) {
-            rotulo.textContent = original;
+    function aplicar(configuracao) {
+        for (const [campo, nome] of Object.entries(CAMPOS)) {
+            const input = formulario.querySelector(`[name="${nome}"]`);
+            if (input) input.checked = Boolean(configuracao[campo]);
         }
+        rigidez = configuracao.rigidez || 'equilibrado';
+        seletor?.querySelectorAll('button').forEach((botao) => {
+            botao.classList.toggle('ativo', botao.dataset.rigidez === rigidez);
+        });
+        atualizarTextos(configuracao);
+    }
 
-        botaoRecalibrar.disabled = false;
-        marcarSalvo();
-    }, 1200);
-});
+    function atualizarTextos(configuracao) {
+        const janela = JANELA[configuracao.janelaFoco] || JANELA.manha;
+        const metaAntifadiga = document.getElementById('meta-antifadiga');
+        const metaFoco = document.getElementById('meta-foco');
+        const metaRepeticao = document.getElementById('meta-repeticao');
+        const metaDinamico = document.getElementById('meta-dinamico');
+        const statusJanela = document.getElementById('status-janela');
+
+        if (metaAntifadiga) {
+            metaAntifadiga.textContent = configuracao.antifadiga
+                ? 'Limite contínuo: 90 min'
+                : 'Proteção desligada';
+        }
+        if (metaFoco) {
+            metaFoco.textContent = configuracao.focoMatinal
+                ? `Janela: ${janela}`
+                : 'Janela automática desligada';
+        }
+        if (metaRepeticao) {
+            metaRepeticao.textContent = configuracao.repeticaoEspacada
+                ? 'Revisões em D+1, D+4 e D+13'
+                : 'Revisões automáticas desligadas';
+        }
+        if (metaDinamico) {
+            metaDinamico.textContent = configuracao.ajusteDinamico
+                ? 'A semana é recalculada quando algo muda'
+                : 'A grade só muda quando você editar';
+        }
+        if (statusJanela) {
+            statusJanela.textContent = configuracao.focoMatinal ? janela : 'Desligada';
+        }
+    }
+
+    function pintarResumo(resumo) {
+        if (!resumo) return;
+        const pausa = document.getElementById('status-pausa');
+        const sessoes = document.getElementById('status-sessoes');
+        const conflitos = document.getElementById('status-conflitos');
+        const selo = document.getElementById('selo-harmonia');
+        const nota = document.getElementById('nota-grafico');
+
+        if (pausa) pausa.textContent = resumo.pausa;
+        if (sessoes) sessoes.textContent = String(resumo.sessoes);
+        if (conflitos) conflitos.textContent = String(resumo.conflitos);
+        if (selo) {
+            selo.textContent = resumo.harmonia === null
+                ? 'Sem base'
+                : `${resumo.harmonia}% das sessões cumpridas`;
+        }
+        if (nota) {
+            nota.textContent = resumo.harmonia === null
+                ? 'O equilíbrio da semana aparece quando houver sessões concluídas.'
+                : `${resumo.rotuloHarmonia}. ${resumo.sessoes} sessão(ões) nesta semana e ${resumo.blocos} compromisso(s) fixo(s).`;
+        }
+    }
+
+    function marcarEstado(texto) {
+        if (statusAuto) statusAuto.lastChild.textContent = ` ${texto}`;
+    }
+
+    function houveMudanca() {
+        if (!salva) return false;
+        const atual = lerRascunho();
+        return Object.keys(CAMPOS).some((campo) => atual[campo] !== salva[campo]) || atual.rigidez !== salva.rigidez;
+    }
+
+    function refletirRascunho() {
+        if (!salva) return;
+        const atual = lerRascunho();
+        atualizarTextos({ ...salva, ...atual });
+        marcarEstado(houveMudanca() ? 'Alterações por salvar' : 'Preferências salvas');
+    }
+
+    async function carregar() {
+        marcarEstado('Carregando preferências...');
+        const { configuracao, resumo } = await AcaiApi.obterConfiguracoes();
+        salva = configuracao;
+        aplicar(configuracao);
+        pintarResumo(resumo);
+        marcarEstado('Preferências salvas');
+    }
+
+    async function salvar() {
+        if (!salva) return;
+        const rascunho = lerRascunho();
+        botaoSalvar.disabled = true;
+        marcarEstado('Salvando...');
+        try {
+            const { configuracao, resumo } = await AcaiApi.salvarConfiguracoes(rascunho);
+            salva = configuracao;
+            aplicar(configuracao);
+            pintarResumo(resumo);
+            marcarEstado('Preferências salvas');
+        } catch (erro) {
+            marcarEstado(erro.message || 'Não foi possível salvar');
+        } finally {
+            botaoSalvar.disabled = false;
+        }
+    }
+
+    formulario?.addEventListener('change', (evento) => {
+        if (evento.target.matches('input[type="checkbox"]')) refletirRascunho();
+    });
+
+    seletor?.addEventListener('click', (evento) => {
+        const botao = evento.target.closest('button[data-rigidez]');
+        if (!botao) return;
+        rigidez = botao.dataset.rigidez;
+        seletor.querySelectorAll('button').forEach((item) => {
+            item.classList.toggle('ativo', item === botao);
+        });
+        refletirRascunho();
+    });
+
+    botaoSalvar?.addEventListener('click', salvar);
+    botaoDescartar?.addEventListener('click', () => {
+        if (!salva) return;
+        aplicar(salva);
+        marcarEstado('Preferências salvas');
+    });
+    botaoAtualizar?.addEventListener('click', () => {
+        carregar().catch((erro) => marcarEstado(erro.message || 'Não foi possível atualizar'));
+    });
+
+    carregar().catch((erro) => marcarEstado(erro.message || 'Não foi possível carregar'));
+})();

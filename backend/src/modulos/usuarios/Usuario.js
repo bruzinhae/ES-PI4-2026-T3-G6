@@ -142,6 +142,32 @@ const usuarioSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+
+        // Preferências da tela de configurações. Fica no usuário para não abrir outra coleção.
+        configuracao: {
+            type: new mongoose.Schema({
+                antifadiga: { type: Boolean, default: true },
+                focoMatinal: { type: Boolean, default: true },
+                repeticaoEspacada: { type: Boolean, default: true },
+                ajusteDinamico: { type: Boolean, default: true },
+                rigidez: {
+                    type: String,
+                    enum: ['flexivel', 'equilibrado', 'intensivo'],
+                    default: 'equilibrado',
+                },
+                janelaFoco: {
+                    type: String,
+                    enum: ['manha', 'tarde', 'noite'],
+                    default: 'manha',
+                },
+                duracaoMinutos: {
+                    type: Number,
+                    enum: [25, 50, 90],
+                    default: 50,
+                },
+            }, { _id: false }),
+            default: () => ({}),
+        },
     },
     {
         // Nome exato da coleção no MongoDB. Sem isso o Mongoose inventaria "usuarios" a partir

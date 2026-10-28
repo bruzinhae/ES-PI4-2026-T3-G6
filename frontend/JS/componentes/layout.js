@@ -45,11 +45,12 @@ const NAV_LATERAL = [
     },
 ];
 
-const DISCIPLINAS_ATIVAS = [
-    { nome: 'Algoritmos & ED', cor: '#4F3466', horas: '4h' },
-    { nome: 'Sistemas Operacionais', cor: '#1B1E36', horas: '3h' },
-    { nome: 'Bancos de Dados', cor: '#10B981', horas: '2.5h' },
-];
+const CORES_DISCIPLINA_HEX = {
+    roxo: '#4F3466',
+    azul: '#6750A4',
+    verde: '#10B981',
+    ambar: '#C9A74D',
+};
 
 const PASTA_ICONES_PADRAO = 'assets/icons/layout';
 const AVATAR_PADRAO = 'assets/icons/avatar-padrao.svg';
@@ -82,18 +83,25 @@ function usuarioDoCabecalho() {
     }
 
     return {
-        nome: escaparHtml(usuario?.nome || 'Mariana Rocha'),
-        curso: escaparHtml(usuario ? usuario.curso || '' : 'Engenharia de Software'),
+        nome: escaparHtml(usuario?.nome || 'Sua conta'),
+        curso: escaparHtml(usuario?.curso || ''),
         avatar: escaparHtml(usuario?.urlAvatar || AVATAR_PADRAO),
     };
 }
 
-function renderHeader({ paginaAtiva, pastaIcones }) {
+function renderHeader({ paginaAtiva, pastaIcones, mostrarAlternador }) {
     const usuario = usuarioDoCabecalho();
     const abas = ABAS.map(
         (aba) =>
             `<a href="${aba.href}"${classeAtiva(paginaAtiva, aba.id)}>${aba.rotulo}</a>`
     ).join('\n            ');
+    const alternador = mostrarAlternador
+        ? `
+            <div class="alternador" role="group" aria-label="Visualização">
+                <button type="button" class="ativo" data-visao="semana" id="visao-semana">Semana</button>
+                <button type="button" data-visao="mes" id="visao-mes">Mês</button>
+            </div>`
+        : '';
 
     return `
     <header class="cabecalho-principal">
@@ -105,28 +113,24 @@ function renderHeader({ paginaAtiva, pastaIcones }) {
         </nav>
 
         <div class="itens-direita">
-
-            <div class="alternador" role="group" aria-label="Visualização">
-                <button type="button" class="ativo" data-visao="semana" id="visao-semana">Semana</button>
-                <button type="button" data-visao="mes" id="visao-mes">Mês</button>
-            </div>
+            ${alternador}
 
             <div class="progresso-tarefas">
                 <img src="${icone(pastaIcones, 'progresso-tarefas.svg')}" alt="" width="15" height="15">
 
                 <div class="progresso-texto">
-                    <span>Tarefas: <strong>18/24</strong> • <strong>75%</strong></span>
+                    <span id="texto-tarefas-cabecalho">Tarefas: <strong>0/0</strong> • <strong>0%</strong></span>
                 </div>
 
                 <div class="trilha-mini">
-                    <span style="width: 75%"></span>
+                    <span id="barra-tarefas-cabecalho" style="width: 0%"></span>
                 </div>
             </div>
 
             <div class="menu-notificacoes">
                 <button type="button" class="botao-notificacao" id="botao-notificacoes" aria-label="Notificações" aria-expanded="false" aria-controls="painel-notificacoes">
                     <img src="${icone(pastaIcones, 'notificacao.svg')}" alt="" width="13.33" height="16.67">
-                    <span class="alerta-notificacao"></span>
+                    <span class="alerta-notificacao" id="alerta-notificacao" hidden></span>
                 </button>
 
                 <div class="painel-notificacoes" id="painel-notificacoes" hidden>
@@ -135,38 +139,16 @@ function renderHeader({ paginaAtiva, pastaIcones }) {
                         <button type="button" class="link-notificacoes">Marcar todas como lidas</button>
                     </div>
 
-                    <ul class="lista-notificacoes">
-                        <li class="notificacao nao-lida">
-                            <span class="notificacao-ponto"></span>
-                            <div>
-                                <p><strong>Sofia IA</strong> sugeriu realocar 1h30 para Algoritmos.</p>
-                                <span class="notificacao-tempo">Há 12 min</span>
-                            </div>
-                        </li>
-                        <li class="notificacao nao-lida">
-                            <span class="notificacao-ponto"></span>
-                            <div>
-                                <p>Prazo do <strong>TCC — Capítulo 2</strong> em 4 dias.</p>
-                                <span class="notificacao-tempo">Há 1 h</span>
-                            </div>
-                        </li>
+                    <ul class="lista-notificacoes" id="lista-notificacoes">
                         <li class="notificacao">
                             <span class="notificacao-ponto"></span>
                             <div>
-                                <p>Você concluiu <strong>3/4 blocos</strong> de hoje.</p>
-                                <span class="notificacao-tempo">Hoje, 09:40</span>
-                            </div>
-                        </li>
-                        <li class="notificacao">
-                            <span class="notificacao-ponto"></span>
-                            <div>
-                                <p>Pomodoro finalizado: sessão de <strong>Cálculo I</strong>.</p>
-                                <span class="notificacao-tempo">Ontem</span>
+                                <p>Carregando avisos...</p>
                             </div>
                         </li>
                     </ul>
 
-                    <a href="#" class="painel-notificacoes-rodape">Ver todas as notificações</a>
+                    <a href="index_metas.html" class="painel-notificacoes-rodape">Ver tarefas e metas</a>
                 </div>
             </div>
 
@@ -211,17 +193,6 @@ function renderSidebar({ paginaAtiva, pastaIcones }) {
                 </a>`
     ).join('\n');
 
-    const disciplinas = DISCIPLINAS_ATIVAS.map(
-        (disciplina) => `
-                <div class="disciplina" title="${disciplina.nome} • ${disciplina.horas}">
-                    <div>
-                        <span class="ponto-disciplina" style="background: ${disciplina.cor}"></span>
-                        <span>${disciplina.nome}</span>
-                    </div>
-                    <span class="horas">${disciplina.horas}</span>
-                </div>`
-    ).join('\n');
-
     return `
     <aside class="barra-lateral" id="barra-lateral">
 
@@ -247,8 +218,8 @@ ${navegacao}
         <div class="grupo-lateral grupo-disciplinas">
             <p class="rotulo-lateral rotulo-pequeno">Disciplinas Ativas</p>
 
-            <div class="lista-disciplinas">
-${disciplinas}
+            <div class="lista-disciplinas" id="lista-disciplinas-laterais">
+                <p class="disciplina-vazia">Carregando...</p>
             </div>
         </div>
 
@@ -419,6 +390,141 @@ function substituirRaiz(seletor, html) {
     raiz.remove();
 }
 
+function renderizarDisciplinasLaterais(disciplinas = []) {
+    const lista = document.getElementById('lista-disciplinas-laterais');
+    if (!lista) {
+        return;
+    }
+
+    if (!disciplinas.length) {
+        lista.innerHTML = '<p class="disciplina-vazia">Nenhuma disciplina ativa</p>';
+        return;
+    }
+
+    lista.innerHTML = disciplinas.slice(0, 6).map((disciplina) => {
+        const cor = CORES_DISCIPLINA_HEX[disciplina.cor] || CORES_DISCIPLINA_HEX.roxo;
+        const nome = escaparHtml(disciplina.nome);
+        const horas = disciplina.horasSemanais != null
+            ? `${disciplina.horasSemanais}h`
+            : '';
+        return `
+                <div class="disciplina" title="${nome}${horas ? ` • ${horas}` : ''}">
+                    <div>
+                        <span class="ponto-disciplina" style="background: ${cor}"></span>
+                        <span>${nome}</span>
+                    </div>
+                    <span class="horas">${escaparHtml(horas)}</span>
+                </div>`;
+    }).join('\n');
+}
+
+const CHAVE_LIDAS = 'acaistudy-notificacoes-lidas';
+
+function idsLidos() {
+    try {
+        const lista = JSON.parse(localStorage.getItem(CHAVE_LIDAS) || '[]');
+        return new Set(Array.isArray(lista) ? lista : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function pintarCabecalho(cabecalho) {
+    const tarefas = cabecalho?.tarefas || { concluidas: 0, total: 0, percentual: 0 };
+    const texto = document.getElementById('texto-tarefas-cabecalho');
+    const barra = document.getElementById('barra-tarefas-cabecalho');
+    if (texto) {
+        texto.innerHTML = `Tarefas: <strong>${tarefas.concluidas}/${tarefas.total}</strong> • <strong>${tarefas.percentual}%</strong>`;
+    }
+    if (barra) {
+        barra.style.width = `${tarefas.percentual}%`;
+    }
+
+    const lista = document.getElementById('lista-notificacoes');
+    const alerta = document.getElementById('alerta-notificacao');
+    const lidas = idsLidos();
+    const avisos = cabecalho?.notificacoes || [];
+    if (!lista) return;
+
+    if (!avisos.length) {
+        lista.innerHTML = '<li class="notificacao"><span class="notificacao-ponto"></span><div><p>Nenhum aviso no momento.</p></div></li>';
+        if (alerta) alerta.hidden = true;
+        return;
+    }
+
+    let naoLidas = 0;
+    lista.innerHTML = avisos.map((aviso) => {
+        const lida = lidas.has(aviso.id);
+        if (!lida) naoLidas += 1;
+        return `
+            <li class="notificacao${lida ? '' : ' nao-lida'}" data-id="${escaparHtml(aviso.id)}">
+                <span class="notificacao-ponto"></span>
+                <div>
+                    <p><a href="${escaparHtml(aviso.href || 'index_calendario.html')}">${escaparHtml(aviso.texto)}</a></p>
+                    <span class="notificacao-tempo">${escaparHtml(aviso.quando)}</span>
+                </div>
+            </li>`;
+    }).join('');
+    if (alerta) alerta.hidden = naoLidas === 0;
+}
+
+async function carregarCabecalho() {
+    if (typeof AcaiApi === 'undefined' || !AcaiApi.temUsuarioAtual?.()) return;
+
+    try {
+        await AcaiApi.verificarSessao?.();
+        const salvo = JSON.parse(localStorage.getItem('acaistudy-usuario') || 'null');
+        if (salvo?.nome) {
+            document.querySelectorAll('.painel-perfil-cabecalho strong').forEach((el) => {
+                el.textContent = salvo.nome;
+            });
+            const curso = document.querySelector('.painel-perfil-cabecalho span');
+            if (curso) curso.textContent = salvo.curso || '';
+            if (salvo.urlAvatar) {
+                document.querySelectorAll('.botao-perfil img, .painel-perfil-cabecalho img').forEach((img) => {
+                    img.src = salvo.urlAvatar;
+                });
+            }
+        }
+    } catch {
+        // o perfil já desenhado no HTML continua valendo
+    }
+
+    try {
+        pintarCabecalho(await AcaiApi.obterCabecalho());
+    } catch {
+        const texto = document.getElementById('texto-tarefas-cabecalho');
+        if (texto) texto.textContent = 'Tarefas indisponíveis';
+    }
+
+    document.querySelector('.link-notificacoes')?.addEventListener('click', () => {
+        const ids = [...document.querySelectorAll('#lista-notificacoes [data-id]')]
+            .map((item) => item.dataset.id);
+        const atuais = idsLidos();
+        ids.forEach((id) => atuais.add(id));
+        localStorage.setItem(CHAVE_LIDAS, JSON.stringify([...atuais]));
+        document.querySelectorAll('#lista-notificacoes .nao-lida').forEach((item) => {
+            item.classList.remove('nao-lida');
+        });
+        const alerta = document.getElementById('alerta-notificacao');
+        if (alerta) alerta.hidden = true;
+    });
+}
+
+async function carregarDisciplinasLaterais() {
+    if (typeof AcaiApi === 'undefined' || !AcaiApi.temUsuarioAtual?.()) {
+        renderizarDisciplinasLaterais([]);
+        return;
+    }
+
+    try {
+        const disciplinas = await AcaiApi.listarDisciplinas({ situacao: 'ativa' });
+        renderizarDisciplinasLaterais(disciplinas);
+    } catch {
+        renderizarDisciplinasLaterais([]);
+    }
+}
+
 function renderLayout(config = {}) {
     const {
         paginaAtiva = 'relatorios',
@@ -426,9 +532,10 @@ function renderLayout(config = {}) {
         cabecalhoSeletor = '#cabecalho-raiz',
         barraSeletor = '#barra-lateral-raiz',
         sidebarRecolhida: sidebarRecolhidaPadrao,
+        mostrarAlternador = paginaAtiva === 'grade',
     } = config;
 
-    substituirRaiz(cabecalhoSeletor, renderHeader({ paginaAtiva, pastaIcones }));
+    substituirRaiz(cabecalhoSeletor, renderHeader({ paginaAtiva, pastaIcones, mostrarAlternador }));
     substituirRaiz(barraSeletor, renderSidebar({ paginaAtiva, pastaIcones }));
     inicializarSidebar(sidebarRecolhidaPadrao);
 
@@ -439,6 +546,11 @@ function renderLayout(config = {}) {
 
     menus.notificacoes = inicializarNotificacoes(() => menus.perfil?.fechar());
     menus.perfil = inicializarPerfil(() => menus.notificacoes?.fechar());
+    carregarDisciplinasLaterais();
+    carregarCabecalho();
+    window.addEventListener('acaistudy:disciplinas-atualizadas', (evento) => {
+        renderizarDisciplinasLaterais(evento.detail?.disciplinas || []);
+    });
 }
 
 window.renderLayout = renderLayout;
