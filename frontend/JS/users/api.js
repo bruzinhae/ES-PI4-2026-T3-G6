@@ -180,9 +180,84 @@ const AcaiApi = (function () {
         await requisitar(`/blocos-fixos/${id}`, { metodo: 'DELETE' });
     }
 
-    async function listarDisciplinasAtivas() {
-        const { disciplinas } = await requisitar('/disciplinas');
+    async function listarDisciplinas(filtros = {}) {
+        const consulta = new URLSearchParams();
+        if (filtros.situacao) {
+            consulta.set('situacao', filtros.situacao);
+        }
+        const sufixo = consulta.toString() ? `?${consulta}` : '';
+        const { disciplinas } = await requisitar(`/disciplinas${sufixo}`);
         return disciplinas;
+    }
+
+    async function listarDisciplinasAtivas() {
+        const { disciplinas } = await requisitar('/disciplinas/ativas');
+        return disciplinas;
+    }
+
+    async function obterDisciplina(id) {
+        const { disciplina } = await requisitar(`/disciplinas/${id}`);
+        return disciplina;
+    }
+
+    async function criarDisciplina(dados) {
+        const { disciplina } = await requisitar('/disciplinas', { metodo: 'POST', corpo: dados });
+        return disciplina;
+    }
+
+    async function atualizarDisciplina(id, alteracoes) {
+        const { disciplina } = await requisitar(`/disciplinas/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        return disciplina;
+    }
+
+    async function excluirDisciplina(id) {
+        await requisitar(`/disciplinas/${id}`, { metodo: 'DELETE' });
+    }
+
+    function obterRelatorio(inicio) {
+        const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
+        return requisitar(`/relatorios${consulta}`);
+    }
+
+    function obterConfiguracoes() {
+        return requisitar('/configuracoes');
+    }
+
+    function salvarConfiguracoes(configuracao) {
+        return requisitar('/configuracoes', { metodo: 'PATCH', corpo: { configuracao } });
+    }
+
+    async function obterCabecalho() {
+        const { cabecalho } = await requisitar('/cabecalho');
+        return cabecalho;
+    }
+
+    async function obterMeta(id) {
+        const { meta } = await requisitar(`/metas/${id}`);
+        return meta;
+    }
+
+    function listarMetas(filtros = {}) {
+        const consulta = new URLSearchParams();
+        if (filtros.situacao) {
+            consulta.set('situacao', filtros.situacao);
+        }
+        const sufixo = consulta.toString() ? `?${consulta}` : '';
+        return requisitar(`/metas${sufixo}`);
+    }
+
+    async function criarMeta(dados) {
+        const { meta } = await requisitar('/metas', { metodo: 'POST', corpo: dados });
+        return meta;
+    }
+
+    async function atualizarMeta(id, alteracoes) {
+        const { meta } = await requisitar(`/metas/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        return meta;
+    }
+
+    async function excluirMeta(id) {
+        await requisitar(`/metas/${id}`, { metodo: 'DELETE' });
     }
     // ----- Usuário logado neste navegador -----
 
@@ -272,7 +347,21 @@ const AcaiApi = (function () {
         criarBlocoFixo,
         atualizarBlocoFixo,
         excluirBlocoFixo,
+        listarDisciplinas,
         listarDisciplinasAtivas,
+        obterDisciplina,
+        criarDisciplina,
+        atualizarDisciplina,
+        excluirDisciplina,
+        obterRelatorio,
+        obterCabecalho,
+        obterConfiguracoes,
+        salvarConfiguracoes,
+        listarMetas,
+        obterMeta,
+        criarMeta,
+        atualizarMeta,
+        excluirMeta,
         obterUsuarioAtual,
         atualizarUsuarioAtual,
         enviarFotoAtual,
