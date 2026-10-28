@@ -1,5 +1,29 @@
 inicializarMenusOnboarding();
 
+// A apresentação aparece sempre que a etapa de horários é aberta.
+const boasVindas = document.querySelector('#boas-vindas-fundo');
+const botaoComecar = document.querySelector('#comecar-onboarding');
+const botaoFecharBoasVindas = document.querySelector('#fechar-boas-vindas');
+
+function fecharBoasVindas() {
+    if (!boasVindas || boasVindas.hidden) return;
+    boasVindas.hidden = true;
+    document.body.classList.remove('boas-vindas-abertas');
+}
+
+if (boasVindas) {
+    document.body.classList.add('boas-vindas-abertas');
+    botaoComecar?.focus();
+    botaoComecar?.addEventListener('click', fecharBoasVindas);
+    botaoFecharBoasVindas?.addEventListener('click', fecharBoasVindas);
+    boasVindas.addEventListener('click', (evento) => {
+        if (evento.target === boasVindas) fecharBoasVindas();
+    });
+    document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape') fecharBoasVindas();
+    });
+}
+
 const calendario = document.querySelector('.calendario');
 const rotinas = document.querySelectorAll('.rotina[draggable="true"]');
 const dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
