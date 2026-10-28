@@ -158,6 +158,16 @@ const disciplinaSchema = new mongoose.Schema(
             type: [conteudoSchema],
             default: [],
         },
+        origem: {
+            type: String,
+            enum: ['manual', 'canvas'],
+            default: 'manual',
+        },
+        idExterno: {
+            type: String,
+            default: null,
+            maxlength: 80,
+        },
     },
     {
         collection: 'disciplinas',
@@ -185,5 +195,9 @@ const disciplinaSchema = new mongoose.Schema(
 
 disciplinaSchema.index({ usuarioId: 1, situacao: 1 });
 disciplinaSchema.index({ usuarioId: 1, nome: 1 });
+disciplinaSchema.index(
+    { usuarioId: 1, idExterno: 1 },
+    { unique: true, partialFilterExpression: { idExterno: { $type: 'string' } } },
+);
 
 export const Disciplina = mongoose.model('Disciplina', disciplinaSchema);

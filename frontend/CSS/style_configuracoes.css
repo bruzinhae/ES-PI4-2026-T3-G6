@@ -475,6 +475,56 @@ img {
     color: var(--cinza-600);
 }
 
+.form-canvas,
+.canvas-conectado {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    margin-top: 14px;
+}
+
+.form-canvas[hidden],
+.canvas-conectado[hidden],
+.form-canvas label[hidden],
+.acoes-canvas button[hidden] {
+    display: none;
+}
+
+.form-canvas label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cinza-600);
+}
+
+.form-canvas input {
+    height: 38px;
+    padding: 0 12px;
+
+    border: 1px solid var(--cinza-200);
+    border-radius: 10px;
+
+    background: var(--branco);
+    color: var(--titulo);
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.acoes-canvas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#canvas-aviso {
+    margin-top: 12px;
+}
+
 .link-acao {
     display: inline-flex;
     align-items: center;

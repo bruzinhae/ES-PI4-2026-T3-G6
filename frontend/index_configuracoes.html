@@ -12,7 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="CSS/layout.css?v=17">
-    <link rel="stylesheet" href="CSS/style_configuracoes.css?v=2">
+    <link rel="stylesheet" href="CSS/style_configuracoes.css?v=3">
+    <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -69,7 +70,7 @@
                                 <h2>Aplicativos &amp; Fontes de Sincronia</h2>
                             </div>
 
-                            <span class="selo-neutro">Em breve</span>
+                            <span class="selo-neutro" id="selo-canvas">Desconectado</span>
                         </div>
 
                         <div class="lista-integracoes">
@@ -80,18 +81,37 @@
                                         <img src="assets/icons/configuracoes/graduacao.svg" alt="" width="28" height="28">
                                         <div>
                                             <div class="integracao-titulo">
-                                                <h3>Canvas LMS &amp; Moodle Universitário</h3>
-                                                <span class="selo-neutro">Indisponível</span>
+                                                <h3>Canvas LMS</h3>
                                             </div>
-                                            <p>Importação automática de notas, prazos e calendário oficial da sua instituição.</p>
+                                            <p id="texto-canvas">Importa as disciplinas e as atividades com prazo do Canvas para a sua conta.</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="integracao-rodape">
-                                    <span class="info-conta">A conexão com Canvas e Moodle ainda não está disponível.</span>
-                                    <button type="button" class="botao-claro" id="botao-conectar-lms" disabled>Em breve</button>
+                                <form id="form-canvas" class="form-canvas">
+                                    <label id="campo-canvas-url">Endereço do Canvas
+                                        <input id="canvas-url" name="instanciaUrl" type="url" inputmode="url" placeholder="https://canvas.suauniversidade.edu" autocomplete="off">
+                                    </label>
+                                    <label>Token de acesso
+                                        <input id="canvas-token" name="token" type="password" autocomplete="off" placeholder="Cole o token gerado no Canvas">
+                                    </label>
+                                    <p class="info-conta">No Canvas: Conta, Configurações, Novo token de acesso. O token fica só no servidor.</p>
+                                    <div class="acoes-canvas">
+                                        <button type="submit" class="botao-roxo" id="botao-conectar-canvas">Conectar</button>
+                                        <button type="button" class="botao-claro" id="botao-oauth-canvas" hidden>Entrar com o Canvas</button>
+                                    </div>
+                                </form>
+
+                                <div id="canvas-conectado" class="canvas-conectado" hidden>
+                                    <p class="info-conta" id="canvas-conta"></p>
+                                    <p class="info-conta" id="canvas-resumo"></p>
+                                    <div class="acoes-canvas">
+                                        <button type="button" class="botao-roxo" id="botao-sincronizar-canvas">Sincronizar</button>
+                                        <button type="button" class="botao-fantasma" id="botao-desconectar-canvas">Desconectar</button>
+                                    </div>
                                 </div>
+
+                                <p class="aviso" id="canvas-aviso" hidden></p>
                             </article>
 
                         </div>
@@ -243,9 +263,10 @@
 
     </main>
 
-    <script src="JS/users/api.js?v=12"></script>
+    <script src="JS/users/api.js?v=13"></script>
     <script src="JS/componentes/layout.js?v=21"></script>
-    <script src="JS/script_configuracoes.js?v=3"></script>
+    <script src="JS/componentes/avisos.js?v=1"></script>
+    <script src="JS/script_configuracoes.js?v=5"></script>
 
 </body>
 </html>

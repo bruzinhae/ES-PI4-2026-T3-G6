@@ -26,6 +26,7 @@ import { relatorioRoutes } from './modulos/relatorios/relatorioRoutes.js';
 import { cabecalhoRoutes } from './modulos/cabecalho/cabecalhoRoutes.js';
 import { metaRoutes } from './modulos/metas/metaRoutes.js';
 import { configuracaoRoutes } from './modulos/configuracoes/configuracaoRoutes.js';
+import { canvasRoutes } from './modulos/canvas/canvasRoutes.js';
 
 // Pasta frontend/ na raiz do repositório (backend/src → sobe duas pastas).
 const pastaFrontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend');
@@ -68,6 +69,7 @@ app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/cabecalho', cabecalhoRoutes);
 app.use('/api/metas', metaRoutes);
 app.use('/api/configuracoes', configuracaoRoutes);
+app.use('/api/canvas', canvasRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);

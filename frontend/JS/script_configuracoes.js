@@ -173,3 +173,138 @@
 
     carregar().catch((erro) => marcarEstado(erro.message || 'Não foi possível carregar'));
 })();
+
+(function () {
+    const form = document.getElementById('form-canvas');
+    if (!form) return;
+
+    const conectado = document.getElementById('canvas-conectado');
+    const aviso = document.getElementById('canvas-aviso');
+    const selo = document.getElementById('selo-canvas');
+    const conta = document.getElementById('canvas-conta');
+    const resumo = document.getElementById('canvas-resumo');
+    const campoUrl = document.getElementById('campo-canvas-url');
+    const inputUrl = document.getElementById('canvas-url');
+    const inputToken = document.getElementById('canvas-token');
+    const botaoOauth = document.getElementById('botao-oauth-canvas');
+    const botaoConectar = document.getElementById('botao-conectar-canvas');
+    const botaoSincronizar = document.getElementById('botao-sincronizar-canvas');
+    const botaoDesconectar = document.getElementById('botao-desconectar-canvas');
+
+    function mostrarAviso(texto, ok) {
+        if (!aviso) return;
+        aviso.hidden = !texto;
+        aviso.textContent = texto || '';
+        aviso.classList.toggle('aviso-ok', Boolean(ok && texto));
+        aviso.classList.toggle('aviso-erro', Boolean(texto && !ok));
+        aviso.classList.remove('aviso-info');
+    }
+
+    function textoResultado(resultado) {
+        if (!resultado) return '';
+        const disciplinas = resultado.disciplinasNovas + resultado.disciplinasAtualizadas;
+        const tarefas = resultado.tarefasNovas + resultado.tarefasAtualizadas;
+        return `${disciplinas} disciplina(s) e ${tarefas} atividade(s) do Canvas.`;
+    }
+
+    function pintar(conexao) {
+        const ligado = Boolean(conexao?.conectado);
+        form.hidden = ligado;
+        conectado.hidden = !ligado;
+        if (selo) selo.textContent = ligado ? 'Conectado' : 'Desconectado';
+        if (ligado && conta) {
+            conta.textContent = `${conexao.nome || 'Conta Canvas'} · ${conexao.instancia || ''}`.trim();
+        }
+        if (campoUrl) campoUrl.hidden = Boolean(conexao?.instanciaFixa);
+        if (inputUrl && conexao?.instanciaFixa) inputUrl.value = `https://${conexao.instanciaFixa}`;
+        if (botaoOauth) botaoOauth.hidden = !conexao?.oauthDisponivel;
+    }
+
+    async function carregar() {
+        const { conexao } = await AcaiApi.obterCanvas();
+        pintar(conexao);
+        if (conexao.conectado && resumo && conexao.sincronizadoEm) {
+            resumo.textContent = `Última sincronização em ${new Date(conexao.sincronizadoEm).toLocaleString('pt-BR')}.`;
+        }
+        return conexao;
+    }
+
+    form.addEventListener('submit', async (evento) => {
+        evento.preventDefault();
+        botaoConectar.disabled = true;
+        mostrarAviso('Conectando ao Canvas...', true);
+        try {
+            const resposta = await AcaiApi.conectarCanvas({
+                instanciaUrl: inputUrl.value,
+                token: inputToken.value,
+            });
+            inputToken.value = '';
+            pintar(resposta.conexao);
+            if (resumo) resumo.textContent = textoResultado(resposta.resultado);
+            mostrarAviso(resposta.aviso || 'Canvas conectado.', !resposta.aviso);
+        } catch (erro) {
+            mostrarAviso(erro.message);
+        } finally {
+            botaoConectar.disabled = false;
+        }
+    });
+
+    botaoOauth?.addEventListener('click', async () => {
+        botaoOauth.disabled = true;
+        try {
+            const { url } = await AcaiApi.iniciarCanvas();
+            window.location.assign(url);
+        } catch (erro) {
+            mostrarAviso(erro.message);
+            botaoOauth.disabled = false;
+        }
+    });
+
+    botaoSincronizar?.addEventListener('click', async () => {
+        botaoSincronizar.disabled = true;
+        mostrarAviso('Sincronizando...', true);
+        try {
+            const resposta = await AcaiApi.sincronizarCanvas();
+            pintar(resposta.conexao);
+            if (resumo) resumo.textContent = textoResultado(resposta.resultado);
+            mostrarAviso('Sincronização concluída.', true);
+        } catch (erro) {
+            mostrarAviso(erro.message);
+        } finally {
+            botaoSincronizar.disabled = false;
+        }
+    });
+
+    botaoDesconectar?.addEventListener('click', async () => {
+        const confirmado = await AcaiAvisos.confirmar({
+            titulo: 'Desconectar o Canvas',
+            texto: 'As disciplinas e atividades já importadas continuam na sua conta. Só o acesso ao Canvas é removido.',
+            confirmar: 'Desconectar',
+        });
+        if (!confirmado) return;
+        botaoDesconectar.disabled = true;
+        try {
+            const { conexao } = await AcaiApi.desconectarCanvas();
+            pintar(conexao);
+            if (resumo) resumo.textContent = '';
+            mostrarAviso('Canvas desconectado. O que já foi importado continua na conta.', true);
+        } catch (erro) {
+            mostrarAviso(erro.message);
+        } finally {
+            botaoDesconectar.disabled = false;
+        }
+    });
+
+    const volta = new URLSearchParams(window.location.search).get('canvas');
+    if (volta) {
+        const mensagens = {
+            conectado: 'Canvas conectado.',
+            recusado: 'A autorização no Canvas foi cancelada.',
+            falhou: 'Não foi possível concluir a conexão com o Canvas.',
+        };
+        mostrarAviso(mensagens[volta] || '', volta === 'conectado');
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    carregar().catch((erro) => mostrarAviso(erro.message));
+})();

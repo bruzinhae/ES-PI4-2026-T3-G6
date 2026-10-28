@@ -227,6 +227,26 @@ const AcaiApi = (function () {
         return requisitar('/configuracoes', { metodo: 'PATCH', corpo: { configuracao } });
     }
 
+    function obterCanvas() {
+        return requisitar('/canvas');
+    }
+
+    function conectarCanvas(dados) {
+        return requisitar('/canvas/conectar', { metodo: 'POST', corpo: dados });
+    }
+
+    function iniciarCanvas() {
+        return requisitar('/canvas/oauth');
+    }
+
+    function sincronizarCanvas() {
+        return requisitar('/canvas/sincronizar', { metodo: 'POST' });
+    }
+
+    function desconectarCanvas() {
+        return requisitar('/canvas', { metodo: 'DELETE' });
+    }
+
     async function obterCabecalho() {
         const { cabecalho } = await requisitar('/cabecalho');
         return cabecalho;
@@ -357,6 +377,11 @@ const AcaiApi = (function () {
         obterCabecalho,
         obterConfiguracoes,
         salvarConfiguracoes,
+        obterCanvas,
+        conectarCanvas,
+        iniciarCanvas,
+        sincronizarCanvas,
+        desconectarCanvas,
         listarMetas,
         obterMeta,
         criarMeta,

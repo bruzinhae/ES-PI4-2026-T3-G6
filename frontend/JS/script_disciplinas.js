@@ -151,6 +151,9 @@ const ETIQUETA_CLASSE = {
     function renderizar() {
         cartoes.replaceChildren(...disciplinas.map(montarCartao));
         avisoVazio.hidden = disciplinas.length > 0;
+        avisoVazio.textContent = 'Nenhuma disciplina cadastrada ainda. Clique em Nova Disciplina para começar.';
+        avisoVazio.classList.remove('aviso-erro');
+        avisoVazio.classList.add('aviso-info');
         atualizarFiltroAreas();
         atualizarIndicadores();
         atualizarLista();
@@ -166,6 +169,8 @@ const ETIQUETA_CLASSE = {
             renderizar();
             avisoVazio.hidden = false;
             avisoVazio.textContent = erro.message || 'Não foi possível carregar as disciplinas.';
+            avisoVazio.classList.remove('aviso-info');
+            avisoVazio.classList.add('aviso-erro');
         }
     }
 
@@ -206,12 +211,18 @@ const ETIQUETA_CLASSE = {
     }
 
     async function excluirDisciplina(disciplina) {
-        if (!window.confirm(`Excluir a disciplina "${disciplina.nome}"?`)) return;
+        const confirmado = await AcaiAvisos.confirmar({
+            titulo: 'Excluir disciplina',
+            texto: `"${disciplina.nome}" sai da sua lista. Os horários na grade continuam, só deixam de estar ligados a ela.`,
+            confirmar: 'Excluir disciplina',
+        });
+        if (!confirmado) return;
         try {
             await AcaiApi.excluirDisciplina(disciplina.id);
             await carregar();
+            AcaiAvisos.mostrar('Disciplina excluída.', 'ok');
         } catch (erro) {
-            window.alert(erro.message);
+            AcaiAvisos.mostrar(erro.message || 'Não foi possível excluir a disciplina.');
         }
     }
 
@@ -567,12 +578,18 @@ const ETIQUETA_CLASSE = {
             botaoExcluir.className = 'agenda-acao-excluir';
             botaoExcluir.textContent = 'Excluir bloco';
             botaoExcluir.addEventListener('click', async () => {
-                if (!window.confirm(`Excluir o bloco "${ocorrencia.bloco.nome}"?`)) return;
+                const confirmado = await AcaiAvisos.confirmar({
+                    titulo: 'Excluir bloco',
+                    texto: `"${ocorrencia.bloco.nome}" sai da grade desta semana e das próximas.`,
+                    confirmar: 'Excluir bloco',
+                });
+                if (!confirmado) return;
                 try {
                     await AcaiApi.excluirBlocoFixo(idDo(ocorrencia.bloco));
                     await carregar();
+                    AcaiAvisos.mostrar('Bloco excluído.', 'ok');
                 } catch (erro) {
-                    window.alert(erro.message);
+                    AcaiAvisos.mostrar(erro.message || 'Não foi possível excluir o bloco.');
                 }
             });
             opcoes.append(botaoEditar, botaoExcluir);
@@ -591,6 +608,8 @@ const ETIQUETA_CLASSE = {
 
         agenda.append(cabecalho, corpo);
         avisoAgenda.hidden = ocorrencias.length > 0;
+        avisoAgenda.classList.remove('aviso-erro');
+        avisoAgenda.classList.add('aviso-info');
         avisoAgenda.textContent = blocos.length
             ? 'Não há compromissos cadastrados para esta semana.'
             : 'Nenhum compromisso cadastrado. Adicione um bloco para visualizá-lo na grade.';
@@ -628,6 +647,8 @@ const ETIQUETA_CLASSE = {
             blocos = [];
             renderizar();
             avisoAgenda.textContent = erro.message || 'Não foi possível carregar os compromissos.';
+            avisoAgenda.classList.remove('aviso-info');
+            avisoAgenda.classList.add('aviso-erro');
             avisoAgenda.hidden = false;
         }
     }

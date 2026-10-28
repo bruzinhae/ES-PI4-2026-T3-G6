@@ -77,6 +77,12 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | DELETE | `/api/metas/:id` 🔒 | Exclui a meta (204) |
 | GET | `/api/configuracoes` 🔒 | Preferências da Sofia e o resumo da semana (sessões, blocos e horários sobrepostos) |
 | PATCH | `/api/configuracoes` 🔒 | Salva as preferências enviadas (`antifadiga`, `focoMatinal`, `repeticaoEspacada`, `ajusteDinamico`, `rigidez`, `janelaFoco`, `duracaoMinutos`) |
+| GET | `/api/canvas` 🔒 | Diz se o Canvas está conectado. Não devolve token |
+| POST | `/api/canvas/conectar` 🔒 | Conecta com o token de acesso do aluno (`instanciaUrl`, `token`) e importa cursos e atividades |
+| GET | `/api/canvas/oauth` 🔒 | Devolve a URL de autorização, se `CANVAS_CLIENT_ID` e `CANVAS_CLIENT_SECRET` estiverem no `.env` |
+| GET | `/api/canvas/retorno` | Volta do Canvas depois da autorização. Redireciona para a tela de configurações |
+| POST | `/api/canvas/sincronizar` 🔒 | Atualiza disciplinas e atividades já ligadas ao Canvas |
+| DELETE | `/api/canvas` 🔒 | Remove a conexão. O que já foi importado permanece |
 | GET | `/api/saude` | Health check |
 
 Campos do perfil: `nome, email, instituicao, curso, semestre, turno, metaSemanalHoras, onboardingConcluido`.
@@ -108,6 +114,10 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   `tokens_recuperacao_senha`, `disciplinas`, `blocos_rotina`, `tarefas`, `metas`, `sessoes_estudo`, `planos_ia`.
   Metas têm CRUD em `/api/metas`. Tarefas, sessões e planos de IA têm schema; as rotas dessas áreas entram nas próximas entregas.
 - O frontend guarda o token em `localStorage` (`acaistudy-token`) e o envia em toda requisição (`JS/users/api.js`).
+- Canvas: o token de acesso fica cifrado no documento do usuário e some de toda resposta JSON. A sincronização
+  grava `origem: "canvas"` e `idExterno` em disciplinas e tarefas, então uma nova sincronização atualiza em vez de duplicar.
+  Sem `CANVAS_CLIENT_ID` e `CANVAS_CLIENT_SECRET`, use o token gerado pelo aluno. A Redirect URI da Developer Key é
+  `FRONTEND_URL/api/canvas/retorno`.
 
 ## Estrutura
 
@@ -131,6 +141,7 @@ backend/
         ├── tarefas/               # schema Tarefa.js (coleção pronta)
         ├── metas/                 # CRUD e painel da tela de metas
         ├── configuracoes/         # preferências da Sofia gravadas no usuário
+        ├── canvas/                # conexão com o Canvas LMS e importação de cursos/atividades
         ├── sessoesEstudo/         # schema SessaoEstudo.js (coleção pronta)
         └── planosIa/              # schema PlanoIa.js (coleção pronta)
 

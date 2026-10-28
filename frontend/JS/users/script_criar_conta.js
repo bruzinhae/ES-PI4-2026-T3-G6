@@ -96,7 +96,7 @@
         if (!campoTermos.checked) {
             valido = false;
             campoTermos.focus();
-            alert('É necessário aceitar os Termos de Serviço e a Política de Privacidade.');
+            AcaiAvisos.mostrar('É necessário aceitar os Termos de Serviço e a Política de Privacidade.');
         }
 
         if (!valido) {

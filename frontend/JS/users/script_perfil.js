@@ -105,7 +105,7 @@ async function carregarPerfil() {
             return;
         }
 
-        alert(erro.message);
+        AcaiAvisos.mostrar(erro.message);
     }
 }
 
@@ -125,7 +125,7 @@ botaoSalvar?.addEventListener('click', async () => {
         mostrarRetornoSalvar('Salvo');
     } catch (erro) {
         botaoSalvar.disabled = false;
-        alert(erro.message);
+        AcaiAvisos.mostrar(erro.message);
     }
 });
 
@@ -183,7 +183,11 @@ document.getElementById('botao-remover-foto')?.addEventListener('click', async (
 });
 
 document.getElementById('botao-excluir-conta')?.addEventListener('click', async () => {
-    const confirmado = confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.');
+    const confirmado = await AcaiAvisos.confirmar({
+        titulo: 'Excluir conta',
+        texto: 'A conta, as disciplinas e as metas saem de vez. Essa ação não pode ser desfeita.',
+        confirmar: 'Excluir conta',
+    });
 
     if (!confirmado) {
         return;
@@ -193,7 +197,7 @@ document.getElementById('botao-excluir-conta')?.addEventListener('click', async 
         await AcaiApi.excluirUsuarioAtual();
         window.location.href = 'index_criar_conta.html';
     } catch (erro) {
-        alert(erro.message);
+        AcaiAvisos.mostrar(erro.message);
     }
 });
 

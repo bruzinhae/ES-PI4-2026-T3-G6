@@ -96,6 +96,16 @@ const tarefaSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        origem: {
+            type: String,
+            enum: ['manual', 'canvas'],
+            default: 'manual',
+        },
+        idExterno: {
+            type: String,
+            default: null,
+            maxlength: 80,
+        },
     },
     {
         collection: 'tarefas',
@@ -112,5 +122,9 @@ const tarefaSchema = new mongoose.Schema(
 );
 
 tarefaSchema.index({ usuarioId: 1, prazo: 1 });
+tarefaSchema.index(
+    { usuarioId: 1, idExterno: 1 },
+    { unique: true, partialFilterExpression: { idExterno: { $type: 'string' } } },
+);
 
 export const Tarefa = mongoose.model('Tarefa', tarefaSchema);
