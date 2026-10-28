@@ -12,6 +12,7 @@
 
 import mongoose from 'mongoose';
 import { env } from './env.js';
+import { garantirColecoes } from './colecoes.js';
 
 /**
  * Abre a conexão com o banco usando a URI definida em MONGODB_URI (Atlas ou local).
@@ -23,6 +24,10 @@ export async function conectarBanco() {
     // O nome do banco vem da própria URI (o trecho "/acaistudy" antes do "?").
     // Mostrar no log ajuda a confirmar que estamos no banco certo.
     console.log(`MongoDB: conexão OK com o banco '${mongoose.connection.name}'`);
+
+    // Cria no Atlas/local as coleções do dicionário (mesmo vazias) e sincroniza índices.
+    const colecoes = await garantirColecoes();
+    console.log(`MongoDB: coleções prontas — ${colecoes.join(', ')}`);
 }
 
 /**
