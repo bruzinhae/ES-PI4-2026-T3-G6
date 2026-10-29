@@ -1,13 +1,14 @@
 /**
- * cabecalho/cabecalhoService.js — resumo do header (tarefas e avisos).
+ * cabecalho/cabecalhoService.js — gauge da rotina e avisos do header.
  *
- * Não existe coleção de notificações: os avisos saem do que já está no banco
- * (prazos de tarefas, conteúdos atrasados e sessões de hoje).
+ * O gauge é as horas dos blocos semanais sobre a meta de horas da conta.
+ * Avisos de sessão continuam; a contagem de tarefas por disciplina fica na grade.
  */
 
-import { Disciplina } from '../disciplinas/Disciplina.js';
+import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
-import { Tarefa } from '../tarefas/Tarefa.js';
+import { Usuario } from '../usuarios/Usuario.js';
+import { minutosDaSemana, resumoRotina } from '../../utils/rotinaSemanal.js';
 
 const LIMITE_AVISOS = 8;
 
@@ -27,30 +28,14 @@ function chaveData(data) {
     return `${data.getFullYear()}-${mes}-${dia}`;
 }
 
-function quandoRelativo(data, agora) {
-    const diffMs = data.getTime() - agora.getTime();
-    const dias = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
-    if (dias < 0) return 'Atrasada';
-    if (dias === 0) return 'Hoje';
-    if (dias === 1) return 'Amanhã';
-    return `Em ${dias} dias`;
-}
-
-function progresso(conteudos = []) {
-    if (!conteudos.length) return 100;
-    const concluidos = conteudos.filter((item) => item.situacao === 'concluido').length;
-    return Math.round((concluidos / conteudos.length) * 100);
-}
-
 export async function montarCabecalho(usuarioId) {
     const agora = new Date();
     const inicioHoje = inicioDoDia(agora);
     const fimHoje = somarDias(inicioHoje, 1);
-    const limite = somarDias(agora, 7);
 
-    const [tarefas, disciplinas, sessoesHoje] = await Promise.all([
-        Tarefa.find({ usuarioId }).select('titulo situacao prazo').lean(),
-        Disciplina.find({ usuarioId, situacao: 'ativa' }).select('nome conteudos').lean(),
+    const [blocos, usuario, sessoesHoje] = await Promise.all([
+        BlocoFixo.find({ usuarioId, recorrencia: 'semanal' }).select('duracaoMinutos diasSemana').lean(),
+        Usuario.findById(usuarioId).select('metaSemanalHoras').lean(),
         SessaoEstudo.find({
             usuarioId,
             inicio: { $gte: inicioHoje, $lt: fimHoje },
@@ -58,37 +43,7 @@ export async function montarCabecalho(usuarioId) {
         }).select('situacao').lean(),
     ]);
 
-    const total = tarefas.length;
-    const concluidas = tarefas.filter((tarefa) => tarefa.situacao === 'concluida').length;
     const notificacoes = [];
-
-    for (const tarefa of tarefas) {
-        if (!tarefa.prazo || tarefa.situacao === 'concluida') continue;
-        const prazo = new Date(tarefa.prazo);
-        if (prazo > limite) continue;
-        const atrasada = prazo < agora;
-        notificacoes.push({
-            id: `tarefa-${tarefa._id}`,
-            texto: atrasada
-                ? `O prazo de ${tarefa.titulo} já passou.`
-                : `Prazo de ${tarefa.titulo} ${quandoRelativo(prazo, agora).toLowerCase()}.`,
-            quando: quandoRelativo(prazo, agora),
-            href: 'index_metas.html',
-        });
-    }
-
-    for (const disciplina of disciplinas) {
-        const conteudos = disciplina.conteudos || [];
-        const percentual = progresso(conteudos);
-        const pendentes = conteudos.filter((item) => item.situacao !== 'concluido').length;
-        if (!pendentes || percentual >= 60) continue;
-        notificacoes.push({
-            id: `disciplina-${disciplina._id}`,
-            texto: `${disciplina.nome} está com ${percentual}% do conteúdo concluído.`,
-            quando: `${pendentes} em aberto`,
-            href: 'index_disciplinas.html',
-        });
-    }
 
     if (sessoesHoje.length) {
         const feitas = sessoesHoje.filter((sessao) => sessao.situacao === 'concluida').length;
@@ -101,11 +56,7 @@ export async function montarCabecalho(usuarioId) {
     }
 
     return {
-        tarefas: {
-            concluidas,
-            total,
-            percentual: total ? Math.round((concluidas / total) * 100) : 0,
-        },
+        rotina: resumoRotina(minutosDaSemana(blocos), usuario?.metaSemanalHoras),
         notificacoes: notificacoes.slice(0, LIMITE_AVISOS),
     };
 }

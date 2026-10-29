@@ -117,52 +117,53 @@ renderLayout({
         document.getElementById('selo-disciplinas').textContent = `${total} ${total === 1 ? 'disciplina' : 'disciplinas'}`;
         const lista = document.getElementById('lista-defasagem');
         if (!total) {
-            lista.innerHTML = '<p class="nota-grafico">Nenhuma disciplina ativa. Cadastre uma matéria para ver o progresso.</p>';
+            lista.innerHTML = '<p class="nota-grafico">Nenhuma disciplina ativa. Cadastre uma matéria para montar a rotina.</p>';
         } else {
             lista.innerHTML = relatorio.disciplinas.map((disciplina) => {
-                const cor = disciplina.emDia ? '#10b981' : '#dc2626';
-                const etiqueta = disciplina.emDia
+                const horas = Number(disciplina.horasSemanais) || 0;
+                const progresso = disciplina.progresso;
+                const largura = Math.min(100, Number(progresso) || 0);
+                const cor = disciplina.naGrade ? '#4F3466' : '#C9A74D';
+                const etiqueta = disciplina.naGrade
                     ? 'etiqueta etiqueta-verde'
-                    : 'etiqueta etiqueta-rosa';
-                const status = disciplina.emDia
-                    ? 'Em dia'
-                    : `Pendente ${duracao(disciplina.pendenteMin)}`;
-                const icone = disciplina.emDia
-                    ? 'assets/icons/relatorios/consistencia.svg'
-                    : 'assets/icons/relatorios/card-atencao.svg';
+                    : 'etiqueta etiqueta-ambar';
+                const status = disciplina.naGrade ? 'Na rotina' : 'Sem horário';
+                const valor = progresso === null || progresso === undefined ? `${horas}h` : `${horas}h • ${progresso}%`;
                 return `
                     <article class="linha-defasagem">
                         <div class="defasagem-esquerda">
-                            <div class="meta-icone ${disciplina.emDia ? 'icone-verde' : 'icone-vermelho'}">
-                                <img src="${icone}" alt="" width="16" height="15">
+                            <div class="meta-icone ${disciplina.naGrade ? 'icone-verde' : 'icone-ambar'}">
+                                <img src="assets/icons/relatorios/consistencia.svg" alt="" width="16" height="15">
                             </div>
                             <div class="defasagem-corpo">
                                 <div class="defasagem-titulo">
                                     <h3>${escapar(disciplina.nome)}</h3>
-                                    <span class="${etiqueta}">${escapar(status)}</span>
+                                    <span class="${etiqueta}">${status}</span>
                                 </div>
                                 <div class="defasagem-progresso">
                                     <div class="defasagem-progresso-topo">
-                                        <span>Conteúdo programático</span>
-                                        <strong style="color: ${cor}">${disciplina.progresso}%</strong>
+                                        <span>Da meta semanal</span>
+                                        <strong style="color: ${cor}">${valor}</strong>
                                     </div>
                                     <div class="trilha">
-                                        <span style="width: ${disciplina.progresso}%; background: ${cor}"></span>
+                                        <span style="width: ${largura}%; background: ${cor}"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <a class="botao-acao-linha botao-claro" href="index_disciplinas.html">Ver disciplina</a>
+                        <a class="botao-acao-linha botao-claro" href="index_disciplinas.html">Ver rotina</a>
                     </article>`;
             }).join('');
         }
 
-        const atrasada = relatorio.disciplinas.find((disciplina) => !disciplina.emDia);
-        document.getElementById('texto-insight').textContent = atrasada
-            ? `${atrasada.nome} está com ${duracao(atrasada.pendenteMin)} de conteúdo pendente e ${atrasada.progresso}% concluído. Priorize um bloco de estudo nessa matéria.`
-            : relatorio.disciplinas.length
-                ? 'As disciplinas ativas estão em dia. As horas do gráfico vêm das sessões de estudo concluídas nesta semana.'
-                : 'Cadastre disciplinas e conclua conteúdos para a Sofia montar este painel com os seus dados.';
+        const rotina = relatorio.rotina || {};
+        const semHorario = relatorio.disciplinas.find((disciplina) => !disciplina.naGrade);
+        const cobertura = rotina.metaHoras
+            ? `A rotina cobre ${rotina.horas}h das ${rotina.metaHoras}h da meta semanal (${rotina.percentual}%).`
+            : `A rotina desta semana soma ${rotina.horas || 0}h. Defina a meta de horas no perfil para ver o percentual.`;
+        document.getElementById('texto-insight').textContent = semHorario
+            ? `${cobertura} ${semHorario.nome} ainda não tem horário fixo.`
+            : cobertura;
     }
 
     async function carregar() {

@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { selecionarCampos } from '../../utils/validacoes.js';
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
+import { Usuario } from '../usuarios/Usuario.js';
+import { resumoRotina } from '../../utils/rotinaSemanal.js';
 import {
     CORES_DISCIPLINA,
     Disciplina,
@@ -40,13 +42,21 @@ function idValido(id, rotulo = 'disciplina') {
     }
 }
 
-function progressoDosConteudos(conteudos = []) {
-    if (!conteudos.length) {
-        return 0;
-    }
+function apresentar(disciplina, horasSemanaisMinutos = 0, metaHoras = null) {
+    const json = disciplina.toJSON();
+    const rotina = resumoRotina(horasSemanaisMinutos, metaHoras);
 
-    const concluidos = conteudos.filter((item) => item.situacao === 'concluido').length;
-    return Math.round((concluidos / conteudos.length) * 100);
+    return {
+        ...json,
+        horasSemanais: rotina.horas,
+        metaSemanalHoras: rotina.metaHoras,
+        progresso: rotina.percentual,
+    };
+}
+
+async function metaDoUsuario(usuarioId) {
+    const usuario = await Usuario.findById(usuarioId).select('metaSemanalHoras').lean();
+    return usuario?.metaSemanalHoras ?? null;
 }
 
 function validarConteudos(conteudos) {
@@ -224,19 +234,6 @@ async function horasSemanaisPorDisciplina(usuarioId, disciplinaIds) {
     return mapa;
 }
 
-function apresentar(disciplina, horasSemanaisMinutos = 0) {
-    const json = disciplina.toJSON();
-    const horas = Math.round((horasSemanaisMinutos / 60) * 10) / 10;
-
-    return {
-        ...json,
-        horasSemanais: horas,
-        progresso: progressoDosConteudos(disciplina.conteudos || []),
-        totalConteudos: disciplina.conteudos?.length || 0,
-        conteudosConcluidos: (disciplina.conteudos || []).filter((item) => item.situacao === 'concluido').length,
-    };
-}
-
 export async function listar(usuarioId, { situacao } = {}) {
     const filtro = { usuarioId };
     if (situacao) {
@@ -244,12 +241,16 @@ export async function listar(usuarioId, { situacao } = {}) {
     }
 
     const disciplinas = await Disciplina.find(filtro).sort({ nome: 1 });
-    const horas = await horasSemanaisPorDisciplina(
-        usuarioId,
-        disciplinas.map((item) => item._id)
-    );
+    const [horas, metaHoras] = await Promise.all([
+        horasSemanaisPorDisciplina(usuarioId, disciplinas.map((item) => item._id)),
+        metaDoUsuario(usuarioId),
+    ]);
 
-    return disciplinas.map((disciplina) => apresentar(disciplina, horas.get(String(disciplina._id)) || 0));
+    return disciplinas.map((disciplina) => apresentar(
+        disciplina,
+        horas.get(String(disciplina._id)) || 0,
+        metaHoras,
+    ));
 }
 
 export async function listarAtivasResumo(usuarioId) {
@@ -272,8 +273,11 @@ export async function buscarPorId(usuarioId, id) {
         throw new ErroApi(404, 'Disciplina não encontrada.');
     }
 
-    const horas = await horasSemanaisPorDisciplina(usuarioId, [disciplina._id]);
-    return apresentar(disciplina, horas.get(String(disciplina._id)) || 0);
+    const [horas, metaHoras] = await Promise.all([
+        horasSemanaisPorDisciplina(usuarioId, [disciplina._id]),
+        metaDoUsuario(usuarioId),
+    ]);
+    return apresentar(disciplina, horas.get(String(disciplina._id)) || 0, metaHoras);
 }
 
 export async function criar(usuarioId, dados) {
@@ -288,7 +292,7 @@ export async function criar(usuarioId, dados) {
         conteudos: payload.conteudos || [],
     });
 
-    return apresentar(disciplina, 0);
+    return apresentar(disciplina, 0, await metaDoUsuario(usuarioId));
 }
 
 export async function atualizar(usuarioId, id, dados) {
@@ -307,8 +311,11 @@ export async function atualizar(usuarioId, id, dados) {
     disciplina.set(payload);
     await disciplina.save();
 
-    const horas = await horasSemanaisPorDisciplina(usuarioId, [disciplina._id]);
-    return apresentar(disciplina, horas.get(String(disciplina._id)) || 0);
+    const [horas, metaHoras] = await Promise.all([
+        horasSemanaisPorDisciplina(usuarioId, [disciplina._id]),
+        metaDoUsuario(usuarioId),
+    ]);
+    return apresentar(disciplina, horas.get(String(disciplina._id)) || 0, metaHoras);
 }
 
 export async function excluir(usuarioId, id) {

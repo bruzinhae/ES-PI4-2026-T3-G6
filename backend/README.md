@@ -69,7 +69,7 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | PATCH | `/api/disciplinas/:id` 🔒 | Atualiza os campos enviados |
 | DELETE | `/api/disciplinas/:id` 🔒 | Exclui a disciplina e desvincula blocos associados (204) |
 | GET | `/api/relatorios?inicio=` 🔒 | Painel da semana (foco, consistência, pomodoro, metas, defasagem). `inicio` é qualquer dia da semana, formato `AAAA-MM-DD` |
-| GET | `/api/cabecalho` 🔒 | Resumo do header: progresso de tarefas e avisos (prazos, conteúdos pendentes, sessões de hoje) |
+| GET | `/api/cabecalho` 🔒 | Gauge da rotina (horas dos blocos semanais sobre a meta de horas) e avisos de sessão |
 | GET | `/api/metas` 🔒 | Lista as metas (`?situacao=ativa` filtra) e o painel da tela (`progresso`, marcos, consistência da semana) |
 | POST | `/api/metas` 🔒 | Cria meta (`titulo` obrigatório; `tipo`, `prioridade`, `prazo`, `situacao`, `disciplinaId`, `metaSemanalHoras`, `marcos` opcionais). Hábito exige horas semanais |
 | GET | `/api/metas/:id` 🔒 | Busca uma meta do usuário |
@@ -106,7 +106,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
 - Blocos fixos são armazenados na coleção `blocos_rotina` (conforme o dicionário de dados), sempre associados a `usuarioId`. A API valida
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
 - Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|verde|ambar`; conteúdos embutidos).
-  `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é % de conteúdos `concluido`.
+  `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
 - Metas seguem `Arquivos/Dicionário de dados/metas.json`. `progresso` é a fração de marcos `atingido`;
   em hábito sem marcos, é as horas estudadas na semana sobre `metaSemanalHoras`. O painel não inventa previsão de IA:
   a consistência usa as sessões já encerradas e o ritmo é a média do progresso das metas ativas.

@@ -31,7 +31,6 @@ const ETIQUETA_CLASSE = {
 
     const comparadores = {
         horas: (a, b) => Number(b.dataset.horas) - Number(a.dataset.horas),
-        progresso: (a, b) => Number(b.dataset.progresso) - Number(a.dataset.progresso),
         nome: (a, b) => a.dataset.nome.localeCompare(b.dataset.nome, 'pt-BR'),
     };
 
@@ -75,11 +74,14 @@ const ETIQUETA_CLASSE = {
     function atualizarIndicadores() {
         const ativas = disciplinas.filter((item) => item.situacao === 'ativa');
         const totalHoras = ativas.reduce((soma, item) => soma + Number(item.horasSemanais || 0), 0);
+        const meta = ativas.find((item) => item.metaSemanalHoras)?.metaSemanalHoras
+            || disciplinas.find((item) => item.metaSemanalHoras)?.metaSemanalHoras;
+        const percentual = meta ? Math.round((totalHoras / meta) * 100) : null;
         seloAtivas.textContent = `${ativas.length} ${ativas.length === 1 ? 'disciplina ativa' : 'disciplinas ativas'}`;
         document.getElementById('indicador-horas-academicas').textContent = `${formatarHoras(Math.round(totalHoras * 10) / 10)} / semana`;
-        document.getElementById('indicador-horas-nota').textContent = ativas.length
-            ? `Distribuição em ${ativas.length} ${ativas.length === 1 ? 'matéria' : 'matérias'}`
-            : 'Cadastre disciplinas e blocos para ver a distribuição';
+        document.getElementById('indicador-horas-nota').textContent = meta
+            ? `${percentual}% da meta de ${meta}h nas matérias`
+            : 'Defina a meta de horas no perfil para ver o percentual';
         document.getElementById('indicador-total-ativas').textContent = String(ativas.length);
     }
 
@@ -87,7 +89,7 @@ const ETIQUETA_CLASSE = {
         const cor = CORES_HEX[disciplina.cor] || CORES_HEX.roxo;
         const classeEtiqueta = ETIQUETA_CLASSE[disciplina.cor] || 'etiqueta-lilas';
         const horas = Number(disciplina.horasSemanais || 0);
-        const progresso = Number(disciplina.progresso || 0);
+        const progresso = disciplina.progresso;
         const creditos = disciplina.creditos != null ? `${disciplina.creditos} créditos` : 'Sem créditos';
         const professor = [disciplina.professor, disciplina.local].filter(Boolean).join(' • ') || 'Professor e local não informados';
         const artigo = document.createElement('article');
@@ -96,7 +98,6 @@ const ETIQUETA_CLASSE = {
         artigo.dataset.id = disciplina.id;
         artigo.dataset.area = disciplina.area || '';
         artigo.dataset.horas = String(horas);
-        artigo.dataset.progresso = String(progresso);
         artigo.dataset.nome = disciplina.nome || '';
         artigo.innerHTML = `
             <div class="cartao-conteudo">
@@ -121,11 +122,11 @@ const ETIQUETA_CLASSE = {
             </div>
             <div class="cartao-progresso">
                 <div class="progresso-topo">
-                    <span>Progresso do Semestre</span>
-                    <strong style="color: ${cor}">${progresso}%</strong>
+                    <span>Da meta semanal</span>
+                    <strong style="color: ${cor}">${progresso === null || progresso === undefined ? '—' : `${progresso}%`}</strong>
                 </div>
                 <div class="trilha">
-                    <span style="width: ${progresso}%; background: ${cor}"></span>
+                    <span style="width: ${Math.min(100, Number(progresso) || 0)}%; background: ${cor}"></span>
                 </div>
             </div>
         `;

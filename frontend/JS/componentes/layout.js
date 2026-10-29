@@ -119,7 +119,7 @@ function renderHeader({ paginaAtiva, pastaIcones, mostrarAlternador }) {
                 <img src="${icone(pastaIcones, 'progresso-tarefas.svg')}" alt="" width="15" height="15">
 
                 <div class="progresso-texto">
-                    <span id="texto-tarefas-cabecalho">Tarefas: <strong>0/0</strong> • <strong>0%</strong></span>
+                    <span id="texto-tarefas-cabecalho">Rotina: <strong>0h</strong></span>
                 </div>
 
                 <div class="trilha-mini">
@@ -430,14 +430,16 @@ function idsLidos() {
 }
 
 function pintarCabecalho(cabecalho) {
-    const tarefas = cabecalho?.tarefas || { concluidas: 0, total: 0, percentual: 0 };
+    const rotina = cabecalho?.rotina || { horas: 0, metaHoras: null, percentual: null };
     const texto = document.getElementById('texto-tarefas-cabecalho');
     const barra = document.getElementById('barra-tarefas-cabecalho');
     if (texto) {
-        texto.innerHTML = `Tarefas: <strong>${tarefas.concluidas}/${tarefas.total}</strong> • <strong>${tarefas.percentual}%</strong>`;
+        texto.innerHTML = rotina.metaHoras
+            ? `Rotina: <strong>${rotina.horas}h/${rotina.metaHoras}h</strong> • <strong>${rotina.percentual}%</strong>`
+            : `Rotina: <strong>${rotina.horas}h</strong>`;
     }
     if (barra) {
-        barra.style.width = `${tarefas.percentual}%`;
+        barra.style.width = `${Math.min(100, rotina.percentual || 0)}%`;
     }
 
     const lista = document.getElementById('lista-notificacoes');
@@ -494,7 +496,7 @@ async function carregarCabecalho() {
         pintarCabecalho(await AcaiApi.obterCabecalho());
     } catch {
         const texto = document.getElementById('texto-tarefas-cabecalho');
-        if (texto) texto.textContent = 'Tarefas indisponíveis';
+        if (texto) texto.textContent = 'Rotina indisponível';
     }
 
     document.querySelector('.link-notificacoes')?.addEventListener('click', () => {

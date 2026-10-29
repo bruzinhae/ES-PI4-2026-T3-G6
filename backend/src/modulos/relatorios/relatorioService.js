@@ -2,15 +2,17 @@
  * relatorios/relatorioService.js — painel da tela de relatórios.
  *
  * Junta, para uma semana, o que já está no banco:
- * sessões de estudo (horas, pomodoro, consistência), disciplinas (progresso e pendências)
- * e metas (marcos cumpridos).
+ * sessões de estudo (horas, pomodoro, consistência), a rotina das disciplinas
+ * e metas (marcos cumpridos). O desempenho das tarefas por disciplina fica na grade.
  */
 
 import { ErroApi } from '../../utils/ErroApi.js';
+import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
 import { Meta } from '../metas/Meta.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 import { Usuario } from '../usuarios/Usuario.js';
+import { minutosDaSemana, resumoRotina } from '../../utils/rotinaSemanal.js';
 
 const ROTULOS_DIA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
@@ -43,20 +45,6 @@ function rotuloPeriodo(inicio, fimExclusivo) {
 
 function indiceSegunda(data) {
     return (data.getDay() + 6) % 7;
-}
-
-function progressoConteudos(conteudos = []) {
-    if (!conteudos.length) {
-        return 0;
-    }
-    const concluidos = conteudos.filter((item) => item.situacao === 'concluido').length;
-    return Math.round((concluidos / conteudos.length) * 100);
-}
-
-function minutosPendentes(conteudos = []) {
-    return conteudos
-        .filter((item) => item.situacao !== 'concluido')
-        .reduce((soma, item) => soma + (Number(item.minutosEstimados) || 0), 0);
 }
 
 function percentualGrupo(metas) {
@@ -156,7 +144,7 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
     const anterior = somarDias(inicio, -7);
     const agora = new Date();
 
-    const [sessoes, sessoesAnteriores, disciplinas, metas, usuario] = await Promise.all([
+    const [sessoes, sessoesAnteriores, disciplinas, blocos, metas, usuario] = await Promise.all([
         SessaoEstudo.find({
             usuarioId,
             inicio: { $gte: inicio, $lt: fim },
@@ -168,6 +156,7 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
             situacao: 'concluida',
         }).select('minutosRealizados inicio').lean(),
         Disciplina.find({ usuarioId, situacao: 'ativa' }).sort({ nome: 1 }).lean(),
+        BlocoFixo.find({ usuarioId, recorrencia: 'semanal' }).select('disciplinaId duracaoMinutos diasSemana').lean(),
         Meta.find({ usuarioId, situacao: { $ne: 'cancelada' } }).lean(),
         Usuario.findById(usuarioId).select('metaSemanalHoras'),
     ]);
@@ -184,24 +173,29 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
     const maxMinutosDia = Math.max(0, ...atual.dias.map((dia) => dia.teoricoMin + dia.praticaMin));
     const eixoMaxHoras = Math.max(2, Math.ceil(maxMinutosDia / 60) || 2);
 
+    const minutosPorDisciplina = new Map();
+    for (const bloco of blocos) {
+        if (!bloco.disciplinaId) continue;
+        const chave = String(bloco.disciplinaId);
+        const soma = bloco.duracaoMinutos * (bloco.diasSemana?.length || 0);
+        minutosPorDisciplina.set(chave, (minutosPorDisciplina.get(chave) || 0) + soma);
+    }
+
+    const metaHoras = usuario?.metaSemanalHoras || null;
+    const rotina = resumoRotina(minutosDaSemana(blocos), metaHoras);
     const linhas = disciplinas.map((disciplina) => {
-        const conteudos = disciplina.conteudos || [];
-        const progresso = progressoConteudos(conteudos);
-        const pendenteMin = minutosPendentes(conteudos);
-        const pendentes = conteudos.filter((item) => item.situacao !== 'concluido').length;
-        const emDia = progresso >= 60 || pendenteMin === 0;
+        const minutosSemana = minutosPorDisciplina.get(String(disciplina._id)) || 0;
+        const parte = resumoRotina(minutosSemana, metaHoras);
         return {
             id: String(disciplina._id),
             nome: disciplina.nome,
-            progresso,
-            pendenteMin,
-            pendentes,
-            emDia,
+            horasSemanais: parte.horas,
+            progresso: parte.percentual,
+            naGrade: minutosSemana > 0,
         };
-    }).sort((a, b) => a.progresso - b.progresso || b.pendenteMin - a.pendenteMin);
+    }).sort((a, b) => b.horasSemanais - a.horasSemanais || a.nome.localeCompare(b.nome, 'pt'));
 
-    const foco = linhas.find((linha) => !linha.emDia) || linhas[0] || null;
-    const metaHoras = usuario?.metaSemanalHoras || null;
+    const foco = linhas.find((linha) => !linha.naGrade) || linhas[0] || null;
     const horasEstudadas = Math.round((atual.minutos / 60) * 10) / 10;
 
     let notaFoco = 'Nenhuma sessão concluída nesta semana.';
@@ -256,17 +250,19 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
         destaque: foco
             ? {
                 nome: foco.nome,
-                status: foco.emDia ? 'No ritmo' : 'Atenção',
-                emDia: foco.emDia,
-                nota: foco.pendentes
-                    ? `${foco.pendentes} conteúdo(s) ainda em aberto`
-                    : 'Conteúdos desta matéria acompanhados',
+                status: foco.naGrade ? 'Na rotina' : 'Sem horário',
+                emDia: foco.naGrade,
+                nota: foco.naGrade
+                    ? (metaHoras
+                        ? `${foco.horasSemanais}h, ${foco.progresso}% da meta semanal de ${metaHoras}h.`
+                        : `${foco.horasSemanais}h na rotina. Defina a meta de horas no perfil.`)
+                    : 'Ainda sem horário fixo na semana.',
             }
             : {
                 nome: 'Sem disciplinas',
                 status: '—',
                 emDia: true,
-                nota: 'Cadastre uma disciplina para acompanhar o semestre.',
+                nota: 'Cadastre uma disciplina para montar a rotina.',
             },
         horasSemana: {
             eixoMaxHoras,
@@ -284,5 +280,6 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
             total: metas.length,
         },
         disciplinas: linhas,
+        rotina,
     };
 }
