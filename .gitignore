@@ -26,3 +26,6 @@ backend/uploads/
 .env
 .env.local
 backend/.env
+
+# Servidor Java (build local)
+servidor/out/
