@@ -13,7 +13,9 @@ A arquitetura segue o exemplo do professor, o *Fazedor de Continhas* (cliente-se
 | `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
 | `Cliente` (console) | `Cliente` |
 
-**Diferença:** os comunicados viajam como **uma linha de JSON** (e não como objetos Java serializados), porque o backend Node não lê a serialização do Java. O campo `"tipo"` faz o papel do `instanceof`. Não há bibliotecas externas (o JSON é lido por `json/Json.java`).
+Além do Fazedor de Continhas, o servidor também aceita os **comandos de texto dos exemplos do outro professor de Java** (`CLIENTESERVIDOR001` e `002`, com `SERVIDOR.java` e `CLIENTE.java`): `OLA`, `DATA`, `HORA` e `FIM`. O `CLIENTE.java` desses exemplos funciona com este servidor sem alteração (veja a seção "Comandos de texto").
+
+**Diferença em relação ao Continhas:** os comunicados viajam como **uma linha de JSON** (e não como objetos Java serializados), porque o backend Node não lê a serialização do Java. O campo `"tipo"` faz o papel do `instanceof`. Não há bibliotecas externas (o JSON é lido por `json/Json.java`).
 
 ## Como o servidor se encaixa
 
@@ -36,6 +38,8 @@ java -cp out br.faculdade.acaistudy.servidor.Servidor            # porta 3000, s
 java -cp out br.faculdade.acaistudy.servidor.Servidor 3100       # outra porta
 java -cp out br.faculdade.acaistudy.servidor.Servidor 3100 0.0.0.0   # (cuidado) escutar em todas as interfaces
 ```
+
+Para o `CLIENTE.java` dos exemplos do outro professor (porta fixa 5000), inicie o servidor passando a porta: `java -cp out br.faculdade.acaistudy.servidor.Servidor 5000`.
 
 Para desativar, digite `desativar` no console. Os clientes conectados recebem um `comunicadoDeDesligamento`.
 
@@ -123,6 +127,36 @@ TCP, texto UTF-8, **uma mensagem por linha** (termina em `\n`). Pode-se mandar v
 - A mesma tarefa pode aparecer em vários espaços: o servidor **ranqueia, não aloca**. Escolher qual tarefa vai em qual espaço, sem repetir, é decisão de quem chama.
 - `parcial: true` quando a tarefa precisa de mais minutos que o espaço; `minutosNoEspaco` é o que caberia ali.
 - `semEspaco`: tarefas ativas que não são candidatas em nenhum espaço. Motivos: `sem_espacos` ou `nenhum_espaco_antes_do_prazo`.
+
+### Comandos de texto (estilo dos exemplos das aulas)
+
+Linhas que não começam com `{` são tratadas como **comandos de texto**, sem JSON. A resposta é **uma linha de texto simples**. Não diferenciam maiúsculas de minúsculas, e espaços nas pontas são ignorados.
+
+| Comando | Resposta |
+| --- | --- |
+| `OLA` | `EU SOU O SERVIDOR DE RANKING DO ACAISTUDY. COMO POSSO AJUDA-LO?` |
+| `DATA` | `DATA:dd/MM/yyyy` (data do servidor, ex.: `DATA:04/11/2026`) |
+| `HORA` | `HORA:HH:mm:ss` (hora do servidor, ex.: `HORA:19:12:35`) |
+| `FIM` | Sem resposta; o servidor encerra a conexão. |
+
+Qualquer outro texto recebe um `erro` em JSON orientando os comandos válidos. Texto e JSON podem ser misturados na mesma conexão, e `OLA` serve como **teste de vida** do servidor.
+
+```bash
+java -cp out br.faculdade.acaistudy.servidor.Cliente OLA localhost 3000     # nosso cliente de console
+```
+
+> Os comandos `COTACAODOLAR` e `COTACAOEURO` do exemplo `002` não foram implementados: dependem de uma API externa e não fazem parte do cálculo de ranking.
+
+**Comparação com os exemplos `001` e `002`:**
+
+| | Exemplos `001`/`002` | Este servidor |
+| --- | --- | --- |
+| Transporte | TCP, linhas de texto, `BufferedReader`/`PrintWriter` | O mesmo |
+| Porta | 5000 fixa | 3000 por padrão; use a porta 5000 para o cliente deles |
+| Uma mensagem por conexão | Sim, e o servidor fecha | Aceita, e também várias na mesma conexão |
+| Atendimento | Um cliente por vez | Uma thread por cliente |
+| Escuta | Todas as interfaces | Só localhost (o segundo argumento muda) |
+| Comandos | `OLA`, `DATA`, `HORA`, cotações | `OLA`, `DATA`, `HORA`, `FIM` e o pedido de ranking em JSON |
 
 ### Outros comunicados
 
