@@ -20,6 +20,7 @@ import java.util.Map;
  * Cliente de console para testar o servidor (equivalente ao Cliente do Fazedor de Continhas).
  *
  * Uso: java ...Cliente ARQUIVO.json [HOST [PORTA]] [--json]
+ *      java ...Cliente OLA|DATA|HORA [HOST [PORTA]]      (comandos de texto simples)
  * Lê um PedidoDeRanking de um arquivo, envia ao servidor e mostra o ranking de cada espaço.
  * Com --json, mostra a resposta bruta. O backend Node usa o mesmo protocolo (ver README).
  */
@@ -42,6 +43,13 @@ public class Cliente
         if (posicionais.isEmpty () || posicionais.size () > 3)
         {
             System.err.println ("Uso esperado: java Cliente ARQUIVO.json [HOST [PORTA]] [--json]\n");
+            return;
+        }
+
+        // Comando de texto (OLA, DATA, HORA): envia a palavra e mostra a resposta, como no CLIENTE.java dos exemplos.
+        if (ComandosDeTexto.responder (posicionais.get (0), java.time.Clock.systemUTC ()) != null)
+        {
+            comandoDeTexto (posicionais);
             return;
         }
 
@@ -78,6 +86,24 @@ public class Cliente
                 mostrar (Campos.comoObjeto (Json.ler (resposta), "resposta"), pedido);
 
             transmissor.println (new PedidoParaSair ().paraJson ());
+        }
+        catch (Exception erro)
+        {
+            System.err.println ("Indique o servidor e a porta corretos! (" + erro.getMessage () + ")\n");
+        }
+    }
+
+    private static void comandoDeTexto (java.util.List<String> posicionais)
+    {
+        try (Socket conexao = new Socket (posicionais.size () > 1 ? posicionais.get (1) : HOST_PADRAO,
+                                          posicionais.size () > 2 ? Integer.parseInt (posicionais.get (2)) : PORTA_PADRAO))
+        {
+            PrintWriter transmissor = new PrintWriter (new OutputStreamWriter (conexao.getOutputStream (), StandardCharsets.UTF_8), true);
+            BufferedReader receptor = new BufferedReader (new InputStreamReader (conexao.getInputStream (), StandardCharsets.UTF_8));
+
+            transmissor.println (posicionais.get (0).toUpperCase ());
+            System.out.println (receptor.readLine ());
+            transmissor.println ("FIM");
         }
         catch (Exception erro)
         {

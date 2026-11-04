@@ -7,6 +7,7 @@ import br.faculdade.acaistudy.servidor.comunicado.PedidoParaSair;
 import br.faculdade.acaistudy.servidor.ranking.CalculadoraDeRanking;
 
 import java.net.Socket;
+import java.time.Clock;
 import java.util.ArrayList;
 
 /**
@@ -66,6 +67,18 @@ public class SupervisoraDeConexao extends Thread
                 if (linha.isBlank ())
                     continue;
 
+                // Comandos de texto dos exemplos da disciplina (OLA, DATA, HORA, FIM).
+                if (ComandosDeTexto.ehPedidoParaSair (linha))
+                    break;
+
+                String respostaDeTexto = ComandosDeTexto.responder (linha, Clock.systemDefaultZone ());
+
+                if (respostaDeTexto != null)
+                {
+                    this.usuario.recebaTexto (respostaDeTexto);
+                    continue;
+                }
+
                 Comunicado comunicado;
 
                 try
@@ -74,7 +87,12 @@ public class SupervisoraDeConexao extends Thread
                 }
                 catch (Exception erro)
                 {
-                    this.usuario.receba (new Erro (mensagemDe (erro, "Pedido inválido")));
+                    // Linha que não é JSON nem comando de texto: orienta quem digitou no console.
+                    String mensagem = linha.trim ().startsWith ("{")
+                        ? mensagemDe (erro, "Pedido inválido")
+                        : "Comando desconhecido. Use OLA, DATA, HORA, FIM ou envie um pedido em JSON.";
+
+                    this.usuario.receba (new Erro (mensagem));
                     continue;
                 }
 

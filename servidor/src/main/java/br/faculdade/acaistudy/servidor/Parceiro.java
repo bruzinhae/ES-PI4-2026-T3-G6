@@ -61,6 +61,20 @@ public class Parceiro
             throw new Exception ("Erro de transmissao");
     }
 
+    // Envia uma resposta em texto simples (uma linha), como nos comandos OLA, DATA e HORA.
+    public synchronized void recebaTexto (String texto) throws Exception
+    {
+        if (texto == null)
+            throw new Exception ("Texto ausente");
+
+        this.transmissor.print (texto.replace ('\n', ' ').replace ('\r', ' '));
+        this.transmissor.print ('\n');
+        this.transmissor.flush ();
+
+        if (this.transmissor.checkError ())
+            throw new Exception ("Erro de transmissao");
+    }
+
     // Lê a próxima linha enviada pelo cliente. Devolve null quando o cliente fechou a conexão.
     public String envie () throws Exception
     {
