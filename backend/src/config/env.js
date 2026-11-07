@@ -33,6 +33,9 @@ dotenv.config({
 // `Number(...)` porque tudo em process.env é string.
 const porta = Number(process.env.PORT) || 3001;
 
+const portaRanking = Number(process.env.RANKING_PORT) || 3000;
+const timeoutRanking = Number(process.env.RANKING_TIMEOUT_MS) || 5000;
+
 // Porta do SMTP. 587 = STARTTLS (Gmail e a maioria dos provedores); 465 = TLS direto.
 const portaSmtp = Number(process.env.SMTP_PORT) || 587;
 
@@ -44,6 +47,13 @@ const usuarioSmtp = process.env.SMTP_USER || '';
 
 export const env = {
     porta,
+
+    // Servidor Java que calcula o ranking de tarefas por espaço livre.
+    rankingJava: {
+        host: process.env.RANKING_HOST || '127.0.0.1',
+        port: portaRanking,
+        timeoutMs: timeoutRanking,
+    },
 
     // Endereço do MongoDB. Sem nenhuma configuração, usa o Mongo local
     // (o do docker-compose.yml do backend).

@@ -83,7 +83,15 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | GET | `/api/canvas/retorno` | Volta do Canvas depois da autorização. Redireciona para a tela de configurações |
 | POST | `/api/canvas/sincronizar` 🔒 | Atualiza disciplinas e atividades já ligadas ao Canvas |
 | DELETE | `/api/canvas` 🔒 | Remove a conexão. O que já foi importado permanece |
+| POST | `/api/ranking` 🔒 | Envia espaços livres, tarefas e preferências ao servidor Java e devolve o ranking |
 | GET | `/api/saude` | Health check |
+
+O corpo de `POST /api/ranking` segue o protocolo descrito em [servidor/README.md](../servidor/README.md):
+`{ espacos, tarefas, agora?, preferencias?, limite? }`. O chamador deve montar os espaços livres
+da agenda e enviar as tarefas pendentes; a API encaminha o pedido ao servidor Java e retorna
+`{ tipo: "ranking", porEspaco, semEspaco }`. A rota exige autenticação. Configure
+`RANKING_HOST`, `RANKING_PORT` e `RANKING_TIMEOUT_MS` no `.env` se o servidor Java não estiver
+em `127.0.0.1:3000`. Se o serviço estiver indisponível, a API responde com erro HTTP explícito.
 
 Campos do perfil: `nome, email, instituicao, curso, semestre, turno, metaSemanalHoras, onboardingConcluido`.
 A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`. Sem foto, `urlAvatar` é `null` e o frontend mostra o ícone padrão.
@@ -107,6 +115,8 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
 - Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|verde|ambar`; conteúdos embutidos).
   `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
+- A API Node atua como cliente TCP do servidor Java de ranking. O Node autentica o chamador e encaminha o pedido;
+  os espaços livres e tarefas são informados pelo chamador, não são calculados nem persistidos por essa integração.
 - Metas seguem `Arquivos/Dicionário de dados/metas.json`. `progresso` é a fração de marcos `atingido`;
   em hábito sem marcos, é as horas estudadas na semana sobre `metaSemanalHoras`. O painel não inventa previsão de IA:
   a consistência usa as sessões já encerradas e o ritmo é a média do progresso das metas ativas.

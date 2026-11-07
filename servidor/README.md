@@ -210,7 +210,17 @@ function pedirRanking(pedido, porta = 3000) {
 }
 ```
 
-A integração com a API (rota, montagem dos espaços livres, tratamento do servidor fora do ar) é a issue #35/#36 e não faz parte desta entrega.
+## Integração com a API Node
+
+A API Node funciona como cliente TCP e disponibiliza `POST /api/ranking` (autenticado). Envie
+`espacos` e `tarefas`, com `agora`, `preferencias` e `limite` opcionais; o formato é o mesmo
+do pedido de ranking descrito acima, sem o campo `tipo` (a API o acrescenta ao encaminhar).
+A resposta da rota mantém o formato `{ "tipo": "ranking", "porEspaco": [...], "semEspaco": [...] }`.
+
+Por padrão, a API conecta em `127.0.0.1:3000`, que corresponde à configuração padrão deste
+servidor. No backend, configure `RANKING_HOST`, `RANKING_PORT` e `RANKING_TIMEOUT_MS` no `.env`
+para alterar o destino e o tempo máximo de resposta. A rota não monta os espaços livres nem
+consulta tarefas no banco: o chamador Node deve enviar esses dados no corpo da requisição.
 
 ## Limitações conhecidas (versão inicial)
 

@@ -52,7 +52,9 @@ npm run dev
 
 API única em Node.js (`backend/`), organizada em módulos (`backend/src/modulos/`). Veja [backend/README.md](backend/README.md).
 
-O servidor de cálculo do calendário (Java, socket) ficará separado e é chamado por esta API.
+O servidor Java de ranking é um serviço TCP separado. Inicie-o na porta 3000 antes de usar
+`POST /api/ranking` no backend Node; a API encaminha o pedido autenticado ao Java. Veja
+[servidor/README.md](servidor/README.md) e [backend/README.md](backend/README.md) para detalhes.
 
 ## Frontend
 
