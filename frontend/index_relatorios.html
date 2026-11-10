@@ -11,8 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=17">
-    <link rel="stylesheet" href="CSS/style_relatorios.css?v=2">
+    <link rel="stylesheet" href="CSS/layout.css?v=20">
+    <link rel="stylesheet" href="CSS/style_relatorios.css?v=7">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
@@ -37,7 +37,7 @@
                     <h1>Dashboard de Desempenho & Estatísticas</h1>
 
                     <p>
-                        Monitore seu ritmo de estudo, cumprimento de metas e defasagens por disciplina<br>com insights gerados pela Sofia IA.
+                        Monitore seu ritmo de estudo e o aproveitamento da rotina.<br>A Sofia comenta a semana. O ajuste da grade fica em outro lugar.
                     </p>
 
                 </div>
@@ -271,26 +271,31 @@
                         <div class="insight-texto">
 
                             <div class="insight-titulo">
-                                <h3>Insight Açaí IA (Sofia)</h3>
-                                <span class="selo-cinza">Otimização Ativa</span>
+                                <h3>Sofia</h3>
+                                <span class="selo-cinza" id="selo-sofia">Aguardando análise</span>
                             </div>
 
-                            <p id="texto-insight">Carregando o resumo da semana...</p>
+                            <p id="texto-insight">Clique em Analisar para a Sofia ler a rotina desta semana.</p>
+
+                            <ul class="lista-sugestoes" id="lista-sugestoes" hidden></ul>
 
                         </div>
 
                     </div>
 
                     <div class="insight-acoes">
-                        <a class="botao-claro" href="index_disciplinas.html">Ver disciplinas</a>
-
-                        <a class="botao-roxo botao-aprovar" href="index_disciplinas.html">
-                            <img src="assets/icons/relatorios/aprovar.svg" alt="" width="17" height="17">
-                            <span>Ajustar grade</span>
-                        </a>
+                        <button type="button" class="botao-roxo" id="botao-analisar">Analisar</button>
                     </div>
 
                 </div>
+
+                <div class="perguntas-sofia" id="perguntas-sofia"></div>
+                <p class="aviso-pergunta" id="conversa-aviso" hidden></p>
+                <form id="form-conversa" class="form-conversa" hidden>
+                    <input type="text" name="texto" maxlength="1000" required placeholder="Pergunte sobre a rotina de estudos desta semana..." aria-label="Pergunta para a Sofia">
+                    <button type="submit" class="botao-roxo">Perguntar</button>
+                </form>
+                <p class="nota-tema" id="nota-tema" hidden>A Sofia só responde sobre a rotina de estudos desta semana.</p>
 
             </section>
 
@@ -298,9 +303,9 @@
 
     </main>
 
-    <script src="JS/users/api.js?v=10"></script>
-    <script src="JS/componentes/layout.js?v=23"></script>
-    <script src="JS/script_relatorios.js?v=4"></script>
+    <script src="JS/users/api.js?v=13"></script>
+    <script src="JS/componentes/layout.js?v=27"></script>
+    <script src="JS/script_relatorios.js?v=8"></script>
 
 </body>
 </html>

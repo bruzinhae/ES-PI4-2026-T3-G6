@@ -219,6 +219,28 @@ const AcaiApi = (function () {
         return requisitar(`/relatorios${consulta}`);
     }
 
+    function obterSugestoesSofia(inicio) {
+        const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
+        return requisitar(`/relatorios/sofia${consulta}`);
+    }
+
+    function listarConversaSofia(inicio) {
+        const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
+        return requisitar(`/relatorios/sofia/conversa${consulta}`);
+    }
+
+    function abrirConversaSofia(inicio) {
+        const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
+        return requisitar(`/relatorios/sofia/conversa/abrir${consulta}`, { metodo: 'POST' });
+    }
+
+    function enviarConversaSofia(inicio, texto) {
+        return requisitar('/relatorios/sofia/conversa', {
+            metodo: 'POST',
+            corpo: { inicio, texto },
+        });
+    }
+
     function obterConfiguracoes() {
         return requisitar('/configuracoes');
     }
@@ -347,9 +369,29 @@ const AcaiApi = (function () {
         }
     }
 
-    // Página para onde o usuário vai depois de entrar: grade normal ou onboarding.
+    // Página para onde o usuário vai depois de entrar: grade normal ou o passo do onboarding
+    // em que parou. A ordem segue o que a conta realmente usa: semestre, horários, metas, foco.
     async function paginaInicial() {
-        return (await onboardingConcluido()) ? 'index_calendario.html' : 'index_onboarding_horarios.html';
+        if (await onboardingConcluido()) {
+            return 'index_calendario.html';
+        }
+
+        const passos = {
+            semestre: 'index_onboarding_semestre.html',
+            horarios: 'index_onboarding_horarios.html',
+            metas: 'index_onboarding_metas.html',
+            foco: 'index_onboarding_foco.html',
+        };
+
+        let passo = '';
+
+        try {
+            passo = localStorage.getItem('acaistudy-onboarding-passo') || '';
+        } catch {
+            passo = '';
+        }
+
+        return passos[passo] || passos.semestre;
     }
 
     return {
@@ -374,6 +416,10 @@ const AcaiApi = (function () {
         atualizarDisciplina,
         excluirDisciplina,
         obterRelatorio,
+        obterSugestoesSofia,
+        listarConversaSofia,
+        abrirConversaSofia,
+        enviarConversaSofia,
         obterCabecalho,
         obterConfiguracoes,
         salvarConfiguracoes,

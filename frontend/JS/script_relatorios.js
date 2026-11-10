@@ -166,10 +166,28 @@ renderLayout({
             : cobertura;
     }
 
+    // A Sofia responde depois do painel. O contador descarta a resposta de uma semana que já saiu da tela.
+    let ultimoPedidoSofia = 0;
+
+    function pintarSugestoes(sugestoes) {
+        const lista = document.getElementById('lista-sugestoes');
+        lista.hidden = !sugestoes.length;
+        lista.innerHTML = sugestoes.map((sugestao) => `
+            <li class="sugestao-sofia prioridade-${escapar(sugestao.prioridade)}">
+                <div class="sugestao-topo">
+                    <strong>${escapar(sugestao.titulo)}</strong>
+                    <span>${escapar(sugestao.dia)}</span>
+                </div>
+                <p>${escapar(sugestao.detalhe)}</p>
+            </li>`).join('');
+    }
+
     async function carregar() {
         try {
-            const { relatorio } = await AcaiApi.obterRelatorio(chaveData(inicioSemana));
+            const inicio = chaveData(inicioSemana);
+            const { relatorio } = await AcaiApi.obterRelatorio(inicio);
             pintar(relatorio);
+            await prepararSofia(inicio);
         } catch (erro) {
             document.getElementById('kpi-foco-nota').textContent = erro.message || 'Não foi possível carregar o relatório.';
         }
@@ -188,6 +206,117 @@ renderLayout({
     });
     document.getElementById('botao-exportar')?.addEventListener('click', () => {
         window.print();
+    });
+
+    const listaPerguntas = document.getElementById('perguntas-sofia');
+    const avisoConversa = document.getElementById('conversa-aviso');
+    const formConversa = document.getElementById('form-conversa');
+    const botaoAnalisar = document.getElementById('botao-analisar');
+    const notaTema = document.getElementById('nota-tema');
+    const seloSofia = document.getElementById('selo-sofia');
+    const textoInsight = document.getElementById('texto-insight');
+
+    function mostrarAvisoConversa(texto) {
+        avisoConversa.hidden = !texto;
+        avisoConversa.textContent = texto || '';
+    }
+
+    function mostrarPerguntas(visivel) {
+        formConversa.hidden = !visivel;
+        notaTema.hidden = !visivel;
+        botaoAnalisar.hidden = visivel;
+    }
+
+    function pintarPerguntas(mensagens) {
+        const seguidas = (mensagens || []).slice(1);
+        listaPerguntas.innerHTML = seguidas.map((mensagem) => `
+            <p class="${mensagem.papel === 'usuario' ? 'pergunta-sofia' : 'resposta-sofia'}">${escapar(mensagem.texto)}</p>
+        `).join('');
+    }
+
+    function aguardandoAnalise() {
+        textoInsight.textContent = 'Clique em Analisar para a Sofia ler a rotina desta semana.';
+        seloSofia.textContent = 'Aguardando análise';
+        seloSofia.title = '';
+        pintarSugestoes([]);
+        pintarPerguntas([]);
+        mostrarAvisoConversa('');
+        mostrarPerguntas(false);
+        botaoAnalisar.disabled = false;
+        botaoAnalisar.textContent = 'Analisar';
+    }
+
+    async function prepararSofia(inicio) {
+        aguardandoAnalise();
+        try {
+            const { conversa } = await AcaiApi.listarConversaSofia(inicio);
+            if (inicio !== chaveData(inicioSemana)) return;
+            const abertura = conversa.mensagens?.[0];
+            if (!abertura) return;
+            textoInsight.textContent = abertura.texto;
+            seloSofia.textContent = 'Análise da semana';
+            pintarPerguntas(conversa.mensagens);
+            mostrarPerguntas(true);
+        } catch (erro) {
+            if (inicio !== chaveData(inicioSemana)) return;
+            mostrarAvisoConversa(erro.message || 'Não foi possível carregar a análise salva.');
+        }
+    }
+
+    async function analisarSemana() {
+        const inicio = chaveData(inicioSemana);
+        const pedido = ++ultimoPedidoSofia;
+        botaoAnalisar.disabled = true;
+        botaoAnalisar.textContent = 'Analisando...';
+        seloSofia.textContent = 'Analisando a semana...';
+        mostrarAvisoConversa('');
+        try {
+            const { sofia } = await AcaiApi.obterSugestoesSofia(inicio);
+            if (pedido !== ultimoPedidoSofia) return;
+            const { conversa } = await AcaiApi.abrirConversaSofia(inicio);
+            if (pedido !== ultimoPedidoSofia) return;
+            textoInsight.textContent = sofia.resumo;
+            seloSofia.textContent = {
+                leve: 'Carga leve',
+                equilibrada: 'Carga equilibrada',
+                pesada: 'Carga pesada',
+                sobrecarregada: 'Sobrecarga',
+            }[sofia.nivelCarga] || 'Sem atividades';
+            pintarSugestoes(sofia.sugestoes);
+            pintarPerguntas(conversa.mensagens);
+            mostrarPerguntas(true);
+        } catch (erro) {
+            if (pedido !== ultimoPedidoSofia) return;
+            seloSofia.textContent = 'Sofia indisponível';
+            seloSofia.title = erro.message || '';
+            mostrarAvisoConversa(erro.message || 'A Sofia não conseguiu analisar a semana.');
+            botaoAnalisar.disabled = false;
+            botaoAnalisar.textContent = 'Analisar';
+        }
+    }
+
+    botaoAnalisar?.addEventListener('click', analisarSemana);
+
+    formConversa?.addEventListener('submit', async (evento) => {
+        evento.preventDefault();
+        const campo = formConversa.elements.texto;
+        const texto = campo.value.trim();
+        if (texto.length < 2) return;
+        const botao = formConversa.querySelector('button');
+        campo.disabled = true;
+        botao.disabled = true;
+        mostrarAvisoConversa('');
+        try {
+            const { conversa } = await AcaiApi.enviarConversaSofia(chaveData(inicioSemana), texto);
+            campo.value = '';
+            pintarPerguntas(conversa.mensagens);
+        } catch (erro) {
+            mostrarAvisoConversa(erro.message || 'A Sofia não conseguiu responder.');
+        } finally {
+            campo.disabled = false;
+            botao.disabled = false;
+            campo.focus();
+        }
     });
 
     carregar();

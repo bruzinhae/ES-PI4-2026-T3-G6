@@ -199,7 +199,7 @@ function renderSidebar({ paginaAtiva, pastaIcones }) {
         <div class="grupo-lateral">
             <p class="rotulo-lateral rotulo-pequeno">Ações Rápidas</p>
 
-            <button type="button" class="botao-sessao" title="Iniciar Sessão">
+            <button type="button" class="botao-sessao" id="botao-iniciar-sessao" title="Iniciar Sessão">
                 <img src="${icone(pastaIcones, 'iniciar.svg')}" alt="" width="8.25" height="10.5">
                 <span>Iniciar Sessão</span>
             </button>
@@ -225,14 +225,20 @@ ${navegacao}
 
 
         <div class="rodape-lateral">
-            <div class="pomodoro" title="Pomodoro: 25:00">
-                <div>
+            <div class="pomodoro" id="pomodoro">
+                <button type="button" class="pomodoro-alternar" id="pomodoro-alternar" title="Iniciar foco">
                     <img src="${icone(pastaIcones, 'pomodoro.svg')}" alt="" width="13.5" height="15.75">
-                    <span>Pomodoro: 25:00</span>
-                </div>
-
-                <button type="button">Configurar</button>
+                    <span id="pomodoro-rotulo">25:00</span>
+                </button>
+                <button type="button" class="pomodoro-configurar" id="pomodoro-configurar">Configurar</button>
             </div>
+            <form class="pomodoro-painel" id="pomodoro-painel" hidden>
+                <label>Foco <input id="pomodoro-foco" type="number" min="1" max="180" value="25"> min</label>
+                <label>Pausa <input id="pomodoro-pausa" type="number" min="1" max="60" value="5"> min</label>
+                <label>Pausa longa <input id="pomodoro-pausa-longa" type="number" min="1" max="60" value="15"> min</label>
+                <label>Ciclos <input id="pomodoro-ciclos" type="number" min="2" max="8" value="4"></label>
+                <button type="submit">Salvar</button>
+            </form>
 
             <button type="button" class="botao-recolher" id="botao-recolher-sidebar" aria-label="Minimizar menu" aria-controls="barra-lateral" aria-expanded="true" title="Minimizar menu">
                 <img src="${icone(pastaIcones, 'recolher.svg')}" alt="" width="14" height="14">
@@ -527,6 +533,325 @@ async function carregarDisciplinasLaterais() {
     }
 }
 
+const CHAVE_POMODORO = 'acaistudy-pomodoro';
+
+function padraoPomodoro() {
+    return {
+        focoMin: 25,
+        pausaMin: 5,
+        pausaLongaMin: 15,
+        ciclos: 4,
+        fase: 'foco',
+        rodando: false,
+        terminaEm: null,
+        restanteMs: 25 * 60 * 1000,
+        focosNoCiclo: 0,
+        sessaoAtiva: false,
+        aviso: null,
+    };
+}
+
+function lerPomodoro() {
+    try {
+        const salvo = JSON.parse(localStorage.getItem(CHAVE_POMODORO) || 'null');
+        if (!salvo || typeof salvo !== 'object') return padraoPomodoro();
+        return { ...padraoPomodoro(), ...salvo };
+    } catch {
+        return padraoPomodoro();
+    }
+}
+
+function gravarPomodoro(estado) {
+    localStorage.setItem(CHAVE_POMODORO, JSON.stringify(estado));
+}
+
+function minutosDaFase(estado) {
+    if (estado.fase === 'pausa') return estado.pausaMin;
+    if (estado.fase === 'pausaLonga') return estado.pausaLongaMin;
+    return estado.focoMin;
+}
+
+function restanteDoPomodoro(estado) {
+    if (estado.rodando && estado.terminaEm) {
+        return Math.max(0, estado.terminaEm - Date.now());
+    }
+    return Math.max(0, Number(estado.restanteMs) || 0);
+}
+
+function formatarRelogio(ms) {
+    const total = Math.ceil(ms / 1000);
+    const minutos = Math.floor(total / 60);
+    const segundos = total % 60;
+    return `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+}
+
+function tocarSinalPomodoro() {
+    try {
+        const audio = new AudioContext();
+        const oscilador = audio.createOscillator();
+        const ganho = audio.createGain();
+        oscilador.frequency.value = 880;
+        ganho.gain.setValueAtTime(0.04, audio.currentTime);
+        oscilador.connect(ganho);
+        ganho.connect(audio.destination);
+        oscilador.start();
+        oscilador.stop(audio.currentTime + 0.2);
+        oscilador.onended = () => audio.close();
+    } catch {
+        // o aviso na tela continua valendo se o navegador bloquear o som
+    }
+}
+
+function mensagemPomodoro(faseEncerrada, proxima, minutos) {
+    const tempo = formatarRelogio(minutos * 60000);
+    if (faseEncerrada === 'foco') {
+        const longa = proxima === 'pausaLonga';
+        return {
+            selo: longa ? 'Pausa longa programada' : 'Pausa programada',
+            titulo: longa ? 'Hora da pausa longa' : 'Hora de pausar',
+            texto: longa
+                ? 'Os ciclos de foco fecharam. Levante, beba água e descanse antes do próximo bloco.'
+                : 'O foco acabou. Uma pausa curta ajuda a manter o ritmo.',
+            tempo,
+            seguir: longa ? 'Começar pausa longa' : 'Começar pausa',
+        };
+    }
+    return {
+        selo: 'Pausa encerrada',
+        titulo: 'De volta ao foco',
+        texto: 'A pausa acabou. O próximo bloco de estudo está pronto.',
+        tempo,
+        seguir: 'Começar foco',
+    };
+}
+
+let relogioPomodoro = null;
+let verificarPomodoroAtual = () => {};
+let avisoPomodoroLigado = false;
+
+function inicializarPomodoro() {
+    const caixa = document.getElementById('pomodoro');
+    const rotulo = document.getElementById('pomodoro-rotulo');
+    const alternar = document.getElementById('pomodoro-alternar');
+    const configurar = document.getElementById('pomodoro-configurar');
+    const painel = document.getElementById('pomodoro-painel');
+    const botaoSessao = document.getElementById('botao-iniciar-sessao');
+    if (!caixa || !rotulo || !alternar) return;
+
+    if (relogioPomodoro) clearInterval(relogioPomodoro);
+
+    let estado = lerPomodoro();
+    document.getElementById('pomodoro-aviso')?.remove();
+    const aviso = document.createElement('section');
+    aviso.id = 'pomodoro-aviso';
+    aviso.className = 'pomodoro-aviso';
+    aviso.hidden = true;
+    aviso.setAttribute('role', 'dialog');
+    aviso.setAttribute('aria-modal', 'true');
+    aviso.setAttribute('aria-labelledby', 'pomodoro-aviso-titulo');
+    aviso.innerHTML = `
+        <div class="pomodoro-aviso-cartao">
+            <span class="pomodoro-aviso-selo" id="pomodoro-aviso-selo">Pausa programada</span>
+            <strong id="pomodoro-aviso-titulo">Hora de pausar</strong>
+            <p id="pomodoro-aviso-tempo">05:00</p>
+            <p id="pomodoro-aviso-texto"></p>
+            <div class="pomodoro-aviso-acoes">
+                <button type="button" class="pomodoro-aviso-agora" id="pomodoro-aviso-fechar">Agora não</button>
+                <button type="button" class="pomodoro-aviso-seguir" id="pomodoro-aviso-seguir">Começar pausa</button>
+            </div>
+        </div>`;
+    document.body.appendChild(aviso);
+    aviso.querySelector('#pomodoro-aviso-fechar').onclick = () => {
+        estado.aviso = null;
+        gravarPomodoro(estado);
+        aviso.hidden = true;
+    };
+    aviso.querySelector('#pomodoro-aviso-seguir').onclick = () => {
+        estado.aviso = null;
+        aviso.hidden = true;
+        iniciarPomodoro();
+    };
+
+    function mostrarAviso() {
+        if (!estado.aviso) {
+            aviso.hidden = true;
+            return;
+        }
+        aviso.querySelector('#pomodoro-aviso-selo').textContent = estado.aviso.selo || 'Pausa programada';
+        aviso.querySelector('#pomodoro-aviso-titulo').textContent = estado.aviso.titulo;
+        aviso.querySelector('#pomodoro-aviso-tempo').textContent = estado.aviso.tempo || '';
+        aviso.querySelector('#pomodoro-aviso-texto').textContent = estado.aviso.texto;
+        aviso.querySelector('#pomodoro-aviso-seguir').textContent = estado.aviso.seguir;
+        aviso.hidden = false;
+    }
+
+    function pintar() {
+        const restante = restanteDoPomodoro(estado);
+        const nomes = { foco: 'Foco', pausa: 'Pausa', pausaLonga: 'Pausa longa' };
+        const nome = nomes[estado.fase] || 'Foco';
+        rotulo.textContent = `${nome} ${formatarRelogio(restante)}`;
+        alternar.title = estado.rodando ? `Pausar ${nome.toLowerCase()}` : `Iniciar ${nome.toLowerCase()}`;
+        caixa.classList.toggle('rodando', estado.rodando);
+        if (botaoSessao) {
+            const texto = !estado.sessaoAtiva
+                ? 'Iniciar Sessão'
+                : estado.rodando
+                    ? 'Encerrar sessão'
+                    : 'Retomar sessão';
+            const rotuloBotao = botaoSessao.querySelector('span');
+            if (rotuloBotao) rotuloBotao.textContent = texto;
+            botaoSessao.title = texto;
+            botaoSessao.classList.toggle('em-andamento', Boolean(estado.sessaoAtiva));
+        }
+        mostrarAviso();
+    }
+
+    function concluirFase() {
+        const encerrada = estado.fase;
+        const focos = encerrada === 'foco' ? estado.focosNoCiclo + 1 : estado.focosNoCiclo;
+        const longa = encerrada === 'foco' && focos >= estado.ciclos;
+        const proxima = encerrada === 'foco' ? (longa ? 'pausaLonga' : 'pausa') : 'foco';
+        const minutos = proxima === 'pausaLonga'
+            ? estado.pausaLongaMin
+            : proxima === 'pausa'
+                ? estado.pausaMin
+                : estado.focoMin;
+        estado = {
+            ...estado,
+            fase: proxima,
+            focosNoCiclo: encerrada === 'foco' ? (longa ? 0 : focos) : estado.focosNoCiclo,
+            rodando: false,
+            terminaEm: null,
+            restanteMs: minutos * 60000,
+            aviso: mensagemPomodoro(encerrada, proxima, minutos),
+        };
+        gravarPomodoro(estado);
+        pintar();
+        tocarSinalPomodoro();
+    }
+
+    function iniciarPomodoro() {
+        const restante = restanteDoPomodoro(estado) || minutosDaFase(estado) * 60000;
+        estado = {
+            ...estado,
+            sessaoAtiva: true,
+            rodando: true,
+            terminaEm: Date.now() + restante,
+            restanteMs: restante,
+            aviso: null,
+        };
+        gravarPomodoro(estado);
+        pintar();
+    }
+
+    function comecarSessao() {
+        const restante = estado.focoMin * 60000;
+        estado = {
+            ...estado,
+            sessaoAtiva: true,
+            fase: 'foco',
+            focosNoCiclo: 0,
+            rodando: true,
+            terminaEm: Date.now() + restante,
+            restanteMs: restante,
+            aviso: null,
+        };
+        gravarPomodoro(estado);
+        if (painel) painel.hidden = true;
+        pintar();
+    }
+
+    function encerrarSessao() {
+        estado = {
+            ...estado,
+            sessaoAtiva: false,
+            fase: 'foco',
+            focosNoCiclo: 0,
+            rodando: false,
+            terminaEm: null,
+            restanteMs: estado.focoMin * 60000,
+            aviso: null,
+        };
+        gravarPomodoro(estado);
+        pintar();
+    }
+
+    function pausarPomodoro() {
+        estado = {
+            ...estado,
+            rodando: false,
+            terminaEm: null,
+            restanteMs: restanteDoPomodoro(estado),
+        };
+        gravarPomodoro(estado);
+        pintar();
+    }
+
+    function verificarFim() {
+        if (estado.rodando && restanteDoPomodoro(estado) <= 0) {
+            concluirFase();
+        } else {
+            pintar();
+        }
+    }
+
+    alternar.addEventListener('click', () => {
+        if (estado.rodando) pausarPomodoro();
+        else iniciarPomodoro();
+    });
+
+    botaoSessao?.addEventListener('click', () => {
+        if (!estado.sessaoAtiva) comecarSessao();
+        else if (estado.rodando) encerrarSessao();
+        else iniciarPomodoro();
+    });
+
+    configurar?.addEventListener('click', () => {
+        painel.hidden = !painel.hidden;
+        if (!painel.hidden) {
+            document.getElementById('pomodoro-foco').value = estado.focoMin;
+            document.getElementById('pomodoro-pausa').value = estado.pausaMin;
+            document.getElementById('pomodoro-pausa-longa').value = estado.pausaLongaMin;
+            document.getElementById('pomodoro-ciclos').value = estado.ciclos;
+        }
+    });
+
+    painel?.addEventListener('submit', (evento) => {
+        evento.preventDefault();
+        const numero = (id, minimo, maximo, atual) => {
+            const valor = Number(document.getElementById(id).value);
+            if (!Number.isFinite(valor)) return atual;
+            return Math.min(maximo, Math.max(minimo, Math.round(valor)));
+        };
+        estado = {
+            ...estado,
+            focoMin: numero('pomodoro-foco', 1, 180, estado.focoMin),
+            pausaMin: numero('pomodoro-pausa', 1, 60, estado.pausaMin),
+            pausaLongaMin: numero('pomodoro-pausa-longa', 1, 60, estado.pausaLongaMin),
+            ciclos: numero('pomodoro-ciclos', 2, 8, estado.ciclos),
+        };
+        if (!estado.rodando) {
+            estado.restanteMs = minutosDaFase(estado) * 60000;
+            estado.terminaEm = null;
+        }
+        gravarPomodoro(estado);
+        painel.hidden = true;
+        pintar();
+    });
+
+    if (estado.rodando && restanteDoPomodoro(estado) <= 0) concluirFase();
+    else pintar();
+
+    relogioPomodoro = setInterval(verificarFim, 250);
+    verificarPomodoroAtual = verificarFim;
+    if (!avisoPomodoroLigado) {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') verificarPomodoroAtual();
+        });
+        avisoPomodoroLigado = true;
+    }
+}
+
 function renderLayout(config = {}) {
     const {
         paginaAtiva = 'relatorios',
@@ -550,6 +875,7 @@ function renderLayout(config = {}) {
     menus.perfil = inicializarPerfil(() => menus.notificacoes?.fechar());
     carregarDisciplinasLaterais();
     carregarCabecalho();
+    inicializarPomodoro();
     window.addEventListener('acaistudy:disciplinas-atualizadas', (evento) => {
         renderizarDisciplinasLaterais(evento.detail?.disciplinas || []);
     });

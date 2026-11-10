@@ -1,6 +1,92 @@
 /**
- * Menus do header de onboarding (ajuda e perfil).
+ * Onboarding compartilhado.
+ * A ordem dos passos segue o que a conta usa na grade:
+ * semestre e disciplinas, blocos fixos, metas e preferências da semana.
+ * A Sofia não monta a grade: ela só analisa os relatórios.
  */
+const AVATAR_PADRAO_ONBOARDING = 'assets/icons/avatar-padrao.svg';
+
+function aplicarUsuarioNoCabecalho(usuario) {
+    if (!usuario) {
+        return;
+    }
+
+    const nome = usuario.nome || 'Sua conta';
+    const curso = usuario.curso || 'Curso ainda não informado';
+    const avatar = usuario.urlAvatar || AVATAR_PADRAO_ONBOARDING;
+
+    document.querySelectorAll('.nome-usuario').forEach((elemento) => {
+        elemento.textContent = nome;
+    });
+
+    document.querySelectorAll('.curso-usuario').forEach((elemento) => {
+        elemento.textContent = curso;
+    });
+
+    document.querySelectorAll('.avatar-usuario').forEach((imagem) => {
+        imagem.src = avatar;
+        imagem.alt = '';
+    });
+
+    const botao = document.getElementById('botao-perfil');
+
+    if (botao) {
+        botao.setAttribute('aria-label', `Perfil e configurações — ${nome}`);
+    }
+}
+
+function marcarPassoOnboarding(passo) {
+    try {
+        localStorage.setItem('acaistudy-onboarding-passo', passo);
+    } catch {
+        // Sem armazenamento local o login volta ao primeiro passo.
+    }
+}
+
+async function carregarCabecalhoOnboarding() {
+    try {
+        const bruto = localStorage.getItem('acaistudy-usuario');
+
+        if (bruto) {
+            aplicarUsuarioNoCabecalho(JSON.parse(bruto));
+        }
+    } catch {
+        // O próximo pedido à API preenche o cabeçalho.
+    }
+
+    try {
+        const usuario = await AcaiApi.obterUsuarioAtual();
+        aplicarUsuarioNoCabecalho(usuario);
+        return usuario;
+    } catch {
+        return null;
+    }
+}
+
+async function encerrarSessaoOnboarding() {
+    await AcaiApi.sair();
+    window.location.href = 'index_login.html';
+}
+
+async function salvarESair(botao) {
+    if (botao) {
+        botao.disabled = true;
+    }
+
+    try {
+        if (typeof window.salvarPassoOnboarding === 'function') {
+            await window.salvarPassoOnboarding();
+        }
+
+        await encerrarSessaoOnboarding();
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível salvar este passo.');
+
+        if (botao) {
+            botao.disabled = false;
+        }
+    }
+}
 function criarMenuSuspenso({ menuSeletor, botaoId, painelId, aoAbrir }) {
     const menu = document.querySelector(menuSeletor);
     const botao = document.getElementById(botaoId);
@@ -68,6 +154,34 @@ function inicializarMenusOnboarding() {
         aoAbrir: () => menus.ajuda?.fechar(),
     });
 
+    document.getElementById('salvar-sair')?.addEventListener('click', (evento) => {
+        salvarESair(evento.currentTarget);
+    });
+
+    document.querySelector('.botao-sair')?.addEventListener('click', (evento) => {
+        evento.preventDefault();
+        salvarESair(evento.currentTarget);
+    });
+
+    document.getElementById('pular-onboarding')?.addEventListener('click', async (evento) => {
+        const botao = evento.currentTarget;
+        botao.disabled = true;
+
+        try {
+            if (typeof window.salvarPassoOnboarding === 'function') {
+                await window.salvarPassoOnboarding();
+            }
+        } catch (erro) {
+            AcaiAvisos.mostrar(`Não foi possível salvar este passo: ${erro.message}`);
+            botao.disabled = false;
+            return;
+        }
+
+        finalizarOnboarding(botao);
+    });
+
+    carregarCabecalhoOnboarding();
+
     return menus;
 }
 
@@ -96,6 +210,9 @@ async function finalizarOnboarding(botao) {
 
 window.inicializarMenusOnboarding = inicializarMenusOnboarding;
 window.finalizarOnboarding = finalizarOnboarding;
+window.marcarPassoOnboarding = marcarPassoOnboarding;
+window.aplicarUsuarioNoCabecalho = aplicarUsuarioNoCabecalho;
+window.carregarCabecalhoOnboarding = carregarCabecalhoOnboarding;
 
 // Quem já concluiu o onboarding (flag no banco) não vê mais estas telas: vai para a grade.
 if (window.AcaiApi) {

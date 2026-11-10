@@ -84,4 +84,15 @@ export const env = {
         clientId: process.env.CANVAS_CLIENT_ID || '',
         clientSecret: process.env.CANVAS_CLIENT_SECRET || '',
     },
+
+    // Gemini, usado pela Sofia na tela de relatórios. Sem a chave, a tela mostra só o resumo calculado.
+    gemini: {
+        apiKey: process.env.GEMINI_API_KEY || '',
+        // Em ordem de tentativa: o segundo só é usado se o primeiro falhar por sobrecarga ou cota.
+        modelos: [...new Set([
+            process.env.GEMINI_MODEL || 'gemini-flash-lite-latest',
+            process.env.GEMINI_MODEL_RESERVA || 'gemini-3.6-flash',
+        ])],
+        timeoutMs: Number(process.env.GEMINI_TIMEOUT_MS) || 20000,
+    },
 };

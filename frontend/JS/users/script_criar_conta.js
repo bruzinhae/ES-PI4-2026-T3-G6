@@ -117,6 +117,6 @@
             botaoCriar.disabled = false;
         }
 
-        window.location.href = 'index_onboarding_horarios.html';
+        window.location.href = 'index_onboarding_semestre.html';
     });
 })();

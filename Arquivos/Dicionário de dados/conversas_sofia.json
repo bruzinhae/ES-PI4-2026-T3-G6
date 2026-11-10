@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "672010000000000000000001",
+    "usuarioId": "672001000000000000000001",
+    "inicioSemana": "2026-11-09",
+    "mensagens": [
+      {
+        "papel": "sofia",
+        "texto": "A rotina da semana reservou 6h e você cumpriu 4h. Terça ficou abaixo do que estava marcado.",
+        "criadoEm": "2026-11-10T18:00:00Z"
+      },
+      {
+        "papel": "usuario",
+        "texto": "O que pesou mais no aproveitamento?",
+        "criadoEm": "2026-11-10T18:01:00Z"
+      },
+      {
+        "papel": "sofia",
+        "texto": "As sessões de terça e quinta não foram feitas. O restante da rotina ficou perto do combinado.",
+        "criadoEm": "2026-11-10T18:01:05Z"
+      }
+    ],
+    "criadoEm": "2026-11-10T18:00:00Z",
+    "atualizadoEm": "2026-11-10T18:01:05Z"
+  }
+]

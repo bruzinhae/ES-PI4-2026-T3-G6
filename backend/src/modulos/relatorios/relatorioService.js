@@ -14,22 +14,22 @@ import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 import { Usuario } from '../usuarios/Usuario.js';
 import { minutosDaSemana, resumoRotina } from '../../utils/rotinaSemanal.js';
 
-const ROTULOS_DIA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+export const ROTULOS_DIA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
-function inicioDaSemana(data) {
+export function inicioDaSemana(data) {
     const inicio = new Date(data.getFullYear(), data.getMonth(), data.getDate());
     inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
     inicio.setHours(0, 0, 0, 0);
     return inicio;
 }
 
-function somarDias(data, dias) {
+export function somarDias(data, dias) {
     const copia = new Date(data);
     copia.setDate(copia.getDate() + dias);
     return copia;
 }
 
-function chaveData(data) {
+export function chaveData(data) {
     const ano = data.getFullYear();
     const mes = String(data.getMonth() + 1).padStart(2, '0');
     const dia = String(data.getDate()).padStart(2, '0');
@@ -43,7 +43,7 @@ function rotuloPeriodo(inicio, fimExclusivo) {
     return `${limpar(inicio)} – ${limpar(ultimo)}`;
 }
 
-function indiceSegunda(data) {
+export function indiceSegunda(data) {
     return (data.getDay() + 6) % 7;
 }
 
@@ -123,7 +123,7 @@ function resumirSessoes(sessoes, agora) {
     };
 }
 
-function resolverInicio(inicioQuery) {
+export function resolverInicio(inicioQuery) {
     if (!inicioQuery) {
         return inicioDaSemana(new Date());
     }

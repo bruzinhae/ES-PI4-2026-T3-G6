@@ -69,6 +69,10 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | PATCH | `/api/disciplinas/:id` 🔒 | Atualiza os campos enviados |
 | DELETE | `/api/disciplinas/:id` 🔒 | Exclui a disciplina e desvincula blocos associados (204) |
 | GET | `/api/relatorios?inicio=` 🔒 | Painel da semana (foco, consistência, pomodoro, metas, defasagem). `inicio` é qualquer dia da semana, formato `AAAA-MM-DD` |
+| GET | `/api/relatorios/sofia?inicio=` 🔒 | Leitura da Sofia (Gemini) sobre a rotina e o aproveitamento da semana do usuário logado. Não ajusta a grade. 503 se `GEMINI_API_KEY` faltar ou o Gemini falhar |
+| GET | `/api/relatorios/sofia/conversa?inicio=` 🔒 | Mensagens já salvas da semana, sem chamar a Sofia |
+| POST | `/api/relatorios/sofia/conversa/abrir?inicio=` 🔒 | Grava a análise da semana na conta |
+| POST | `/api/relatorios/sofia/conversa` 🔒 | Envia uma pergunta (`inicio`, `texto`) só sobre a rotina de estudos e grava a resposta |
 | GET | `/api/cabecalho` 🔒 | Gauge da rotina (horas dos blocos semanais sobre a meta de horas) e avisos de sessão |
 | GET | `/api/metas` 🔒 | Lista as metas (`?situacao=ativa` filtra) e o painel da tela (`progresso`, marcos, consistência da semana) |
 | POST | `/api/metas` 🔒 | Cria meta (`titulo` obrigatório; `tipo`, `prioridade`, `prazo`, `situacao`, `disciplinaId`, `metaSemanalHoras`, `marcos` opcionais). Hábito exige horas semanais |

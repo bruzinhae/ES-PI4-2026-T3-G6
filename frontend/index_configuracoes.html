@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=17">
+    <link rel="stylesheet" href="CSS/layout.css?v=20">
     <link rel="stylesheet" href="CSS/style_configuracoes.css?v=3">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
@@ -34,7 +34,7 @@
                     <h1>Configurações</h1>
 
                     <p>
-                        Ajuste como a Sofia organiza a semana. As preferências ficam salvas na sua conta.
+                        Defina como a plataforma monta a semana. A Sofia usa esses dados só na análise dos relatórios.
                     </p>
 
                 </div>
@@ -119,14 +119,14 @@
                     </section>
 
 
-                    <!-- Motor Sofia -->
+                    <!-- Montagem da semana -->
 
                     <section class="cartao">
 
                         <div class="cartao-cabecalho">
                             <div class="titulo-com-icone">
                                 <img src="assets/icons/configuracoes/sofia.svg" alt="" width="16" height="16">
-                                <h2>Motor de Prioridade &amp; Configurações de IA (Sofia)</h2>
+                                <h2>Como a plataforma monta a semana</h2>
                             </div>
 
                             <span class="selo-info" id="selo-motor">Preferências da conta</span>
@@ -198,11 +198,11 @@
 
                         <div class="bloco-rigidez">
                             <div class="rigidez-texto">
-                                <h3>Rigidez &amp; Intervenção do Motor</h3>
-                                <p>Define com que frequência a Sofia sugere mudanças na sua grade semanal.</p>
+                                <h3>Detalhe da análise</h3>
+                                <p>Quantas observações a Sofia inclui quando analisa a semana nos relatórios.</p>
                             </div>
 
-                            <div class="seletor-rigidez" role="group" aria-label="Nível de intervenção da Sofia">
+                            <div class="seletor-rigidez" role="group" aria-label="Detalhe da análise da Sofia">
                                 <button type="button" data-rigidez="flexivel">Flexível</button>
                                 <button type="button" class="ativo" data-rigidez="equilibrado">Equilibrado (Ideal)</button>
                                 <button type="button" data-rigidez="intensivo">Intensivo</button>
@@ -221,7 +221,7 @@
                         <div class="cartao-cabecalho">
                             <div class="titulo-com-icone">
                                 <img src="assets/icons/configuracoes/raio.svg" alt="" width="16" height="16">
-                                <h2>Status do Motor Sofia</h2>
+                                <h2>Status da semana</h2>
                             </div>
 
                             <span class="selo-sucesso" id="selo-harmonia">Sem base</span>
@@ -264,7 +264,7 @@
     </main>
 
     <script src="JS/users/api.js?v=13"></script>
-    <script src="JS/componentes/layout.js?v=23"></script>
+    <script src="JS/componentes/layout.js?v=27"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
     <script src="JS/script_configuracoes.js?v=5"></script>
 
