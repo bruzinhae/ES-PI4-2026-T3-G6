@@ -605,6 +605,10 @@
     background: #3e2852;
 }
 
+.botao-sessao.em-andamento {
+    background: #6b3f86;
+}
+
 .botao-sessao span {
     white-space: nowrap;
 }
@@ -738,21 +742,26 @@
     box-shadow: var(--sombra-pequena);
 }
 
-.pomodoro > div {
+.pomodoro-alternar {
     display: flex;
     align-items: center;
     gap: 8px;
+
+    padding: 0;
+    border: 0;
+    background: transparent;
 
     font-family: var(--fonte-mono);
     font-weight: 500;
     color: var(--tinta);
 }
 
-.pomodoro > div span {
+.pomodoro-alternar span {
     white-space: nowrap;
 }
 
-.pomodoro button {
+.pomodoro-configurar,
+.pomodoro-painel button {
     border: 0;
     background: transparent;
 
@@ -763,6 +772,151 @@
     color: var(--roxo);
 
     white-space: nowrap;
+}
+
+.pomodoro-painel {
+    display: grid;
+    gap: 8px;
+
+    margin-top: 8px;
+    padding: 10px 12px;
+
+    background: var(--branco);
+    border: 1px solid var(--cinza-200);
+    border-radius: 10px;
+}
+
+.pomodoro-painel[hidden] {
+    display: none;
+}
+
+.pomodoro-painel label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    font-size: 12px;
+    color: var(--tinta);
+}
+
+.pomodoro-painel input {
+    width: 64px;
+    padding: 4px 6px;
+
+    border: 1px solid var(--cinza-200);
+    border-radius: 8px;
+
+    font: inherit;
+    text-align: right;
+}
+
+.pomodoro.rodando .pomodoro-alternar {
+    color: var(--roxo);
+}
+
+.pomodoro-aviso {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+
+    display: grid;
+    place-items: center;
+
+    padding: 24px;
+
+    background: rgba(28, 18, 36, .46);
+}
+
+.pomodoro-aviso[hidden] {
+    display: none;
+}
+
+.pomodoro-aviso-cartao {
+    width: min(420px, 100%);
+    padding: 32px 28px;
+
+    text-align: center;
+
+    background: var(--branco);
+    border-radius: 16px;
+    box-shadow: var(--sombra-pequena);
+}
+
+.pomodoro-aviso-selo {
+    display: inline-block;
+
+    margin-bottom: 12px;
+    padding: 4px 10px;
+
+    border-radius: 999px;
+
+    background: var(--fundo);
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    line-height: 16px;
+    text-transform: uppercase;
+
+    color: var(--roxo);
+}
+
+.pomodoro-aviso strong {
+    display: block;
+
+    font-family: var(--fonte-titulo);
+    font-size: 28px;
+    line-height: 34px;
+    color: var(--titulo);
+}
+
+.pomodoro-aviso-cartao > p {
+    margin-top: 8px;
+
+    font-size: 15px;
+    line-height: 22px;
+    color: var(--tinta);
+}
+
+#pomodoro-aviso-tempo {
+    margin-top: 16px;
+
+    font-family: var(--fonte-mono);
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 48px;
+    letter-spacing: .04em;
+
+    color: var(--roxo);
+}
+
+.pomodoro-aviso-acoes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: 24px;
+}
+
+.pomodoro-aviso button {
+    padding: 10px 16px;
+
+    border: 0;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.pomodoro-aviso-agora {
+    background: var(--fundo);
+    color: var(--titulo);
+}
+
+.pomodoro-aviso-seguir {
+    background: var(--roxo);
+    color: var(--branco);
 }
 
 
@@ -791,16 +945,18 @@ body.sidebar-recolhida .botao-recolher-texto {
 .barra-lateral.recolhida .disciplina > div > span:last-child,
 .barra-lateral.recolhida .disciplina-vazia,
 .barra-lateral.recolhida .horas,
-.barra-lateral.recolhida .pomodoro > div span,
-.barra-lateral.recolhida .pomodoro button,
+.barra-lateral.recolhida .pomodoro-alternar span,
+.barra-lateral.recolhida .pomodoro-configurar,
+.barra-lateral.recolhida .pomodoro-painel,
 body.sidebar-recolhida .rotulo-lateral,
 body.sidebar-recolhida .botao-sessao span,
 body.sidebar-recolhida .navegacao a span,
 body.sidebar-recolhida .disciplina > div > span:last-child,
 body.sidebar-recolhida .disciplina-vazia,
 body.sidebar-recolhida .horas,
-body.sidebar-recolhida .pomodoro > div span,
-body.sidebar-recolhida .pomodoro button {
+body.sidebar-recolhida .pomodoro-alternar span,
+body.sidebar-recolhida .pomodoro-configurar,
+body.sidebar-recolhida .pomodoro-painel {
     display: none;
 }
 
@@ -828,8 +984,8 @@ body.sidebar-recolhida .pomodoro {
     padding: 10px 11px;
 }
 
-.barra-lateral.recolhida .pomodoro > div,
-body.sidebar-recolhida .pomodoro > div {
+.barra-lateral.recolhida .pomodoro-alternar,
+body.sidebar-recolhida .pomodoro-alternar {
     gap: 0;
 }
 

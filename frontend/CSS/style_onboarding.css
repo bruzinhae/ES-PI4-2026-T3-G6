@@ -139,13 +139,18 @@ a {
     align-items: center;
     gap: 8px;
 
-    padding: 8px 14px;
+    padding: 6px 10px;
 
     border-radius: 8px;
 
     color: var(--cinza-500);
 
     white-space: nowrap;
+}
+
+a.etapa:hover {
+    background: var(--cinza-100);
+    color: var(--roxo);
 }
 
 .etapa span {
@@ -651,6 +656,11 @@ a {
 
     .etapa strong {
         display: none;
+    }
+
+    .etapa.ativo strong,
+    .etapa[aria-current="step"] strong {
+        display: inline;
     }
 
     .botao-texto {

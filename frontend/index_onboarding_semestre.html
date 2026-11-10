@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/icons/favicon.png" type="image/png">
+
+    <title>AçaíStudy - Onboarding · Semestre</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_onboarding.css?v=4">
+    <link rel="stylesheet" href="CSS/style_onboarding_semestre.css?v=1">
+    <link rel="stylesheet" href="CSS/avisos.css?v=1">
+    <script src="JS/users/guarda.js?v=1"></script>
+</head>
+<body>
+
+    <header class="barra-superior">
+        <div class="marca">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+            <span class="selo-onboarding">Onboarding</span>
+        </div>
+
+        <nav class="etapas" aria-label="Etapas do onboarding">
+            <div class="etapa ativo" aria-current="step">
+                <span>1</span>
+                <strong>Semestre</strong>
+            </div>
+            <div class="etapa">
+                <span>2</span>
+                <strong>Horários</strong>
+            </div>
+            <div class="etapa">
+                <span>3</span>
+                <strong>Metas</strong>
+            </div>
+            <div class="etapa">
+                <span>4</span>
+                <strong>Foco</strong>
+            </div>
+        </nav>
+
+        <div class="acoes-cabecalho">
+            <button type="button" class="botao-texto" id="salvar-sair">Salvar e sair</button>
+            <button type="button" class="botao-texto" id="pular-onboarding">Pular onboarding</button>
+            <span class="divisor-vertical" aria-hidden="true"></span>
+
+            <div class="menu-ajuda">
+                <button type="button" class="ajuda" id="botao-ajuda" aria-label="Ajuda" aria-expanded="false" aria-controls="painel-ajuda">?</button>
+                <div class="painel-ajuda" id="painel-ajuda" hidden>
+                    <strong>Como funciona este passo</strong>
+                    <ul>
+                        <li>Instituição, curso, semestre e turno identificam a sua rotina acadêmica.</li>
+                        <li>A meta de horas é o ritmo semanal que metas de hábito e o acompanhamento da conta usam.</li>
+                        <li>Cada disciplina cadastrada aqui pode receber horários de aula e metas próprias.</li>
+                        <li>O Canvas pode importar matérias depois, em Configurações.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="menu-perfil">
+                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e configurações" aria-expanded="false" aria-controls="painel-perfil">
+                    <img class="avatar-usuario" src="assets/icons/avatar-padrao.svg" alt="">
+                </button>
+                <div class="painel-perfil" id="painel-perfil" hidden>
+                    <div class="painel-perfil-cabecalho">
+                        <img class="avatar-usuario" src="assets/icons/avatar-padrao.svg" alt="" width="40" height="40">
+                        <div>
+                            <strong class="nome-usuario">Sua conta</strong>
+                            <span class="curso-usuario">Curso ainda não informado</span>
+                        </div>
+                    </div>
+                    <nav class="lista-perfil">
+                        <a href="index_perfil.html">Meu perfil</a>
+                        <a href="index_configuracoes.html">Configurações</a>
+                    </nav>
+                    <button type="button" class="botao-sair">Sair da conta</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pagina">
+        <section class="introducao">
+            <div>
+                <div class="caminho-navegacao">
+                    ● &nbsp; PASSO 1 DE 4 &nbsp;•&nbsp; BASE DA CONTA
+                    <span>•</span>
+                    <span id="periodo-letivo">Semestre letivo</span>
+                </div>
+                <h1>Monte o seu semestre</h1>
+                <p>
+                    A grade, as metas e os relatórios partem daqui. Informe onde você estuda e cadastre
+                    as disciplinas do período. Sem essa lista, um horário de aula não tem matéria e uma
+                    meta de disciplina não tem para onde apontar.
+                </p>
+            </div>
+            <div class="dica">
+                <div class="icone-dica">🎓</div>
+                <div>
+                    <strong>O que a plataforma faz com isso</strong>
+                    <p>
+                        O turno sugere a janela de foco. A meta de horas vira o ritmo da conta.
+                        Cada disciplina entra na tela de Disciplinas e pode receber blocos e metas.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="area-trabalho">
+            <form class="painel-semestre" id="formulario-perfil">
+                <h2>Perfil acadêmico</h2>
+                <p>Esses campos ficam no seu perfil e podem ser editados depois.</p>
+
+                <div class="grade-perfil">
+                    <div class="campo campo-largo">
+                        <label for="campo-instituicao">Instituição</label>
+                        <input type="text" id="campo-instituicao" name="instituicao" maxlength="160" placeholder="Ex.: PUC-Campinas" autocomplete="organization" required>
+                    </div>
+                    <div class="campo campo-largo">
+                        <label for="campo-curso">Curso</label>
+                        <input type="text" id="campo-curso" name="curso" maxlength="120" placeholder="Ex.: Engenharia de Software" required>
+                        <span class="ajuda-campo">O curso também é a área das disciplinas cadastradas neste passo.</span>
+                    </div>
+                    <div class="campo">
+                        <label for="campo-semestre">Semestre</label>
+                        <select id="campo-semestre" name="semestre" required>
+                            <option value="">Selecione</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="campo-turno">Turno das aulas</label>
+                        <select id="campo-turno" name="turno" required>
+                            <option value="">Selecione</option>
+                            <option value="matutino">Matutino</option>
+                            <option value="vespertino">Vespertino</option>
+                            <option value="noturno">Noturno</option>
+                            <option value="integral">Integral</option>
+                        </select>
+                    </div>
+                    <div class="campo campo-largo">
+                        <label for="campo-horas">Meta de estudo por semana (horas)</label>
+                        <input type="number" id="campo-horas" name="metaSemanalHoras" min="1" max="168" step="1" value="10" required>
+                        <span class="ajuda-campo">É o ritmo que uma meta de hábito pode acompanhar. O medidor da conta compara as horas da grade com este número.</span>
+                    </div>
+                </div>
+            </form>
+
+            <section class="painel-disciplinas">
+                <h2>Disciplinas deste período</h2>
+                <p class="descricao-painel">Adicione pelo menos uma. Dificuldade 5 indica a matéria que mais pede blocos de estudo.</p>
+
+                <form class="formulario-disciplina" id="formulario-disciplina">
+                    <div class="campo">
+                        <label for="campo-nome-disciplina">Nome</label>
+                        <input type="text" id="campo-nome-disciplina" maxlength="120" placeholder="Ex.: Cálculo II" required>
+                    </div>
+                    <div class="campo">
+                        <label for="campo-dificuldade">Dificuldade</label>
+                        <select id="campo-dificuldade">
+                            <option value="1">1 · Leve</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3 · Média</option>
+                            <option value="4">4</option>
+                            <option value="5">5 · Densa</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="botao-adicionar">+ Adicionar</button>
+                </form>
+
+                <ul class="lista-disciplinas" id="lista-disciplinas"></ul>
+
+                <p class="nota-canvas">
+                    <strong>Canvas.</strong>
+                    Se as matérias já estão no Canvas, dá para importá-las depois em Configurações. O que você cadastrar agora já fica na conta.
+                </p>
+            </section>
+        </section>
+
+        <footer class="rodape">
+            <div class="estado" id="estado-rodape">
+                ⓘ
+                <strong>Passo 1 de 4</strong>
+                • Preencha o perfil e adicione ao menos uma disciplina
+            </div>
+            <div class="acoes-rodape">
+                <button type="button" class="proximo" id="botao-proximo" disabled>
+                    Avançar para horários
+                    <span>→</span>
+                </button>
+            </div>
+        </footer>
+    </main>
+
+    <div class="boas-vindas-fundo" id="boas-vindas-fundo" role="presentation" hidden>
+        <section class="boas-vindas-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-boas-vindas" aria-describedby="texto-boas-vindas">
+            <button class="boas-vindas-fechar" type="button" id="fechar-boas-vindas" aria-label="Fechar introdução">×</button>
+            <span class="boas-vindas-etiqueta">SUA CONTA AINDA ESTÁ VAZIA</span>
+            <h2 id="titulo-boas-vindas">Quatro passos, na ordem em que o AçaíStudy usa</h2>
+            <p id="texto-boas-vindas">Cada passo grava na sua conta. Quando você entrar na grade, as disciplinas, os horários bloqueados, as metas e as preferências da semana já estão lá. A Sofia só comenta essa rotina nos relatórios.</p>
+            <div class="boas-vindas-pontos">
+                <span><i aria-hidden="true">1</i> Semestre e disciplinas: a base de metas, aulas e relatórios.</span>
+                <span><i aria-hidden="true">2</i> Horários fixos: o que a grade não pode ocupar com estudo.</span>
+                <span><i aria-hidden="true">3</i> Metas ligadas às suas matérias e à meta de horas.</span>
+                <span><i aria-hidden="true">4</i> Foco: a mesma calibração da tela de Configurações.</span>
+            </div>
+            <button class="boas-vindas-acao" type="button" id="comecar-onboarding">Começar pelo semestre <span aria-hidden="true">→</span></button>
+            <small>Você pode salvar e sair. Na próxima entrada, o onboarding continua deste ponto.</small>
+        </section>
+    </div>
+
+    <script src="JS/users/api.js?v=7"></script>
+    <script src="JS/componentes/avisos.js?v=1"></script>
+    <script src="JS/users/onboarding.js?v=6"></script>
+    <script src="JS/users/script_onboarding_semestre.js?v=1"></script>
+</body>
+</html>

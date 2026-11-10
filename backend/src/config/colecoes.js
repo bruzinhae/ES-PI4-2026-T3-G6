@@ -15,6 +15,7 @@ import { Tarefa } from '../modulos/tarefas/Tarefa.js';
 import { Meta } from '../modulos/metas/Meta.js';
 import { SessaoEstudo } from '../modulos/sessoesEstudo/SessaoEstudo.js';
 import { PlanoIa } from '../modulos/planosIa/PlanoIa.js';
+import { ConversaSofia } from '../modulos/relatorios/ConversaSofia.js';
 
 const MODELS = [
     Usuario,
@@ -26,6 +27,7 @@ const MODELS = [
     Meta,
     SessaoEstudo,
     PlanoIa,
+    ConversaSofia,
 ];
 
 export async function garantirColecoes() {

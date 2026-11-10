@@ -15,7 +15,7 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=2">
-    <link rel="stylesheet" href="CSS/layout.css?v=17">
+    <link rel="stylesheet" href="CSS/layout.css?v=20">
     <link rel="stylesheet" href="CSS/style_disciplinas.css?v=17">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
@@ -226,7 +226,7 @@
             </section>
 
 
-            <!-- ================= SUGESTÃO PREDITIVA ================= -->
+            <!-- ================= AJUSTE AUTOMÁTICO DE GRADE ================= -->
 
             <section class="sugestao">
 
@@ -239,13 +239,13 @@
                     <div class="sugestao-texto">
 
                         <div class="sugestao-titulo">
-                            <h4>Sugestão Preditiva da Sofia</h4>
-                            <span class="selo-violeta">Otimização Ativa</span>
+                            <h4>Ajuste automático de grade</h4>
+                            <span class="selo-violeta">Em conexão</span>
                         </div>
 
                         <p>
-                            Cadastre seus compromissos fixos para que a Sofia possa identificar janelas disponíveis
-                            e ajudar a organizar seus estudos.
+                            Os horários fixos desta rotina vão alimentar o ajuste da grade.
+                            Esse servidor ainda não está conectado.
                         </p>
 
                     </div>
@@ -255,9 +255,9 @@
                 <div class="sugestao-acoes">
                     <button type="button" class="botao-suave">Personalizar</button>
 
-                    <button type="button" class="botao-aprovar">
+                    <button type="button" class="botao-aprovar" disabled>
                         <img src="assets/icons/disciplinas/aprovar.svg" alt="" width="9.51" height="7.01">
-                        <span>Aprovar Sugestão</span>
+                        <span>Em conexão</span>
                     </button>
                 </div>
 
@@ -274,7 +274,7 @@
                     <span class="dialogo-bloco-icone">📚</span>
                     <div>
                         <h2 id="titulo-modal-disciplina">Nova disciplina</h2>
-                        <p>Nome e área bastam para começar. O restante ajuda a Sofia a priorizar essa matéria.</p>
+                        <p>Nome e área bastam para começar. O restante entra no ajuste automático de grade.</p>
                     </div>
                 </div>
                 <button type="button" class="fechar-modal-bloco" id="fechar-modal-disciplina" aria-label="Fechar">×</button>
@@ -422,14 +422,13 @@
                             <option value="9">9</option>
                             <option value="10">Alta — quase não muda</option>
                         </select>
-                        <small class="dica-campo">Quanto maior, mais a Sofia evita mexer neste horário.</small>
+                        <small class="dica-campo">Quanto maior, mais o ajuste da grade evita mexer neste horário.</small>
                     </div>
                     <div class="campo-bloco"><label for="bloco-local">Local</label><input id="bloco-local" name="local"
                             maxlength="120" placeholder="Sala, endereço ou link"></div>
                 </div>
                 <label class="fixo-bloco"><input type="checkbox" name="fixo" checked><span><strong>Compromisso
-                            inegociável</strong><small>Marque para a Sofia bloquear este horário ao sugerir
-                            estudos.</small></span></label>
+                            inegociável</strong><small>Marque para o ajuste da grade manter este horário.</small></span></label>
                 <p class="aviso aviso-erro" id="erro-form-bloco" role="alert"></p>
                 <footer class="acoes-form-bloco"><button type="button"
                         class="botao-cancelar-bloco">Cancelar</button><button type="submit"
@@ -439,7 +438,7 @@
     </div>
 
     <script src="JS/users/api.js?v=10"></script>
-    <script src="JS/componentes/layout.js?v=23"></script>
+    <script src="JS/componentes/layout.js?v=27"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
     <script src="JS/script_disciplinas.js?v=26"></script>
 

@@ -206,10 +206,19 @@
     border-radius: 12px;
 }
 
+.campo[hidden] {
+    display: none;
+}
+
 .campo {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.campo-disciplina,
+.campo-horas {
+    grid-column: span 2;
 }
 
 .campo label {

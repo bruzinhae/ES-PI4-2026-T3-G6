@@ -1,11 +1,12 @@
 inicializarMenusOnboarding();
+marcarPassoOnboarding('foco');
 
-const CHAVE_FOCO = 'acaistudy-onboarding-foco';
+const CHAVE_FOCO = 'acaistudy-onboarding-foco-v2';
 
 const janelas = {
-    manha: { rotulo: '08:30 – 12:00', nota: 'priorizo disciplinas densas na manhã' },
-    tarde: { rotulo: '14:00 – 18:00', nota: 'priorizo blocos de alto impacto na tarde' },
-    noite: { rotulo: '19:00 – 22:30', nota: 'concentro o estudo após as aulas, à noite' },
+    manha: { rotulo: '08:30 – 12:00', nota: 'deixa o estudo denso na manhã' },
+    tarde: { rotulo: '14:00 – 18:00', nota: 'deixa o estudo denso na tarde' },
+    noite: { rotulo: '19:00 – 22:30', nota: 'deixa o estudo denso depois das aulas, à noite' },
 };
 
 const rigidezRotulo = {
@@ -49,7 +50,39 @@ const perfis = {
     },
 };
 
-const estado = carregarEstado() || { ...perfis.equilibrado };
+const estado = {
+    janela: 'tarde',
+    duracao: '50',
+    antifadiga: true,
+    repeticao: true,
+    dinamico: true,
+    rigidez: 'equilibrado',
+};
+
+function janelaSugerida(turno) {
+    if (turno === 'matutino') return 'tarde';
+    if (turno === 'vespertino') return 'noite';
+    if (turno === 'noturno') return 'manha';
+    if (turno === 'integral') return 'noite';
+    return 'tarde';
+}
+
+function textoDoTurno(turno) {
+    const janela = janelas[janelaSugerida(turno)];
+    if (turno === 'matutino') {
+        return `Suas aulas são de manhã, então a sugestão de estudo denso é ${janela.rotulo}.`;
+    }
+    if (turno === 'vespertino') {
+        return `Suas aulas são à tarde, então a sugestão de estudo denso é ${janela.rotulo}.`;
+    }
+    if (turno === 'noturno') {
+        return `Suas aulas são à noite, então a sugestão de estudo denso é ${janela.rotulo}.`;
+    }
+    if (turno === 'integral') {
+        return `O turno integral ocupa o dia, então a sugestão de estudo denso é ${janela.rotulo}.`;
+    }
+    return 'Escolha a janela em que o estudo denso rende mais. Dá para trocar depois em Configurações.';
+}
 
 const resumoJanela = document.getElementById('resumo-janela');
 const resumoDuracao = document.getElementById('resumo-duracao');
@@ -91,22 +124,29 @@ function atualizarResumo() {
     resumoRigidez.textContent = rigidezRotulo[estado.rigidez];
     metaAntifadiga.textContent = `Limite contínuo: ${Math.max(duracao, 90)} min`;
 
-    const protecoes = [];
-    if (estado.antifadiga) protecoes.push('protegendo pausas contra fadiga');
-    if (estado.repeticao) protecoes.push('agendando revisões espaçadas');
-    if (estado.dinamico) protecoes.push('reorganizando a semana em tempo real');
+    const regras = [];
+    if (estado.antifadiga) regras.push('limita blocos contínuos');
+    if (estado.repeticao) regras.push('reserva revisões espaçadas');
+    if (estado.dinamico) regras.push('recalcula a semana quando algo muda');
 
     let complemento = '';
 
-    if (protecoes.length === 1) {
-        complemento = `, ${protecoes[0]}`;
-    } else if (protecoes.length === 2) {
-        complemento = `, ${protecoes[0]} e ${protecoes[1]}`;
-    } else if (protecoes.length > 2) {
-        complemento = `, ${protecoes.slice(0, -1).join(', ')} e ${protecoes.at(-1)}`;
+    if (regras.length === 1) {
+        complemento = ` e ${regras[0]}`;
+    } else if (regras.length === 2) {
+        complemento = `, ${regras[0]} e ${regras[1]}`;
+    } else if (regras.length > 2) {
+        complemento = `, ${regras.slice(0, -1).join(', ')} e ${regras.at(-1)}`;
     }
 
-    notaSofia.textContent = `Com esse perfil, ${janela.nota}${complemento}.`;
+    notaSofia.textContent = `A grade ${janela.nota}${complemento}. A Sofia comenta o resultado nos relatórios.`;
+
+    const metaDinamico = document.getElementById('meta-dinamico');
+    if (metaDinamico) {
+        metaDinamico.textContent = estado.dinamico
+            ? 'A semana é recalculada quando algo muda'
+            : 'A grade só muda quando você editar';
+    }
 }
 
 function aplicarEstadoNaTela() {
@@ -190,19 +230,72 @@ inputDinamico.addEventListener('change', () => {
     aplicarEstadoNaTela();
 });
 
+function payloadDaConta() {
+    return {
+        antifadiga: estado.antifadiga,
+        focoMatinal: true,
+        repeticaoEspacada: estado.repeticao,
+        ajusteDinamico: estado.dinamico,
+        rigidez: estado.rigidez,
+        janelaFoco: estado.janela,
+        duracaoMinutos: Number(estado.duracao),
+    };
+}
+
+async function salvarConfiguracao() {
+    salvarEstado();
+    await AcaiApi.salvarConfiguracoes(payloadDaConta());
+}
+
+window.salvarPassoOnboarding = salvarConfiguracao;
+
 document.getElementById('botao-voltar').addEventListener('click', () => {
     window.location.href = 'index_onboarding_metas.html';
 });
 
-document.getElementById('botao-concluir').addEventListener('click', (evento) => {
-    salvarEstado();
+document.getElementById('botao-concluir').addEventListener('click', async (evento) => {
+    const botao = evento.currentTarget;
+    botao.disabled = true;
 
-    // Marca no banco que o onboarding foi concluído; a partir daí o usuário vai direto para a grade.
-    finalizarOnboarding(evento.currentTarget);
+    try {
+        await salvarConfiguracao();
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível salvar as preferências.');
+        botao.disabled = false;
+        return;
+    }
+
+    finalizarOnboarding(botao);
 });
 
-document.getElementById('pular-onboarding').addEventListener('click', (evento) => {
-    finalizarOnboarding(evento.currentTarget);
-});
+async function iniciar() {
+    const rascunho = carregarEstado();
 
-aplicarEstadoNaTela();
+    try {
+        const [resposta, usuario] = await Promise.all([
+            AcaiApi.obterConfiguracoes(),
+            AcaiApi.obterUsuarioAtual(),
+        ]);
+        const config = resposta.configuracao || {};
+        const dica = document.getElementById('dica-foco');
+        if (dica) dica.textContent = textoDoTurno(usuario?.turno);
+
+        if (rascunho) {
+            Object.assign(estado, rascunho);
+        } else {
+            estado.janela = janelaSugerida(usuario?.turno);
+            estado.duracao = String(config.duracaoMinutos || 50);
+            estado.antifadiga = config.antifadiga !== false;
+            estado.repeticao = config.repeticaoEspacada !== false;
+            estado.dinamico = config.ajusteDinamico !== false;
+            estado.rigidez = config.rigidez || 'equilibrado';
+        }
+    } catch (erro) {
+        if (rascunho) Object.assign(estado, rascunho);
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível carregar as preferências.');
+    }
+
+    aplicarEstadoNaTela();
+}
+
+iniciar();

@@ -1,128 +1,71 @@
 inicializarMenusOnboarding();
-
-// A apresentação aparece sempre que a etapa de horários é aberta.
-const boasVindas = document.querySelector('#boas-vindas-fundo');
-const botaoComecar = document.querySelector('#comecar-onboarding');
-const botaoFecharBoasVindas = document.querySelector('#fechar-boas-vindas');
-
-function fecharBoasVindas() {
-    if (!boasVindas || boasVindas.hidden) return;
-    boasVindas.hidden = true;
-    document.body.classList.remove('boas-vindas-abertas');
-}
-
-if (boasVindas) {
-    document.body.classList.add('boas-vindas-abertas');
-    botaoComecar?.focus();
-    botaoComecar?.addEventListener('click', fecharBoasVindas);
-    botaoFecharBoasVindas?.addEventListener('click', fecharBoasVindas);
-    boasVindas.addEventListener('click', (evento) => {
-        if (evento.target === boasVindas) fecharBoasVindas();
-    });
-    document.addEventListener('keydown', (evento) => {
-        if (evento.key === 'Escape') fecharBoasVindas();
-    });
-}
+marcarPassoOnboarding('horarios');
 
 const calendario = document.querySelector('.calendario');
-const rotinas = document.querySelectorAll('.rotina[draggable="true"]');
 const dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-const datas = ['03 Fev', '04 Fev', '05 Fev', '06 Fev', '07 Fev', '08 Fev', '09 Fev'];
-const horaInicial = 6; // horário que começa 
-const horaFinal = 23; // horário que termina
+const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const horaInicial = 6;
+const horaFinal = 23;
 const faixasPorHora = 2;
 const totalFaixas = (horaFinal - horaInicial) * faixasPorHora;
-const eventosIniciais = Array.from(calendario.querySelectorAll('.compromisso')).map((bloco) => {
-    const indiceOriginal = Array.from(calendario.children).indexOf(bloco);
-    const linhaAntiga = Math.floor(indiceOriginal / 8) + 1;
-    const colunaAntiga = indiceOriginal % 8 + 1;
-    const horariosPorLinha = { 2: 6, 3: 7, 4: 8, 5: 12, 6: 13, 7: 15, 8: 22 };
-    const texto = bloco.textContent;
-    const inicioExplicito = texto.match(/(\d{1,2}):(\d{2})\s*[-–]/);
-    let hora = inicioExplicito ? Number(inicioExplicito[1]) : horariosPorLinha[linhaAntiga] || 6;
-    let minuto = inicioExplicito ? Number(inicioExplicito[2]) : 0;
-    if (bloco.classList.contains('evento-sono') && !inicioExplicito) hora = 22;
+const totalMinutosSemana = 7 * 24 * 60;
 
-    const duracaoExplicita = texto.match(/\((\d+)h\)/i);
-    let duracaoMinutos = duracaoExplicita ? Number(duracaoExplicita[1]) * 60 : 60;
-    if (bloco.classList.contains('evento-sono') || bloco.classList.contains('sono-noturno')) {
-        duracaoMinutos = duracaoExplicita ? Number(duracaoExplicita[1]) * 60 : 8 * 60;
-    }
-    if (inicioExplicito && !duracaoExplicita) {
-        const intervalo = texto.match(/\d{1,2}:(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
-        if (intervalo) {
-            const inicio = hora * 60 + minuto;
-            let fim = Number(intervalo[2]) * 60 + Number(intervalo[3]);
-            if (fim <= inicio) fim += 24 * 60;
-            duracaoMinutos = fim - inicio;
-        }
-    }
+const CLASSE = {
+    aulas: 'roxo',
+    trabalho: 'azul',
+    sono: 'escuro',
+    saude: 'verde',
+    pausa: 'amarelo',
+    translado: 'deslocamento',
+    outro: 'roxo',
+};
 
-    return {
-        elemento: bloco,
-        indiceDia: Math.max(0, Math.min(6, colunaAntiga - 2)),
-        indiceFaixa: Math.max(0, Math.min(totalFaixas - 1, (hora - horaInicial) * faixasPorHora + minuto / 30)),
-        duracaoFaixas: Math.max(1, Math.ceil(duracaoMinutos / 30)),
-    };
-});
+const ICONE = {
+    aulas: '🎓',
+    trabalho: '💼',
+    sono: '🌙',
+    saude: '↗',
+    pausa: '🍴',
+    translado: '🚗',
+    outro: '✦',
+};
 
+const PRESETS = {
+    Aulas: { categoria: 'aulas', minutos: 120, prioridade: 9, fixo: true },
+    Trabalho: { categoria: 'trabalho', minutos: 240, prioridade: 8, fixo: true },
+    Sono: { categoria: 'sono', minutos: 480, prioridade: 10, fixo: true },
+    Saúde: { categoria: 'saude', minutos: 60, prioridade: 4, fixo: false },
+    Pausa: { categoria: 'pausa', minutos: 60, prioridade: 5, fixo: false },
+    Translado: { categoria: 'translado', minutos: 60, prioridade: 6, fixo: true },
+};
+
+const rotinas = document.querySelectorAll('.rotina[draggable="true"]');
+const selectDisciplina = document.getElementById('disciplina-aula');
+
+const cache = new Map();
+let disciplinas = [];
+let metaHoras = 10;
 let rotinaArrastada = null;
 let compromissoArrastado = null;
+let soltoNaGrade = false;
 
-function criarCelulaGrade(nomeClasse, texto, linha, coluna) {
-    const celula = document.createElement('div');
-    celula.className = nomeClasse;
-    if (texto) celula.textContent = texto;
-    celula.style.gridRow = linha;
-    celula.style.gridColumn = coluna;
-    calendario.appendChild(celula);
-    return celula;
+function idDo(bloco) {
+    return String(bloco._id || bloco.id);
 }
 
-function montarCalendario() {
-    calendario.replaceChildren();
-    criarCelulaGrade('canto', 'HORA', 1, 1);
-    dias.forEach((dia, indice) => {
-        const cabecalho = criarCelulaGrade(`dia${indice === 3 ? ' selecionado' : ''}`, '', 1, indice + 2);
-        cabecalho.innerHTML = `<small>${dia.toUpperCase()}</small><strong>${datas[indice]}</strong>`;
-    });
-
-    for (let indiceFaixa = 0; indiceFaixa < totalFaixas; indiceFaixa += 1) {
-        const minutosDesdeInicio = indiceFaixa * 30;
-        const hora = horaInicial + Math.floor(minutosDesdeInicio / 60);
-        const minuto = minutosDesdeInicio % 60;
-        const rotulo = `${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`;
-        const linha = indiceFaixa + 2;
-        criarCelulaGrade('horario', rotulo, linha, 1);
-        dias.forEach((_, indiceDia) => {
-            const faixa = criarCelulaGrade('faixa-calendario', '', linha, indiceDia + 2);
-            faixa.dataset.indiceDia = indiceDia;
-            faixa.dataset.indiceFaixa = indiceFaixa;
-            faixa.setAttribute('aria-label', `${dias[indiceDia]} às ${rotulo}`);
-        });
-    }
-
-    eventosIniciais.forEach(({ elemento, indiceDia, indiceFaixa, duracaoFaixas }) => {
-        elemento.classList.add('evento-calendario');
-        elemento.dataset.indiceDia = indiceDia;
-        elemento.dataset.indiceFaixa = indiceFaixa;
-        elemento.dataset.duracaoFaixas = duracaoFaixas;
-        posicionarCompromisso(elemento, indiceDia, indiceFaixa, duracaoFaixas);
-        calendario.appendChild(elemento);
-    });
+function inicioDaSemana(data = new Date()) {
+    const inicio = new Date(data.getFullYear(), data.getMonth(), data.getDate());
+    inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
+    return inicio;
 }
 
-function posicionarCompromisso(bloco, indiceDia, indiceFaixa, duracaoFaixas) {
-    const linha = indiceFaixa + 2;
-    const duracaoVisivel = Math.min(duracaoFaixas, totalFaixas - indiceFaixa);
-    bloco.style.gridRow = `${linha} / span ${duracaoVisivel}`;
-    bloco.style.gridColumn = indiceDia + 2;
-    bloco.dataset.indiceDia = indiceDia;
-    bloco.dataset.indiceFaixa = indiceFaixa;
-    bloco.dataset.duracaoFaixas = duracaoFaixas;
-
-    const rotuloHorario = bloco.querySelector('.horario-movido');
-    if (rotuloHorario) rotuloHorario.textContent = `${dias[indiceDia]} · ${formatarHorario(indiceFaixa)}`;
+function datasDaSemana() {
+    const inicio = inicioDaSemana();
+    return dias.map((_, indice) => {
+        const data = new Date(inicio);
+        data.setDate(inicio.getDate() + indice);
+        return data;
+    });
 }
 
 function formatarHorario(indiceFaixa) {
@@ -130,13 +73,101 @@ function formatarHorario(indiceFaixa) {
     return `${String(Math.floor(minutos / 60)).padStart(2, '0')}:${String(minutos % 60).padStart(2, '0')}`;
 }
 
-function obterPosicaoDeSoltura(alvo) {
-    const faixa = alvo.closest('.faixa-calendario');
-    if (faixa) return { indiceDia: Number(faixa.dataset.indiceDia), indiceFaixa: Number(faixa.dataset.indiceFaixa) };
+function minutosDe(hora) {
+    const [horas, minutos] = String(hora || '00:00').split(':').map(Number);
+    return horas * 60 + minutos;
+}
 
-    // Permite soltar sobre outro compromisso e usar a faixa onde ele começa.
-    const evento = alvo.closest('.evento-calendario');
-    if (evento) return { indiceDia: Number(evento.dataset.indiceDia), indiceFaixa: Number(evento.dataset.indiceFaixa) };
+function duracaoQueCabe(horaInicio, desejada) {
+    const restante = 24 * 60 - minutosDe(horaInicio);
+    const cabivel = Math.floor(restante / 30) * 30;
+    return Math.max(30, Math.min(desejada, cabivel));
+}
+
+function indiceFaixaDe(horaInicio) {
+    const minutos = minutosDe(horaInicio);
+    const inicioGrade = horaInicial * 60;
+    const fimGrade = horaFinal * 60;
+    if (minutos < inicioGrade || minutos >= fimGrade) return null;
+    return Math.floor((minutos - inicioGrade) / 30);
+}
+
+function criarCelula(nomeClasse, texto, linha, coluna) {
+    const celula = document.createElement('div');
+    celula.className = nomeClasse;
+    if (texto) celula.textContent = texto;
+    celula.style.gridRow = String(linha);
+    celula.style.gridColumn = String(coluna);
+    calendario.appendChild(celula);
+    return celula;
+}
+
+function montarGrade() {
+    const datas = datasDaSemana();
+    const hoje = new Date();
+    const chaveHoje = `${hoje.getFullYear()}-${hoje.getMonth()}-${hoje.getDate()}`;
+
+    calendario.replaceChildren();
+    criarCelula('canto', 'HORA', 1, 1);
+
+    datas.forEach((data, indice) => {
+        const chave = `${data.getFullYear()}-${data.getMonth()}-${data.getDate()}`;
+        const cabecalho = criarCelula(`dia${chave === chaveHoje ? ' selecionado' : ''}`, '', 1, indice + 2);
+        const rotulo = document.createElement('small');
+        rotulo.textContent = dias[indice].toUpperCase();
+        const numero = document.createElement('strong');
+        numero.textContent = `${String(data.getDate()).padStart(2, '0')} ${meses[data.getMonth()]}`;
+        cabecalho.append(rotulo, numero);
+    });
+
+    for (let indiceFaixa = 0; indiceFaixa < totalFaixas; indiceFaixa += 1) {
+        const linha = indiceFaixa + 2;
+        criarCelula('horario', formatarHorario(indiceFaixa), linha, 1);
+        dias.forEach((dia, indiceDia) => {
+            const faixa = criarCelula('faixa-calendario', '', linha, indiceDia + 2);
+            faixa.dataset.indiceDia = String(indiceDia);
+            faixa.dataset.indiceFaixa = String(indiceFaixa);
+            faixa.setAttribute('aria-label', `${dia} às ${formatarHorario(indiceFaixa)}`);
+        });
+    }
+
+    const inicio = datas[0];
+    const fim = datas[6];
+    const intervalo = document.getElementById('intervalo-semana');
+    if (intervalo) {
+        intervalo.textContent = `${inicio.getDate()} ${meses[inicio.getMonth()]} – ${fim.getDate()} ${meses[fim.getMonth()]}`;
+    }
+}
+
+function posicionar(bloco, indiceDia, indiceFaixa, duracaoFaixas) {
+    const duracaoVisivel = Math.min(duracaoFaixas, totalFaixas - indiceFaixa);
+    bloco.style.gridRow = `${indiceFaixa + 2} / span ${duracaoVisivel}`;
+    bloco.style.gridColumn = String(indiceDia + 2);
+    bloco.dataset.indiceDia = String(indiceDia);
+    bloco.dataset.indiceFaixa = String(indiceFaixa);
+    bloco.dataset.duracaoFaixas = String(duracaoFaixas);
+    bloco.dataset.dia = String(indiceDia);
+
+    const rotulo = bloco.querySelector('.horario-movido');
+    if (rotulo) {
+        const inicio = formatarHorario(indiceFaixa);
+        const fimMinutos = horaInicial * 60 + (indiceFaixa + duracaoVisivel) * 30;
+        const fim = `${String(Math.floor(fimMinutos / 60)).padStart(2, '0')}:${String(fimMinutos % 60).padStart(2, '0')}`;
+        rotulo.textContent = `${dias[indiceDia]} · ${inicio}–${fim}`;
+    }
+}
+
+function obterPosicao(alvo) {
+    const faixa = alvo.closest('.faixa-calendario');
+    if (faixa) {
+        return { indiceDia: Number(faixa.dataset.indiceDia), indiceFaixa: Number(faixa.dataset.indiceFaixa) };
+    }
+
+    const eventoEl = alvo.closest('.evento-calendario');
+    if (eventoEl) {
+        return { indiceDia: Number(eventoEl.dataset.indiceDia), indiceFaixa: Number(eventoEl.dataset.indiceFaixa) };
+    }
+
     return null;
 }
 
@@ -144,9 +175,10 @@ function ativarArrasteDeRotina(rotina) {
     rotina.draggable = true;
     rotina.addEventListener('dragstart', (evento) => {
         rotinaArrastada = rotina;
+        compromissoArrastado = null;
         rotina.classList.add('arrastando');
         evento.dataTransfer.effectAllowed = 'copy';
-        evento.dataTransfer.setData('text/plain', rotina.dataset.rotina);
+        evento.dataTransfer.setData('text/plain', rotina.dataset.rotina || '');
     });
     rotina.addEventListener('dragend', () => {
         rotina.classList.remove('arrastando');
@@ -159,26 +191,326 @@ function ativarArrasteDeCompromisso(bloco) {
     bloco.draggable = true;
     bloco.addEventListener('dragstart', (evento) => {
         compromissoArrastado = bloco;
+        rotinaArrastada = null;
+        soltoNaGrade = false;
         bloco.classList.add('arrastando');
         evento.dataTransfer.effectAllowed = 'move';
-        evento.dataTransfer.setData('text/plain', bloco.dataset.rotina || bloco.textContent.trim());
+        evento.dataTransfer.setData('text/plain', bloco.dataset.id || '');
     });
-    bloco.addEventListener('dragend', (evento) => {
+    bloco.addEventListener('dragend', () => {
         bloco.classList.remove('arrastando');
-        if (evento.dataTransfer.dropEffect === 'none') bloco.remove();
-        compromissoArrastado = null;
         calendario.classList.remove('pronto-para-soltar');
+        if (!soltoNaGrade && compromissoArrastado === bloco) {
+            removerOcorrencia(bloco);
+        }
+        compromissoArrastado = null;
     });
 }
 
-montarCalendario();
-calendario.querySelectorAll('.evento-calendario').forEach(ativarArrasteDeCompromisso);
+function desenharBloco(bloco, dia) {
+    const faixa = indiceFaixaDe(bloco.horaInicio);
+    if (faixa === null) return;
 
+    const elemento = document.createElement('div');
+    elemento.className = `evento-adicionado evento-calendario ${CLASSE[bloco.categoria] || 'roxo'}`;
+    elemento.dataset.id = bloco.id;
+    elemento.dataset.duracaoMinutos = String(bloco.duracaoMinutos);
+
+    const titulo = document.createElement('span');
+    titulo.textContent = `${ICONE[bloco.categoria] || '✦'} ${bloco.nome}`;
+    const horario = document.createElement('small');
+    horario.className = 'horario-movido';
+    elemento.append(titulo, horario);
+
+    const faixas = Math.max(1, Math.ceil(bloco.duracaoMinutos / 30));
+    posicionar(elemento, dia, faixa, faixas);
+    ativarArrasteDeCompromisso(elemento);
+    calendario.appendChild(elemento);
+}
+
+function desenharTodos() {
+    calendario.querySelectorAll('.evento-calendario').forEach((elemento) => elemento.remove());
+    cache.forEach((bloco) => {
+        if (bloco.recorrencia !== 'semanal') return;
+        (bloco.diasSemana || []).forEach((dia) => desenharBloco(bloco, dia));
+    });
+    atualizarResumo();
+}
+
+function normalizar(bloco) {
+    return {
+        id: idDo(bloco),
+        nome: bloco.nome,
+        categoria: bloco.categoria,
+        recorrencia: bloco.recorrencia,
+        diasSemana: [...(bloco.diasSemana || [])].map(Number),
+        horaInicio: bloco.horaInicio,
+        duracaoMinutos: Number(bloco.duracaoMinutos),
+        prioridade: Number(bloco.prioridade),
+        fixo: Boolean(bloco.fixo),
+        disciplinaId: bloco.disciplinaId ? String(bloco.disciplinaId) : null,
+        local: bloco.local || null,
+    };
+}
+
+function horasDe(minutos) {
+    const horas = minutos / 60;
+    return Number.isInteger(horas) ? String(horas) : horas.toFixed(1).replace('.', ',');
+}
+
+function atualizarResumo() {
+    const porCategoria = { aulas: 0, trabalho: 0, sono: 0, saude: 0, pausa: 0, translado: 0, outro: 0 };
+    let foraDaGrade = 0;
+
+    cache.forEach((bloco) => {
+        if (bloco.recorrencia !== 'semanal') return;
+        const minutos = bloco.duracaoMinutos * (bloco.diasSemana?.length || 0);
+        porCategoria[bloco.categoria] = (porCategoria[bloco.categoria] || 0) + minutos;
+        if (indiceFaixaDe(bloco.horaInicio) === null) foraDaGrade += minutos;
+    });
+
+    const ocupado = Object.values(porCategoria).reduce((soma, valor) => soma + valor, 0);
+    const livre = Math.max(0, totalMinutosSemana - ocupado);
+    const total = Math.max(totalMinutosSemana, ocupado);
+
+    const faixas = {
+        sono: porCategoria.sono,
+        aula: porCategoria.aulas,
+        trabalho: porCategoria.trabalho,
+        saude: porCategoria.saude,
+        refeicao: porCategoria.pausa + porCategoria.translado + porCategoria.outro,
+        estudo: livre,
+    };
+
+    Object.entries(faixas).forEach(([chave, minutos]) => {
+        const faixa = document.getElementById(`faixa-${chave}`);
+        if (faixa) faixa.style.width = `${(minutos / total) * 100}%`;
+    });
+
+    const legenda = document.getElementById('legenda-distribuicao');
+    if (legenda) {
+        const itens = [
+            ['ponto-sono', 'Sono', porCategoria.sono],
+            ['ponto-aula', 'Aulas', porCategoria.aulas],
+            ['ponto-trabalho', 'Trabalho', porCategoria.trabalho],
+            ['ponto-estudo', 'Livre', livre],
+        ];
+        legenda.replaceChildren();
+        itens.forEach(([ponto, rotulo, minutos]) => {
+            const item = document.createElement('div');
+            const marca = document.createElement('span');
+            marca.className = `ponto ${ponto}`;
+            item.append(marca, document.createTextNode(` ${rotulo}: ${horasDe(minutos)}h`));
+            legenda.appendChild(item);
+        });
+    }
+
+    const legendaRodape = document.getElementById('legenda-rodape');
+    if (legendaRodape) {
+        legendaRodape.replaceChildren();
+        [
+            ['ponto-roxo', 'Aulas', porCategoria.aulas],
+            ['ponto-azul', 'Trabalho', porCategoria.trabalho],
+            ['ponto-verde', 'Saúde', porCategoria.saude],
+            ['ponto-escuro', 'Sono', porCategoria.sono],
+        ].forEach(([ponto, rotulo, minutos]) => {
+            const item = document.createElement('span');
+            const marca = document.createElement('i');
+            marca.className = ponto;
+            item.append(marca, document.createTextNode(` ${rotulo} (${horasDe(minutos)}h)`));
+            legendaRodape.appendChild(item);
+        });
+    }
+
+    const fixas = document.getElementById('horas-fixas');
+    const livres = document.getElementById('horas-livres');
+    if (fixas) fixas.textContent = `● ${horasDe(ocupado)}h bloqueadas`;
+    if (livres) livres.textContent = `• ${horasDe(livre)}h livres · meta de estudo ${metaHoras}h`;
+
+    const estado = document.getElementById('estado-rodape');
+    if (!estado) return;
+
+    if (cache.size === 0) {
+        estado.innerHTML = 'ⓘ <strong>Passo 2 de 4</strong> • Nenhum horário bloqueado ainda';
+        return;
+    }
+
+    const avisoFora = foraDaGrade > 0 ? ` · ${horasDe(foraDaGrade)}h fora da grade` : '';
+    estado.innerHTML = `ⓘ <strong>Passo 2 de 4 em andamento</strong> • ${horasDe(ocupado)}h bloqueadas · meta de ${metaHoras}h${avisoFora}`;
+}
+
+function disciplinaSelecionada() {
+    const id = selectDisciplina?.value;
+    return disciplinas.find((item) => item.id === id) || null;
+}
+
+function dadosDoArraste(rotina) {
+    const preset = PRESETS[rotina.dataset.rotina];
+    if (preset) {
+        return {
+            nome: rotina.dataset.rotina,
+            categoria: preset.categoria,
+            duracaoMinutos: preset.minutos,
+            prioridade: preset.prioridade,
+            fixo: preset.fixo,
+        };
+    }
+
+    return {
+        nome: rotina.dataset.rotina,
+        categoria: rotina.dataset.categoria || 'outro',
+        duracaoMinutos: (Number(rotina.dataset.duracaoFaixas) || 4) * 30,
+        prioridade: Number(rotina.dataset.prioridade) || 5,
+        fixo: Number(rotina.dataset.prioridade) >= 7,
+    };
+}
+
+async function criarNaGrade(rotina, posicao) {
+    const base = dadosDoArraste(rotina);
+    let horaInicio = formatarHorario(posicao.indiceFaixa);
+    let duracao = duracaoQueCabe(horaInicio, base.duracaoMinutos);
+
+    if (duracao < base.duracaoMinutos) {
+        AcaiAvisos.mostrar('O bloco foi encurtado para não passar da meia-noite. Ajuste o restante depois, em Disciplinas.');
+    }
+
+    const payload = {
+        nome: base.nome,
+        categoria: base.categoria,
+        recorrencia: 'semanal',
+        diasSemana: [posicao.indiceDia],
+        horaInicio,
+        duracaoMinutos: duracao,
+        prioridade: base.prioridade,
+        fixo: base.fixo,
+    };
+
+    if (base.categoria === 'aulas') {
+        const disciplina = disciplinaSelecionada();
+        if (disciplina) {
+            payload.nome = `Aula de ${disciplina.nome}`.slice(0, 80);
+            payload.disciplinaId = disciplina.id;
+        } else if (disciplinas.length === 0) {
+            AcaiAvisos.mostrar('Cadastre as disciplinas no passo anterior para ligar a aula a uma matéria.');
+        }
+    }
+
+    const criado = normalizar(await AcaiApi.criarBlocoFixo(payload));
+    cache.set(criado.id, criado);
+    desenharTodos();
+}
+
+async function moverOcorrencia(elemento, posicao) {
+    const id = elemento.dataset.id;
+    const diaAntigo = Number(elemento.dataset.dia);
+    const bloco = cache.get(id);
+    if (!bloco) return;
+
+    const horaInicio = formatarHorario(posicao.indiceFaixa);
+    const duracao = duracaoQueCabe(horaInicio, Number(elemento.dataset.duracaoMinutos) || bloco.duracaoMinutos);
+    const diaNovo = posicao.indiceDia;
+
+    elemento.dataset.duracaoMinutos = String(duracao);
+    posicionar(
+        elemento,
+        diaNovo,
+        posicao.indiceFaixa,
+        Math.max(1, Math.ceil(duracao / 30))
+    );
+
+    try {
+        if ((bloco.diasSemana || []).length <= 1) {
+            const atualizado = normalizar(await AcaiApi.atualizarBlocoFixo(id, {
+                diasSemana: [diaNovo],
+                horaInicio,
+                duracaoMinutos: duracao,
+            }));
+            cache.set(id, atualizado);
+        } else {
+            const restantes = bloco.diasSemana.filter((dia) => dia !== diaAntigo);
+            const atualizado = normalizar(await AcaiApi.atualizarBlocoFixo(id, { diasSemana: restantes }));
+            cache.set(id, atualizado);
+            const criado = normalizar(await AcaiApi.criarBlocoFixo({
+                nome: bloco.nome,
+                categoria: bloco.categoria,
+                recorrencia: 'semanal',
+                diasSemana: [diaNovo],
+                horaInicio,
+                duracaoMinutos: duracao,
+                prioridade: bloco.prioridade,
+                fixo: bloco.fixo,
+                ...(bloco.disciplinaId ? { disciplinaId: bloco.disciplinaId } : {}),
+                ...(bloco.local ? { local: bloco.local } : {}),
+            }));
+            cache.set(criado.id, criado);
+            elemento.dataset.id = criado.id;
+        }
+        atualizarResumo();
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível mover o bloco.');
+        const blocos = await AcaiApi.listarBlocosFixos();
+        cache.clear();
+        blocos.forEach((item) => {
+            const normal = normalizar(item);
+            cache.set(normal.id, normal);
+        });
+        desenharTodos();
+    }
+}
+
+async function removerOcorrencia(elemento) {
+    const id = elemento.dataset.id;
+    const dia = Number(elemento.dataset.dia);
+    const bloco = cache.get(id);
+    elemento.remove();
+    if (!id || !bloco) {
+        atualizarResumo();
+        return;
+    }
+
+    try {
+        const restantes = (bloco.diasSemana || []).filter((item) => item !== dia);
+        if (restantes.length === 0) {
+            await AcaiApi.excluirBlocoFixo(id);
+            cache.delete(id);
+        } else {
+            const atualizado = normalizar(await AcaiApi.atualizarBlocoFixo(id, { diasSemana: restantes }));
+            cache.set(id, atualizado);
+        }
+        atualizarResumo();
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível remover o bloco.');
+        desenharTodos();
+    }
+}
+
+function preencherDisciplinas() {
+    if (!selectDisciplina) return;
+    selectDisciplina.replaceChildren();
+
+    if (disciplinas.length === 0) {
+        const opcao = document.createElement('option');
+        opcao.value = '';
+        opcao.textContent = 'Nenhuma disciplina no passo 1';
+        selectDisciplina.appendChild(opcao);
+        selectDisciplina.disabled = true;
+        return;
+    }
+
+    selectDisciplina.disabled = false;
+    disciplinas.forEach((disciplina) => {
+        const opcao = document.createElement('option');
+        opcao.value = disciplina.id;
+        opcao.textContent = disciplina.nome;
+        selectDisciplina.appendChild(opcao);
+    });
+}
+
+montarGrade();
 rotinas.forEach(ativarArrasteDeRotina);
 
 calendario.addEventListener('dragover', (evento) => {
-    const posicao = obterPosicaoDeSoltura(evento.target);
-    if ((!rotinaArrastada && !compromissoArrastado) || !posicao) return;
+    if ((!rotinaArrastada && !compromissoArrastado) || !obterPosicao(evento.target)) return;
     evento.preventDefault();
     evento.dataTransfer.dropEffect = compromissoArrastado ? 'move' : 'copy';
     calendario.classList.add('pronto-para-soltar');
@@ -188,31 +520,30 @@ calendario.addEventListener('dragleave', (evento) => {
     if (!calendario.contains(evento.relatedTarget)) calendario.classList.remove('pronto-para-soltar');
 });
 
-calendario.addEventListener('drop', (evento) => {
-    const posicao = obterPosicaoDeSoltura(evento.target);
+calendario.addEventListener('drop', async (evento) => {
+    if (compromissoArrastado) soltoNaGrade = true;
+    const posicao = obterPosicao(evento.target);
     if ((!rotinaArrastada && !compromissoArrastado) || !posicao) return;
     evento.preventDefault();
     calendario.classList.remove('pronto-para-soltar');
 
     if (compromissoArrastado) {
-        posicionarCompromisso(compromissoArrastado, posicao.indiceDia, posicao.indiceFaixa, Number(compromissoArrastado.dataset.duracaoFaixas));
+        soltoNaGrade = true;
+        const elemento = compromissoArrastado;
+        try {
+            await moverOcorrencia(elemento, posicao);
+        } catch (erro) {
+            AcaiAvisos.mostrar(erro.message || 'Não foi possível mover o bloco.');
+        }
         return;
     }
 
-    const bloco = document.createElement('div');
-    const corRotina = Array.from(rotinaArrastada.classList).find((nome) => ['roxo', 'azul', 'escuro', 'verde', 'amarelo', 'deslocamento'].includes(nome));
-    const duracaoHoras = { Aulas: 2, Trabalho: 4, Sono: 8, Saúde: 1, Pausa: 1, Translado: 1 };
-    const duracaoFaixas = Number(rotinaArrastada.dataset.duracaoFaixas) || duracaoHoras[rotinaArrastada.dataset.rotina] * faixasPorHora;
-    bloco.className = `evento-adicionado evento-calendario ${corRotina}`;
-    bloco.dataset.rotina = rotinaArrastada.dataset.rotina;
-    const tituloBloco = document.createElement('span');
-    tituloBloco.textContent = `${rotinaArrastada.dataset.icone || '✦'} ${rotinaArrastada.dataset.rotina}`;
-    const horarioBloco = document.createElement('small');
-    horarioBloco.className = 'horario-movido';
-    bloco.append(tituloBloco, horarioBloco);
-    posicionarCompromisso(bloco, posicao.indiceDia, posicao.indiceFaixa, duracaoFaixas);
-    ativarArrasteDeCompromisso(bloco);
-    calendario.appendChild(bloco);
+    const rotina = rotinaArrastada;
+    try {
+        await criarNaGrade(rotina, posicao);
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível gravar o bloco.');
+    }
 });
 
 function adicionarBlocoPersonalizado(dados) {
@@ -223,8 +554,6 @@ function adicionarBlocoPersonalizado(dados) {
     cartao.dataset.categoria = dados.categoria;
     cartao.dataset.duracaoFaixas = dados.duracaoFaixas;
     cartao.dataset.prioridade = dados.prioridade;
-    cartao.dataset.diaPreferido = dados.diaPreferido;
-    cartao.dataset.horarioPreferido = dados.horarioPreferido;
 
     const icone = document.createElement('div');
     icone.className = 'icone-rotina';
@@ -233,7 +562,7 @@ function adicionarBlocoPersonalizado(dados) {
     const titulo = document.createElement('strong');
     titulo.textContent = dados.nome;
     const configuracao = document.createElement('small');
-    configuracao.textContent = `Configuração: ${dados.textoDia} · ${dados.horarioPreferido || 'sem horário'}`;
+    configuracao.textContent = dados.categoria;
     detalhes.append(titulo, configuracao);
     const duracao = document.createElement('span');
     duracao.textContent = dados.duracaoTexto;
@@ -241,9 +570,7 @@ function adicionarBlocoPersonalizado(dados) {
     etiqueta.textContent = dados.categoria;
     cartao.append(icone, detalhes, duracao, etiqueta);
     ativarArrasteDeRotina(cartao);
-
-    const botaoCriacao = document.querySelector('#abrir-modal-bloco');
-    document.querySelector('.cartao-lateral').insertBefore(cartao, botaoCriacao);
+    document.querySelector('.cartao-lateral').insertBefore(cartao, document.querySelector('#abrir-modal-bloco'));
 }
 
 window.adicionarBlocoPersonalizado = adicionarBlocoPersonalizado;
@@ -252,19 +579,19 @@ const quadroModal = document.querySelector('#quadro-modal');
 let modalPronto = false;
 let aberturaPendente = false;
 
-document.querySelector('#abrir-modal-bloco').addEventListener('click', () => {
+document.querySelector('#abrir-modal-bloco')?.addEventListener('click', () => {
     if (!modalPronto) aberturaPendente = true;
-    quadroModal.contentWindow.postMessage({ tipo: 'abrir-modal' }, '*');
+    quadroModal?.contentWindow?.postMessage({ tipo: 'abrir-modal' }, '*');
 });
 
-quadroModal.addEventListener('load', () => {
+quadroModal?.addEventListener('load', () => {
     if (!aberturaPendente) return;
     aberturaPendente = false;
     quadroModal.contentWindow.postMessage({ tipo: 'abrir-modal' }, '*');
 });
 
 window.addEventListener('message', (evento) => {
-    if (evento.source !== quadroModal.contentWindow || !evento.data) return;
+    if (!quadroModal || evento.source !== quadroModal.contentWindow || !evento.data) return;
 
     if (evento.data.tipo === 'modal-pronto') {
         modalPronto = true;
@@ -282,7 +609,7 @@ window.addEventListener('message', (evento) => {
     if (evento.data.tipo === 'modal-fechado') {
         quadroModal.classList.remove('ativo');
         quadroModal.setAttribute('aria-hidden', 'true');
-        document.querySelector('#abrir-modal-bloco').focus();
+        document.querySelector('#abrir-modal-bloco')?.focus();
     }
 
     if (evento.data.tipo === 'bloco-salvo') {
@@ -294,10 +621,31 @@ document.getElementById('botao-proximo')?.addEventListener('click', () => {
     window.location.href = 'index_onboarding_metas.html';
 });
 
-document.getElementById('pular-onboarding')?.addEventListener('click', (evento) => {
-    finalizarOnboarding(evento.currentTarget);
+document.getElementById('botao-voltar')?.addEventListener('click', () => {
+    window.location.href = 'index_onboarding_semestre.html';
 });
 
-document.getElementById('botao-voltar')?.addEventListener('click', () => {
-    window.history.back();
-});
+window.salvarPassoOnboarding = async () => {};
+
+async function iniciar() {
+    try {
+        const [conta, materias, blocos] = await Promise.all([
+            AcaiApi.obterUsuarioAtual(),
+            AcaiApi.listarDisciplinas({ situacao: 'ativa' }),
+            AcaiApi.listarBlocosFixos(),
+        ]);
+        metaHoras = conta?.metaSemanalHoras || 10;
+        disciplinas = materias;
+        blocos.forEach((item) => {
+            const bloco = normalizar(item);
+            cache.set(bloco.id, bloco);
+        });
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message || 'Não foi possível carregar a rotina.');
+    }
+
+    preencherDisciplinas();
+    desenharTodos();
+}
+
+iniciar();

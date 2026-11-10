@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="assets/icons/favicon.png" type="image/png">
 
-    <title>AçaíStudy - Onboarding · Horários Fixos</title>
+    <title>AçaíStudy - Onboarding · Horários</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/style_onboarding.css?v=3">
-    <link rel="stylesheet" href="CSS/style_onboarding_horarios.css?v=18">
+    <link rel="stylesheet" href="CSS/style_onboarding.css?v=4">
+    <link rel="stylesheet" href="CSS/style_onboarding_horarios.css?v=20">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
@@ -30,25 +30,30 @@
 
         <nav class="etapas" aria-label="Etapas do onboarding">
 
-            <div class="etapa ativo" aria-current="step">
-                <span>1</span>
-                <strong>Horários Fixos</strong>
-            </div>
+            <a class="etapa concluido" href="index_onboarding_semestre.html">
+                <span>✓</span>
+                <strong>Semestre</strong>
+            </a>
 
-            <div class="etapa">
+            <div class="etapa ativo" aria-current="step">
                 <span>2</span>
-                <strong>Metas Acadêmicas</strong>
+                <strong>Horários</strong>
             </div>
 
             <div class="etapa">
                 <span>3</span>
-                <strong>Configurações de Foco</strong>
+                <strong>Metas</strong>
+            </div>
+
+            <div class="etapa">
+                <span>4</span>
+                <strong>Foco</strong>
             </div>
 
         </nav>
 
         <div class="acoes-cabecalho">
-            <button type="button" class="botao-texto">Salvar e sair</button>
+            <button type="button" class="botao-texto" id="salvar-sair">Salvar e sair</button>
             <button type="button" class="botao-texto" id="pular-onboarding">Pular onboarding</button>
 
             <span class="divisor-vertical" aria-hidden="true"></span>
@@ -59,36 +64,34 @@
                 <div class="painel-ajuda" id="painel-ajuda" hidden>
                     <strong>Como funciona este passo</strong>
                     <ul>
-                        <li>Arraste blocos de rotina fixa para a grade semanal.</li>
-                        <li>Bloqueie aulas, trabalho, sono e outras obrigações recorrentes.</li>
-                        <li>A Sofia usará as janelas livres para montar seu cronograma.</li>
-                        <li>Você pode salvar e sair a qualquer momento e retomar depois.</li>
+                        <li>Arraste um tipo de compromisso para o dia e a hora em que ele acontece.</li>
+                        <li>Aulas usam a disciplina escolhida ao lado e entram na carga dela.</li>
+                        <li>O bloco é gravado na hora. Solte fora da grade para apagar.</li>
+                        <li>Esses horários são os mesmos da tela de Disciplinas e da grade.</li>
                     </ul>
                 </div>
             </div>
 
             <div class="menu-perfil">
-                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e Configurações - Mariana Rocha" aria-expanded="false" aria-controls="painel-perfil">
-                    <img src="assets/icons/layout/avatar-704c8e.png" alt="">
+                <button type="button" class="botao-perfil" id="botao-perfil" aria-label="Perfil e configurações" aria-expanded="false" aria-controls="painel-perfil">
+                    <img class="avatar-usuario" src="assets/icons/avatar-padrao.svg" alt="">
                 </button>
 
                 <div class="painel-perfil" id="painel-perfil" hidden>
                     <div class="painel-perfil-cabecalho">
-                        <img src="assets/icons/layout/avatar-704c8e.png" alt="" width="40" height="40">
+                        <img class="avatar-usuario" src="assets/icons/avatar-padrao.svg" alt="" width="40" height="40">
                         <div>
-                            <strong>Mariana Rocha</strong>
-                            <span>Engenharia de Software</span>
+                            <strong class="nome-usuario">Sua conta</strong>
+                            <span class="curso-usuario">Curso ainda não informado</span>
                         </div>
                     </div>
 
                     <nav class="lista-perfil">
                         <a href="index_perfil.html">Meu perfil</a>
                         <a href="index_configuracoes.html">Configurações</a>
-                        <a href="#">Assinatura</a>
-                        <a href="#">Ajuda</a>
                     </nav>
 
-                    <a href="index_login.html" class="botao-sair">Sair da conta</a>
+                    <button type="button" class="botao-sair">Sair da conta</button>
                 </div>
             </div>
         </div>
@@ -107,17 +110,17 @@
             <div>
 
                 <div class="caminho-navegacao">
-                    ● &nbsp; PASSO 1 DE 3 &nbsp;•&nbsp; PLANEJAMENTO BASE
+                    ● &nbsp; PASSO 2 DE 4 &nbsp;•&nbsp; JANELAS LIVRES
                     <span>•</span>
-                    Semestre Letivo 2026.2
+                    O que não entra como estudo
                 </div>
 
-                <h1>Bloquear Horários Fixos</h1>
+                <h1>Bloqueie o que já está ocupado</h1>
 
                 <p>
-                    Arraste seus compromissos recorrentes e inegociáveis para a grade semanal.
-                    O motor neural do AçaíStudy utilizará as janelas livres para calcular e montar
-                    seu cronograma de estudos de alto rendimento.
+                    Arraste aulas, trabalho, sono e pausas para a semana real. Cada bloco é gravado
+                    na sua conta e aparece na grade. Aulas ficam ligadas à disciplina escolhida,
+                    então a carga horária dela passa a contar.
                 </p>
 
             </div>
@@ -128,11 +131,11 @@
                 <div class="icone-dica">💡</div>
 
                 <div>
-                    <strong>Dica de Equilíbrio Sustentável</strong>
+                    <strong>O que fica livre vira estudo</strong>
 
                     <p>
-                        Garanta horários constantes de descanso noturno e refeições.
-                        Alunos com pausas fixas retêm até 38% mais conteúdo nas disciplinas exatas.
+                        Sono, aula e trabalho saem das janelas de estudo da grade. Se um bloco passaria da meia-noite,
+                        ele é encurtado até 00:00 — o restante se ajusta depois em Disciplinas.
                     </p>
                 </div>
 
@@ -159,9 +162,15 @@
                     </div>
 
                     <p class="descricao">
-                        Defina seus compromissos recorrentes e inegociáveis
-                        para a IA calcular seus horários livres de estudo.
+                        Solte na grade o compromisso daquele dia. A duração padrão vem do tipo;
+                        você ajusta o detalhe depois em Disciplinas.
                     </p>
+
+                    <label class="seletor-disciplina" for="disciplina-aula">
+                        Disciplina ao soltar “Aulas”
+                        <select id="disciplina-aula"></select>
+                        <small>A aula entra na carga horária dessa disciplina.</small>
+                    </label>
 
 
                     <!-- Aula -->
@@ -276,41 +285,19 @@
                         <span>168h totais</span>
                     </div>
 
-                    <div class="progresso">
+                    <div class="progresso" id="barra-distribuicao">
 
-                        <span class="sono"></span>
-                        <span class="aula"></span>
-                        <span class="trabalho"></span>
-                        <span class="saude"></span>
-                        <span class="refeicao"></span>
-                        <span class="estudo"></span>
-
-                    </div>
-
-
-                    <div class="legenda">
-
-                        <div>
-                            <span class="ponto ponto-sono"></span>
-                            Sono: 56h
-                        </div>
-
-                        <div>
-                            <span class="ponto ponto-aula"></span>
-                            Aulas: 24h
-                        </div>
-
-                        <div>
-                            <span class="ponto ponto-trabalho"></span>
-                            Trabalho: 16h
-                        </div>
-
-                        <div>
-                            <span class="ponto ponto-estudo"></span>
-                            Estudo Livre: 58h
-                        </div>
+                        <span class="sono" id="faixa-sono"></span>
+                        <span class="aula" id="faixa-aula"></span>
+                        <span class="trabalho" id="faixa-trabalho"></span>
+                        <span class="saude" id="faixa-saude"></span>
+                        <span class="refeicao" id="faixa-refeicao"></span>
+                        <span class="estudo" id="faixa-estudo"></span>
 
                     </div>
+
+
+                    <div class="legenda" id="legenda-distribuicao"></div>
 
                 </div>
 
@@ -329,27 +316,25 @@
                         <div class="icone-calendario">▣</div>
 
                         <div>
-                            <h2>Grade Semanal de Rotina</h2>
-                            <small>Horário configurado: 06:00 às 23:00</small>
+                            <h2>Sua semana</h2>
+                            <small>Horário visível: 06:00 às 23:00</small>
                         </div>
                     </div>
 
 
                     <div class="info-calendario">
 
-                        <span class="fixo">
-                            ● 38h fixas bloqueadas
+                        <span class="fixo" id="horas-fixas">
+                            ● 0h bloqueadas
                         </span>
 
-                        <span class="livre">
-                            • 74h livres p/ estudo
+                        <span class="livre" id="horas-livres">
+                            • 168h livres
                         </span>
 
-                        <span class="semana">Semana (7 Dias)</span>
+                        <span class="semana">Semana atual</span>
 
-                        <span>Seg – Sex</span>
-
-                        <span>↻</span>
+                        <span id="intervalo-semana">—</span>
 
                     </div>
 
@@ -358,246 +343,14 @@
 
                 <!-- ================= GRID ================= -->
 
-                <div class="calendario">
+                <div class="calendario" id="calendario" aria-label="Grade semanal"></div>
 
-                    <!-- Cabeçalho -->
-
-                    <div class="canto">
-                        HORA
-                    </div>
-
-                    <div class="dia">
-                        <small>SEG</small>
-                        <strong>03 Fev</strong>
-                    </div>
-
-                    <div class="dia">
-                        <small>TER</small>
-                        <strong>04 Fev</strong>
-                    </div>
-
-                    <div class="dia">
-                        <small>QUA</small>
-                        <strong>05 Fev</strong>
-                    </div>
-
-                    <div class="dia selecionado">
-                        <small>QUI</small>
-                        <strong>06 Fev</strong>
-                    </div>
-
-                    <div class="dia">
-                        <small>SEX</small>
-                        <strong>07 Fev</strong>
-                    </div>
-
-                    <div class="dia">
-                        <small>SÁB</small>
-                        <strong>08 Fev</strong>
-                    </div>
-
-                    <div class="dia">
-                        <small>DOM</small>
-                        <strong>09 Fev</strong>
-                    </div>
-
-
-                    <!-- 06:00 -->
-
-                    <div class="horario">06:00</div>
-
-                    <div class="compromisso evento-sono">◔ Sono</div>
-                    <div class="compromisso evento-sono">◔ Sono</div>
-                    <div class="compromisso evento-sono">◔ Sono</div>
-                    <div class="compromisso evento-sono">◔ Sono</div>
-                    <div class="compromisso evento-sono">◔ Sono</div>
-                    <div class="compromisso evento-sono">◔ Sono (08h)</div>
-                    <div class="compromisso evento-sono">◔ Sono (09h)</div>
-
-
-                    <!-- 07:00 -->
-
-                    <div class="horario">07:00</div>
-
-                    <div class="compromisso exercicio">
-                        ↗ Treino
-                        <small>07:00 - 08:00</small>
-                    </div>
-
-                    <div class="compromisso evento-deslocamento">
-                        ▣ Ônibus
-                        <small>Translado</small>
-                    </div>
-
-                    <div class="compromisso exercicio">
-                        ↗ Treino
-                        <small>07:00 - 08:00</small>
-                    </div>
-
-                    <div class="compromisso cafe-da-manha">
-                        ☕ Café
-                        <small>Desjejum</small>
-                    </div>
-
-                    <div class="compromisso exercicio">
-                        ↗ Treino
-                        <small>07:00 - 08:00</small>
-                    </div>
-
-                    <div class="faixa-livre">Livre</div>
-                    <div class="faixa-livre">Livre</div>
-
-
-                    <!-- 08:00 -->
-
-                    <div class="horario">08:00</div>
-
-                    <div class="compromisso evento-aula">
-                        <strong>PRESENCIAL</strong>
-                        <b>Engenharia de Software</b>
-                        <small>Prof. Dr. Amanda</small>
-                        <span>Sala 314</span>
-                        <em>08:00 - 12:00 (4h)</em>
-                    </div>
-
-                    <div class="janela-livre">
-                        ✦<br>
-                        Janela TA<br>
-                        Livre
-                    </div>
-
-                    <div class="compromisso evento-aula">
-                        <strong>LABORATÓRIO</strong>
-                        <b>Banco de Dados II</b>
-                        <small>Prof. João</small>
-                        <span>Lab 02</span>
-                        <em>08:00 - 12:00 (4h)</em>
-                    </div>
-
-                    <div class="janela-livre grande">
-                        <b>Soltar para Agendar</b>
-                        <br>
-                        (4h)
-                        <br><br>
-                        Qui · 08:00 às 12:00
-                    </div>
-
-                    <div class="compromisso evento-aula">
-                        <strong>TEÓRICA</strong>
-                        <b>Algoritmos & Estruturas</b>
-                        <small>Auditório Central</small>
-                        <em>08:00 - 12:00 (4h)</em>
-                    </div>
-
-                    <div class="faixa-livre"></div>
-                    <div class="faixa-livre"></div>
-
-
-                    <!-- 12:00 -->
-
-                    <div class="horario">12:00</div>
-
-                    <div class="compromisso almoco">🍴 Almoço</div>
-                    <div class="compromisso almoco">🍴 Almoço</div>
-                    <div class="compromisso almoco">🍴 Almoço</div>
-                    <div class="compromisso almoco">🍴 Almoço</div>
-                    <div class="compromisso almoco">🍴 Almoço</div>
-                    <div class="compromisso almoco">🍴 Almoço</div>
-                    <div class="compromisso almoco">🍴 Almoço</div>
-
-
-                    <!-- 13:00 -->
-
-                    <div class="horario">13:00</div>
-
-                    <div class="estudo-livre">
-                        Livre p/<br>Metas
-                    </div>
-
-                    <div class="compromisso estagio">
-                        <strong>TECH REMOTE</strong>
-                        <b>Estágio Desenvolvimento</b>
-                        <small>Squad Mobile • Remoto</small>
-                        <em>13:00 - 18:00 (5h)</em>
-                    </div>
-
-                    <div class="estudo-livre">
-                        Livre p/<br>Metas
-                    </div>
-
-                    <div class="compromisso estagio">
-                        <strong>TECH REMOTE</strong>
-                        <b>Estágio Desenvolvimento</b>
-                        <small>Squad Mobile • Remoto</small>
-                        <em>13:00 - 18:00 (5h)</em>
-                    </div>
-
-                    <div class="estudo-livre">
-                        Livre p/<br>Metas
-                    </div>
-
-                    <div class="faixa-livre"></div>
-                    <div class="faixa-livre"></div>
-
-
-                    <!-- 15:00 -->
-
-                    <div class="horario">15:00</div>
-
-                    <div class="vazio"></div>
-                    <div class="vazio"></div>
-                    <div class="vazio"></div>
-                    <div class="vazio"></div>
-                    <div class="vazio"></div>
-                    <div class="vazio"></div>
-                    <div class="vazio"></div>
-
-
-                    <!-- 22:00 -->
-
-                    <div class="horario">22:00</div>
-
-                    <div class="compromisso sono-noturno">◔ Sono (22h–06h)</div>
-                    <div class="compromisso sono-noturno">◔ Sono</div>
-                    <div class="compromisso sono-noturno">◔ Sono</div>
-                    <div class="compromisso sono-noturno">◔ Sono</div>
-                    <div class="compromisso sono-noturno">◔ Sono</div>
-                    <div class="compromisso sono-noturno">◔ Sono</div>
-                    <div class="compromisso sono-noturno">◔ Sono</div>
-
-
-                </div>
-
-
-                <!-- Rodapé calendário -->
 
                 <div class="rodape-calendario">
 
-                    <span>♧ Arraste para mudar o horário, use a alça inferior para ajustar a duração de 30 em 30 min e solte fora para remover.</span>
+                    <span>Arraste para a grade para gravar. Arraste de novo para mudar o dia ou solte fora para apagar.</span>
 
-                    <div class="legenda-rodape">
-
-                        <span>
-                            <i class="ponto-roxo"></i>
-                            Aulas (24h)
-                        </span>
-
-                        <span>
-                            <i class="ponto-azul"></i>
-                            Trabalho (10h)
-                        </span>
-
-                        <span>
-                            <i class="ponto-verde"></i>
-                            Saúde (4h)
-                        </span>
-
-                        <span>
-                            <i class="ponto-escuro"></i>
-                            Sono (56h)
-                        </span>
-
-                    </div>
+                    <div class="legenda-rodape" id="legenda-rodape"></div>
 
                 </div>
 
@@ -610,11 +363,10 @@
 
         <footer class="rodape">
 
-            <div class="estado">
+            <div class="estado" id="estado-rodape">
                 ⓘ
-                <strong>Passo 1 de 3 concluído</strong>
-                • Você poderá refinar ou reajustar esta rotina a qualquer momento
-                em Configurações da Grade.
+                <strong>Passo 2 de 4</strong>
+                • Arraste os compromissos que não devem virar estudo
             </div>
 
 
@@ -625,7 +377,7 @@
                 </button>
 
                 <button type="button" class="proximo" id="botao-proximo">
-                    Avançar para Metas
+                    Avançar para metas
                     <span>→</span>
                 </button>
 
@@ -635,23 +387,6 @@
 
     </main>
 
-    <div class="boas-vindas-fundo" id="boas-vindas-fundo" role="presentation">
-        <section class="boas-vindas-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-boas-vindas" aria-describedby="texto-boas-vindas">
-            <button class="boas-vindas-fechar" type="button" id="fechar-boas-vindas" aria-label="Fechar introdução">×</button>
-            <div class="boas-vindas-icone" aria-hidden="true">✦</div>
-            <span class="boas-vindas-etiqueta">SEU PLANEJAMENTO COMEÇA AQUI</span>
-            <h2 id="titulo-boas-vindas">Uma rotina feita para você</h2>
-            <p id="texto-boas-vindas">Este onboarding ajuda você a ajustar sua rotina de verdade. Conte ao AçaíStudy seus horários fixos, objetivos e preferências para que a Sofia reconheça seus compromissos e organize os estudos nos momentos que funcionam para você.</p>
-            <div class="boas-vindas-pontos">
-                <span><i aria-hidden="true">✓</i> Respeita seus horários e pausas</span>
-                <span><i aria-hidden="true">✓</i> Identifica seus períodos livres</span>
-                <span><i aria-hidden="true">✓</i> Adapta o cronograma à sua rotina</span>
-            </div>
-            <button class="boas-vindas-acao" type="button" id="comecar-onboarding">Vamos ajustar minha rotina <span aria-hidden="true">→</span></button>
-            <small>Você poderá atualizar essas informações quando quiser.</small>
-        </section>
-    </div>
-
     <iframe
         class="quadro-modal"
         id="quadro-modal"
@@ -660,10 +395,10 @@
         aria-hidden="true">
     </iframe>
 
-    <script src="JS/users/api.js?v=6"></script>
+    <script src="JS/users/api.js?v=7"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
-    <script src="JS/users/onboarding.js?v=4"></script>
-    <script src="JS/users/script_onboarding_horarios.js?v=19"></script>
+    <script src="JS/users/onboarding.js?v=6"></script>
+    <script src="JS/users/script_onboarding_horarios.js?v=21"></script>
 
 </body>
 </html>

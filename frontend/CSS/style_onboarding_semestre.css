@@ -1,0 +1,318 @@
+/* Passo 1 — semestre e disciplinas */
+
+.area-trabalho {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.painel-semestre,
+.painel-disciplinas {
+    background: var(--branco);
+    border: 1px solid var(--cinza-200);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.painel-semestre h2,
+.painel-disciplinas h2 {
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--titulo);
+}
+
+.painel-semestre > p,
+.painel-disciplinas > .descricao-painel {
+    margin: 6px 0 16px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--cinza-500);
+}
+
+.grade-perfil {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-largo {
+    grid-column: 1 / -1;
+}
+
+.campo label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--cinza-600);
+}
+
+.campo input,
+.campo select {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--cinza-200);
+    border-radius: 8px;
+    background: var(--branco);
+    color: var(--tinta);
+    font-size: 13px;
+}
+
+.campo input:focus,
+.campo select:focus {
+    outline: 2px solid #ddcce9;
+    border-color: var(--roxo);
+}
+
+.ajuda-campo {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--cinza-500);
+}
+
+.formulario-disciplina {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(140px, .7fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 14px;
+}
+
+.botao-adicionar {
+    height: 38px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--roxo);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.botao-adicionar:hover {
+    background: #3f2853;
+}
+
+.lista-disciplinas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item-disciplina {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--cinza-200);
+    border-radius: 10px;
+    background: var(--fundo);
+}
+
+.item-disciplina strong {
+    font-size: 13px;
+    color: var(--tinta);
+}
+
+.item-disciplina small {
+    font-size: 11px;
+    color: var(--cinza-500);
+}
+
+.ponto-disciplina {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ponto-disciplina.roxo { background: #4f3466; }
+.ponto-disciplina.azul { background: #087fbd; }
+.ponto-disciplina.verde { background: #18b989; }
+.ponto-disciplina.ambar { background: #c9a74d; }
+
+.botao-remover {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--cinza-500);
+    font-size: 18px;
+    line-height: 1;
+}
+
+.botao-remover:hover {
+    background: #fee2e2;
+    color: var(--vermelho);
+}
+
+.estado-vazio {
+    padding: 22px 16px;
+    border: 1px dashed var(--cinza-300);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.estado-vazio strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--tinta);
+    font-size: 13px;
+}
+
+.estado-vazio p {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--cinza-500);
+}
+
+.nota-canvas {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--roxo-claro);
+    color: var(--cinza-600);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.nota-canvas strong {
+    color: var(--roxo);
+}
+
+/* Boas-vindas */
+body.boas-vindas-abertas { overflow: hidden; }
+
+.boas-vindas-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(27, 30, 54, .56);
+    backdrop-filter: blur(3px);
+}
+
+.boas-vindas-fundo[hidden] { display: none; }
+
+.boas-vindas-modal {
+    position: relative;
+    width: min(100%, 540px);
+    padding: 36px 40px 30px;
+    border: 1px solid var(--cinza-200);
+    border-radius: 20px;
+    background: var(--branco);
+    box-shadow: 0 24px 70px rgba(27, 30, 54, .24);
+    text-align: center;
+}
+
+.boas-vindas-fechar {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--cinza-100);
+    color: var(--cinza-600);
+    font-size: 24px;
+    line-height: 1;
+}
+
+.boas-vindas-etiqueta {
+    color: var(--roxo);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.boas-vindas-modal h2 {
+    margin: 8px 0 10px;
+    color: var(--titulo);
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+.boas-vindas-modal > p {
+    color: var(--cinza-600);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.boas-vindas-pontos {
+    display: grid;
+    gap: 10px;
+    margin: 20px 0 22px;
+    text-align: left;
+    color: var(--tinta);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.boas-vindas-pontos span {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.boas-vindas-pontos i {
+    display: grid;
+    place-items: center;
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+    border-radius: 50%;
+    background: var(--verde-claro);
+    color: var(--verde);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.boas-vindas-acao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-radius: 11px;
+    background: var(--roxo);
+    color: var(--branco);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.boas-vindas-acao:hover { background: #3f2853; }
+
+.boas-vindas-modal > small {
+    display: block;
+    margin-top: 14px;
+    color: var(--cinza-500);
+    font-size: 11px;
+}
+
+@media (max-width: 980px) {
+    .area-trabalho,
+    .grade-perfil,
+    .formulario-disciplina {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-largo { grid-column: auto; }
+}
