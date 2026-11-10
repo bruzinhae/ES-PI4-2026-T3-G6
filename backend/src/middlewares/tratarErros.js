@@ -80,7 +80,18 @@ export function tratarErros(erro, _req, res, _next) {
         return res.status(400).json({ mensagem: 'Corpo da requisição inválido.' });
     }
 
-    // 6) Qualquer outra coisa é um erro inesperado (bug, banco caiu no meio...).
+    // 6) Corpo da requisição maior que o limite do `express.json()` (100kb, ver app.js).
+    //    Também nasce antes de chegar nas rotas. Sem este caso, cairia no 500 abaixo e
+    //    pareceria um defeito do servidor, quando na verdade o cliente mandou dados demais.
+    //    O erro traz o limite em bytes (`erro.limit`), usado para montar a mensagem.
+    //    Status 413 = Payload Too Large.
+    if (erro?.type === 'entity.too.large') {
+        const limite = Number.isFinite(erro.limit) ? ` (limite de ${Math.round(erro.limit / 1024)} KB)` : '';
+
+        return res.status(413).json({ mensagem: `O corpo da requisição é grande demais${limite}.` });
+    }
+
+    // 7) Qualquer outra coisa é um erro inesperado (bug, banco caiu no meio...).
     //    Registramos o erro completo no terminal para quem estiver depurando, mas para o
     //    cliente devolvemos só uma mensagem genérica — detalhes internos não devem vazar.
     //    Status 500 = Internal Server Error.
