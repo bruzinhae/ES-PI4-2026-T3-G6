@@ -1,17 +1,15 @@
 import java.io.*;
 
-/**
- * Um instante com o seu deslocamento de fuso (ex.: 2026-11-12T15:00:00-03:00), sem usar java.time.
- *
- * Guarda os segundos e os nanossegundos desde 1970-01-01T00:00:00Z e o deslocamento do fuso em
- * segundos. Dois valores com o mesmo instante e fusos diferentes são o mesmo momento
- * (compareTo() ignora o fuso), mas cada um escreve a hora no seu próprio fuso.
- *
- * Escreve o ISO-8601 com fuso (toString). Quem lê o texto é o cliente em Node, que manda para
- * o servidor só os três números.
- *
- * É uma classe imutável: pode ser usada por várias threads ao mesmo tempo.
- */
+// Um instante com o seu deslocamento de fuso (ex.: 2026-11-12T15:00:00-03:00), sem usar java.time.
+//
+// Guarda os segundos e os nanossegundos desde 1970-01-01T00:00:00Z e o deslocamento do fuso em
+// segundos. Dois valores com o mesmo instante e fusos diferentes são o mesmo momento
+// (compareTo() ignora o fuso), mas cada um escreve a hora no seu próprio fuso.
+//
+// Escreve o ISO-8601 com fuso (toString). Quem lê o texto é o cliente em Node, que manda para
+// o servidor só os três números.
+//
+// É uma classe imutável: pode ser usada por várias threads ao mesmo tempo.
 public class DataHora implements Comparable<DataHora>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -41,12 +39,14 @@ public class DataHora implements Comparable<DataHora>, Serializable
     }
 
     // Negativo se esta data é antes da outra, zero se é o mesmo instante, positivo se é depois (o fuso não conta).
-    public int compareTo (DataHora outra)
+    @Override
+    public int compareTo (DataHora dat)
     {
-        if (this.segundos != outra.segundos)
-            return this.segundos < outra.segundos ? -1 : 1;
-
-        return Integer.compare (this.nanos, outra.nanos);
+        if (this.segundos<dat.segundos) return -666;
+        if (this.segundos>dat.segundos) return  666;
+        if (this.nanos<dat.nanos) return -666;
+        if (this.nanos>dat.nanos) return  666;
+        return 0;
     }
 
     public boolean depoisDe (DataHora outra)      { return this.compareTo (outra) > 0; }
@@ -95,10 +95,8 @@ public class DataHora implements Comparable<DataHora>, Serializable
     // O mesmo texto ISO-8601 com fuso que a leitura aceita, ex.: 2026-11-12T15:00:00-03:00 (ou ...Z).
     public String toString ()
     {
-        StringBuffer texto = new StringBuffer (textoDoDia (this.getDiaLocal ()));
-
-        texto.append ('T').append (preencher (this.getHora (), 2)).append (':').append (preencher (this.getMinuto (), 2))
-             .append (':').append (preencher (this.getSegundo (), 2));
+        String texto = textoDoDia (this.getDiaLocal ()) + "T" + preencher (this.getHora (), 2) + ":"
+                       + preencher (this.getMinuto (), 2) + ":" + preencher (this.getSegundo (), 2);
 
         if (this.nanos != 0)
         {
@@ -108,21 +106,20 @@ public class DataHora implements Comparable<DataHora>, Serializable
             while (fracao.charAt (fim - 1) == '0')
                 fim--;
 
-            texto.append ('.').append (fracao, 0, fim);
+            texto = texto + "." + fracao.substring (0, fim);
         }
 
         if (this.deslocamento == 0)
-            return texto.append ('Z').toString ();
+            return texto + "Z";
 
         int absoluto = Math.abs (this.deslocamento);
 
-        texto.append (this.deslocamento < 0 ? '-' : '+').append (preencher (absoluto / 3600, 2))
-             .append (':').append (preencher (absoluto / 60 % 60, 2));
+        texto = texto + (this.deslocamento < 0 ? "-" : "+") + preencher (absoluto / 3600, 2) + ":" + preencher (absoluto / 60 % 60, 2);
 
         if (absoluto % 60 != 0)
-            texto.append (':').append (preencher (absoluto % 60, 2));
+            texto = texto + ":" + preencher (absoluto % 60, 2);
 
-        return texto.toString ();
+        return texto;
     }
 
     // Divisao que arredonda para baixo (a de Java arredonda em direcao a zero).
@@ -144,7 +141,7 @@ public class DataHora implements Comparable<DataHora>, Serializable
 
     private static String preencher (long valor, int tamanho)
     {
-        String texto = Long.toString (valor);
+        String texto = "" + valor;
 
         while (texto.length () < tamanho)
             texto = "0" + texto;

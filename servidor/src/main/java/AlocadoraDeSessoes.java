@@ -1,25 +1,23 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Decide, a partir do ranking, qual tarefa vai em qual horário, sem repetir tempo nem sobrepor sessões.
- *
- * O ranking sozinho devolve, para cada espaço livre, uma lista de candidatas, e a mesma tarefa pode ser a
- * primeira de vários espaços. Esta classe resolve isso com um algoritmo guloso:
- *
- *   1. percorre os espaços em ordem cronológica;
- *   2. dentro de cada espaço, escolhe a melhor candidata (a mesma nota do ranking) entre as tarefas que
- *      ainda têm minutos pendentes, e reserva uma sessão para ela;
- *   3. desconta os minutos e repete no resto do espaço, até acabar o espaço ou as tarefas;
- *   4. passa ao próximo espaço.
- *
- * Preferências do usuário que entram aqui:
- *   - duracaoMinutos: tamanho de cada sessão (uma tarefa grande vira várias; uma sessão pode passar até 14 min
- *     quando o resto seria pequeno demais para virar outra);
- *   - antifadiga: com ela ligada, há uma pausa de 10 minutos entre sessões seguidas no mesmo espaço; desligada,
- *     sessões seguidas da mesma tarefa são juntadas em uma só.
- *
- * É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
- */
+// Decide, a partir do ranking, qual tarefa vai em qual horário, sem repetir tempo nem sobrepor sessões.
+//
+// O ranking sozinho devolve, para cada espaço livre, uma lista de candidatas, e a mesma tarefa pode ser a
+// primeira de vários espaços. Esta classe resolve isso com um algoritmo guloso:
+//
+//   1. percorre os espaços em ordem cronológica;
+//   2. dentro de cada espaço, escolhe a melhor candidata (a mesma nota do ranking) entre as tarefas que
+//      ainda têm minutos pendentes, e reserva uma sessão para ela;
+//   3. desconta os minutos e repete no resto do espaço, até acabar o espaço ou as tarefas;
+//   4. passa ao próximo espaço.
+//
+// Preferências do usuário que entram aqui:
+//   - duracaoMinutos: tamanho de cada sessão (uma tarefa grande vira várias; uma sessão pode passar até 14 min
+//     quando o resto seria pequeno demais para virar outra);
+//   - antifadiga: com ela ligada, há uma pausa de 10 minutos entre sessões seguidas no mesmo espaço; desligada,
+//     sessões seguidas da mesma tarefa são juntadas em uma só.
+//
+// É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
 public class AlocadoraDeSessoes
 {
     public static final int PAUSA_ANTIFADIGA_MINUTOS = 10;
@@ -29,11 +27,11 @@ public class AlocadoraDeSessoes
 
     private static final int MINUTOS_MINIMOS_DO_ESPACO = 15;
 
-    public static Alocacao alocar (PedidoDeRanking pedido) throws Exception
+    public static Alocacao alocar (PedidoDeRanking pedido)
     {
         Preferencias preferencias = pedido.getPreferencias ();
         DataHora agora = pedido.getAgora ();
-        int pausa = preferencias.getAntifadiga () ? PAUSA_ANTIFADIGA_MINUTOS : 0;
+        int pausa = preferencias.isAntifadiga () ? PAUSA_ANTIFADIGA_MINUTOS : 0;
 
         // Tarefas que ainda pedem tempo (concluídas ficam de fora; id repetido vale só o primeiro).
         ArrayList<Tarefa> ativas = new ArrayList<Tarefa> ();
@@ -53,7 +51,7 @@ public class AlocadoraDeSessoes
         }
 
         ArrayList<EspacoLivre> espacos = new ArrayList<EspacoLivre> (pedido.getEspacos ());
-        Ordenador.ordene (espacos);
+        espacos = new Ordenador<EspacoLivre> ().ordene (espacos);
 
         ArrayList<SessaoAlocada> sessoes = new ArrayList<SessaoAlocada> ();
         DataHora ocupadoAte = null;
@@ -120,7 +118,10 @@ public class AlocadoraDeSessoes
 
                 if (pausa == 0 && ultima != null && ultima.getTarefaId ().equals (melhor.getTarefaId ())
                     && ultima.getFim ().mesmoInstante (cursor))
-                    sessoes.set (indiceDaUltima, ultima.estendida (minutos, faltaDepois));
+                {
+                    sessoes.remove (indiceDaUltima); // a ultima sessao e sempre a ultima da lista
+                    sessoes.add (ultima.estendida (minutos, faltaDepois));
+                }
                 else
                 {
                     sessoes.add (new SessaoAlocada (espaco.getId (), melhor.getTarefaId (), cursor, fimDaSessao, minutos, faltaDepois,
@@ -148,7 +149,7 @@ public class AlocadoraDeSessoes
 
     // Tarefas que ainda têm minutos pendentes no fim, com o motivo.
     private static ArrayList<TarefaSemAlocacao> tarefasSemAlocacao (ArrayList<Tarefa> ativas, int[] restante, int[] pedidos,
-                                                                    boolean[] foiCandidata, boolean semEspacos) throws Exception
+                                                                    boolean[] foiCandidata, boolean semEspacos)
     {
         ArrayList<TarefaSemAlocacao> sem = new ArrayList<TarefaSemAlocacao> ();
 

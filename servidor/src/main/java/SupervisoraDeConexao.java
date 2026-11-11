@@ -2,12 +2,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-/**
- * Atende UM cliente numa thread própria: lê comunicados, responde e repete até o cliente sair.
- * Equivalente à SupervisoraDeConexao do Fazedor de Continhas, mas sem estado por conexão:
- * cada PedidoDeRanking e cada PedidoDeMetas é independente (o servidor não guarda nada entre pedidos).
- * Quem confere os valores do pedido é o cliente, como no exemplo.
- */
 public class SupervisoraDeConexao extends Thread
 {
     private Parceiro            usuario;
@@ -30,6 +24,7 @@ public class SupervisoraDeConexao extends Thread
 
     public void run ()
     {
+
         ObjectOutputStream transmissor;
         try
         {
@@ -41,7 +36,7 @@ public class SupervisoraDeConexao extends Thread
         {
             return;
         }
-
+        
         ObjectInputStream receptor=null;
         try
         {
@@ -58,7 +53,7 @@ public class SupervisoraDeConexao extends Thread
             }
             catch (Exception falha)
             {} // so tentando fechar antes de acabar a thread
-
+            
             return;
         }
 
@@ -79,6 +74,7 @@ public class SupervisoraDeConexao extends Thread
                 this.usuarios.add (this.usuario);
             }
 
+
             for(;;)
             {
                 Comunicado comunicado = this.usuario.envie ();
@@ -93,7 +89,7 @@ public class SupervisoraDeConexao extends Thread
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro ("Não foi possível calcular o ranking: "+erro.getMessage()));
+                        this.usuario.receba (new Erro ("Nao foi possivel calcular o ranking: "+erro.getMessage()));
                     }
                 }
                 else if (comunicado instanceof PedidoDeMetas)
@@ -104,28 +100,30 @@ public class SupervisoraDeConexao extends Thread
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro ("Não foi possível priorizar as metas: "+erro.getMessage()));
+                        this.usuario.receba (new Erro ("Nao foi possivel priorizar as metas: "+erro.getMessage()));
                     }
                 }
                 else if (comunicado instanceof PedidoParaSair)
-                    return;
+                {
+                    synchronized (this.usuarios)
+                    {
+                        this.usuarios.remove (this.usuario);
+                    }
+                    this.usuario.adeus();
+                }
             }
         }
         catch (Exception erro)
-        {} // erro de rede, objeto de classe proibida ou fluxo corrompido: encerra esta conexao
-        finally
         {
-            synchronized (this.usuarios)
-            {
-                this.usuarios.remove (this.usuario);
-            }
-
             try
             {
-                this.usuario.adeus();
+                transmissor.close ();
+                receptor   .close ();
             }
             catch (Exception falha)
             {} // so tentando fechar antes de acabar a thread
+
+            return;
         }
     }
 }

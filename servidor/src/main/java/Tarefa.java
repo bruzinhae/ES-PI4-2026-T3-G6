@@ -1,15 +1,13 @@
 import java.io.*;
 
-/**
- * Tarefa pendente candidata a ser encaixada na grade.
- *
- * categoria        "estudos" ou "pessoal" (tarefa pessoal nao depende da janela de foco)
- * prioridade       1 a 10, definida pelo usuario
- * prazo            entrega; null quando a tarefa nao tem prazo
- * minutosEstimados esforco estimado; null quando nao informado
- * dificuldade      da disciplina (1 a 5), ou null
- * peso             da disciplina (1 a 5), ou null
- */
+// Tarefa pendente candidata a ser encaixada na grade.
+//
+// categoria        "estudos" ou "pessoal" (tarefa pessoal nao depende da janela de foco)
+// prioridade       1 a 10, definida pelo usuario
+// prazo            entrega; null quando a tarefa nao tem prazo
+// minutosEstimados esforco estimado; null quando nao informado
+// dificuldade      da disciplina (1 a 5), ou null
+// peso             da disciplina (1 a 5), ou null
 public class Tarefa implements Serializable
 {
     private static final long serialVersionUID = 1L;

@@ -1,9 +1,7 @@
 import java.io.*;
 
-/**
- * A nota de uma meta e as tres partes que a compoem (cada uma de 0 a 1). Guarda tambem o prazo e o
- * peso da prioridade da meta, que servem de desempate quando as notas sao iguais.
- */
+// A nota de uma meta e as tres partes que a compoem (cada uma de 0 a 1). Guarda tambem o prazo e o
+// peso da prioridade da meta, que servem de desempate quando as notas sao iguais.
 public class NotaDeMeta implements Comparable<NotaDeMeta>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -54,24 +52,27 @@ public class NotaDeMeta implements Comparable<NotaDeMeta>, Serializable
         return this.prazo;
     }
 
-    public int compareTo (NotaDeMeta outro)
+    @Override
+    public int compareTo (NotaDeMeta not)
     {
         // nota maior primeiro; empates: prazo mais cedo (sem prazo por ultimo), prioridade maior e id
-        int ret = Double.compare (outro.nota, this.nota);
-        if (ret != 0) return ret;
+        if (this.nota>not.nota) return -666;
+        if (this.nota<not.nota) return  666;
 
-        if (this.prazo == null && outro.prazo != null) return 1;
-        if (this.prazo != null && outro.prazo == null) return -1;
-        if (this.prazo != null)
+        if (this.prazo==null && not.prazo!=null) return  666;
+        if (this.prazo!=null && not.prazo==null) return -666;
+        if (this.prazo!=null)
         {
-            ret = this.prazo.compareTo (outro.prazo);
-            if (ret != 0) return ret;
+            if (this.prazo.compareTo(not.prazo)<0) return -666;
+            if (this.prazo.compareTo(not.prazo)>0) return  666;
         }
 
-        ret = Double.compare (outro.pesoDaPrioridade, this.pesoDaPrioridade);
-        if (ret != 0) return ret;
+        if (this.pesoDaPrioridade>not.pesoDaPrioridade) return -666;
+        if (this.pesoDaPrioridade<not.pesoDaPrioridade) return  666;
 
-        return this.metaId.compareTo (outro.metaId);
+        if (this.metaId.compareTo(not.metaId)<0) return -666;
+        if (this.metaId.compareTo(not.metaId)>0) return  666;
+        return 0;
     }
 
 }

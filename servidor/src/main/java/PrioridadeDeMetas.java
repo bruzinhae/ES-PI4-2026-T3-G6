@@ -1,9 +1,7 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Resposta ao PedidoDeMetas: as metas da mais para a menos urgente, a meta foco (a primeira da lista,
- * ou null se não há metas ativas) e as datas propostas (AAAA-MM-DD) para os marcos novos da meta foco.
- */
+// Resposta ao PedidoDeMetas: as metas da mais para a menos urgente, a meta foco (a primeira da lista,
+// ou null se não há metas ativas) e as datas propostas (AAAA-MM-DD) para os marcos novos da meta foco.
 public class PrioridadeDeMetas extends Comunicado
 {
     private static final long serialVersionUID = 1L;

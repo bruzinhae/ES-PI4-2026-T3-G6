@@ -1,9 +1,7 @@
 import java.io.*;
 
-/**
- * Um intervalo livre da grade, calculado pelo backend Node (grade da semana menos blocos
- * fixos e sessoes ja marcadas).
- */
+// Um intervalo livre da grade, calculado pelo backend Node (grade da semana menos blocos
+// fixos e sessoes ja marcadas).
 public class EspacoLivre implements Comparable<EspacoLivre>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -39,13 +37,15 @@ public class EspacoLivre implements Comparable<EspacoLivre>, Serializable
         return (int) this.inicio.minutosAte (this.fim);
     }
 
-    public int compareTo (EspacoLivre outro)
+    @Override
+    public int compareTo (EspacoLivre esp)
     {
         // o que comeca primeiro vem antes; empate pelo id
-        int ret = this.inicio.compareTo (outro.inicio);
-        if (ret != 0) return ret;
-
-        return this.id.compareTo (outro.id);
+        if (this.inicio.compareTo(esp.inicio)<0) return -666;
+        if (this.inicio.compareTo(esp.inicio)>0) return  666;
+        if (this.id.compareTo(esp.id)<0) return -666;
+        if (this.id.compareTo(esp.id)>0) return  666;
+        return 0;
     }
 
 }

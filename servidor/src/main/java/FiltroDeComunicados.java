@@ -1,10 +1,8 @@
 import java.io.*;
 
-/**
- * Decide quais classes podem ser lidas de um fluxo de objetos serializados. Ler objetos de um
- * fluxo qualquer pode executar código de classes que ninguém previu; por isso o servidor só aceita
- * os comunicados e as classes que eles carregam, além de limitar o tamanho e a profundidade.
- */
+// Decide quais classes podem ser lidas de um fluxo de objetos serializados. Ler objetos de um
+// fluxo qualquer pode executar código de classes que ninguém previu; por isso o servidor só aceita
+// os comunicados e as classes que eles carregam, além de limitar o tamanho e a profundidade.
 public class FiltroDeComunicados implements ObjectInputFilter
 {
     public static final long MAXIMO_DE_BYTES      = 8000000;

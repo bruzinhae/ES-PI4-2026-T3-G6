@@ -1,13 +1,11 @@
 import java.io.*;
 
-/**
- * Meta ativa do estudante, candidata a receber a atencao da Sofia.
- *
- * tipo       geral, disciplina, habito ou projeto
- * prioridade baixa, media ou alta
- * progresso  0 a 100, ja calculado pelo backend
- * prazo      entrega; null quando a meta nao tem prazo
- */
+// Meta ativa do estudante, candidata a receber a atencao da Sofia.
+//
+// tipo       geral, disciplina, habito ou projeto
+// prioridade baixa, media ou alta
+// progresso  0 a 100, ja calculado pelo backend
+// prazo      entrega; null quando a meta nao tem prazo
 public class Meta implements Serializable
 {
     private static final long serialVersionUID = 1L;

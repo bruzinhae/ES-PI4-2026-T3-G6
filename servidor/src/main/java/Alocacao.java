@@ -1,11 +1,9 @@
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Resultado da alocacao: as sessoes decididas (em ordem cronologica) e as tarefas que nao couberam por inteiro.
- *
- * truncada true se a alocacao parou ao atingir o limite de sessoes por pedido
- */
+// Resultado da alocacao: as sessoes decididas (em ordem cronologica) e as tarefas que nao couberam por inteiro.
+//
+// truncada true se a alocacao parou ao atingir o limite de sessoes por pedido
 public class Alocacao implements Serializable
 {
     private static final long serialVersionUID = 1L;

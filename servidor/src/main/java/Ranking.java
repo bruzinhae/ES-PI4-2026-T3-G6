@@ -1,10 +1,8 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Resposta ao PedidoDeRanking: para cada espaço livre, o vetor de candidatos ordenado por nota
- * (maior primeiro), e a lista das tarefas que não couberam em nenhum espaço. Quando o pedido pede a
- * alocação, vem também a Alocacao (senão ela é null).
- */
+// Resposta ao PedidoDeRanking: para cada espaço livre, o vetor de candidatos ordenado por nota
+// (maior primeiro), e a lista das tarefas que não couberam em nenhum espaço. Quando o pedido pede a
+// alocação, vem também a Alocacao (senão ela é null).
 public class Ranking extends Comunicado
 {
     private static final long serialVersionUID = 1L;

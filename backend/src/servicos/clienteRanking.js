@@ -341,7 +341,7 @@ const PEDIDO_DE_RANKING = {
   montar: pedidoDeRanking,
   classeDaResposta: 'Ranking',
   converter: respostaDeRanking,
-  prefixoDeErroDeCalculo: 'Não foi possível calcular o ranking:',
+  prefixoDeErroDeCalculo: 'Nao foi possivel calcular o ranking:',
 };
 
 const PEDIDO_DE_METAS = {
@@ -350,7 +350,7 @@ const PEDIDO_DE_METAS = {
   montar: pedidoDeMetas,
   classeDaResposta: 'PrioridadeDeMetas',
   converter: respostaDeMetas,
-  prefixoDeErroDeCalculo: 'Não foi possível priorizar as metas:',
+  prefixoDeErroDeCalculo: 'Nao foi possivel priorizar as metas:',
 };
 
 /** Pede ao servidor Java o ranking de tarefas por espaço livre (e, com `alocar`, a alocação). */

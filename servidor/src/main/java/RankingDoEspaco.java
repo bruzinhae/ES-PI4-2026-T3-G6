@@ -1,7 +1,7 @@
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
-/** Os candidatos de um espaco livre, do mais para o menos recomendado. */
+// Os candidatos de um espaco livre, do mais para o menos recomendado.
 public class RankingDoEspaco implements Serializable
 {
     private static final long serialVersionUID = 1L;
