@@ -27,7 +27,8 @@ import java.util.Set;
  *               da tarefa (medir a partir do espaço faria a nota favorecer espaços tardios);
  *   importância prioridade do usuário (1 a 10), com reforço para prova/trabalho e para
  *               disciplinas de maior peso;
- *   encaixe     o quanto a tarefa cabe no espaço e se cai na janela de foco do usuário.
+ *   encaixe     o quanto a tarefa cabe no espaço e se cai na janela de foco do usuário
+ *               (tarefa pessoal não depende da janela de foco: usa o valor neutro).
  *
  * Regras fixas (não são pesos):
  *   - tarefa concluída não é candidata;
@@ -179,8 +180,8 @@ public final class CalculadoraDeRanking
     {
         double tamanho = parcial ? 0.4 : 1.0 - 0.5 * (disponiveis - necessarios) / (double) disponiveis;
 
-        boolean dificil = "prova".equals (tarefa.tipo ()) || "trabalho".equals (tarefa.tipo ())
-                          || (tarefa.dificuldade () != null && tarefa.dificuldade () >= 4);
+        boolean dificil = !tarefa.pessoal () && ("prova".equals (tarefa.tipo ()) || "trabalho".equals (tarefa.tipo ())
+                          || (tarefa.dificuldade () != null && tarefa.dificuldade () >= 4));
 
         double foco = 0.7;
         if (preferencias.focoMatinal () && dificil)

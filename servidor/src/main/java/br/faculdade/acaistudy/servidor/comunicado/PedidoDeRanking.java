@@ -120,8 +120,13 @@ public class PedidoDeRanking extends Comunicado
                 peso        = Campos.inteiro (d, "peso", false, 1, 5);
             }
 
+            String categoria = Campos.texto (t, "categoria", false, Tarefa.CATEGORIA_ESTUDOS);
+            if (!Tarefa.CATEGORIA_ESTUDOS.equals (categoria) && !Tarefa.CATEGORIA_PESSOAL.equals (categoria))
+                throw new Exception ("\"categoria\" deve ser \"estudos\" ou \"pessoal\"");
+
             tarefas.add (new Tarefa (Campos.texto (t, "id", true, null),
                                      Campos.texto (t, "titulo", false, ""),
+                                     categoria,
                                      Campos.texto (t, "tipo", false, "outro"),
                                      prioridade == null ? 5 : prioridade,
                                      prazo == null ? null : prazo.toInstant (),
