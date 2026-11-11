@@ -88,6 +88,12 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | POST | `/api/canvas/sincronizar` 🔒 | Atualiza disciplinas e atividades já ligadas ao Canvas |
 | DELETE | `/api/canvas` 🔒 | Remove a conexão. O que já foi importado permanece |
 | POST | `/api/ranking` 🔒 | Envia espaços livres, tarefas e preferências ao servidor Java e devolve o ranking |
+| GET | `/api/grade/sugestoes?semana=` 🔒 | Sugestões de estudo para a semana (`semana` é qualquer dia no formato `AAAA-MM-DD`; padrão: a semana atual). Monta os espaços livres, pede a alocação ao servidor Java e devolve `{ semana, espacosLivres, motivo, sugestoes, semAlocacao }`. **Não grava nada** |
+| GET | `/api/sessoes-estudo?de=&ate=&situacao=` 🔒 | Sessões de estudo do período `[de, ate)` (`AAAA-MM-DD` ou data e hora ISO; padrão: a semana atual; máximo de 62 dias). As canceladas só aparecem com `situacao=cancelada` |
+| POST | `/api/sessoes-estudo` 🔒 | Cria uma sessão agendada (`inicio`, `fim`, e `tarefaId` ou `titulo`; opcionais `disciplinaId`, `origem` = `manual`\|`ia`, `tipoFoco`). Dura de 15 a 480 min e **responde 409 se o horário choca com um bloco fixo ou outra sessão** |
+| PATCH | `/api/sessoes-estudo/:id` 🔒 | Move ou ajusta a sessão (`inicio`, `fim`, `titulo`, `situacao`, `tipoFoco`). Revalida o conflito; cancelar libera o horário |
+| DELETE | `/api/sessoes-estudo/:id` 🔒 | Exclui a sessão (204) |
+| POST | `/api/sessoes-estudo/pomodoro` 🔒 | Registra uma sessão de foco já realizada (`minutos`, `fim`, `completo`) |
 | GET | `/api/saude` | Health check |
 
 O corpo de `POST /api/ranking` segue o protocolo descrito em [servidor/README.md](../servidor/README.md):
@@ -119,8 +125,18 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
 - Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|verde|ambar`; conteúdos embutidos).
   `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
-- A API Node atua como cliente TCP do servidor Java de ranking. O Node autentica o chamador e encaminha o pedido;
-  os espaços livres e tarefas são informados pelo chamador, não são calculados nem persistidos por essa integração.
+- A API Node atua como cliente TCP do servidor Java de ranking. `POST /api/ranking` só encaminha o pedido autenticado:
+  os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
+  do usuário logado (o cliente não manda dados) e usa o mesmo cliente TCP com `alocar: true`.
+- **Sugestões da grade** (`modulos/grade/`): os espaços livres são, em cada dia da semana, a faixa das 07:00 às 21:00 menos os blocos
+  fixos (semanais e únicos) e as sessões agendadas ou concluídas, só de agora em diante e com ao menos 15 min. Entram as tarefas de
+  categoria `estudos` ainda abertas, **descontando os minutos já agendados em sessões futuras**, com a dificuldade e o peso da
+  disciplina. As preferências (`janelaFoco`, `focoMatinal`, `duracaoMinutos`, `antifadiga`) vêm da conta do usuário. Sem tarefas ou
+  sem espaços, o campo `motivo` vale `sem_tarefas` ou `sem_espacos` e o servidor Java nem é chamado; com ele fora do ar a rota
+  responde 503, e as rotas de sessões continuam funcionando.
+- **Sessões de estudo** são o horário planejado de uma tarefa (coleção `sessoes_estudo`). Aceitar uma sugestão é `POST /api/sessoes-estudo`
+  com `origem: "ia"`. Sessões `agendada` e `concluida` ocupam horário; `cancelada` e `nao_realizada` o liberam.
+- **Fuso:** a grade usa um deslocamento fixo (`FUSO_OFFSET`, padrão `-03:00`) e as datas da API saem nesse fuso, ex.: `2026-11-09T14:00:00-03:00`.
 - Metas seguem `Arquivos/Dicionário de dados/metas.json`. `progresso` é a fração de marcos `atingido`;
   em hábito sem marcos, é as horas estudadas na semana sobre `metaSemanalHoras`. O painel não inventa previsão de IA:
   a consistência usa as sessões já encerradas e o ritmo é a média do progresso das metas ativas.
