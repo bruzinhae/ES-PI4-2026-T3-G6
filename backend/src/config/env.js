@@ -33,6 +33,10 @@ dotenv.config({
 // `Number(...)` porque tudo em process.env é string.
 const porta = Number(process.env.PORT) || 3001;
 
+// Fuso do calendário como deslocamento fixo (padrão -03:00, Brasília: sem horário de verão desde 2019).
+const fusoOffset = /^[+-]\d{2}:\d{2}$/.test(process.env.FUSO_OFFSET || '') ? process.env.FUSO_OFFSET : '-03:00';
+const fusoMinutos = (fusoOffset[0] === '-' ? -1 : 1) * (Number(fusoOffset.slice(1, 3)) * 60 + Number(fusoOffset.slice(4, 6)));
+
 const portaRanking = Number(process.env.RANKING_PORT) || 3000;
 const timeoutRanking = Number(process.env.RANKING_TIMEOUT_MS) || 5000;
 
@@ -47,6 +51,12 @@ const usuarioSmtp = process.env.SMTP_USER || '';
 
 export const env = {
     porta,
+
+    // Fuso usado para montar a grade da semana e as datas que a API devolve ao calendário.
+    fuso: {
+        offset: fusoOffset,
+        minutos: fusoMinutos,
+    },
 
     // Servidor Java que calcula o ranking de tarefas por espaço livre.
     rankingJava: {
