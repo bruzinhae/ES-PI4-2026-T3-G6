@@ -742,7 +742,7 @@ async function alterarSessaoAberta(acao) {
 /* ---------- Ajuste da grade (sugestões da Sofia) ---------- */
 
 const MENSAGENS_SEM_SUGESTAO = {
-    sem_tarefas: 'Você não tem tarefas de estudo pendentes para encaixar nesta semana.',
+    sem_tarefas: 'Você não tem tarefas pendentes para encaixar nesta semana.',
     sem_espacos: 'Não há horários livres nesta semana (a grade vai das 07:00 às 21:00).',
 };
 

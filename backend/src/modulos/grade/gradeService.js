@@ -58,10 +58,10 @@ function preferenciasDoUsuario(usuario) {
     return { janelaFoco, focoMatinal, duracaoMinutos, antifadiga };
 }
 
-// Tarefas de estudo ainda abertas, já descontando o que está agendado em sessões futuras.
+// Tarefas abertas (de estudo e pessoais), já descontando o que está agendado em sessões futuras.
 async function tarefasParaRanking(usuarioId, preferencias, agora) {
     const [tarefas, sessoes] = await Promise.all([
-        Tarefa.find({ usuarioId, categoria: 'estudos', situacao: { $ne: 'concluida' } }).lean(),
+        Tarefa.find({ usuarioId, situacao: { $ne: 'concluida' } }).lean(),
         SessaoEstudo.find({ usuarioId, situacao: 'agendada', tarefaId: { $ne: null }, fim: { $gt: new Date(agora) } }).select('tarefaId inicio fim').lean(),
     ]);
 
@@ -86,6 +86,7 @@ async function tarefasParaRanking(usuarioId, preferencias, agora) {
         return [{
             id,
             titulo: tarefa.titulo,
+            categoria: tarefa.categoria,
             tipo: tarefa.tipo,
             prioridade: tarefa.prioridade,
             prazo: tarefa.prazo ? tarefa.prazo.toISOString() : null,

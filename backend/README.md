@@ -129,8 +129,8 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
   do usuário logado (o cliente não manda dados) e usa o mesmo cliente TCP com `alocar: true`.
 - **Sugestões da grade** (`modulos/grade/`): os espaços livres são, em cada dia da semana, a faixa das 07:00 às 21:00 menos os blocos
-  fixos (semanais e únicos) e as sessões agendadas ou concluídas, só de agora em diante e com ao menos 15 min. Entram as tarefas de
-  categoria `estudos` ainda abertas, **descontando os minutos já agendados em sessões futuras**, com a dificuldade e o peso da
+  fixos (semanais e únicos) e as sessões agendadas ou concluídas, só de agora em diante e com ao menos 15 min. Entram as tarefas
+  abertas, de estudo e pessoais (a categoria segue junto no pedido), **descontando os minutos já agendados em sessões futuras**, com a dificuldade e o peso da
   disciplina. As preferências (`janelaFoco`, `focoMatinal`, `duracaoMinutos`, `antifadiga`) vêm da conta do usuário. Sem tarefas ou
   sem espaços, o campo `motivo` vale `sem_tarefas` ou `sem_espacos` e o servidor Java nem é chamado; com ele fora do ar a rota
   responde 503, e as rotas de sessões continuam funcionando.
