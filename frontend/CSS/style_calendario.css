@@ -291,18 +291,6 @@ img {
     font-weight: 700;
 }
 
-.botao-nova-tarefa kbd {
-    padding: 2px 6px;
-
-    border-radius: 4px;
-
-    background: rgba(255, 255, 255, .16);
-
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: 10px;
-    font-weight: 500;
-}
-
 .botao-nova-tarefa:hover {
     background: #3f2a52;
 }

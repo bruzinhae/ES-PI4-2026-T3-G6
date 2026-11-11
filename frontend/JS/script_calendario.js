@@ -686,11 +686,6 @@ document.getElementById('botao-nova-tarefa').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (evento) => {
-    if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'n') {
-        evento.preventDefault();
-        abrirModal('criar', { origem: 'lista', tipo: 'estudos' });
-    }
-
     if (evento.key === 'Escape' && modal.classList.contains('aberto')) {
         fecharModal();
     }
