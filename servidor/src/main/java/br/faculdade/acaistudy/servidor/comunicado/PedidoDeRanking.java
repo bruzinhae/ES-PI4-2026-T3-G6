@@ -25,9 +25,16 @@ public class PedidoDeRanking extends Comunicado
     private final List<EspacoLivre> espacos;
     private final List<Tarefa>      tarefas;
     private final int               limite;
+    private final boolean           alocar;
 
     public PedidoDeRanking (Instant agora, Preferencias preferencias, List<EspacoLivre> espacos,
                             List<Tarefa> tarefas, int limite) throws Exception
+    {
+        this (agora, preferencias, espacos, tarefas, limite, false);
+    }
+
+    public PedidoDeRanking (Instant agora, Preferencias preferencias, List<EspacoLivre> espacos,
+                            List<Tarefa> tarefas, int limite, boolean alocar) throws Exception
     {
         if (agora == null)
             throw new Exception ("Data atual ausente");
@@ -45,6 +52,7 @@ public class PedidoDeRanking extends Comunicado
         this.espacos      = espacos;
         this.tarefas      = tarefas;
         this.limite       = limite;
+        this.alocar       = alocar;
     }
 
     public Instant agora ()                 { return this.agora; }
@@ -52,6 +60,7 @@ public class PedidoDeRanking extends Comunicado
     public List<EspacoLivre> espacos ()     { return this.espacos; }
     public List<Tarefa> tarefas ()          { return this.tarefas; }
     public int limite ()                    { return this.limite; }
+    public boolean alocar ()                { return this.alocar; }
 
     public String tipo ()
     {
@@ -77,7 +86,8 @@ public class PedidoDeRanking extends Comunicado
                 throw new Exception ("\"janelaFoco\" deve ser manha, tarde ou noite");
 
             Integer duracao = Campos.inteiro (p, "duracaoMinutos", false, 10, 240);
-            preferencias = new Preferencias (janela, Campos.logico (p, "focoMatinal", true), duracao == null ? 50 : duracao);
+            preferencias = new Preferencias (janela, Campos.logico (p, "focoMatinal", true), duracao == null ? 50 : duracao,
+                                             Campos.logico (p, "antifadiga", true));
         }
 
         List<EspacoLivre> espacos = new ArrayList<EspacoLivre> ();
@@ -125,6 +135,7 @@ public class PedidoDeRanking extends Comunicado
 
         return new PedidoDeRanking (agora == null ? Instant.now () : agora.toInstant (),
                                     preferencias, espacos, tarefas,
-                                    limite == null ? LIMITE_PADRAO : limite);
+                                    limite == null ? LIMITE_PADRAO : limite,
+                                    Campos.logico (mapa, "alocar", false));
     }
 }

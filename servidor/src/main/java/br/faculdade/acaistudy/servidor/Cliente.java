@@ -93,6 +93,43 @@ public class Cliente
         }
     }
 
+    // Alocação decidida pelo servidor (quando o pedido traz "alocar": true).
+    private static void mostrarAlocacao (Map<String, Object> resposta, Map<String, String> titulos) throws Exception
+    {
+        System.out.println ("Alocacao sugerida:");
+
+        @SuppressWarnings ("unchecked")
+        List<Object> sessoes = (List<Object>) resposta.get ("alocacao");
+
+        if (sessoes.isEmpty ())
+            System.out.println ("   (nenhuma sessao)");
+
+        for (Object s : sessoes)
+        {
+            Map<String, Object> sessao = Campos.comoObjeto (s, "sessao");
+            System.out.printf ("   %s ate %s  %-36s %d min  (faltam %d min)%n",
+                               sessao.get ("inicio"), sessao.get ("fim"),
+                               titulos.get (String.valueOf (sessao.get ("tarefaId"))),
+                               ((Double) sessao.get ("minutos")).intValue (),
+                               ((Double) sessao.get ("minutosRestantes")).intValue ());
+        }
+
+        @SuppressWarnings ("unchecked")
+        List<Object> pendentes = (List<Object>) resposta.get ("semAlocacao");
+
+        for (Object p : pendentes)
+        {
+            Map<String, Object> pendente = Campos.comoObjeto (p, "pendente");
+            System.out.println ("   ! " + titulos.get (String.valueOf (pendente.get ("tarefaId"))) + ": " + pendente.get ("motivo")
+                                + " (faltam " + ((Double) pendente.get ("minutosRestantes")).intValue () + " min)");
+        }
+
+        if (Boolean.TRUE.equals (resposta.get ("alocacaoTruncada")))
+            System.out.println ("   (alocacao truncada no limite de sessoes)");
+
+        System.out.println ();
+    }
+
     private static void comandoDeTexto (java.util.List<String> posicionais)
     {
         try (Socket conexao = new Socket (posicionais.size () > 1 ? posicionais.get (1) : HOST_PADRAO,
@@ -159,6 +196,9 @@ public class Cliente
 
             System.out.println ();
         }
+
+        if (resposta.get ("alocacao") instanceof List)
+            mostrarAlocacao (resposta, titulos);
 
         @SuppressWarnings ("unchecked")
         List<Object> sem = (List<Object>) resposta.get ("semEspaco");

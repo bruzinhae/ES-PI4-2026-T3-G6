@@ -85,18 +85,45 @@ public final class CalculadoraDeRanking
                 semEspaco.add (new TarefaSemEspaco (tarefa.id (),
                                                     pedido.espacos ().isEmpty () ? "sem_espacos" : "nenhum_espaco_antes_do_prazo"));
 
-        return new Ranking (porEspaco, semEspaco);
+        // A alocação só é calculada quando o pedido traz "alocar": true; o ranking por espaço é o mesmo.
+        return new Ranking (porEspaco, semEspaco, pedido.alocar () ? AlocadoraDeSessoes.alocar (pedido) : null);
+    }
+
+    // Minutos que a tarefa pede no total: a estimativa dela ou, sem estimativa, a duração de sessão preferida.
+    static int minutosNecessarios (Tarefa tarefa, Preferencias preferencias)
+    {
+        return tarefa.minutosEstimados () != null ? tarefa.minutosEstimados () : preferencias.duracaoMinutos ();
+    }
+
+    // Tamanho da sessão: o que a tarefa pede, limitado ao espaço e ao tamanho máximo de sessão. Se depois
+    // desta sessão sobrariam menos de 15 minutos (e eles cabem no espaço), a sessão absorve o resto.
+    static int minutosDaSessao (int necessarios, int disponiveis, int limiteDeSessao)
+    {
+        int sessao = Math.min (Math.min (necessarios, disponiveis), limiteDeSessao);
+        int sobra  = necessarios - sessao;
+
+        if (sobra > 0 && sobra < MINUTOS_MINIMOS_DO_ESPACO && necessarios <= disponiveis)
+            return necessarios;
+
+        return sessao;
     }
 
     // Devolve null quando a tarefa não pode ser candidata a este espaço.
     private static Candidato avaliar (Tarefa tarefa, EspacoLivre espaco, Instant agora, Preferencias preferencias)
     {
+        return avaliar (tarefa, espaco, agora, preferencias, minutosNecessarios (tarefa, preferencias), Integer.MAX_VALUE);
+    }
+
+    // `necessarios` são os minutos que AINDA faltam da tarefa; `limiteDeSessao` é o tamanho máximo de uma sessão
+    // (Integer.MAX_VALUE no ranking, que não divide a tarefa em sessões).
+    static Candidato avaliar (Tarefa tarefa, EspacoLivre espaco, Instant agora, Preferencias preferencias,
+                              int necessarios, int limiteDeSessao)
+    {
         if (tarefa.concluida ())
             return null;
 
         int disponiveis = espaco.minutos ();
-        int necessarios = tarefa.minutosEstimados () != null ? tarefa.minutosEstimados () : preferencias.duracaoMinutos ();
-        int noEspaco    = Math.min (necessarios, disponiveis);
+        int noEspaco    = minutosDaSessao (necessarios, disponiveis, limiteDeSessao);
         boolean parcial = necessarios > disponiveis;
 
         boolean atrasada = tarefa.prazo () != null && !tarefa.prazo ().isAfter (agora);
@@ -179,7 +206,7 @@ public final class CalculadoraDeRanking
     }
 
     // Nota maior primeiro; empates: prazo mais cedo (sem prazo por último), prioridade maior, id.
-    private static Comparator<Candidato> comparadorDeCandidatos (List<Tarefa> tarefas)
+    static Comparator<Candidato> comparadorDeCandidatos (List<Tarefa> tarefas)
     {
         java.util.Map<String, Tarefa> porId = new java.util.HashMap<String, Tarefa> ();
         for (Tarefa tarefa : tarefas)
@@ -192,7 +219,7 @@ public final class CalculadoraDeRanking
             .thenComparing (Candidato::tarefaId);
     }
 
-    private static double limitar (double valor)
+    static double limitar (double valor)
     {
         return Math.max (0.0, Math.min (1.0, valor));
     }
