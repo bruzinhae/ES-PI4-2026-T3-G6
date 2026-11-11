@@ -1,5 +1,6 @@
 package br.faculdade.acaistudy.servidor.comunicado;
 
+import br.faculdade.acaistudy.servidor.modelo.Alocacao;
 import br.faculdade.acaistudy.servidor.modelo.RankingDoEspaco;
 import br.faculdade.acaistudy.servidor.modelo.TarefaSemEspaco;
 
@@ -16,8 +17,14 @@ public class Ranking extends Comunicado
 {
     private final List<RankingDoEspaco> porEspaco;
     private final List<TarefaSemEspaco> semEspaco;
+    private final Alocacao              alocacao; // null quando o pedido não pediu alocação
 
     public Ranking (List<RankingDoEspaco> porEspaco, List<TarefaSemEspaco> semEspaco) throws Exception
+    {
+        this (porEspaco, semEspaco, null);
+    }
+
+    public Ranking (List<RankingDoEspaco> porEspaco, List<TarefaSemEspaco> semEspaco, Alocacao alocacao) throws Exception
     {
         if (porEspaco == null)
             throw new Exception ("Ranking por espaço ausente");
@@ -26,6 +33,7 @@ public class Ranking extends Comunicado
 
         this.porEspaco = porEspaco;
         this.semEspaco = semEspaco;
+        this.alocacao  = alocacao;
     }
 
     public String tipo ()
@@ -46,6 +54,10 @@ public class Ranking extends Comunicado
         Map<String, Object> mapa = new LinkedHashMap<String, Object> ();
         mapa.put ("porEspaco", espacos);
         mapa.put ("semEspaco", sem);
+
+        if (this.alocacao != null)
+            mapa.putAll (this.alocacao.paraMapa ());
+
         return mapa;
     }
 }
