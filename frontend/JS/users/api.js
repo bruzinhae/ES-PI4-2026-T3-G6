@@ -260,6 +260,36 @@ const AcaiApi = (function () {
         await requisitar(`/tarefas/${id}`, { metodo: 'DELETE' });
     }
 
+    // Sessões de estudo: o horário planejado de uma tarefa. `de` e `ate` aceitam AAAA-MM-DD ou data e hora ISO.
+    async function listarSessoes({ de, ate, situacao } = {}) {
+        const consulta = new URLSearchParams();
+        if (de) consulta.set('de', de);
+        if (ate) consulta.set('ate', ate);
+        if (situacao) consulta.set('situacao', situacao);
+        const texto = consulta.toString();
+        const { sessoes } = await requisitar(`/sessoes-estudo${texto ? `?${texto}` : ''}`);
+        return sessoes;
+    }
+
+    async function criarSessao(dados) {
+        const { sessao } = await requisitar('/sessoes-estudo', { metodo: 'POST', corpo: dados });
+        return sessao;
+    }
+
+    async function atualizarSessao(id, alteracoes) {
+        const { sessao } = await requisitar(`/sessoes-estudo/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        return sessao;
+    }
+
+    async function excluirSessao(id) {
+        await requisitar(`/sessoes-estudo/${id}`, { metodo: 'DELETE' });
+    }
+
+    // Sugestões de estudo da semana (o servidor Java aloca as tarefas nos horários livres). `semana` é um dia AAAA-MM-DD.
+    function obterSugestoesGrade(semana) {
+        return requisitar(`/grade/sugestoes${semana ? `?semana=${semana}` : ''}`);
+    }
+
     function obterRelatorio(inicio) {
         const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
         return requisitar(`/relatorios${consulta}`);
@@ -483,6 +513,11 @@ const AcaiApi = (function () {
         criarTarefa,
         atualizarTarefa,
         excluirTarefa,
+        listarSessoes,
+        criarSessao,
+        atualizarSessao,
+        excluirSessao,
+        obterSugestoesGrade,
         obterRelatorio,
         obterSugestoesSofia,
         listarConversaSofia,
