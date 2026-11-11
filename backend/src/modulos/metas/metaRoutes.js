@@ -12,6 +12,9 @@ metaRoutes.use(exigirAutenticacao);
 
 metaRoutes.get('/', controller.listar);
 metaRoutes.post('/', controller.criar);
+// Antes de /:id, senão "sofia" seria lido como identificador de meta.
+metaRoutes.post('/sofia/marcos', controller.sugerirMarcos);
+metaRoutes.post('/sofia', controller.analisar);
 metaRoutes.get('/:id', controller.buscarPorId);
 metaRoutes.patch('/:id', controller.atualizar);
 metaRoutes.delete('/:id', controller.excluir);

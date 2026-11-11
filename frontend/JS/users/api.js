@@ -320,6 +320,16 @@ const AcaiApi = (function () {
     async function excluirMeta(id) {
         await requisitar(`/metas/${id}`, { metodo: 'DELETE' });
     }
+
+    async function analisarMetas() {
+        const { leitura } = await requisitar('/metas/sofia', { metodo: 'POST', corpo: {} });
+        return leitura;
+    }
+
+    async function sugerirMarcosMeta(dados) {
+        const { sugestao } = await requisitar('/metas/sofia/marcos', { metodo: 'POST', corpo: dados });
+        return sugestao;
+    }
     // ----- Usuário logado neste navegador -----
 
     async function obterUsuarioAtual() {
@@ -456,6 +466,8 @@ const AcaiApi = (function () {
         criarMeta,
         atualizarMeta,
         excluirMeta,
+        analisarMetas,
+        sugerirMarcosMeta,
         obterUsuarioAtual,
         atualizarUsuarioAtual,
         enviarFotoAtual,

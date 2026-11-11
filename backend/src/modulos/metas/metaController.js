@@ -3,6 +3,7 @@
  */
 
 import * as service from './metaService.js';
+import * as sofiaMetas from './sofiaMetasService.js';
 
 export async function listar(req, res) {
     const situacao = typeof req.query.situacao === 'string' && req.query.situacao
@@ -30,4 +31,16 @@ export async function atualizar(req, res) {
 export async function excluir(req, res) {
     await service.excluir(req.usuario._id, req.params.id);
     res.status(204).end();
+}
+
+// POST /api/metas/sofia — comentário e marcos sugeridos. Não grava nada e não chama o relatório.
+export async function analisar(req, res) {
+    const leitura = await sofiaMetas.analisar(req.usuario._id);
+    res.json({ leitura });
+}
+
+// POST /api/metas/sofia/marcos — rascunho de marcos para o formulário, antes de salvar.
+export async function sugerirMarcos(req, res) {
+    const sugestao = await sofiaMetas.sugerirMarcos(req.usuario._id, req.body);
+    res.json({ sugestao });
 }

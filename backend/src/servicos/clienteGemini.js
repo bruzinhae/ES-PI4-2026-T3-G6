@@ -24,7 +24,7 @@ function nivelPensamento(modelo) {
     return 'MINIMAL';
 }
 
-function interpretar(corpo, modelo) {
+function interpretar(corpo, modelo, mensagemIndisponivel) {
     const candidato = corpo.candidates?.[0];
     const texto = (candidato?.content?.parts || [])
         .filter((parte) => parte.text && !parte.thought)
@@ -35,16 +35,18 @@ function interpretar(corpo, modelo) {
         return { dados: JSON.parse(texto), modelo };
     } catch {
         console.error(`[gemini] ${modelo}: resposta sem JSON válido. finishReason:`, candidato?.finishReason);
-        throw new ErroApi(503, MENSAGEM_INDISPONIVEL);
+        throw new ErroApi(503, mensagemIndisponivel);
     }
 }
 
-export async function gerarJson({ instrucaoSistema, prompt, schema }) {
+export async function gerarJson({ instrucaoSistema, prompt, schema, mensagens = {} }) {
     if (!env.gemini.apiKey) {
         throw new ErroApi(503, 'A Sofia ainda não está configurada neste servidor.');
     }
 
-    let mensagem = MENSAGEM_INDISPONIVEL;
+    const mensagemIndisponivel = mensagens.indisponivel || MENSAGEM_INDISPONIVEL;
+    const mensagemLimite = mensagens.limite || MENSAGEM_LIMITE;
+    let mensagem = mensagemIndisponivel;
     const modelos = env.gemini.modelos;
     for (let indice = 0; indice < modelos.length; indice += 1) {
         const modelo = modelos[indice];
@@ -79,12 +81,12 @@ export async function gerarJson({ instrucaoSistema, prompt, schema }) {
             }
 
             if (resposta.ok) {
-                return interpretar(await resposta.json(), modelo);
+                return interpretar(await resposta.json(), modelo, mensagemIndisponivel);
             }
 
             const detalhe = await resposta.text().catch(() => '');
             console.error(`[gemini] ${modelo}: HTTP ${resposta.status}:`, detalhe.slice(0, 500));
-            mensagem = resposta.status === 429 ? MENSAGEM_LIMITE : MENSAGEM_INDISPONIVEL;
+            mensagem = resposta.status === 429 ? mensagemLimite : mensagemIndisponivel;
 
             const sobrecarregado = resposta.status === 429 || resposta.status === 503;
             if (resposta.status === 404) break;

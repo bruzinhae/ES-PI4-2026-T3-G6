@@ -157,6 +157,11 @@ h1 {
 
 /* Botões */
 
+.botao-claro[hidden],
+.botao-roxo[hidden] {
+    display: none !important;
+}
+
 .botao-claro,
 .botao-roxo {
     display: flex;
@@ -873,6 +878,78 @@ h1 {
 .insight-esquerda {
     display: flex;
     gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.insight-texto {
+    flex: 1;
+    min-width: 0;
+}
+
+.texto-sofia {
+    margin-top: 8px;
+    font-size: 15px;
+    line-height: 22px;
+    color: var(--titulo);
+}
+
+.sugestoes-sofia {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.sugestoes-sofia:empty {
+    display: none;
+}
+
+.sugestao-marco {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 6px 6px 12px;
+    border: 1px solid var(--cinza-200);
+    border-radius: 999px;
+    background: var(--fundo);
+    color: var(--titulo);
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.sugestao-marco span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sugestao-marco button {
+    border: 0;
+    border-radius: 999px;
+    background: var(--roxo);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.sugestao-marco button:disabled {
+    opacity: .6;
+}
+
+.marcos-botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.nota-marcos {
+    color: var(--cinza-500);
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .insight-icone {

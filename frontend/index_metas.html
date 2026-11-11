@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="CSS/layout.css?v=20">
-    <link rel="stylesheet" href="CSS/style_metas.css?v=14">
+    <link rel="stylesheet" href="CSS/style_metas.css?v=16">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
@@ -38,7 +38,7 @@
                     <h1>Gestão de Metas & Objetivos</h1>
 
                     <p>
-                        Acompanhe seus marcos acadêmicos, prazos de entrega e consistência de estudo. <br>O ajuste automático de grade entra aqui e ainda será conectado.
+                        Acompanhe seus marcos acadêmicos, prazos de entrega e consistência de estudo. <br>A Sofia comenta esse avanço quando você pede a análise.
                     </p>
 
                 </div>
@@ -129,7 +129,7 @@
                 <article class="cartao-kpi">
 
                     <div class="kpi-topo">
-                        <span class="kpi-titulo">Dias Restantes no Semestre</span>
+                        <span class="kpi-titulo" id="kpi-dias-titulo">Dias restantes no semestre</span>
 
                         <span class="kpi-icone">
                             <img src="assets/icons/metas/calendario-dias.svg" alt="" width="13.5" height="15">
@@ -139,7 +139,7 @@
                     <div class="kpi-corpo kpi-corpo-linha">
                         <p class="kpi-valor-linha">
                             <strong class="kpi-valor" id="kpi-dias-valor">—</strong>
-                            <span class="kpi-complemento">dias</span>
+                            <span class="kpi-complemento" id="kpi-dias-complemento">dias</span>
                         </p>
 
                         <span class="selo-roxo" id="kpi-dias-selo" hidden></span>
@@ -155,7 +155,7 @@
                 <article class="cartao-kpi">
 
                     <div class="kpi-topo">
-                        <span class="kpi-titulo">Ajuste automático de grade</span>
+                        <span class="kpi-titulo">Ritmo das metas</span>
 
                         <span class="kpi-icone">
                             <img src="assets/icons/metas/previsao-ia.svg" alt="" width="15.04" height="15.05">
@@ -226,7 +226,7 @@
             </section>
 
 
-            <!-- ================= AJUSTE AUTOMÁTICO DE GRADE ================= -->
+            <!-- ================= SOFIA NAS METAS ================= -->
 
             <section class="insight">
 
@@ -241,18 +241,21 @@
                         <div class="insight-texto">
 
                             <div class="insight-titulo">
-                                <h3>IA Sofia</h3>
-                                <span class="selo-cinza">Em conexão</span>
+                                <h3>Sofia</h3>
+                                <span class="selo-cinza" id="selo-sofia-metas">Pronta para sugerir</span>
                             </div>
 
                             <p id="texto-insight">Carregando o resumo das metas...</p>
+                            <p class="texto-sofia" id="texto-sofia" hidden></p>
+                            <div id="sugestoes-sofia" class="sugestoes-sofia"></div>
 
                         </div>
 
                     </div>
 
                     <div class="insight-acoes">
-                        <button type="button" class="botao-claro botao-vertical" id="botao-editar-foco">Editar meta</button>
+                        <button type="button" class="botao-claro" id="botao-analisar-metas">Sugerir marcos</button>
+                        <button type="button" class="botao-claro" id="botao-editar-foco">Editar meta</button>
 
                         <button type="button" class="botao-roxo botao-aprovar" id="botao-concluir-marco" hidden>
                             <img src="assets/icons/metas/aprovar.svg" alt="" width="17" height="17">
@@ -327,7 +330,11 @@
                 <fieldset class="modal-meta-marcos">
                     <legend>Marcos</legend>
                     <ul id="lista-marcos-formulario"></ul>
-                    <button type="button" class="botao-claro" id="adicionar-marco">Adicionar marco</button>
+                    <div class="marcos-botoes">
+                        <button type="button" class="botao-claro" id="adicionar-marco">Adicionar marco</button>
+                        <button type="button" class="botao-claro" id="sugerir-marcos">Sugerir marcos</button>
+                    </div>
+                    <p class="nota-marcos" id="nota-marcos" hidden></p>
                 </fieldset>
                 <p class="aviso aviso-erro" id="erro-meta" hidden></p>
                 <footer class="modal-meta-acoes">
@@ -338,10 +345,10 @@
         </section>
     </div>
 
-    <script src="JS/users/api.js?v=11"></script>
+    <script src="JS/users/api.js?v=13"></script>
     <script src="JS/componentes/layout.js?v=27"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
-    <script src="JS/script_metas.js?v=15"></script>
+    <script src="JS/script_metas.js?v=19"></script>
 
 </body>
 </html>

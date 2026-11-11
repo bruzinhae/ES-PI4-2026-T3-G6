@@ -63,6 +63,8 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
 
     let metas = [];
     let painel = null;
+    let leitura = null;
+    let pedidoLeitura = 0;
     let filtroIndice = 0;
     let metaEmEdicao = null;
 
@@ -227,14 +229,36 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
         document.getElementById('kpi-consistencia-barra').style.width = `${consistencia.percentual}%`;
         document.getElementById('kpi-consistencia-nota').textContent = consistencia.nota;
 
-        document.getElementById('kpi-dias-valor').textContent = prazo.diasRestantes === null ? '—' : String(prazo.diasRestantes);
-        document.getElementById('kpi-dias-nota').textContent = prazo.nota;
+        const dias = prazo.diasRestantes;
+        const tituloDias = document.getElementById('kpi-dias-titulo');
+        const complementoDias = document.getElementById('kpi-dias-complemento');
         const seloDias = document.getElementById('kpi-dias-selo');
-        if (prazo.diasRestantes === null) {
+        document.getElementById('kpi-dias-nota').textContent = prazo.nota;
+
+        if (dias === null) {
+            document.getElementById('kpi-dias-valor').textContent = '—';
+            complementoDias.textContent = 'dias';
+            tituloDias.textContent = 'Dias restantes no semestre';
             seloDias.hidden = true;
-        } else {
+        } else if (dias < 0) {
+            const atraso = Math.abs(dias);
+            document.getElementById('kpi-dias-valor').textContent = String(atraso);
+            complementoDias.textContent = atraso === 1 ? 'dia atrás' : 'dias atrás';
+            tituloDias.textContent = 'Último prazo';
             seloDias.hidden = false;
-            seloDias.textContent = prazo.diasRestantes < 0 ? 'Prazo vencido' : prazo.diasRestantes <= 21 ? 'Reta final' : 'Em curso';
+            seloDias.textContent = 'Prazo vencido';
+        } else if (dias === 0) {
+            document.getElementById('kpi-dias-valor').textContent = 'Hoje';
+            complementoDias.textContent = '';
+            tituloDias.textContent = 'Dias restantes no semestre';
+            seloDias.hidden = false;
+            seloDias.textContent = 'Último dia';
+        } else {
+            document.getElementById('kpi-dias-valor').textContent = String(dias);
+            complementoDias.textContent = dias === 1 ? 'dia' : 'dias';
+            tituloDias.textContent = 'Dias restantes no semestre';
+            seloDias.hidden = false;
+            seloDias.textContent = dias <= 21 ? 'Reta final' : 'Em curso';
         }
 
         document.getElementById('kpi-previsao-valor').textContent = previsao.rotulo;
@@ -264,10 +288,51 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
             }).join('')
             : '<span class="detalhe-cinza">Nenhum marco cadastrado.</span>';
 
-        const insight = painel?.insight || { texto: 'Cadastre uma meta para acompanhar o semestre.', metaId: null, marcoId: null };
-        document.getElementById('texto-insight').textContent = insight.texto;
+        const insight = alvoDoBanner();
+        const base = painel?.insight || { texto: 'Cadastre uma meta para acompanhar o semestre.', metaId: null, marcoId: null };
+        document.getElementById('texto-insight').textContent = base.texto;
+        const textoSofia = document.getElementById('texto-sofia');
+        textoSofia.hidden = !leitura?.texto;
+        textoSofia.textContent = leitura?.texto || '';
         document.getElementById('botao-editar-foco').textContent = insight.metaId ? 'Editar meta' : 'Nova meta';
         document.getElementById('botao-concluir-marco').hidden = !insight.marcoId;
+        pintarSugestoes();
+        const selo = document.getElementById('selo-sofia-metas');
+        if (selo) {
+            if (leitura?.sugestoes?.length) {
+                selo.textContent = 'Marcos sugeridos';
+            } else if (leitura?.modelo) {
+                selo.textContent = 'Leitura pronta';
+            } else if (leitura) {
+                selo.textContent = 'Sem metas';
+            } else {
+                selo.textContent = 'Pronta para sugerir';
+            }
+        }
+    }
+
+    function pintarSugestoes() {
+        const destino = document.getElementById('sugestoes-sofia');
+        const sugestoes = leitura?.metaId ? (leitura.sugestoes || []) : [];
+        destino.innerHTML = sugestoes.map((item) => `
+            <div class="sugestao-marco">
+                <span>${escapar(item.titulo)}</span>
+                <button type="button" data-incluir="${escapar(item.titulo)}">Incluir</button>
+            </div>`).join('');
+    }
+
+    function alvoDoBanner() {
+        const base = painel?.insight || { metaId: null, marcoId: null };
+        const metaId = leitura?.metaId || base.metaId || null;
+        const meta = metas.find((item) => item.id === metaId) || null;
+        const pendente = (meta?.marcos || []).find((marco) => marco.atingido !== true) || null;
+        let marcoId = pendente?.id || null;
+
+        if (!marcoId && !meta) {
+            marcoId = (leitura?.metaId ? leitura.marcoId : base.marcoId) || null;
+        }
+
+        return { metaId, marcoId };
     }
 
     function mostrarErro(mensagem) {
@@ -297,6 +362,10 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
         const tipo = formulario.elements.tipo.value;
         document.getElementById('campo-disciplina').hidden = tipo !== 'disciplina';
         document.getElementById('campo-horas').hidden = tipo !== 'habito';
+        document.getElementById('sugerir-marcos').hidden = tipo === 'habito';
+        const nota = document.getElementById('nota-marcos');
+        nota.hidden = tipo !== 'habito';
+        nota.textContent = tipo === 'habito' ? 'Hábito é medido pelas horas da semana.' : '';
     }
 
     async function preencherDisciplinas(selecionada) {
@@ -355,7 +424,10 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
         }).filter((marco) => marco.titulo);
     }
 
-    async function carregar() {
+    async function carregar({ manterLeitura = false } = {}) {
+        if (!manterLeitura) {
+            leitura = null;
+        }
         const filtro = FILTROS[filtroIndice];
         try {
             const resposta = await AcaiApi.listarMetas(filtro.id ? { situacao: filtro.id } : {});
@@ -372,7 +444,7 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
 
     document.getElementById('filtro-metas').addEventListener('click', () => {
         filtroIndice = (filtroIndice + 1) % FILTROS.length;
-        carregar();
+        carregar({ manterLeitura: true });
     });
 
     ordenar.addEventListener('change', ordenarLista);
@@ -405,37 +477,167 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
     });
 
     async function metaDoInsight() {
-        const id = painel?.insight?.metaId;
+        const id = alvoDoBanner().metaId;
         if (!id) {
             return null;
         }
         return metas.find((item) => item.id === id) || AcaiApi.obterMeta(id);
     }
 
+    document.getElementById('botao-analisar-metas').addEventListener('click', async () => {
+        const botao = document.getElementById('botao-analisar-metas');
+        const selo = document.getElementById('selo-sofia-metas');
+        const pedido = ++pedidoLeitura;
+        botao.disabled = true;
+        botao.textContent = 'Sugerindo...';
+        selo.textContent = 'Sugerindo';
+        try {
+            const resultado = await AcaiApi.analisarMetas();
+            if (pedido !== pedidoLeitura) {
+                return;
+            }
+            leitura = resultado;
+            pintarPainel();
+        } catch (erro) {
+            if (pedido !== pedidoLeitura) {
+                return;
+            }
+            const textoSofia = document.getElementById('texto-sofia');
+            textoSofia.hidden = false;
+            textoSofia.textContent = erro.message || 'Não foi possível sugerir marcos.';
+            selo.textContent = 'Tente de novo';
+        } finally {
+            if (pedido === pedidoLeitura) {
+                botao.disabled = false;
+                botao.textContent = 'Sugerir marcos';
+            }
+        }
+    });
+
+    document.getElementById('sugestoes-sofia').addEventListener('click', async (evento) => {
+        const botao = evento.target.closest('[data-incluir]');
+        if (!botao || botao.disabled) {
+            return;
+        }
+        const titulo = botao.dataset.incluir;
+        botao.disabled = true;
+        botao.textContent = '...';
+        try {
+            const meta = await metaDoInsight();
+            if (!meta) {
+                return;
+            }
+            const marcos = [
+                ...meta.marcos.map((marco) => ({
+                    id: marco.id,
+                    titulo: marco.titulo,
+                    atingido: marco.atingido,
+                    atingidoEm: marco.atingidoEm,
+                    nota: marco.nota,
+                })),
+                { titulo, atingido: false, nota: null },
+            ];
+            await AcaiApi.atualizarMeta(meta.id, { marcos });
+            if (leitura?.sugestoes) {
+                leitura.sugestoes = leitura.sugestoes.filter((item) => item.titulo !== titulo);
+            }
+            await carregar({ manterLeitura: true });
+        } catch (erro) {
+            const textoSofia = document.getElementById('texto-sofia');
+            textoSofia.hidden = false;
+            textoSofia.textContent = erro.message || 'Não foi possível incluir o marco.';
+            botao.disabled = false;
+            botao.textContent = 'Incluir';
+        }
+    });
+
+    document.getElementById('sugerir-marcos').addEventListener('click', async () => {
+        const botao = document.getElementById('sugerir-marcos');
+        const titulo = formulario.elements.titulo.value.trim();
+        if (titulo.length < 2) {
+            mostrarErro('Escreva o título da meta antes de pedir marcos.');
+            return;
+        }
+        botao.disabled = true;
+        botao.textContent = 'Sugerindo...';
+        erroForm.hidden = true;
+        try {
+            const sugestao = await AcaiApi.sugerirMarcosMeta({
+                titulo,
+                tipo: formulario.elements.tipo.value,
+                disciplinaId: formulario.elements.disciplinaId.value || null,
+                prazo: formulario.elements.prazo.value || null,
+                existentes: marcosDoFormulario().map((marco) => marco.titulo),
+            });
+            (sugestao.marcos || []).forEach((nome) => linhaMarco({ titulo: nome }));
+            if (!sugestao.marcos?.length) {
+                mostrarErro(sugestao.aviso || 'A Sofia não encontrou marcos novos para esse título.');
+            }
+        } catch (erro) {
+            mostrarErro(erro.message || 'Não foi possível sugerir marcos.');
+        } finally {
+            botao.disabled = false;
+            botao.textContent = 'Sugerir marcos';
+        }
+    });
+
     document.getElementById('botao-editar-foco').addEventListener('click', async () => {
         try {
             abrirModal(await metaDoInsight());
         } catch (erro) {
-            document.getElementById('texto-insight').textContent = erro.message || 'Não foi possível abrir a meta.';
+            document.getElementById('texto-sofia').hidden = false;
+            document.getElementById('texto-sofia').textContent = erro.message || 'Não foi possível abrir a meta.';
         }
     });
 
     document.getElementById('botao-concluir-marco').addEventListener('click', async () => {
-        const insight = painel?.insight;
-        const meta = await metaDoInsight();
-        if (!meta || !insight?.marcoId) {
+        const botao = document.getElementById('botao-concluir-marco');
+        const rotulo = botao.querySelector('span');
+        const alvo = alvoDoBanner();
+        const textoSofia = document.getElementById('texto-sofia');
+
+        if (!alvo.metaId) {
+            textoSofia.hidden = false;
+            textoSofia.textContent = 'Essa meta ainda não tem um marco para concluir.';
+            botao.hidden = true;
             return;
         }
-        const marcos = meta.marcos.map((marco) => (
-            marco.id === insight.marcoId
-                ? { ...marco, atingido: true }
-                : marco
-        ));
+
+        botao.disabled = true;
+        if (rotulo) {
+            rotulo.textContent = 'Concluindo...';
+        }
+
         try {
+            const meta = await AcaiApi.obterMeta(alvo.metaId);
+            const pendente = (meta?.marcos || []).find((marco) => marco.id === alvo.marcoId && marco.atingido !== true)
+                || (meta?.marcos || []).find((marco) => marco.atingido !== true);
+
+            if (!meta || !pendente) {
+                textoSofia.hidden = false;
+                textoSofia.textContent = 'Essa meta não tem marco pendente.';
+                botao.hidden = true;
+                return;
+            }
+
+            const marcos = meta.marcos.map((marco) => ({
+                id: marco.id,
+                titulo: marco.titulo,
+                atingido: marco.id === pendente.id ? true : marco.atingido === true,
+                atingidoEm: marco.id === pendente.id ? null : marco.atingidoEm,
+                nota: marco.nota ?? null,
+            }));
             await AcaiApi.atualizarMeta(meta.id, { marcos });
+            leitura = null;
             await carregar();
         } catch (erro) {
-            document.getElementById('texto-insight').textContent = erro.message || 'Não foi possível concluir o marco.';
+            textoSofia.hidden = false;
+            textoSofia.textContent = erro.message || 'Não foi possível concluir o marco.';
+        } finally {
+            botao.disabled = false;
+            if (rotulo) {
+                rotulo.textContent = 'Concluir marco';
+            }
         }
     });
 
