@@ -1,22 +1,20 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Decide qual meta merece atenção primeiro e em que datas propor os marcos novos dela.
- *
- * Nota = 0,45 x urgência + 0,35 x lacuna + 0,20 x importância   (cada parte vai de 0 a 1)
- *
- *   urgência    1 se o prazo já passou; 0,1 sem prazo; senão cai linearmente até 0 com 14 dias de folga;
- *   lacuna      quanto falta para a meta: 1 - progresso/100;
- *   importância prioridade que o estudante deu à meta (baixa 0,3, média 0,6, alta 1,0).
- *
- * Os pesos são os mesmos do ranking de tarefas (CalculadoraDeRanking).
- * Desempate: prazo mais cedo (sem prazo por último), prioridade maior, id.
- *
- * Datas dos marcos (só para a meta foco, e nunca para hábito ou meta sem prazo): espaçadas igualmente
- * entre hoje e o prazo, em dias diferentes sempre que o prazo permitir. Meta atrasada recebe hoje.
- *
- * É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
- */
+// Decide qual meta merece atenção primeiro e em que datas propor os marcos novos dela.
+//
+// Nota = 0,45 x urgência + 0,35 x lacuna + 0,20 x importância   (cada parte vai de 0 a 1)
+//
+//   urgência    1 se o prazo já passou; 0,1 sem prazo; senão cai linearmente até 0 com 14 dias de folga;
+//   lacuna      quanto falta para a meta: 1 - progresso/100;
+//   importância prioridade que o estudante deu à meta (baixa 0,3, média 0,6, alta 1,0).
+//
+// Os pesos são os mesmos do ranking de tarefas (CalculadoraDeRanking).
+// Desempate: prazo mais cedo (sem prazo por último), prioridade maior, id.
+//
+// Datas dos marcos (só para a meta foco, e nunca para hábito ou meta sem prazo): espaçadas igualmente
+// entre hoje e o prazo, em dias diferentes sempre que o prazo permitir. Meta atrasada recebe hoje.
+//
+// É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
 public class CalculadoraDeMetas
 {
     public static final double PESO_URGENCIA    = 0.45;
@@ -26,7 +24,7 @@ public class CalculadoraDeMetas
     private static final double HORIZONTE_DE_URGENCIA_DIAS = 14.0;
     private static final double URGENCIA_SEM_PRAZO         = 0.1;
 
-    public static PrioridadeDeMetas calcular (PedidoDeMetas pedido) throws Exception
+    public static PrioridadeDeMetas calcular (PedidoDeMetas pedido)
     {
         DataHora agora = pedido.getAgora ();
         ArrayList<Meta> metas = pedido.getMetas ();
@@ -36,7 +34,7 @@ public class CalculadoraDeMetas
         for (int i = 0; i < metas.size (); i++)
             notas.add (avaliar (metas.get (i), metas.get (CalculadoraDeMetas.posicaoDoId (metas, metas.get (i).getId ())), agora));
 
-        Ordenador.ordene (notas);
+        notas = new Ordenador<NotaDeMeta> ().ordene (notas);
 
         String foco = notas.size () == 0 ? null : notas.get (0).getMetaId ();
         ArrayList<String> datas = foco == null ? new ArrayList<String> ()
@@ -57,7 +55,7 @@ public class CalculadoraDeMetas
     }
 
     // `referencia` é a meta de que a nota herda o prazo e a prioridade para o desempate.
-    static NotaDeMeta avaliar (Meta meta, Meta referencia, DataHora agora) throws Exception
+    static NotaDeMeta avaliar (Meta meta, Meta referencia, DataHora agora)
     {
         boolean atrasada = meta.getPrazo () != null && !meta.getPrazo ().depoisDe (agora);
 
@@ -84,12 +82,12 @@ public class CalculadoraDeMetas
 
     static double pesoDaPrioridade (Meta meta)
     {
-        switch (meta.getPrioridade ())
-        {
-            case "alta":  return 1.0;
-            case "baixa": return 0.3;
-            default:      return 0.6;
-        }
+        if (meta.getPrioridade ().equals ("alta"))
+            return 1.0;
+        if (meta.getPrioridade ().equals ("baixa"))
+            return 0.3;
+
+        return 0.6;
     }
 
     // Dias de calendário até o prazo, no fuso do pedido; zero para meta atrasada ou com prazo hoje.
@@ -115,7 +113,7 @@ public class CalculadoraDeMetas
 
         for (int k = 1; k <= quantidade; k++)
         {
-            int dia = (int) Math.round (dias * k / (double) (quantidade + 1));
+            int dia = (int) (dias * k / (double) (quantidade + 1) + 0.5);
             dia = Math.max (dia, Math.min (anterior + 1, dias));
             dia = Math.min (dia, dias);
             anterior = dia;
@@ -133,6 +131,6 @@ public class CalculadoraDeMetas
 
     private static double arredondar (double valor)
     {
-        return Math.round (valor * 1000.0) / 1000.0;
+        return (long) (valor * 1000.0 + 0.5) / 1000.0;
     }
 }

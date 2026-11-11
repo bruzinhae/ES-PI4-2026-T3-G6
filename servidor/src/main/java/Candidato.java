@@ -1,9 +1,7 @@
 import java.io.*;
 
-/**
- * Uma tarefa candidata a um espaco, com a nota final e as tres partes que a compoem. Guarda tambem o
- * prazo e a prioridade da tarefa, que servem de desempate quando as notas sao iguais.
- */
+// Uma tarefa candidata a um espaco, com a nota final e as tres partes que a compoem. Guarda tambem o
+// prazo e a prioridade da tarefa, que servem de desempate quando as notas sao iguais.
 public class Candidato implements Comparable<Candidato>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -71,24 +69,27 @@ public class Candidato implements Comparable<Candidato>, Serializable
         return this.prioridade;
     }
 
-    public int compareTo (Candidato outro)
+    @Override
+    public int compareTo (Candidato can)
     {
         // nota maior primeiro; empates: prazo mais cedo (sem prazo por ultimo), prioridade maior e id
-        int ret = Double.compare (outro.nota, this.nota);
-        if (ret != 0) return ret;
+        if (this.nota>can.nota) return -666;
+        if (this.nota<can.nota) return  666;
 
-        if (this.prazo == null && outro.prazo != null) return 1;
-        if (this.prazo != null && outro.prazo == null) return -1;
-        if (this.prazo != null)
+        if (this.prazo==null && can.prazo!=null) return  666;
+        if (this.prazo!=null && can.prazo==null) return -666;
+        if (this.prazo!=null)
         {
-            ret = this.prazo.compareTo (outro.prazo);
-            if (ret != 0) return ret;
+            if (this.prazo.compareTo(can.prazo)<0) return -666;
+            if (this.prazo.compareTo(can.prazo)>0) return  666;
         }
 
-        ret = Integer.compare (outro.prioridade, this.prioridade);
-        if (ret != 0) return ret;
+        if (this.prioridade>can.prioridade) return -666;
+        if (this.prioridade<can.prioridade) return  666;
 
-        return this.tarefaId.compareTo (outro.tarefaId);
+        if (this.tarefaId.compareTo(can.tarefaId)<0) return -666;
+        if (this.tarefaId.compareTo(can.tarefaId)>0) return  666;
+        return 0;
     }
 
 }

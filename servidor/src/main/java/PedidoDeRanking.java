@@ -1,9 +1,7 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * O cliente envia os espaços livres da grade, as tarefas pendentes e as preferências do
- * usuário, e pede o ranking de candidatos para cada espaço. Contrato completo no README.
- */
+// O cliente envia os espaços livres da grade, as tarefas pendentes e as preferências do
+// usuário, e pede o ranking de candidatos para cada espaço. Contrato completo no README.
 public class PedidoDeRanking extends Comunicado
 {
     private static final long serialVersionUID = 1L;
@@ -20,7 +18,7 @@ public class PedidoDeRanking extends Comunicado
     public ArrayList<EspacoLivre> getEspacos () { return this.espacos; }
     public ArrayList<Tarefa> getTarefas ()      { return this.tarefas; }
     public int getLimite ()                     { return this.limite; }
-    public boolean getAlocar ()                 { return this.alocar; }
+    public boolean isAlocar ()                 { return this.alocar; }
 
     public String toString ()
     {

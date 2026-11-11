@@ -1,25 +1,23 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Calcula, para cada espaço livre da grade, o vetor de tarefas candidatas ordenado por nota.
- *
- * Nota = 0,45 x urgência + 0,35 x importância + 0,20 x encaixe   (cada parte vai de 0 a 1)
- *
- *   urgência    quanto o prazo aperta, medido a partir de AGORA e já descontando o esforço
- *               da tarefa (medir a partir do espaço faria a nota favorecer espaços tardios);
- *   importância prioridade do usuário (1 a 10), com reforço para prova/trabalho e para
- *               disciplinas de maior peso;
- *   encaixe     o quanto a tarefa cabe no espaço e se cai na janela de foco do usuário
- *               (tarefa pessoal não depende da janela de foco: usa o valor neutro).
- *
- * Regras fixas (não são pesos):
- *   - tarefa concluída não é candidata;
- *   - a sessão precisa terminar antes do prazo (tarefa já atrasada pode entrar em qualquer espaço);
- *   - espaços com menos de 15 minutos são ignorados (mínimo de uma tarefa);
- *   - desempate: prazo mais cedo, depois maior prioridade, depois id (ver Candidato.compareTo).
- *
- * É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
- */
+// Calcula, para cada espaço livre da grade, o vetor de tarefas candidatas ordenado por nota.
+//
+// Nota = 0,45 x urgência + 0,35 x importância + 0,20 x encaixe   (cada parte vai de 0 a 1)
+//
+//   urgência    quanto o prazo aperta, medido a partir de AGORA e já descontando o esforço
+//               da tarefa (medir a partir do espaço faria a nota favorecer espaços tardios);
+//   importância prioridade do usuário (1 a 10), com reforço para prova/trabalho e para
+//               disciplinas de maior peso;
+//   encaixe     o quanto a tarefa cabe no espaço e se cai na janela de foco do usuário
+//               (tarefa pessoal não depende da janela de foco: usa o valor neutro).
+//
+// Regras fixas (não são pesos):
+//   - tarefa concluída não é candidata;
+//   - a sessão precisa terminar antes do prazo (tarefa já atrasada pode entrar em qualquer espaço);
+//   - espaços com menos de 15 minutos são ignorados (mínimo de uma tarefa);
+//   - desempate: prazo mais cedo, depois maior prioridade, depois id (ver Candidato.compareTo).
+//
+// É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
 public class CalculadoraDeRanking
 {
     public static final double PESO_URGENCIA    = 0.45;
@@ -29,8 +27,9 @@ public class CalculadoraDeRanking
     private static final int    MINUTOS_MINIMOS_DO_ESPACO  = 15;
     private static final double HORIZONTE_DE_URGENCIA_DIAS = 14.0;
     private static final double URGENCIA_SEM_PRAZO         = 0.1;
+    private static final int    SEM_LIMITE_DE_SESSAO       = 1000000; // minutos
 
-    public static Ranking calcular (PedidoDeRanking pedido) throws Exception
+    public static Ranking calcular (PedidoDeRanking pedido)
     {
         ArrayList<Tarefa> tarefas = pedido.getTarefas ();
 
@@ -57,7 +56,7 @@ public class CalculadoraDeRanking
                     }
                 }
 
-            Ordenador.ordene (candidatos);
+            candidatos = new Ordenador<Candidato> ().ordene (candidatos);
 
             while (candidatos.size () > pedido.getLimite ())
                 candidatos.remove (candidatos.size () - 1);
@@ -73,7 +72,7 @@ public class CalculadoraDeRanking
                                                     pedido.getEspacos ().size () == 0 ? "sem_espacos" : "nenhum_espaco_antes_do_prazo"));
 
         // A alocação só é calculada quando o pedido traz "alocar": true; o ranking por espaço é o mesmo.
-        return new Ranking (porEspaco, semEspaco, pedido.getAlocar () ? AlocadoraDeSessoes.alocar (pedido) : null);
+        return new Ranking (porEspaco, semEspaco, pedido.isAlocar () ? AlocadoraDeSessoes.alocar (pedido) : null);
     }
 
     // Para cada tarefa, a posição da primeira tarefa da lista que tem o mesmo id (ela mesma, se for a primeira).
@@ -116,16 +115,16 @@ public class CalculadoraDeRanking
     }
 
     // Devolve null quando a tarefa não pode ser candidata a este espaço.
-    private static Candidato avaliar (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora, Preferencias preferencias) throws Exception
+    private static Candidato avaliar (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora, Preferencias preferencias)
     {
-        return avaliar (tarefa, referencia, espaco, agora, preferencias, minutosNecessarios (tarefa, preferencias), Integer.MAX_VALUE);
+        return avaliar (tarefa, referencia, espaco, agora, preferencias, minutosNecessarios (tarefa, preferencias), SEM_LIMITE_DE_SESSAO);
     }
 
     // `necessarios` são os minutos que AINDA faltam da tarefa; `limiteDeSessao` é o tamanho máximo de uma sessão
-    // (Integer.MAX_VALUE no ranking, que não divide a tarefa em sessões).
+    // (SEM_LIMITE_DE_SESSAO no ranking, que não divide a tarefa em sessões).
     // `referencia` é a tarefa de que o candidato herda o prazo e a prioridade para o desempate.
     static Candidato avaliar (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora, Preferencias preferencias,
-                              int necessarios, int limiteDeSessao) throws Exception
+                              int necessarios, int limiteDeSessao)
     {
         if (tarefa.concluida ())
             return null;
@@ -192,7 +191,7 @@ public class CalculadoraDeRanking
                           || (tarefa.getDificuldade () != null && tarefa.getDificuldade () >= 4));
 
         double foco = 0.7;
-        if (preferencias.getFocoMatinal () && dificil)
+        if (preferencias.isFocoMatinal () && dificil)
             foco = dentroDaJanela (espaco.getInicio ().getSegundoDoDia (), preferencias.getJanelaFoco ()) ? 1.0 : 0.4;
 
         return 0.6 * tamanho + 0.4 * foco;
@@ -201,14 +200,18 @@ public class CalculadoraDeRanking
     // Janelas iguais às da tela de Configurações. A hora vem em segundos desde a meia-noite.
     private static boolean dentroDaJanela (int segundoDoDia, String janela)
     {
-        int inicio;
-        int fim;
+        int inicio = 8 * 3600 + 30 * 60; // manha
+        int fim    = 12 * 3600;
 
-        switch (janela)
+        if (janela.equals ("tarde"))
         {
-            case "tarde": inicio = 14 * 3600;          fim = 18 * 3600;          break;
-            case "noite": inicio = 19 * 3600;          fim = 22 * 3600 + 30 * 60; break;
-            default:      inicio = 8 * 3600 + 30 * 60; fim = 12 * 3600;
+            inicio = 14 * 3600;
+            fim    = 18 * 3600;
+        }
+        else if (janela.equals ("noite"))
+        {
+            inicio = 19 * 3600;
+            fim    = 22 * 3600 + 30 * 60;
         }
 
         return segundoDoDia >= inicio && segundoDoDia < fim;
@@ -221,6 +224,6 @@ public class CalculadoraDeRanking
 
     private static double arredondar (double valor)
     {
-        return Math.round (valor * 1000.0) / 1000.0;
+        return (long) (valor * 1000.0 + 0.5) / 1000.0;
     }
 }

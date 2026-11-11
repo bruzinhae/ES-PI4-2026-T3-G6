@@ -1,9 +1,7 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * O cliente envia as metas ativas do estudante e pede qual deve receber atenção primeiro e em que
- * datas propor os marcos novos dessa meta. Contrato completo no README.
- */
+// O cliente envia as metas ativas do estudante e pede qual deve receber atenção primeiro e em que
+// datas propor os marcos novos dessa meta. Contrato completo no README.
 public class PedidoDeMetas extends Comunicado
 {
     private static final long serialVersionUID = 1L;

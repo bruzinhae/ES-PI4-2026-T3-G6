@@ -1,10 +1,8 @@
 import java.io.*;
 
-/**
- * Uma sessao de estudo decidida pela alocacao: qual tarefa, onde (espaco livre) e quando.
- *
- * minutosRestantes o que ainda falta da tarefa depois desta sessao (0 = a tarefa ficou completa)
- */
+// Uma sessao de estudo decidida pela alocacao: qual tarefa, onde (espaco livre) e quando.
+//
+// minutosRestantes o que ainda falta da tarefa depois desta sessao (0 = a tarefa ficou completa)
 public class SessaoAlocada implements Serializable
 {
     private static final long serialVersionUID = 1L;

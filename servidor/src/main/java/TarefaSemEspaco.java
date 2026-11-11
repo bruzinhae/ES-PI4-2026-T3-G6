@@ -1,9 +1,7 @@
 import java.io.*;
 
-/**
- * Tarefa que nao coube em nenhum dos espacos enviados.
- * motivo: "sem_espacos" ou "nenhum_espaco_antes_do_prazo".
- */
+// Tarefa que nao coube em nenhum dos espacos enviados.
+// motivo: "sem_espacos" ou "nenhum_espaco_antes_do_prazo".
 public class TarefaSemEspaco implements Serializable
 {
     private static final long serialVersionUID = 1L;

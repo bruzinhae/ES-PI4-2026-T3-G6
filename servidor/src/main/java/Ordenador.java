@@ -1,48 +1,53 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Ordena uma lista usando o compareTo dos próprios elementos (merge sort, que mantém a ordem
- * original dos elementos iguais).
- */
-public class Ordenador
+// Ordena uma lista usando o compareTo dos proprios elementos (merge sort, que mantem a ordem
+// original dos elementos iguais). Devolve uma lista nova; a original nao muda.
+public class Ordenador<X extends Comparable<X>>
 {
-    public static <X extends Comparable<X>> void ordene (ArrayList<X> lista)
+    public ArrayList<X> ordene (ArrayList<X> lista)
     {
-        if (lista.size () < 2)
-            return;
+        X[] elemento = (X[]) new Comparable[lista.size()];
+        for (int i=0; i<elemento.length; i++)
+            elemento[i] = lista.get(i);
 
-        ArrayList<X> auxiliar = new ArrayList<X> (lista);
-        Ordenador.ordene (lista, auxiliar, 0, lista.size ());
+        X[] auxiliar = (X[]) new Comparable[elemento.length];
+        this.ordene (elemento, auxiliar, 0, elemento.length);
+
+        ArrayList<X> ret = new ArrayList<X> ();
+        for (int i=0; i<elemento.length; i++)
+            ret.add (elemento[i]);
+
+        return ret;
     }
 
-    // Ordena a parte da lista que vai de inicio (inclusive) até fim (exclusive).
-    private static <X extends Comparable<X>> void ordene (ArrayList<X> lista, ArrayList<X> auxiliar, int inicio, int fim)
+    // Ordena a parte do vetor que vai de inicio (inclusive) ate fim (exclusive).
+    private void ordene (X[] elemento, X[] auxiliar, int inicio, int fim)
     {
-        if (fim - inicio < 2)
+        if (fim-inicio < 2)
             return;
 
-        int meio = (inicio + fim) / 2;
+        int meio = (inicio+fim)/2;
 
-        Ordenador.ordene (lista, auxiliar, inicio, meio);
-        Ordenador.ordene (lista, auxiliar, meio, fim);
+        this.ordene (elemento, auxiliar, inicio, meio);
+        this.ordene (elemento, auxiliar, meio, fim);
 
         int esquerda = inicio;
         int direita  = meio;
         int destino  = inicio;
 
-        while (esquerda < meio && direita < fim)
-            if (lista.get (direita).compareTo (lista.get (esquerda)) < 0)
-                auxiliar.set (destino++, lista.get (direita++));
+        while (esquerda<meio && direita<fim)
+            if (elemento[direita].compareTo(elemento[esquerda]) < 0)
+                auxiliar[destino++] = elemento[direita++];
             else
-                auxiliar.set (destino++, lista.get (esquerda++));
+                auxiliar[destino++] = elemento[esquerda++];
 
-        while (esquerda < meio)
-            auxiliar.set (destino++, lista.get (esquerda++));
+        while (esquerda<meio)
+            auxiliar[destino++] = elemento[esquerda++];
 
-        while (direita < fim)
-            auxiliar.set (destino++, lista.get (direita++));
+        while (direita<fim)
+            auxiliar[destino++] = elemento[direita++];
 
-        for (destino = inicio; destino < fim; destino++)
-            lista.set (destino, auxiliar.get (destino));
+        for (destino=inicio; destino<fim; destino++)
+            elemento[destino] = auxiliar[destino];
     }
 }
