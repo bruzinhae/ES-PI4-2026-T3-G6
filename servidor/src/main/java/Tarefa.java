@@ -1,29 +1,20 @@
 import java.io.*;
 
-// Tarefa pendente candidata a ser encaixada na grade.
-//
-// categoria        "estudos" ou "pessoal" (tarefa pessoal nao depende da janela de foco)
-// prioridade       1 a 10, definida pelo usuario
-// prazo            entrega; null quando a tarefa nao tem prazo
-// minutosEstimados esforco estimado; null quando nao informado
-// dificuldade      da disciplina (1 a 5), ou null
-// peso             da disciplina (1 a 5), ou null
 public class Tarefa implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    public static final String CATEGORIA_ESTUDOS = "estudos";
     public static final String CATEGORIA_PESSOAL = "pessoal";
 
     private String   id;
-    private String   categoria;
-    private String   tipo;
-    private int      prioridade;
-    private DataHora prazo;
-    private Integer  minutosEstimados;
-    private Integer  dificuldade;
-    private Integer  peso;
-    private String   situacao;
+    private String   categoria;        // estudos ou pessoal
+    private String   tipo;             // prova, trabalho, exercicio, leitura ou outro
+    private int      prioridade;       // de 1 a 10
+    private DataHora prazo;            // null se a tarefa nao tem prazo
+    private Integer  minutosEstimados; // null se nao informado
+    private Integer  dificuldade;      // da disciplina, de 1 a 5 (ou null)
+    private Integer  peso;             // da disciplina, de 1 a 5 (ou null)
+    private String   situacao;         // pendente, em_andamento ou concluida
 
     public String getId ()
     {
@@ -69,5 +60,4 @@ public class Tarefa implements Serializable
     {
         return "concluida".equals (this.situacao);
     }
-
 }

@@ -1,16 +1,15 @@
 import java.util.*;
 
-// Resposta ao PedidoDeMetas: as metas da mais para a menos urgente, a meta foco (a primeira da lista,
-// ou null se não há metas ativas) e as datas propostas (AAAA-MM-DD) para os marcos novos da meta foco.
 public class PrioridadeDeMetas extends Comunicado
 {
     private static final long serialVersionUID = 1L;
 
-    private ArrayList<NotaDeMeta> ranking;
-    private String                foco;
-    private ArrayList<String>     datasDosMarcos;
+    private ArrayList<NotaDeMeta> ranking;        // da mais para a menos urgente
+    private String                foco;           // id da meta de maior nota (null sem metas)
+    private ArrayList<String>     datasDosMarcos; // AAAA-MM-DD, so da meta foco
 
-    public PrioridadeDeMetas (ArrayList<NotaDeMeta> ranking, String foco, ArrayList<String> datasDosMarcos)
+    public PrioridadeDeMetas (ArrayList<NotaDeMeta> ranking, String foco,
+                              ArrayList<String> datasDosMarcos)
     {
         this.ranking        = ranking;
         this.foco           = foco;

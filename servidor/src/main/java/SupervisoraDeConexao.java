@@ -74,7 +74,6 @@ public class SupervisoraDeConexao extends Thread
                 this.usuarios.add (this.usuario);
             }
 
-
             for(;;)
             {
                 Comunicado comunicado = this.usuario.envie ();
@@ -85,22 +84,30 @@ public class SupervisoraDeConexao extends Thread
                 {
                     try
                     {
-                        this.usuario.receba (CalculadoraDeRanking.calcular ((PedidoDeRanking)comunicado));
+                        PedidoDeRanking pedido = (PedidoDeRanking)comunicado;
+
+                        this.usuario.receba (CalculadoraDeRanking.calcular (pedido));
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro ("Nao foi possivel calcular o ranking: "+erro.getMessage()));
+                        String mensagem = "Nao foi possivel calcular o ranking: ";
+
+                        this.usuario.receba (new Erro (mensagem+erro.getMessage()));
                     }
                 }
                 else if (comunicado instanceof PedidoDeMetas)
                 {
                     try
                     {
-                        this.usuario.receba (CalculadoraDeMetas.calcular ((PedidoDeMetas)comunicado));
+                        PedidoDeMetas pedido = (PedidoDeMetas)comunicado;
+
+                        this.usuario.receba (CalculadoraDeMetas.calcular (pedido));
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro ("Nao foi possivel priorizar as metas: "+erro.getMessage()));
+                        String mensagem = "Nao foi possivel priorizar as metas: ";
+
+                        this.usuario.receba (new Erro (mensagem+erro.getMessage()));
                     }
                 }
                 else if (comunicado instanceof PedidoParaSair)

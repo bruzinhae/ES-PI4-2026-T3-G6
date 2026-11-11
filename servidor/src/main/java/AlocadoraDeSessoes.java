@@ -1,29 +1,10 @@
 import java.util.*;
 
-// Decide, a partir do ranking, qual tarefa vai em qual horário, sem repetir tempo nem sobrepor sessões.
-//
-// O ranking sozinho devolve, para cada espaço livre, uma lista de candidatas, e a mesma tarefa pode ser a
-// primeira de vários espaços. Esta classe resolve isso com um algoritmo guloso:
-//
-//   1. percorre os espaços em ordem cronológica;
-//   2. dentro de cada espaço, escolhe a melhor candidata (a mesma nota do ranking) entre as tarefas que
-//      ainda têm minutos pendentes, e reserva uma sessão para ela;
-//   3. desconta os minutos e repete no resto do espaço, até acabar o espaço ou as tarefas;
-//   4. passa ao próximo espaço.
-//
-// Preferências do usuário que entram aqui:
-//   - duracaoMinutos: tamanho de cada sessão (uma tarefa grande vira várias; uma sessão pode passar até 14 min
-//     quando o resto seria pequeno demais para virar outra);
-//   - antifadiga: com ela ligada, há uma pausa de 10 minutos entre sessões seguidas no mesmo espaço; desligada,
-//     sessões seguidas da mesma tarefa são juntadas em uma só.
-//
-// É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
 public class AlocadoraDeSessoes
 {
     public static final int PAUSA_ANTIFADIGA_MINUTOS = 10;
 
-    // Proteção: um pedido nunca gera mais sessões que isto (a alocação para e marca "alocacaoTruncada").
-    public static final int MAXIMO_DE_SESSOES = 2000;
+    public static final int MAXIMO_DE_SESSOES = 2000; // por pedido; ao chegar aqui marca truncada
 
     private static final int MINUTOS_MINIMOS_DO_ESPACO = 15;
 
@@ -31,13 +12,14 @@ public class AlocadoraDeSessoes
     {
         Preferencias preferencias = pedido.getPreferencias ();
         DataHora agora = pedido.getAgora ();
+        int duracao = preferencias.getDuracaoMinutos ();
         int pausa = preferencias.isAntifadiga () ? PAUSA_ANTIFADIGA_MINUTOS : 0;
 
-        // Tarefas que ainda pedem tempo (concluídas ficam de fora; id repetido vale só o primeiro).
         ArrayList<Tarefa> ativas = new ArrayList<Tarefa> ();
         for (Tarefa tarefa : pedido.getTarefas ())
-            if (!tarefa.concluida () && AlocadoraDeSessoes.posicaoDoId (ativas, tarefa.getId ()) == -1)
-                ativas.add (tarefa);
+            if (!tarefa.concluida () &&
+                AlocadoraDeSessoes.posicaoDoId (ativas, tarefa.getId ()) == -1)
+                ativas.add (tarefa); // concluida fica de fora; id repetido vale so o primeiro
 
         int[] restante = new int [ativas.size ()];
         int[] pedidos  = new int [ativas.size ()];
@@ -45,7 +27,9 @@ public class AlocadoraDeSessoes
 
         for (int i = 0; i < ativas.size (); i++)
         {
-            int necessarios = CalculadoraDeRanking.minutosNecessarios (ativas.get (i), preferencias);
+            int necessarios =
+            CalculadoraDeRanking.minutosNecessarios (ativas.get (i), preferencias);
+
             restante[i] = necessarios;
             pedidos[i]  = necessarios;
         }
@@ -64,11 +48,10 @@ public class AlocadoraDeSessoes
 
             DataHora cursor = espaco.getInicio ();
 
-            // Se espaços enviados se sobrepõem, nunca reserva o mesmo minuto duas vezes.
             if (ocupadoAte != null && ocupadoAte.depoisDe (cursor))
-                cursor = ocupadoAte.noFusoDe (espaco.getInicio ());
+                cursor = ocupadoAte.noFusoDe (espaco.getInicio ()); // espacos que se sobrepoem
 
-            int indiceDaUltima = -1; // última sessão reservada neste espaço
+            int indiceDaUltima = -1; // ultima sessao reservada neste espaco
 
             for (;;)
             {
@@ -83,7 +66,9 @@ public class AlocadoraDeSessoes
                     break;
                 }
 
-                EspacoLivre aindaLivre = new EspacoLivre (espaco.getId (), cursor, espaco.getFim ());
+                EspacoLivre aindaLivre =
+                new EspacoLivre (espaco.getId (), cursor, espaco.getFim ());
+
                 Candidato melhor = null;
                 int indiceDaMelhor = -1;
 
@@ -92,8 +77,10 @@ public class AlocadoraDeSessoes
                     if (restante[i] <= 0)
                         continue;
 
-                    Candidato candidato = CalculadoraDeRanking.avaliar (ativas.get (i), ativas.get (i), aindaLivre, agora, preferencias,
-                                                                         restante[i], preferencias.getDuracaoMinutos ());
+                    Tarefa tarefa = ativas.get (i);
+                    Candidato candidato =
+                    CalculadoraDeRanking.avaliar (tarefa, tarefa, aindaLivre, agora, preferencias,
+                                                  restante[i], duracao);
                     if (candidato == null)
                         continue;
 
@@ -107,7 +94,7 @@ public class AlocadoraDeSessoes
                 }
 
                 if (melhor == null)
-                    break; // ninguém serve para o que sobrou deste espaço
+                    break; // ninguem serve para o que sobrou deste espaco
 
                 int minutos = melhor.getMinutosNoEspaco ();
                 int faltaDepois = restante[indiceDaMelhor] - minutos;
@@ -116,16 +103,21 @@ public class AlocadoraDeSessoes
                 DataHora fimDaSessao = cursor.maisMinutos (minutos);
                 SessaoAlocada ultima = indiceDaUltima >= 0 ? sessoes.get (indiceDaUltima) : null;
 
-                if (pausa == 0 && ultima != null && ultima.getTarefaId ().equals (melhor.getTarefaId ())
-                    && ultima.getFim ().mesmoInstante (cursor))
+                if (pausa == 0 && ultima != null && ultima.getFim ().mesmoInstante (cursor)
+                    && ultima.getTarefaId ().equals (melhor.getTarefaId ()))
                 {
                     sessoes.remove (indiceDaUltima); // a ultima sessao e sempre a ultima da lista
                     sessoes.add (ultima.estendida (minutos, faltaDepois));
                 }
                 else
                 {
-                    sessoes.add (new SessaoAlocada (espaco.getId (), melhor.getTarefaId (), cursor, fimDaSessao, minutos, faltaDepois,
-                                                    melhor.getNota (), melhor.getUrgencia (), melhor.getImportancia (), melhor.getEncaixe ()));
+                    SessaoAlocada nova =
+                    new SessaoAlocada (espaco.getId (), melhor.getTarefaId (), cursor, fimDaSessao,
+                                       minutos, faltaDepois, melhor.getNota (),
+                                       melhor.getUrgencia (), melhor.getImportancia (),
+                                       melhor.getEncaixe ());
+
+                    sessoes.add (nova);
                     indiceDaUltima = sessoes.size () - 1;
                 }
 
@@ -134,10 +126,12 @@ public class AlocadoraDeSessoes
             }
         }
 
-        return new Alocacao (sessoes, tarefasSemAlocacao (ativas, restante, pedidos, foiCandidata, espacos.size () == 0), truncada);
+        ArrayList<TarefaSemAlocacao> sem =
+        tarefasSemAlocacao (ativas, restante, pedidos, foiCandidata, espacos.size () == 0);
+
+        return new Alocacao (sessoes, sem, truncada);
     }
 
-    // A posição da primeira tarefa da lista com esse id, ou -1 se não há nenhuma.
     private static int posicaoDoId (ArrayList<Tarefa> tarefas, String id)
     {
         for (int i = 0; i < tarefas.size (); i++)
@@ -147,9 +141,9 @@ public class AlocadoraDeSessoes
         return -1;
     }
 
-    // Tarefas que ainda têm minutos pendentes no fim, com o motivo.
-    private static ArrayList<TarefaSemAlocacao> tarefasSemAlocacao (ArrayList<Tarefa> ativas, int[] restante, int[] pedidos,
-                                                                    boolean[] foiCandidata, boolean semEspacos)
+    private static ArrayList<TarefaSemAlocacao> tarefasSemAlocacao
+    (ArrayList<Tarefa> ativas, int[] restante, int[] pedidos,
+     boolean[] foiCandidata, boolean semEspacos)
     {
         ArrayList<TarefaSemAlocacao> sem = new ArrayList<TarefaSemAlocacao> ();
 
