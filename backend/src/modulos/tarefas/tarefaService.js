@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { Tarefa, CATEGORIAS_TAREFA, TIPOS_TAREFA } from './Tarefa.js';
+import { Disciplina } from '../disciplinas/Disciplina.js';
 
-const CAMPOS = ['titulo', 'categoria', 'tipo', 'etiqueta', 'prazo', 'minutosEstimados', 'prioridade', 'local', 'observacoes'];
+const CAMPOS = ['titulo', 'categoria', 'tipo', 'etiqueta', 'prazo', 'minutosEstimados', 'prioridade', 'local', 'observacoes', 'disciplinaId'];
 
 function idValido(id) {
     if (!mongoose.isValidObjectId(id)) throw new ErroApi(400, 'ID de tarefa inválido.');
@@ -18,6 +19,7 @@ function validar(dados, parcial = false) {
         if (typeof payload.titulo !== 'string' || payload.titulo.trim().length < 2 || payload.titulo.trim().length > 80) throw new ErroApi(400, 'O título deve ter entre 2 e 80 caracteres.');
         payload.titulo = payload.titulo.trim();
     }
+    if (payload.disciplinaId !== undefined && payload.disciplinaId !== null && !mongoose.isValidObjectId(payload.disciplinaId)) throw new ErroApi(400, 'ID de disciplina inválido.');
     if (payload.categoria !== undefined && !CATEGORIAS_TAREFA.includes(payload.categoria)) throw new ErroApi(400, 'Categoria de tarefa inválida.');
     if (payload.tipo !== undefined && !TIPOS_TAREFA.includes(payload.tipo)) throw new ErroApi(400, 'Tipo de tarefa inválido.');
     for (const campo of ['etiqueta', 'local', 'observacoes']) {
@@ -45,12 +47,19 @@ function validar(dados, parcial = false) {
     return payload;
 }
 
+async function validarDisciplinaDoUsuario(usuarioId, disciplinaId) {
+    if (disciplinaId && !await Disciplina.exists({ _id: disciplinaId, usuarioId })) {
+        throw new ErroApi(400, 'A disciplina selecionada não existe ou não pertence a esta conta.');
+    }
+}
+
 export function listar(usuarioId) {
     return Tarefa.find({ usuarioId, situacao: { $ne: 'concluida' } }).sort({ prazo: 1, criadoEm: -1 });
 }
 
 export async function criar(usuarioId, dados) {
     const payload = validar(dados);
+    await validarDisciplinaDoUsuario(usuarioId, payload.disciplinaId);
     const tarefa = new Tarefa({ ...payload, usuarioId, categoria: payload.categoria || 'estudos', tipo: payload.tipo || 'outro', situacao: 'pendente' });
     await tarefa.save();
     return tarefa;
@@ -60,6 +69,7 @@ export async function atualizar(usuarioId, id, dados) {
     idValido(id);
     const payload = validar(dados, true);
     if (!Object.keys(payload).length) throw new ErroApi(400, 'Informe ao menos um campo para atualizar.');
+    await validarDisciplinaDoUsuario(usuarioId, payload.disciplinaId);
     const tarefa = await Tarefa.findOneAndUpdate({ _id: id, usuarioId }, { $set: payload }, { new: true, runValidators: true });
     if (!tarefa) throw new ErroApi(404, 'Tarefa não encontrada.');
     return tarefa;
