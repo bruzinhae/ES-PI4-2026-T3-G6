@@ -97,7 +97,7 @@ TCP, texto UTF-8, **uma mensagem por linha** (termina em `\n`). Pode-se mandar v
 | `agora` | não | ISO-8601 com fuso. Padrão: hora do servidor. Mandar sempre permite resultados reproduzíveis. |
 | `preferencias.janelaFoco` | não | `manha` (08:30–12:00), `tarde` (14:00–18:00) ou `noite` (19:00–22:30). Padrão `manha`. |
 | `preferencias.focoMatinal` | não | `false` ignora a janela de foco. Padrão `true`. |
-| `preferencias.duracaoMinutos` | não | 10 a 240; usada quando a tarefa não tem estimativa e, na alocação, como tamanho máximo de cada sessão. Padrão 50. |
+| `preferencias.duracaoMinutos` | não | 10 a 240; usada quando a tarefa não tem estimativa e, na alocação, como tamanho de cada sessão (pode passar até 14 min para absorver um resto pequeno). Padrão 50. |
 | `preferencias.antifadiga` | não | Só na alocação: `true` põe uma pausa de 10 min entre sessões seguidas; `false` junta sessões seguidas da mesma tarefa. Padrão `true`. |
 | `alocar` | não | `true` pede, além do ranking, a **alocação** (ver "Alocação"). Padrão `false`: a resposta é exatamente a de antes. |
 | `limite` | não | Máximo de candidatos por espaço (1 a 100). Padrão 10. |
