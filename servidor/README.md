@@ -50,7 +50,17 @@ java -cp out br.faculdade.acaistudy.servidor.Cliente exemplos/pedido-semana.json
 java -cp out br.faculdade.acaistudy.servidor.Cliente exemplos/pedido-semana.json localhost 3000 --json   # resposta bruta
 ```
 
-`exemplos/pedido-semana.json` foi montado com as tarefas e disciplinas do dicionário de dados. O layout de pastas (`src/main/java/...`) já é o do Maven, para adicionar um `pom.xml` e o JUnit da #37 sem mover arquivos.
+`exemplos/pedido-semana.json` foi montado com as tarefas e disciplinas do dicionário de dados. A compilação e execução do servidor não dependem de Maven nem de bibliotecas externas.
+
+## Testes automatizados
+
+Os testes JUnit 5 cobrem partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro do serviço `SupervisoraDeConexao`, usando uma conexão TCP local. Requerem Maven; execute na pasta `servidor/`:
+
+```bash
+mvn test
+```
+
+O relatório para a atividade de Teste OO está em [`RELATORIO-TESTES-OO.md`](RELATORIO-TESTES-OO.md).
 
 ## Protocolo
 
