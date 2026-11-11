@@ -1,0 +1,11 @@
+{
+  "tipo": "pedidoDeMetas",
+  "agora": "2026-11-11T15:00:00-03:00",
+  "quantidadeDeMarcos": 3,
+  "metas": [
+    { "id": "m1", "titulo": "Entregar o projeto final", "tipo": "projeto", "prioridade": "alta", "progresso": 20, "prazo": "2026-12-15T23:59:00-03:00" },
+    { "id": "m2", "titulo": "Revisar calculo para a prova", "tipo": "geral", "prioridade": "baixa", "progresso": 0, "prazo": "2027-02-20T23:59:00-03:00" },
+    { "id": "m3", "titulo": "Estudar 10 horas por semana", "tipo": "habito", "prioridade": "media", "progresso": 50 },
+    { "id": "m4", "titulo": "Apresentar o seminario", "tipo": "disciplina", "prioridade": "media", "progresso": 10, "prazo": "2026-11-14T23:59:00-03:00" }
+  ]
+}

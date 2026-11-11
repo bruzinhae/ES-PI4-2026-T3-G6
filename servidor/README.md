@@ -9,13 +9,23 @@ A arquitetura segue o exemplo do professor, o *Fazedor de Continhas* (cliente-se
 | `Servidor` (main, porta 3000, comando `desativar`) | `Servidor` |
 | `AceitadoraDeConexao` (thread no `accept()`) | `AceitadoraDeConexao` |
 | `SupervisoraDeConexao` (uma thread por cliente, `instanceof`) | `SupervisoraDeConexao` |
-| `Parceiro` (socket + fluxos) | `Parceiro` |
+| `Parceiro` (socket + fluxos, `receba`, `espie`, `envie`, `adeus`) | `Parceiro` |
+| `Teclado` | `Teclado` (a mesma classe do exemplo) |
 | `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoDeMetas`, `PrioridadeDeMetas`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
-| `Cliente` (console) | `Cliente` |
+| `Cliente` (console, com menu) | `Cliente` |
+| `TratadoraDeComunicadoDeDesligamento` | `TratadoraDeComunicadoDeDesligamento` |
+
+Como no exemplo, **não há pacotes** (todas as classes ficam em `src/main/java`) e o código só usa o que foi ensinado nas aulas: `ArrayList`, `StringBuffer`, genéricos, interfaces e `@Override`. Não há `record`, lambdas, `Map`/`Set`, `Comparator`, `StringBuilder` nem `java.time`. Os modelos são classes comuns com `getX()` e seguem o molde das classes da disciplina: `Cloneable`, `toString`, `equals`, `hashCode`, `compareTo` (quando há ordem), construtor de cópia e `clone`.
+
+As peças que substituem o que a biblioteca faria:
+
+- `Objeto` é um objeto JSON (pares nome/valor em ordem); `Json` lê e escreve o texto e `Campos` confere os tipos.
+- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`); só aceita anos de 4 dígitos.
+- `Ordenador` ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável).
 
 Além do Fazedor de Continhas, o servidor também aceita os **comandos de texto dos exemplos do outro professor de Java** (`CLIENTESERVIDOR001` e `002`, com `SERVIDOR.java` e `CLIENTE.java`): `OLA`, `DATA`, `HORA` e `FIM`. O `CLIENTE.java` desses exemplos funciona com este servidor sem alteração (veja a seção "Comandos de texto").
 
-**Diferença em relação ao Continhas:** os comunicados viajam como **uma linha de JSON** (e não como objetos Java serializados), porque o backend Node não lê a serialização do Java. O campo `"tipo"` faz o papel do `instanceof`. Não há bibliotecas externas (o JSON é lido por `json/Json.java`).
+**Diferença em relação ao Continhas:** os comunicados viajam como **uma linha de JSON** (e não como objetos Java serializados), porque o backend Node não lê a serialização do Java. O campo `"tipo"` faz o papel do `instanceof`. Não há bibliotecas externas (o JSON é lido por `Json.java`).
 
 ## Como o servidor se encaixa
 
@@ -33,22 +43,24 @@ Front → API Node (autenticada) ──► Servidor Java (este)
 Requer Java 17 (sem Maven e sem dependências). Na pasta `servidor/`:
 
 ```bash
-javac -d out $(find src -name '*.java')
-java -cp out br.faculdade.acaistudy.servidor.Servidor            # porta 3000, só localhost
-java -cp out br.faculdade.acaistudy.servidor.Servidor 3100       # outra porta
-java -cp out br.faculdade.acaistudy.servidor.Servidor 3100 0.0.0.0   # (cuidado) escutar em todas as interfaces
+javac -d out src/main/java/*.java
+java -cp out Servidor            # porta 3000, só localhost
+java -cp out Servidor 3100       # outra porta
+java -cp out Servidor 3100 0.0.0.0   # (cuidado) escutar em todas as interfaces
 ```
 
-Para o `CLIENTE.java` dos exemplos do outro professor (porta fixa 5000), inicie o servidor passando a porta: `java -cp out br.faculdade.acaistudy.servidor.Servidor 5000`.
+Para o `CLIENTE.java` dos exemplos do outro professor (porta fixa 5000), inicie o servidor passando a porta: `java -cp out Servidor 5000`.
 
 Para desativar, digite `desativar` no console. Os clientes conectados recebem um `comunicadoDeDesligamento`.
 
-Para testar sem o Node, com o cliente de console (mostra o ranking em tabela):
+Para testar sem o Node, com o cliente de console (um menu, como o do Fazedor de Continhas):
 
 ```bash
-java -cp out br.faculdade.acaistudy.servidor.Cliente exemplos/pedido-semana.json localhost 3000
-java -cp out br.faculdade.acaistudy.servidor.Cliente exemplos/pedido-semana.json localhost 3000 --json   # resposta bruta
+java -cp out Cliente                  # localhost, porta 3000
+java -cp out Cliente localhost 3100   # outra porta
 ```
+
+As opções são `R` (pedido de ranking e alocação, lido de um arquivo JSON; mostra o ranking em tabela), `M` (pedido de metas), `O`, `D` e `H` (comandos de texto `OLA`, `DATA` e `HORA`) e `T` (terminar). Nos pedidos, Enter usa o arquivo de exemplo (`exemplos/pedido-semana-alocacao.json` ou `exemplos/pedido-metas.json`). Se o servidor for desativado com o cliente aberto, a `TratadoraDeComunicadoDeDesligamento` avisa e encerra o cliente.
 
 `exemplos/pedido-semana.json` foi montado com as tarefas e disciplinas do dicionário de dados. A compilação e execução do servidor não dependem de Maven nem de bibliotecas externas.
 
@@ -172,7 +184,7 @@ O ranking sozinho pode indicar a mesma tarefa como primeira de vários espaços.
 - `semAlocacao`: tarefas que ficaram com minutos pendentes. Motivos: `sem_espacos`, `nenhum_espaco_antes_do_prazo` (nenhum espaço serve por causa do prazo), `espacos_insuficientes` (serviam, mas outras tarefas ficaram com o tempo) ou `alocacao_parcial` (alocou parte; veja `minutosRestantes`).
 - `alocacaoTruncada: true` aparece se o pedido atingiu o limite de 2000 sessões.
 
-**Como a alocação decide** (algoritmo guloso, em `ranking/AlocadoraDeSessoes.java`):
+**Como a alocação decide** (algoritmo guloso, em `AlocadoraDeSessoes.java`):
 1. Percorre os espaços em ordem cronológica.
 2. Em cada espaço, escolhe a melhor candidata (a mesma nota do ranking, calculada com os minutos que ainda faltam) e reserva uma sessão.
 3. Desconta os minutos e repete no que sobrou do espaço, até acabar o espaço ou as tarefas.
@@ -180,7 +192,7 @@ O ranking sozinho pode indicar a mesma tarefa como primeira de vários espaços.
 5. Com `antifadiga`, há 10 min de pausa entre sessões seguidas no mesmo espaço. Sem ela, sessões seguidas da mesma tarefa são juntadas em uma só.
 6. Se os espaços enviados se sobrepõem, nenhum minuto é reservado duas vezes. A sessão sempre termina antes do prazo (tarefa atrasada pode ir em qualquer espaço).
 
-Para ver no console: `java -cp out br.faculdade.acaistudy.servidor.Cliente exemplos/pedido-semana-alocacao.json localhost 3000`.
+Para ver no console: opção `R` do `Cliente` com `exemplos/pedido-semana-alocacao.json`.
 
 ### Comandos de texto (estilo dos exemplos das aulas)
 
@@ -196,7 +208,7 @@ Linhas que não começam com `{` são tratadas como **comandos de texto**, sem J
 Qualquer outro texto recebe um `erro` em JSON orientando os comandos válidos. Texto e JSON podem ser misturados na mesma conexão, e `OLA` serve como **teste de vida** do servidor.
 
 ```bash
-java -cp out br.faculdade.acaistudy.servidor.Cliente OLA localhost 3000     # nosso cliente de console
+java -cp out Cliente                         # nosso cliente de console, opção O
 ```
 
 > Os comandos `COTACAODOLAR` e `COTACAOEURO` do exemplo `002` não foram implementados: dependem de uma API externa e não fazem parte do cálculo de ranking.
@@ -262,7 +274,7 @@ nota = 0,45 × urgência + 0,35 × lacuna + 0,20 × importância        (cada pa
 | **Lacuna** | 35% | `1 − progresso / 100`. |
 | **Importância** | 20% | `baixa` 0,3, `media` 0,6, `alta` 1,0. |
 
-Desempate: prazo mais cedo (sem prazo por último), prioridade maior, `id`. As datas dividem o caminho entre hoje e o prazo em partes iguais, em dias diferentes sempre que couber; meta atrasada recebe hoje. O código está em `ranking/CalculadoraDeMetas.java`.
+Desempate: prazo mais cedo (sem prazo por último), prioridade maior, `id`. As datas dividem o caminho entre hoje e o prazo em partes iguais, em dias diferentes sempre que couber; meta atrasada recebe hoje. O código está em `CalculadoraDeMetas.java`.
 
 ### Outros comunicados
 
@@ -291,7 +303,7 @@ Regras fixas, que não são pesos:
 - Espaços com menos de 15 minutos são ignorados.
 - **Desempate:** nota maior, prazo mais cedo (sem prazo por último), prioridade maior, `id`.
 
-Os pesos são constantes em `ranking/CalculadoraDeRanking.java`.
+Os pesos são constantes em `CalculadoraDeRanking.java`.
 
 ## Uso a partir do Node
 
