@@ -4,6 +4,19 @@ import { DIA, MINUTO, chaveDoDia, diaDaSemana, inicioDoDia, instanteLocal } from
 
 // Sessões que ocupam horário na agenda (as canceladas e não realizadas liberam o horário).
 const SITUACOES_QUE_OCUPAM = ['agendada', 'concluida'];
+const INTERVALO_SEMANAS = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 };
+
+function blocoRecorrenteNaData(bloco, dia) {
+    const intervalo = INTERVALO_SEMANAS[bloco.recorrencia];
+    if (!intervalo || !bloco.diasSemana.includes(diaDaSemana(dia))) return false;
+    const criado = new Date(bloco.inicioRecorrencia || bloco.criadoEm || 0);
+    const inicio = new Date(Date.UTC(criado.getUTCFullYear(), criado.getUTCMonth(), criado.getUTCDate()));
+    inicio.setUTCDate(inicio.getUTCDate() - ((inicio.getUTCDay() + 6) % 7));
+    const data = new Date(dia);
+    data.setUTCHours(0, 0, 0, 0);
+    const semana = Math.floor((data.getTime() - inicio.getTime()) / (7 * DIA));
+    return semana >= 0 && semana % intervalo === 0;
+}
 
 /**
  * Intervalos ocupados do usuário entre `de` e `ate` (milissegundos): blocos fixos (semanais e únicos,
@@ -27,8 +40,8 @@ export async function ocupacoesDoPeriodo(usuarioId, de, ate, { ignorarSessaoId =
         const chave = chaveDoDia(dia);
 
         for (const bloco of blocos) {
-            const cai = bloco.recorrencia === 'semanal'
-                ? bloco.diasSemana.includes(diaDaSemana(dia))
+            const cai = INTERVALO_SEMANAS[bloco.recorrencia]
+                ? blocoRecorrenteNaData(bloco, dia)
                 : bloco.data && bloco.data.toISOString().slice(0, 10) === chave;
             if (!cai) continue;
 

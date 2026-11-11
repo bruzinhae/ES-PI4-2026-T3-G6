@@ -17,7 +17,8 @@ export function resumoRotina(minutos, metaHoras) {
 }
 
 export function minutosDaSemana(blocos = []) {
+    const intervalo = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 };
     return blocos.reduce((soma, bloco) => (
-        soma + (Number(bloco.duracaoMinutos) || 0) * (bloco.diasSemana?.length || 0)
+        soma + (Number(bloco.duracaoMinutos) || 0) * (bloco.diasSemana?.length || 0) / (intervalo[bloco.recorrencia] || 1)
     ), 0);
 }

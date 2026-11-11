@@ -34,7 +34,7 @@ export async function montarCabecalho(usuarioId) {
     const fimHoje = somarDias(inicioHoje, 1);
 
     const [blocos, usuario, sessoesHoje] = await Promise.all([
-        BlocoFixo.find({ usuarioId, recorrencia: 'semanal' }).select('duracaoMinutos diasSemana').lean(),
+        BlocoFixo.find({ usuarioId, recorrencia: { $in: ['semanal', 'quinzenal', 'a_cada_3_semanas'] } }).select('duracaoMinutos diasSemana recorrencia').lean(),
         Usuario.findById(usuarioId).select('metaSemanalHoras').lean(),
         SessaoEstudo.find({
             usuarioId,

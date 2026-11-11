@@ -76,7 +76,7 @@ const ETIQUETA_CLASSE = {
     function horariosDaMateria(disciplinaId) {
         return blocosAula.filter((bloco) => (
             bloco.categoria === 'aulas'
-            && bloco.recorrencia === 'semanal'
+            && ['semanal', 'quinzenal', 'a_cada_3_semanas'].includes(bloco.recorrencia)
             && String(bloco.disciplinaId?._id || bloco.disciplinaId || '') === String(disciplinaId)
         ));
     }
@@ -334,6 +334,7 @@ const ETIQUETA_CLASSE = {
     const inicioHoje = inicioDaSemana(new Date());
     const checksDias = [...formulario.querySelectorAll('[name="diasSemana"]')];
     const campoData = document.querySelector('.campo-data-bloco');
+    const campoInicioRecorrencia = document.querySelector('.campo-inicio-recorrencia');
     const seletorDisciplina = document.querySelector('#bloco-disciplina');
     const disciplinasPorId = new Map();
     const disciplinasProntas = carregarDisciplinas();
@@ -490,12 +491,25 @@ const ETIQUETA_CLASSE = {
             const duracao = Number(bloco.duracaoMinutos);
             if (!Number.isFinite(inicio) || !Number.isFinite(duracao) || duracao <= 0) return [];
             return diasDaSemana.flatMap((data, indice) => {
-                const ocorreNoDia = bloco.recorrencia === 'semanal'
-                    ? (bloco.diasSemana || []).map(Number).includes(indice)
-                    : bloco.recorrencia === 'unico' && formatoData(bloco.data) === chaveData(data);
+                const ocorreNoDia = recorrenteNaData(bloco, data)
+                    || bloco.recorrencia === 'unico' && formatoData(bloco.data) === chaveData(data);
                 return ocorreNoDia ? [{ bloco, data, inicio, fim: inicio + duracao }] : [];
             });
         }).sort((a, b) => a.inicio - b.inicio || a.bloco.nome.localeCompare(b.bloco.nome, 'pt-BR'));
+    }
+
+    function recorrenteNaData(bloco, data) {
+        const intervalo = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 }[bloco.recorrencia];
+        if (!intervalo || !(bloco.diasSemana || []).map(Number).includes((data.getDay() + 6) % 7)) return false;
+        const inicioRecorrencia = bloco.inicioRecorrencia;
+        const criado = inicioRecorrencia
+            ? (typeof inicioRecorrencia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(inicioRecorrencia)
+                ? new Date(`${inicioRecorrencia}T12:00:00`)
+                : new Date(inicioRecorrencia))
+            : bloco.criadoEm ? new Date(bloco.criadoEm) : new Date();
+        const inicio = inicioDaSemana(criado);
+        const semana = Math.floor((inicioDaSemana(data) - inicio) / (7 * 24 * 60 * 60 * 1000));
+        return semana >= 0 && semana % intervalo === 0;
     }
 
     function renderizarAgenda() {
@@ -567,7 +581,7 @@ const ETIQUETA_CLASSE = {
         const eventosAgrupados = [];
         eventosPorDia.forEach((eventosDoDia, indiceDia) => {
             eventosDoDia.forEach(ocorrencia => {
-                const anterior = ocorrencia.totalFaixas === 1 && ocorrencia.bloco.recorrencia === 'semanal'
+                const anterior = ocorrencia.totalFaixas === 1 && ['semanal', 'quinzenal', 'a_cada_3_semanas'].includes(ocorrencia.bloco.recorrencia)
                     ? [...eventosAgrupados].reverse().find(grupo =>
                         idDo(grupo.bloco) === idDo(ocorrencia.bloco)
                         && grupo.diaFim === indiceDia - 1
@@ -678,8 +692,9 @@ const ETIQUETA_CLASSE = {
 
     function atualizarTotalBloqueado() {
         const minutos = blocos.reduce((total, bloco) => {
-            if (!bloco.fixo || bloco.recorrencia !== 'semanal') return total;
-            return total + Number(bloco.duracaoMinutos) * (bloco.diasSemana || []).length;
+            const intervalo = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 }[bloco.recorrencia];
+            if (!bloco.fixo || !intervalo) return total;
+            return total + Number(bloco.duracaoMinutos) * (bloco.diasSemana || []).length / intervalo;
         }, 0);
         document.querySelector('#horas-bloqueadas-semana').textContent = `${formatarDuracao(minutos) || '0h'} bloqueadas / semana`;
     }
@@ -740,6 +755,7 @@ const ETIQUETA_CLASSE = {
         checksDias.forEach(check => { check.checked = false; });
         document.querySelector('#bloco-prioridade').value = '5';
         formulario.elements.horaFim.value = '';
+        formulario.elements.inicioRecorrencia.value = chaveData(inicioDaSemana(new Date()));
         const bloco = id ? blocos.find(item => idDo(item) === id) : null;
         if (bloco) {
             formulario.elements.nome.value = bloco.nome;
@@ -750,6 +766,7 @@ const ETIQUETA_CLASSE = {
             }
             formulario.elements.disciplinaId.value = disciplinaId;
             formulario.elements.recorrencia.value = bloco.recorrencia;
+            formulario.elements.inicioRecorrencia.value = formatoData(bloco.inicioRecorrencia || bloco.criadoEm || chaveData(new Date()));
             formulario.elements.horaInicio.value = String(bloco.horaInicio).slice(0, 5);
             const fimMinutos = minutosDe(bloco.horaInicio) + Number(bloco.duracaoMinutos);
             formulario.elements.horaFim.value = fimMinutos >= 1440 ? '23:59' : horaDe(fimMinutos);
@@ -774,25 +791,47 @@ const ETIQUETA_CLASSE = {
     function atualizarVinculoAula() {
         const aula = formulario.elements.categoria.value === 'aulas';
         const campo = document.getElementById('campo-bloco-disciplina');
+        const indicadorObrigatorio = document.getElementById('bloco-disciplina-obrigatoria');
         campo.hidden = !aula;
         seletorDisciplina.required = aula;
+        seletorDisciplina.setAttribute('aria-required', String(aula));
+        indicadorObrigatorio.hidden = !aula;
     }
 
     function alternarRecorrencia() {
         const unico = recorrencia.value === 'unico';
+        const recorrente = ['semanal', 'quinzenal', 'a_cada_3_semanas'].includes(recorrencia.value);
+        const intervaloComInicio = ['quinzenal', 'a_cada_3_semanas'].includes(recorrencia.value);
         campoData.hidden = !unico;
         document.querySelector('#bloco-data').required = unico;
-        checksDias.forEach(check => { check.disabled = unico; if (unico) check.checked = false; });
+        campoInicioRecorrencia.hidden = !intervaloComInicio;
+        formulario.elements.inicioRecorrencia.required = intervaloComInicio;
+        checksDias.forEach(check => { check.disabled = !recorrente; if (!recorrente) check.checked = false; });
     }
     function conflita(dados) {
         const min = hora => hora.split(':').map(Number).reduce((h, m) => h * 60 + m);
-        const dia = data => (new Date(`${formatoData(data)}T12:00:00`).getDay() + 6) % 7;
+        const blocoAtual = editandoId ? blocos.find(item => idDo(item) === editandoId) : null;
+        const novo = { ...dados, criadoEm: blocoAtual?.criadoEm || new Date(), inicioRecorrencia: dados.inicioRecorrencia || blocoAtual?.inicioRecorrencia };
+        const recorrenciasConflitam = (a, b) => {
+            const primeiro = new Date();
+            for (let i = 0; i < 42; i++) {
+                const data = new Date(primeiro);
+                data.setDate(data.getDate() + i);
+                if (recorrenteNaData(a, data) && recorrenteNaData(b, data)) return true;
+            }
+            return false;
+        };
         return blocos.some(outro => {
             if (idDo(outro) === editandoId) return false;
-            if (dados.recorrencia === 'unico' && outro.recorrencia === 'unico' && formatoData(dados.data) !== formatoData(outro.data)) return false;
-            if (dados.recorrencia === 'unico' && outro.recorrencia === 'semanal' && !outro.diasSemana.includes(dia(dados.data))) return false;
-            if (dados.recorrencia === 'semanal' && outro.recorrencia === 'unico' && !dados.diasSemana.includes(dia(outro.data))) return false;
-            if (dados.recorrencia === 'semanal' && outro.recorrencia === 'semanal' && !dados.diasSemana.some(d => outro.diasSemana.includes(d))) return false;
+            const somenteUmaData = novo.recorrencia === 'unico' && outro.recorrencia === 'unico';
+            const conflitoDeDia = somenteUmaData
+                ? formatoData(novo.data) === formatoData(outro.data)
+                : novo.recorrencia === 'unico'
+                    ? recorrenteNaData(outro, new Date(`${formatoData(novo.data)}T12:00:00`))
+                    : outro.recorrencia === 'unico'
+                        ? recorrenteNaData(novo, new Date(`${formatoData(outro.data)}T12:00:00`))
+                        : recorrenciasConflitam(novo, outro);
+            if (!conflitoDeDia) return false;
             return min(dados.horaInicio) < min(outro.horaInicio) + Number(outro.duracaoMinutos) && min(outro.horaInicio) < min(dados.horaInicio) + Number(dados.duracaoMinutos);
         });
     }
@@ -840,9 +879,10 @@ const ETIQUETA_CLASSE = {
     formulario.addEventListener('submit', async evento => {
         evento.preventDefault();
         const dados = Object.fromEntries(new FormData(formulario).entries());
-        dados.diasSemana = recorrencia.value === 'semanal' ? checksDias.filter(check => check.checked).map(check => Number(check.value)) : [];
+        dados.diasSemana = recorrencia.value !== 'unico' ? checksDias.filter(check => check.checked).map(check => Number(check.value)) : [];
         dados.prioridade = Number(dados.prioridade); dados.fixo = formulario.elements.fixo.checked;
         dados.local = dados.local.trim(); dados.nome = dados.nome.trim(); dados.data = dados.data || null; dados.disciplinaId = dados.disciplinaId.trim() || null;
+        if (!['quinzenal', 'a_cada_3_semanas'].includes(dados.recorrencia)) dados.inicioRecorrencia = null;
         dados.horaInicio = String(dados.horaInicio || '').slice(0, 5);
         delete dados.horaFim;
         if (dados.categoria === 'aulas' && !dados.disciplinaId) {
@@ -851,7 +891,7 @@ const ETIQUETA_CLASSE = {
         }
         if (dados.categoria !== 'aulas') dados.disciplinaId = null;
         const erro = document.querySelector('#erro-form-bloco'); erro.textContent = '';
-        if (dados.recorrencia === 'semanal' && !dados.diasSemana.length) { exibirErro('Selecione ao menos um dia da semana.'); return; }
+        if (dados.recorrencia !== 'unico' && !dados.diasSemana.length) { exibirErro('Selecione ao menos um dia da semana.'); return; }
         const duracao = duracaoInformada();
         if (!duracao) { exibirErro(document.getElementById('bloco-duracao-texto').textContent); return; }
         dados.duracaoMinutos = duracao;

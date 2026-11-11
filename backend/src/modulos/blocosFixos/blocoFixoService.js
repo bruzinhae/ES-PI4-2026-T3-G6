@@ -3,7 +3,7 @@ import { ErroApi } from '../../utils/ErroApi.js';
 import { BlocoFixo, CATEGORIAS_BLOCO } from './BlocoFixo.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
 
-const CAMPOS = ['disciplinaId', 'nome', 'categoria', 'recorrencia', 'diasSemana', 'data', 'horaInicio', 'duracaoMinutos', 'prioridade', 'fixo', 'local'];
+const CAMPOS = ['disciplinaId', 'nome', 'categoria', 'recorrencia', 'diasSemana', 'data', 'inicioRecorrencia', 'horaInicio', 'duracaoMinutos', 'prioridade', 'fixo', 'local'];
 const CAMPOS_OBRIGATORIOS = ['nome', 'categoria', 'recorrencia', 'horaInicio', 'duracaoMinutos', 'prioridade'];
 const LIMPAR = valor => valor === '' ? null : valor;
 function validarPayload(dados, parcial = false) {
@@ -17,7 +17,7 @@ function validarPayload(dados, parcial = false) {
     }
     if (payload.nome !== undefined && (typeof payload.nome !== 'string' || payload.nome.trim().length < 2 || payload.nome.trim().length > 200)) throw new ErroApi(400, 'O nome deve ter entre 2 e 200 caracteres.');
     if (payload.categoria !== undefined && !CATEGORIAS_BLOCO.includes(payload.categoria)) throw new ErroApi(400, 'Categoria de bloco inv\u00e1lida.');
-    if (payload.recorrencia !== undefined && !['semanal', 'unico'].includes(payload.recorrencia)) throw new ErroApi(400, 'A recorr\u00eancia deve ser semanal ou \u00fanica.');
+    if (payload.recorrencia !== undefined && !['semanal', 'quinzenal', 'a_cada_3_semanas', 'unico'].includes(payload.recorrencia)) throw new ErroApi(400, 'A recorr\u00eancia deve ser semanal, quinzenal, a cada 3 semanas ou \u00fanica.');
     if (payload.horaInicio !== undefined && (typeof payload.horaInicio !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(payload.horaInicio))) throw new ErroApi(400, 'Informe um hor\u00e1rio v\u00e1lido no formato HH:MM.');
     if (payload.duracaoMinutos !== undefined && (!Number.isInteger(payload.duracaoMinutos) || payload.duracaoMinutos < 15 || payload.duracaoMinutos > 1440)) throw new ErroApi(400, 'A dura\u00e7\u00e3o deve ser um n\u00famero inteiro entre 15 e 1440 minutos.');
     if (payload.prioridade !== undefined && (!Number.isInteger(payload.prioridade) || payload.prioridade < 1 || payload.prioridade > 10)) throw new ErroApi(400, 'A prioridade deve ser um n\u00famero inteiro entre 1 e 10.');
@@ -29,6 +29,12 @@ function validarPayload(dados, parcial = false) {
         if (Number.isNaN(data.getTime()) || data.toISOString().slice(0, 10) !== payload.data) throw new ErroApi(400, 'Informe uma data v\u00e1lida no formato AAAA-MM-DD.');
         payload.data = data;
     }
+    if (payload.inicioRecorrencia !== undefined && payload.inicioRecorrencia !== null) {
+        if (typeof payload.inicioRecorrencia !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(payload.inicioRecorrencia)) throw new ErroApi(400, 'Informe uma semana inicial válida.');
+        const inicioRecorrencia = new Date(`${payload.inicioRecorrencia}T00:00:00Z`);
+        if (Number.isNaN(inicioRecorrencia.getTime()) || inicioRecorrencia.toISOString().slice(0, 10) !== payload.inicioRecorrencia) throw new ErroApi(400, 'Informe uma semana inicial válida.');
+        payload.inicioRecorrencia = inicioRecorrencia;
+    }
     if (payload.disciplinaId !== undefined && payload.disciplinaId !== null && !mongoose.isValidObjectId(payload.disciplinaId)) throw new ErroApi(400, 'ID de disciplina inv\u00e1lido.');
     if (payload.local !== undefined && payload.local !== null && (typeof payload.local !== 'string' || payload.local.trim().length > 120)) throw new ErroApi(400, 'O local deve ter no m\u00e1ximo 120 caracteres.');
     if (payload.nome) payload.nome = payload.nome.trim();
@@ -36,7 +42,8 @@ function validarPayload(dados, parcial = false) {
     return payload;
 }
 function validarConsistencia(bloco) {
-    if (bloco.recorrencia === 'semanal' && (!bloco.diasSemana?.length || bloco.data)) throw new ErroApi(400, 'Blocos semanais precisam de ao menos um dia e n\u00e3o podem ter data \u00fanica.');
+    if (['semanal', 'quinzenal', 'a_cada_3_semanas'].includes(bloco.recorrencia) && (!bloco.diasSemana?.length || bloco.data)) throw new ErroApi(400, 'Blocos recorrentes precisam de ao menos um dia e n\u00e3o podem ter data \u00fanica.');
+    if (['quinzenal', 'a_cada_3_semanas'].includes(bloco.recorrencia) && !bloco.inicioRecorrencia) throw new ErroApi(400, 'Informe a semana inicial da recorrência.');
     if (bloco.recorrencia === 'unico' && (!bloco.data || bloco.diasSemana?.length)) throw new ErroApi(400, 'Blocos de data \u00fanica precisam de uma data e n\u00e3o usam dias da semana.');
     const [h, m] = bloco.horaInicio.split(':').map(Number);
     if ((h * 60 + m + bloco.duracaoMinutos) > 1440) throw new ErroApi(400, 'O hor\u00e1rio e a dura\u00e7\u00e3o ultrapassam o fim do dia.');
@@ -46,16 +53,38 @@ async function validarDisciplinaDoUsuario(usuarioId, disciplinaId) {
         throw new ErroApi(400, 'A disciplina selecionada n\u00e3o existe ou n\u00e3o pertence a esta conta.');
     }
 }
+function validarDisciplinaDaCategoria(categoria, disciplinaId) {
+    if (categoria === 'aulas' && !disciplinaId) {
+        throw new ErroApi(400, 'Escolha a matéria deste horário de aula.');
+    }
+}
+const INTERVALO_SEMANAS = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 };
+function recorrenteNaData(bloco, data) {
+    if (!INTERVALO_SEMANAS[bloco.recorrencia] || !bloco.diasSemana.includes((data.getUTCDay() + 6) % 7)) return false;
+    const criado = bloco.inicioRecorrencia || (bloco.criadoEm ? new Date(bloco.criadoEm) : new Date(0));
+    const inicio = new Date(Date.UTC(criado.getUTCFullYear(), criado.getUTCMonth(), criado.getUTCDate()));
+    inicio.setUTCDate(inicio.getUTCDate() - ((inicio.getUTCDay() + 6) % 7));
+    const semana = Math.floor((data.getTime() - inicio.getTime()) / 604800000);
+    return semana >= 0 && semana % INTERVALO_SEMANAS[bloco.recorrencia] === 0;
+}
 function caiNoMesmoDia(blocoA, blocoB) {
     if (blocoA.recorrencia === 'unico' && blocoB.recorrencia === 'unico') return blocoA.data.getTime() === blocoB.data.getTime();
-    const diaDaSemana = data => (data.getUTCDay() + 6) % 7;
-    if (blocoA.recorrencia === 'unico') return blocoB.diasSemana.includes(diaDaSemana(blocoA.data));
-    if (blocoB.recorrencia === 'unico') return blocoA.diasSemana.includes(diaDaSemana(blocoB.data));
-    return blocoA.diasSemana.some(dia => blocoB.diasSemana.includes(dia));
+    if (blocoA.recorrencia === 'unico') return recorrenteNaData(blocoB, blocoA.data);
+    if (blocoB.recorrencia === 'unico') return recorrenteNaData(blocoA, blocoB.data);
+    const inicioA = new Date(blocoA.inicioRecorrencia || blocoA.criadoEm || 0);
+    const inicioB = new Date(blocoB.inicioRecorrencia || blocoB.criadoEm || 0);
+    const inicio = new Date(Math.max(inicioA.getTime(), inicioB.getTime()));
+    inicio.setUTCHours(0, 0, 0, 0);
+    for (let i = 0; i < 42; i++) {
+        const data = new Date(inicio);
+        data.setUTCDate(data.getUTCDate() + i);
+        if (recorrenteNaData(blocoA, data) && recorrenteNaData(blocoB, data)) return true;
+    }
+    return false;
 }
 async function validarConflito(usuarioId, bloco, ignorarId = null) {
     const consulta = { usuarioId, _id: { $ne: ignorarId || new mongoose.Types.ObjectId() } };
-    const existentes = await BlocoFixo.find(consulta).select('recorrencia diasSemana data horaInicio duracaoMinutos');
+    const existentes = await BlocoFixo.find(consulta).select('recorrencia diasSemana data inicioRecorrencia criadoEm horaInicio duracaoMinutos');
     const inicio = bloco.horaInicio.split(':').map(Number).reduce((h, m) => h * 60 + m);
     const choque = existentes.some(outro => {
         const existente = outro.toObject();
@@ -75,8 +104,10 @@ export async function buscarPorId(usuarioId, id) {
 }
 export async function criar(usuarioId, dados) {
     const payload = validarPayload(dados);
+    if (['quinzenal', 'a_cada_3_semanas'].includes(payload.recorrencia) && !payload.inicioRecorrencia) throw new ErroApi(400, 'Informe a semana inicial da recorrência.');
+    validarDisciplinaDaCategoria(payload.categoria, payload.disciplinaId);
     await validarDisciplinaDoUsuario(usuarioId, payload.disciplinaId);
-    const bloco = new BlocoFixo({ ...payload, usuarioId, diasSemana: payload.diasSemana || [], data: payload.data || null });
+    const bloco = new BlocoFixo({ ...payload, usuarioId, criadoEm: new Date(), diasSemana: payload.diasSemana || [], data: payload.data || null });
     validarConsistencia(bloco);
     await validarConflito(usuarioId, bloco.toObject());
     await bloco.save();
@@ -86,6 +117,14 @@ export async function atualizar(usuarioId, id, dados) {
     const bloco = await buscarPorId(usuarioId, id);
     const payload = validarPayload(dados, true);
     if (!Object.keys(payload).length) throw new ErroApi(400, 'Informe ao menos um campo para atualizar.');
+    if (['quinzenal', 'a_cada_3_semanas'].includes(payload.recorrencia ?? bloco.recorrencia)
+        && !payload.inicioRecorrencia && !bloco.inicioRecorrencia) {
+        payload.inicioRecorrencia = bloco.criadoEm || new Date();
+    }
+    const categoria = payload.categoria ?? bloco.categoria;
+    if (categoria !== 'aulas') payload.disciplinaId = null;
+    const disciplinaId = Object.hasOwn(payload, 'disciplinaId') ? payload.disciplinaId : bloco.disciplinaId;
+    validarDisciplinaDaCategoria(categoria, disciplinaId);
     await validarDisciplinaDoUsuario(usuarioId, payload.disciplinaId);
     bloco.set(payload);
     validarConsistencia(bloco);

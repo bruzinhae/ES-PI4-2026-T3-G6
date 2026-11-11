@@ -333,9 +333,23 @@ function chipDoBloco(categoria) {
 
 // Blocos fixos que caem no dia (semanais pelo dia da semana, únicos pela data).
 function blocosDoDia(chave, diaDaSemana) {
-    return estado.blocos.filter((bloco) => (bloco.recorrencia === 'semanal'
-        ? bloco.diasSemana.includes(diaDaSemana)
-        : (bloco.data || '').slice(0, 10) === chave));
+    return estado.blocos.filter((bloco) => {
+        const intervalo = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 }[bloco.recorrencia];
+        if (!intervalo) return (bloco.data || '').slice(0, 10) === chave;
+        if (!bloco.diasSemana.includes(diaDaSemana)) return false;
+        const [ano, mes, dia] = chave.split('-').map(Number);
+        const data = new Date(ano, mes - 1, dia);
+        const inicioRecorrencia = bloco.inicioRecorrencia;
+        const criado = inicioRecorrencia
+            ? (typeof inicioRecorrencia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(inicioRecorrencia)
+                ? new Date(`${inicioRecorrencia}T12:00:00`)
+                : new Date(inicioRecorrencia))
+            : bloco.criadoEm ? new Date(bloco.criadoEm) : data;
+        const inicio = new Date(criado.getFullYear(), criado.getMonth(), criado.getDate());
+        inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
+        const semana = Math.floor((data - inicio) / (7 * 24 * 60 * 60 * 1000));
+        return semana >= 0 && semana % intervalo === 0;
+    });
 }
 
 function inicioDoBloco(bloco, chave) {
@@ -680,7 +694,8 @@ function abrirDetalhes(item) {
     } else {
         linhaDeDetalhe(lista, 'Categoria', item.bloco.categoria);
         linhaDeDetalhe(lista, 'Local', item.bloco.local);
-        linhaDeDetalhe(lista, 'Repete', item.bloco.recorrencia === 'semanal' ? 'Toda semana' : 'Só neste dia');
+        const repeticao = { semanal: 'Toda semana', quinzenal: 'A cada 2 semanas', a_cada_3_semanas: 'A cada 3 semanas', unico: 'Só neste dia' };
+        linhaDeDetalhe(lista, 'Repete', repeticao[item.bloco.recorrencia] || 'Só neste dia');
         lista.append(el('dt', null, 'Edição'), el('dd', null, 'Blocos fixos são editados na tela de horários.'));
     }
 

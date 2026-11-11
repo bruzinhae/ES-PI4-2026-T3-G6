@@ -406,8 +406,15 @@
                     <div class="campo-bloco"><label for="bloco-recorrencia">Recorrência</label><select
                             id="bloco-recorrencia" name="recorrencia">
                             <option value="semanal">Toda semana</option>
+                            <option value="quinzenal">A cada 2 semanas</option>
+                            <option value="a_cada_3_semanas">A cada 3 semanas</option>
                             <option value="unico">Uma única data</option>
                         </select></div>
+                    <div class="campo-bloco campo-inicio-recorrencia" hidden>
+                        <label for="bloco-inicio-recorrencia">A partir da semana de <b>*</b></label>
+                        <input id="bloco-inicio-recorrencia" name="inicioRecorrencia" type="date">
+                        <small class="dica-campo">O intervalo começa na semana que contém essa data.</small>
+                    </div>
                     <div class="campo-bloco campo-data-bloco" hidden><label for="bloco-data">Data <b>*</b></label><input
                             id="bloco-data" name="data" type="date"></div>
                     <div class="campo-bloco"><label for="bloco-hora">Começa <b>*</b></label><input

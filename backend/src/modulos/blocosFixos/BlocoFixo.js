@@ -6,9 +6,10 @@ const blocoFixoSchema = new mongoose.Schema({
     disciplinaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', default: null },
     nome: { type: String, required: [true, 'Informe o nome do compromisso.'], trim: true, minlength: [2, 'O nome deve ter ao menos 2 caracteres.'], maxlength: [200, 'O nome deve ter no máximo 200 caracteres.'] },
     categoria: { type: String, enum: { values: CATEGORIAS_BLOCO, message: 'Categoria de bloco inv\u00e1lida.' }, required: true },
-    recorrencia: { type: String, enum: ['semanal', 'unico'], required: true },
+    recorrencia: { type: String, enum: ['semanal', 'quinzenal', 'a_cada_3_semanas', 'unico'], required: true },
     diasSemana: { type: [Number], default: [] },
     data: { type: Date, default: null },
+    inicioRecorrencia: { type: Date, default: null },
     horaInicio: { type: String, required: true, match: [/^(?:[01]\d|2[0-3]):[0-5]\d$/, 'Informe um hor\u00e1rio v\u00e1lido.'] },
     duracaoMinutos: { type: Number, required: true, min: [15, 'A dura\u00e7\u00e3o m\u00ednima \u00e9 15 minutos.'], max: [1440, 'A dura\u00e7\u00e3o m\u00e1xima \u00e9 24 horas.'], validate: { validator: Number.isInteger, message: 'A dura\u00e7\u00e3o deve ser um n\u00famero inteiro de minutos.' } },
     prioridade: { type: Number, required: true, min: 1, max: 10, validate: { validator: Number.isInteger, message: 'A prioridade deve ser um n\u00famero inteiro.' } },
@@ -17,9 +18,9 @@ const blocoFixoSchema = new mongoose.Schema({
 }, { timestamps: { createdAt: 'criadoEm', updatedAt: 'atualizadoEm' }, versionKey: false });
 
 blocoFixoSchema.pre('validate', function () {
-    if (this.recorrencia === 'semanal') {
+    if (['semanal', 'quinzenal', 'a_cada_3_semanas'].includes(this.recorrencia)) {
         if (!this.diasSemana?.length) this.invalidate('diasSemana', 'Selecione ao menos um dia da semana.');
-        if (this.data) this.invalidate('data', 'Blocos semanais n\u00e3o devem ter uma data \u00fanica.');
+        if (this.data) this.invalidate('data', 'Blocos recorrentes n\u00e3o devem ter uma data \u00fanica.');
     } else if (this.recorrencia === 'unico') {
         if (!this.data) this.invalidate('data', 'Informe a data do compromisso.');
         if (this.diasSemana?.length) this.invalidate('diasSemana', 'Blocos de data \u00fanica n\u00e3o devem ter dias da semana.');

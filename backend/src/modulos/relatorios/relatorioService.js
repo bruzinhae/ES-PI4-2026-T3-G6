@@ -156,7 +156,7 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
             situacao: 'concluida',
         }).select('minutosRealizados inicio').lean(),
         Disciplina.find({ usuarioId, situacao: 'ativa' }).sort({ nome: 1 }).lean(),
-        BlocoFixo.find({ usuarioId, recorrencia: 'semanal' }).select('disciplinaId duracaoMinutos diasSemana').lean(),
+        BlocoFixo.find({ usuarioId, recorrencia: { $in: ['semanal', 'quinzenal', 'a_cada_3_semanas'] } }).select('disciplinaId duracaoMinutos diasSemana recorrencia').lean(),
         Meta.find({ usuarioId, situacao: { $ne: 'cancelada' } }).lean(),
         Usuario.findById(usuarioId).select('metaSemanalHoras'),
     ]);
@@ -177,7 +177,8 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
     for (const bloco of blocos) {
         if (!bloco.disciplinaId) continue;
         const chave = String(bloco.disciplinaId);
-        const soma = bloco.duracaoMinutos * (bloco.diasSemana?.length || 0);
+        const intervalo = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 }[bloco.recorrencia] || 1;
+        const soma = bloco.duracaoMinutos * (bloco.diasSemana?.length || 0) / intervalo;
         minutosPorDisciplina.set(chave, (minutosPorDisciplina.get(chave) || 0) + soma);
     }
 
