@@ -307,6 +307,49 @@ img {
     background: #3f2a52;
 }
 
+.acoes-tarefas {
+    display: flex;
+    gap: 8px;
+}
+
+.acoes-tarefas > button {
+    flex: 1 1 0;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.acoes-tarefas .botao-nova-tarefa {
+    flex-wrap: wrap;
+    gap: 4px;
+    height: auto;
+    min-height: 42px;
+    padding: 6px 12px;
+}
+
+.botao-sofia-organizar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    padding: 6px 12px;
+
+    border: 1px solid #d6c6e6;
+    border-radius: 10px;
+
+    background: var(--roxo-claro);
+    color: var(--roxo);
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+}
+
+.botao-sofia-organizar:hover {
+    background: var(--roxo-suave);
+}
+
 
 /* =====================================================
    PAINEL CALENDÁRIO
