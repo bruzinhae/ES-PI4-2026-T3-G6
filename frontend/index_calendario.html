@@ -34,7 +34,7 @@
 
                     <div class="tarefas-cabecalho">
                         <h2>Tarefas Pendentes</h2>
-                        <span class="selo-pendentes" id="selo-pendentes">6 pendentes</span>
+                        <span class="selo-pendentes" id="selo-pendentes">0 pendentes</span>
                     </div>
 
                     <label class="campo-busca">
@@ -49,75 +49,7 @@
                         <button type="button" class="filtro" data-filtro="alta">Alta Prioridade</button>
                     </div>
 
-                    <div class="lista-tarefas" id="lista-tarefas">
-
-                        <article class="tarefa" draggable="true" data-id="1" data-filtro="estudos alta" data-titulo="Revisar código em C#" data-duracao="2h" data-tag="Programação">
-                            <div class="tarefa-topo">
-                                <strong>Revisar código em C#</strong>
-                                <span class="duracao">2h</span>
-                            </div>
-                            <div class="tarefa-meta">
-                                <span class="tag estudos">#Programação</span>
-                                <span class="prazo">Sexta</span>
-                            </div>
-                        </article>
-
-                        <article class="tarefa urgente" draggable="true" data-id="2" data-filtro="estudos alta" data-titulo="Entrega de Cálculo IV" data-duracao="1h 30m" data-tag="Exatas">
-                            <div class="tarefa-topo">
-                                <strong>Entrega de Cálculo IV</strong>
-                                <span class="duracao">1h 30m</span>
-                            </div>
-                            <div class="tarefa-meta">
-                                <span class="tag estudos">#Exatas</span>
-                                <span class="prazo critico">hoje 23:59</span>
-                            </div>
-                        </article>
-
-                        <article class="tarefa" draggable="true" data-id="3" data-filtro="estudos" data-titulo="Ler paper de SO" data-duracao="1h" data-tag="Sistemas">
-                            <div class="tarefa-topo">
-                                <strong>Ler paper de SO</strong>
-                                <span class="duracao">1h</span>
-                            </div>
-                            <div class="tarefa-meta">
-                                <span class="tag estudos">#Sistemas</span>
-                                <span class="prazo">Quinta</span>
-                            </div>
-                        </article>
-
-                        <article class="tarefa" draggable="true" data-id="4" data-filtro="estudos" data-titulo="Preparar demo do TCC" data-duracao="3h" data-tag="Projeto">
-                            <div class="tarefa-topo">
-                                <strong>Preparar demo do TCC</strong>
-                                <span class="duracao">3h</span>
-                            </div>
-                            <div class="tarefa-meta">
-                                <span class="tag estudos">#Projeto</span>
-                                <span class="prazo">Sábado</span>
-                            </div>
-                        </article>
-
-                        <article class="tarefa" draggable="true" data-id="5" data-filtro="pessoal" data-titulo="Treino academia" data-duracao="1h" data-tag="Saúde">
-                            <div class="tarefa-topo">
-                                <strong>Treino academia</strong>
-                                <span class="duracao">1h</span>
-                            </div>
-                            <div class="tarefa-meta">
-                                <span class="tag pessoal">#Saúde</span>
-                                <span class="prazo">Hoje</span>
-                            </div>
-                        </article>
-
-                        <article class="tarefa" draggable="true" data-id="6" data-filtro="estudos" data-titulo="Configurar CI no GitHub" data-duracao="45m" data-tag="DevOps">
-                            <div class="tarefa-topo">
-                                <strong>Configurar CI no GitHub</strong>
-                                <span class="duracao">45m</span>
-                            </div>
-                            <div class="tarefa-meta">
-                                <span class="tag estudos">#DevOps</span>
-                                <span class="prazo">Domingo</span>
-                            </div>
-                        </article>
-
-                    </div>
+                    <div class="lista-tarefas" id="lista-tarefas"></div>
 
                     <div class="acoes-tarefas">
                         <button type="button" class="botao-nova-tarefa" id="botao-nova-tarefa">
@@ -408,9 +340,9 @@
         </section>
     </div>
 
-    <script src="JS/users/api.js?v=10"></script>
+    <script src="JS/users/api.js?v=11"></script>
     <script src="JS/componentes/layout.js?v=27"></script>
-    <script src="JS/script_calendario.js?v=5"></script>
+    <script src="JS/script_calendario.js?v=6"></script>
 
 </body>
 </html>

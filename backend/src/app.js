@@ -28,6 +28,7 @@ import { metaRoutes } from './modulos/metas/metaRoutes.js';
 import { configuracaoRoutes } from './modulos/configuracoes/configuracaoRoutes.js';
 import { canvasRoutes } from './modulos/canvas/canvasRoutes.js';
 import { rankingRoutes } from './modulos/ranking/rankingRoutes.js';
+import { tarefaRoutes } from './modulos/tarefas/tarefaRoutes.js';
 
 // Pasta frontend/ na raiz do repositório (backend/src → sobe duas pastas).
 const pastaFrontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend');
@@ -72,6 +73,7 @@ app.use('/api/metas', metaRoutes);
 app.use('/api/configuracoes', configuracaoRoutes);
 app.use('/api/canvas', canvasRoutes);
 app.use('/api/ranking', rankingRoutes);
+app.use('/api/tarefas', tarefaRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);
