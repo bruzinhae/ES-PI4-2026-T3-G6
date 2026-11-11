@@ -1441,3 +1441,198 @@ body.modal-aberto {
         grid-column: auto;
     }
 }
+
+
+/* Semana real: blocos fixos, sessões de estudo e sugestões */
+
+.evento.bloco-fixo,
+.evento.sugestao {
+    cursor: default;
+}
+
+.evento.sessao {
+    cursor: grab;
+}
+
+.evento.curto {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+}
+
+.evento.curto > small,
+.evento.curto > span,
+.evento.curto > em,
+.evento.medio > em {
+    display: none;
+}
+
+.evento.sugestao .sugestao-acoes {
+    display: flex;
+    gap: 6px;
+    margin-top: auto;
+}
+
+.evento.sugestao .sugestao-acoes button {
+    padding: 3px 9px;
+    border: 1px solid var(--roxo);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--roxo);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.evento.sugestao .sugestao-acoes button[data-acao="aceitar"] {
+    background: var(--roxo);
+    color: #fff;
+}
+
+.evento.sugestao .sugestao-acoes b,
+.evento.sugestao .sugestao-acoes i {
+    font-style: normal;
+}
+
+/* Em blocos curtos e médios os botões ficam na linha do título, só com o ícone nos curtos. */
+.evento.sugestao.curto .sugestao-acoes,
+.evento.sugestao.medio .sugestao-acoes {
+    margin-top: 0;
+}
+
+.evento.sugestao.curto .sugestao-acoes {
+    margin-left: auto;
+}
+
+.evento.sugestao.curto .sugestao-acoes i {
+    display: none;
+}
+
+.evento.sugestao.curto .sugestao-acoes button {
+    padding: 1px 6px;
+}
+
+.evento.sugestao.curto strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.evento.sessao.cancelada {
+    opacity: .5;
+}
+
+.barra-sugestoes {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    margin-bottom: 10px;
+    padding: 10px 14px;
+
+    border: 1px dashed var(--roxo);
+    border-radius: 10px;
+    background: rgba(79, 52, 102, .06);
+    color: var(--roxo);
+    font-size: 13px;
+}
+
+.barra-sugestoes[hidden] {
+    display: none;
+}
+
+.barra-sugestoes p {
+    margin: 0;
+    font-weight: 600;
+}
+
+.barra-sugestoes-acoes {
+    display: flex;
+    gap: 8px;
+}
+
+.barra-sugestoes-acoes button {
+    padding: 6px 14px;
+    border: 1px solid var(--roxo);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--roxo);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.barra-sugestoes-acoes .botao-aceitar-todas {
+    background: var(--roxo);
+    color: #fff;
+}
+
+.barra-sugestoes-acoes button:disabled {
+    opacity: .6;
+    cursor: progress;
+}
+
+.botao-sofia-organizar[aria-busy="true"] {
+    opacity: .7;
+    cursor: progress;
+}
+
+.detalhes-sessao {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 16px;
+    margin: 0;
+    padding: 4px 24px 18px;
+    font-size: 14px;
+}
+
+.detalhes-sessao dt {
+    color: var(--cinza-500, #6b7280);
+    font-weight: 600;
+}
+
+.detalhes-sessao dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.modal-sessao-cartao {
+    max-width: 460px;
+}
+
+/* Sugestão média (45 a 90 min): título e botões na mesma linha, horário embaixo. */
+.evento.sugestao.medio {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "titulo acoes" "info info";
+    align-content: start;
+    column-gap: 6px;
+    row-gap: 0;
+    padding: 4px 8px;
+}
+
+.evento.sugestao.medio strong {
+    grid-area: titulo;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.evento.sugestao.medio small {
+    grid-area: info;
+}
+
+.evento.sugestao.medio .sugestao-acoes {
+    grid-area: acoes;
+}
+
+.evento.sugestao.medio .sugestao-acoes i {
+    display: none;
+}
+
+.evento.sugestao.medio .sugestao-acoes button {
+    padding: 1px 6px;
+}
