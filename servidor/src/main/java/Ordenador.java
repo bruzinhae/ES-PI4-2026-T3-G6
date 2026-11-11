@@ -6,8 +6,6 @@ import java.util.ArrayList;
  */
 public class Ordenador
 {
-    private Ordenador () {}
-
     public static <X extends Comparable<X>> void ordene (ArrayList<X> lista)
     {
         if (lista.size () < 2)

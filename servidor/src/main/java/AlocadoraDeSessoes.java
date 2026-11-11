@@ -29,8 +29,6 @@ public class AlocadoraDeSessoes
 
     private static final int MINUTOS_MINIMOS_DO_ESPACO = 15;
 
-    private AlocadoraDeSessoes () {}
-
     public static Alocacao alocar (PedidoDeRanking pedido) throws Exception
     {
         Preferencias preferencias = pedido.getPreferencias ();

@@ -30,8 +30,6 @@ public class CalculadoraDeRanking
     private static final double HORIZONTE_DE_URGENCIA_DIAS = 14.0;
     private static final double URGENCIA_SEM_PRAZO         = 0.1;
 
-    private CalculadoraDeRanking () {}
-
     public static Ranking calcular (PedidoDeRanking pedido) throws Exception
     {
         ArrayList<Tarefa> tarefas = pedido.getTarefas ();

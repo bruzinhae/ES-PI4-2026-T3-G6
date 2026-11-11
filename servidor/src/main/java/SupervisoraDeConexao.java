@@ -6,12 +6,10 @@ import java.util.*;
  * Atende UM cliente numa thread própria: lê comunicados, responde e repete até o cliente sair.
  * Equivalente à SupervisoraDeConexao do Fazedor de Continhas, mas sem estado por conexão:
  * cada PedidoDeRanking e cada PedidoDeMetas é independente (o servidor não guarda nada entre pedidos).
+ * Quem confere os valores do pedido é o cliente, como no exemplo.
  */
 public class SupervisoraDeConexao extends Thread
 {
-    // Conexão parada por mais que isto é encerrada.
-    public static final int TEMPO_MAXIMO_OCIOSO_MS = 5 * 60 * 1000;
-
     private Parceiro            usuario;
     private Socket              conexao;
     private ArrayList<Parceiro> usuarios;
@@ -30,19 +28,11 @@ public class SupervisoraDeConexao extends Thread
         this.usuarios = usuarios;
     }
 
-    // Excecoes como NullPointerException vem sem mensagem; o cliente sempre recebe um texto.
-    private static String mensagemDe (Exception erro, String padrao)
-    {
-        return erro.getMessage()==null ? padrao : erro.getMessage();
-    }
-
-    @Override
     public void run ()
     {
         ObjectOutputStream transmissor;
         try
         {
-            this.conexao.setSoTimeout (TEMPO_MAXIMO_OCIOSO_MS);
             transmissor =
             new ObjectOutputStream(
             this.conexao.getOutputStream());
@@ -97,48 +87,24 @@ public class SupervisoraDeConexao extends Thread
                     return;
                 else if (comunicado instanceof PedidoDeRanking)
                 {
-                    PedidoDeRanking pedidoDeRanking = (PedidoDeRanking)comunicado;
-
                     try
                     {
-                        pedidoDeRanking.valide ();
+                        this.usuario.receba (CalculadoraDeRanking.calcular ((PedidoDeRanking)comunicado));
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro (mensagemDe (erro,"Pedido invalido")));
-                        continue;
-                    }
-
-                    try
-                    {
-                        this.usuario.receba (CalculadoraDeRanking.calcular (pedidoDeRanking));
-                    }
-                    catch (Exception erro)
-                    {
-                        this.usuario.receba (new Erro ("Não foi possível calcular o ranking: " + mensagemDe (erro,"erro inesperado")));
+                        this.usuario.receba (new Erro ("Não foi possível calcular o ranking: "+erro.getMessage()));
                     }
                 }
                 else if (comunicado instanceof PedidoDeMetas)
                 {
-                    PedidoDeMetas pedidoDeMetas = (PedidoDeMetas)comunicado;
-
                     try
                     {
-                        pedidoDeMetas.valide ();
+                        this.usuario.receba (CalculadoraDeMetas.calcular ((PedidoDeMetas)comunicado));
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro (mensagemDe (erro,"Pedido invalido")));
-                        continue;
-                    }
-
-                    try
-                    {
-                        this.usuario.receba (CalculadoraDeMetas.calcular (pedidoDeMetas));
-                    }
-                    catch (Exception erro)
-                    {
-                        this.usuario.receba (new Erro ("Não foi possível priorizar as metas: " + mensagemDe (erro,"erro inesperado")));
+                        this.usuario.receba (new Erro ("Não foi possível priorizar as metas: "+erro.getMessage()));
                     }
                 }
                 else if (comunicado instanceof PedidoParaSair)
@@ -146,15 +112,7 @@ public class SupervisoraDeConexao extends Thread
             }
         }
         catch (Exception erro)
-        {
-            // Erro de rede, tempo ocioso esgotado, objeto de classe proibida ou fluxo corrompido: encerra esta conexao.
-            try
-            {
-                this.usuario.receba (new Erro (mensagemDe (erro,"Erro de conexao")));
-            }
-            catch (Exception falha)
-            {} // so tentando avisar antes de acabar a thread
-        }
+        {} // erro de rede, objeto de classe proibida ou fluxo corrompido: encerra esta conexao
         finally
         {
             synchronized (this.usuarios)

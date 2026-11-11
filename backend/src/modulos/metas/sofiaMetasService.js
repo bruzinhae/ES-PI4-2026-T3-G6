@@ -184,7 +184,6 @@ async function priorizarNoServidor(resultado, contexto) {
             quantidadeDeMarcos: LIMITE_SUGESTOES,
             metas: contexto.metas.map((meta) => ({
                 id: meta.id,
-                titulo: meta.titulo,
                 tipo: meta.tipo,
                 prioridade: meta.prioridade,
                 progresso: meta.progresso,

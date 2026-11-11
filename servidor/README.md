@@ -12,10 +12,10 @@ A arquitetura segue o exemplo do professor, o *Fazedor de Continhas* (cliente-se
 | `Parceiro` (socket + fluxos, `receba`, `espie`, `envie`, `adeus`) | `Parceiro` |
 | `Teclado` | `Teclado` (a mesma classe do exemplo) |
 | `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoDeMetas`, `PrioridadeDeMetas`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
-| `Cliente` (console, com menu) | `Cliente` |
-| `TratadoraDeComunicadoDeDesligamento` | `TratadoraDeComunicadoDeDesligamento` |
 
-Como no exemplo, **não há pacotes** (todas as classes ficam em `src/main/java`) e o código só usa o que foi ensinado nas aulas: `ArrayList`, `StringBuffer`, genéricos, interfaces e `@Override`. Não há `record`, lambdas, `Map`/`Set`, `Comparator`, `StringBuilder` nem `java.time`. Os modelos são classes comuns com `getX()` e seguem o molde das classes da disciplina: `Cloneable`, `toString`, `equals`, `hashCode`, `compareTo` (quando há ordem), construtor de cópia e `clone`.
+Como no exemplo, **não há pacotes** (as classes ficam em `src/main/java`) e o código só usa o que foi ensinado nas aulas: `ArrayList`, `StringBuffer`, genéricos e interfaces. Não há `record`, lambdas, `Map`/`Set`, `Comparator`, `StringBuilder` nem `java.time`. Os modelos são classes comuns: atributos, getters e `compareTo` onde o servidor ordena. O servidor também **confia no que recebe**, como o do exemplo: quem confere os valores (intervalos, datas e ids) é o cliente, e o cliente é o backend em Node.
+
+O cliente do Fazedor de Continhas (`Cliente`) não existe aqui: o cliente deste servidor é o backend em Node.
 
 As peças que substituem o que a biblioteca faria:
 
@@ -33,36 +33,26 @@ Front → API Node (autenticada) ──► Servidor Java (este)
 ```
 
 - O **Node** calcula os espaços livres (grade da semana menos blocos fixos e sessões já marcadas), junta as tarefas pendentes e as preferências do usuário e manda ao servidor.
-- O servidor **não acessa o banco e não conhece usuário**, por isso não tem autenticação. Ele escuta **somente em localhost** por padrão; só o backend na mesma máquina (ou rede interna) deve chamá-lo.
+- O servidor **não acessa o banco e não conhece usuário**, por isso não tem autenticação. Como o do Fazedor de Continhas, ele escuta em todas as interfaces da máquina; use-o só em rede interna.
 - Cada pedido é independente: nada é guardado entre pedidos.
 
 ## Como compilar e rodar
 
-Requer Java 17 (sem Maven e sem dependências). Na pasta `servidor/`:
+Requer Java 17 (sem Maven e sem dependências). Em `servidor/src/main/java`:
 
 ```bash
-javac -d out src/main/java/*.java
-java -cp out Servidor            # porta 3000, só localhost
-java -cp out Servidor 3100       # outra porta
-java -cp out Servidor 3100 0.0.0.0   # (cuidado) escutar em todas as interfaces
+javac *.java
+java Servidor            # porta 3000
+java Servidor 3100       # outra porta
 ```
 
-Para desativar, digite `desativar` no console. Os clientes conectados recebem um `comunicadoDeDesligamento`.
+Para desativar, digite `desativar` no console (o servidor só roda com console, como o do exemplo). Os clientes conectados recebem um `ComunicadoDeDesligamento`.
 
-Para testar sem o Node, com o cliente de console (um menu, como o do Fazedor de Continhas):
-
-```bash
-java -cp out Cliente                  # localhost, porta 3000
-java -cp out Cliente localhost 3100   # outra porta
-```
-
-As opções são `R` (pedido de ranking com alocação, montado com dados de exemplo; mostra o ranking e a alocação), `M` (pedido de metas, também de exemplo) e `T` (terminar). Se o servidor for desativado com o cliente aberto, a `TratadoraDeComunicadoDeDesligamento` avisa e encerra o cliente.
-
-Os arquivos de `exemplos/` são corpos de exemplo para a rota `POST /api/ranking` da API Node (veja "Integração com a API Node"); o `Cliente` de console não os lê. A compilação e execução do servidor não dependem de Maven nem de bibliotecas externas.
+Para testar, suba o backend e use `POST /api/ranking` (veja "Integração com a API Node") ou o botão "Ajuste da grade" do calendário.
 
 ## Testes automatizados
 
-Os testes JUnit 5 cobrem partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro do serviço `SupervisoraDeConexao`, usando uma conexão TCP local. Requerem Maven; execute na pasta `servidor/`:
+Os testes JUnit 5 (que ainda usam as classes antigas e precisam ser adaptados) cobrem partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro do serviço `SupervisoraDeConexao`, usando uma conexão TCP local. Requerem Maven; execute na pasta `servidor/`:
 
 ```bash
 mvn test
@@ -72,7 +62,7 @@ O relatório para a atividade de Teste OO está em [`RELATORIO-TESTES-OO.md`](RE
 
 ## Protocolo
 
-TCP, com os comunicados como **objetos Java serializados** (cabeçalho do fluxo, depois um objeto por mensagem). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. Limites: 8 MB de fluxo por conexão e só as classes dos comunicados (`FiltroDeComunicados`); conexão parada por mais de 5 minutos é encerrada. O servidor valida cada pedido depois de lê-lo (`valide()`, com as mesmas mensagens de antes) e responde com um `Erro` se algo estiver fora do intervalo.
+TCP, com os comunicados como **objetos Java serializados** (cabeçalho do fluxo, depois um objeto por mensagem). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. O `FiltroDeComunicados` só deixa o servidor ler as classes dos comunicados (até 8 MB por conexão). Como no Fazedor de Continhas, **o servidor confia no que recebe**: quem confere os valores (prioridade de 1 a 10, datas, intervalos e ids) é o cliente, e o cliente em Node faz isso antes de enviar. Se o cálculo falhar, o servidor responde com um `Erro`.
 
 Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a resposta que ela devolve; o backend transforma esse JSON nos comunicados (`PedidoDeRanking` e `PedidoDeMetas`) e converte a resposta (`Ranking` e `PrioridadeDeMetas`) de volta. As tabelas de campos valem para os dois lados.
 
@@ -101,7 +91,6 @@ Datas viajam como `DataHora` (segundos, nanossegundos e fuso). O Node converte o
   "tarefas": [
     {
       "id": "672006000000000000000001",
-      "titulo": "Prova P2 de Cálculo II",
       "tipo": "prova",
       "prioridade": 9,
       "prazo": "2026-11-05T11:00:00Z",
@@ -201,7 +190,6 @@ O ranking sozinho pode indicar a mesma tarefa como primeira de vários espaços.
 5. Com `antifadiga`, há 10 min de pausa entre sessões seguidas no mesmo espaço. Sem ela, sessões seguidas da mesma tarefa são juntadas em uma só.
 6. Se os espaços enviados se sobrepõem, nenhum minuto é reservado duas vezes. A sessão sempre termina antes do prazo (tarefa atrasada pode ir em qualquer espaço).
 
-Para ver no console: opção `R` do `Cliente` com `exemplos/pedido-semana-alocacao.json`.
 
 ### `pedidoDeMetas` (cliente → servidor) e `prioridadeDeMetas` (servidor → cliente)
 

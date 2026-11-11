@@ -1,60 +1,57 @@
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
+import java.net.*;
+import java.util.*;
 
-/**
- * Fica aceitando conexões e entrega cada uma a uma SupervisoraDeConexao (uma thread por cliente).
- * Por padrão só escuta em localhost: o servidor não tem autenticação e deve ser chamado apenas
- * pelo backend Node na mesma máquina ou rede interna.
- */
 public class AceitadoraDeConexao extends Thread
 {
     private ServerSocket        pedido;
     private ArrayList<Parceiro> usuarios;
 
-    public AceitadoraDeConexao (String porta, String host, ArrayList<Parceiro> usuarios) throws Exception
+    public AceitadoraDeConexao
+    (String porta, ArrayList<Parceiro> usuarios)
+    throws Exception
     {
-        if (porta == null)
+        if (porta==null)
             throw new Exception ("Porta ausente");
-        if (usuarios == null)
-            throw new Exception ("Usuarios ausentes");
 
         try
         {
-            InetAddress endereco = host == null ? InetAddress.getLoopbackAddress () : InetAddress.getByName (host);
-            this.pedido = new ServerSocket (Integer.parseInt (porta), 50, endereco);
+            this.pedido =
+            new ServerSocket (Integer.parseInt(porta));
         }
-        catch (Exception erro)
+        catch (Exception  erro)
         {
             throw new Exception ("Porta invalida");
         }
 
+        if (usuarios==null)
+            throw new Exception ("Usuarios ausentes");
+
         this.usuarios = usuarios;
     }
 
-    @Override
     public void run ()
     {
-        for (;;)
+        for(;;)
         {
-            Socket conexao;
-
+            Socket conexao=null;
             try
             {
-                conexao = this.pedido.accept ();
+                conexao = this.pedido.accept();
             }
             catch (Exception erro)
             {
                 continue;
             }
 
+            SupervisoraDeConexao supervisoraDeConexao=null;
             try
             {
-                new SupervisoraDeConexao (conexao, this.usuarios).start ();
+                supervisoraDeConexao =
+                new SupervisoraDeConexao (conexao, usuarios);
             }
             catch (Exception erro)
             {} // sei que passei parametros corretos para o construtor
+            supervisoraDeConexao.start();
         }
     }
 }

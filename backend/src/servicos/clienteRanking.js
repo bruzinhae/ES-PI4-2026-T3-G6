@@ -7,6 +7,8 @@ const TAMANHO_MAXIMO = 2_000_000;
 const MAXIMO_DE_ITENS = 2000;
 const MAXIMO_DE_METAS = 200;
 const LIMITE_PADRAO = 10;
+const JANELAS_DE_FOCO = ['manha', 'tarde', 'noite'];
+const CATEGORIAS = ['estudos', 'pessoal'];
 const MARCOS_PADRAO = 3;
 const FORMATO_DA_DATA = '2026-10-27T09:00:00-03:00';
 const FUSO_PADRAO = -3 * 3600;
@@ -157,6 +159,20 @@ function dataHora(pedido, nome, obrigatorio) {
 
 const comoInteger = (valor) => (valor === null ? null : { _c: 'java.lang.Integer', value: valor });
 
+// O servidor confia no que recebe (como o do Fazedor de Continhas); quem confere os intervalos é o cliente.
+function entre(valor, nome, minimo, maximo) {
+  if (valor !== null && (valor < minimo || valor > maximo)) throw new ErroApi(400, `"${nome}" deve estar entre ${minimo} e ${maximo}`);
+  return valor;
+}
+
+function idObrigatorio(id) {
+  if (id === null) throw new ErroApi(400, '"id" é obrigatório');
+  if (id.length === 0) throw new ErroApi(400, '"id" não pode ser vazio');
+  return id;
+}
+
+const depoisDe = (a, b) => a.segundos > b.segundos || (a.segundos === b.segundos && a.nanos > b.nanos);
+
 // ------------------------------------------------------------------------ pedidos → comunicados
 
 const agora = () => ({ segundos: Math.floor(Date.now() / 1000), nanos: (Date.now() % 1000) * 1_000_000, deslocamento: FUSO_PADRAO });
@@ -167,10 +183,12 @@ function pedidoDeRanking(pedido) {
   let preferencias = { _c: 'Preferencias', janelaFoco: 'manha', focoMatinal: true, duracaoMinutos: 50, antifadiga: true };
   if (pedido.preferencias !== undefined && pedido.preferencias !== null) {
     const p = objeto(pedido.preferencias, 'preferencias');
-    const duracao = inteiro(p, 'duracaoMinutos');
+    const janelaFoco = texto(p, 'janelaFoco', 'manha');
+    if (!JANELAS_DE_FOCO.includes(janelaFoco)) throw new ErroApi(400, '"janelaFoco" deve ser manha, tarde ou noite');
+    const duracao = entre(inteiro(p, 'duracaoMinutos'), 'duracaoMinutos', 10, 240);
     preferencias = {
       _c: 'Preferencias',
-      janelaFoco: texto(p, 'janelaFoco', 'manha'),
+      janelaFoco,
       focoMatinal: logico(p, 'focoMatinal', true),
       duracaoMinutos: duracao === null ? 50 : duracao,
       antifadiga: logico(p, 'antifadiga', true),
@@ -179,39 +197,46 @@ function pedidoDeRanking(pedido) {
 
   const espacos = lista(pedido, 'espacos', MAXIMO_DE_ITENS).map((item) => {
     const e = objeto(item, 'espacos[]');
-    return { _c: 'EspacoLivre', inicio: comoDataHora(dataHora(e, 'inicio', true)), fim: comoDataHora(dataHora(e, 'fim', true)), id: texto(e, 'id') };
+    const inicio = dataHora(e, 'inicio', true);
+    const fim = dataHora(e, 'fim', true);
+    if (!depoisDe(fim, inicio)) throw new ErroApi(400, 'Em "espacos", o "fim" deve ser depois do "inicio"');
+    return { _c: 'EspacoLivre', id: idObrigatorio(texto(e, 'id')), inicio: comoDataHora(inicio), fim: comoDataHora(fim) };
   });
 
   const tarefas = lista(pedido, 'tarefas', MAXIMO_DE_ITENS).map((item) => {
     const t = objeto(item, 'tarefas[]');
     const prazo = dataHora(t, 'prazo', false);
-    const prioridade = inteiro(t, 'prioridade');
+    const prioridade = entre(inteiro(t, 'prioridade'), 'prioridade', 1, 10);
 
     let dificuldade = null;
     let peso = null;
     if (t.disciplina !== undefined && t.disciplina !== null) {
       const d = objeto(t.disciplina, 'disciplina');
-      dificuldade = inteiro(d, 'dificuldade');
-      peso = inteiro(d, 'peso');
+      dificuldade = entre(inteiro(d, 'dificuldade'), 'dificuldade', 1, 5);
+      peso = entre(inteiro(d, 'peso'), 'peso', 1, 5);
     }
 
     const categoria = texto(t, 'categoria', 'estudos');
+    if (!CATEGORIAS.includes(categoria)) throw new ErroApi(400, '"categoria" deve ser "estudos" ou "pessoal"');
+
+    const id = idObrigatorio(texto(t, 'id'));
+    const tipo = texto(t, 'tipo', 'outro');
+    const minutosEstimados = entre(inteiro(t, 'minutosEstimados'), 'minutosEstimados', 15, 1440);
     return {
       _c: 'Tarefa',
-      id: texto(t, 'id'),
-      titulo: texto(t, 'titulo', ''),
+      id,
       categoria,
-      tipo: texto(t, 'tipo', 'outro'),
+      tipo,
       prioridade: prioridade === null ? 5 : prioridade,
       prazo: comoDataHora(prazo),
-      minutosEstimados: comoInteger(inteiro(t, 'minutosEstimados')),
+      minutosEstimados: comoInteger(minutosEstimados),
       dificuldade: comoInteger(dificuldade),
       peso: comoInteger(peso),
       situacao: texto(t, 'situacao', 'pendente'),
     };
   });
 
-  const limite = inteiro(pedido, 'limite');
+  const limite = entre(inteiro(pedido, 'limite'), 'limite', 1, 100);
   return {
     _c: 'PedidoDeRanking',
     agora: comoDataHora(quando),
@@ -242,12 +267,11 @@ function pedidoDeMetas(pedido) {
     // Só metas ativas entram na disputa; concluídas e canceladas são ignoradas.
     if (texto(m, 'situacao', 'ativa') !== 'ativa') continue;
 
-    const progresso = inteiro(m, 'progresso');
+    const progresso = entre(inteiro(m, 'progresso'), 'progresso', 0, 100);
     const prazo = dataHora(m, 'prazo', false);
     metas.push({
       _c: 'Meta',
-      id: texto(m, 'id'),
-      titulo: texto(m, 'titulo', ''),
+      id: idObrigatorio(texto(m, 'id')),
       tipo,
       prioridade,
       progresso: progresso === null ? 0 : progresso,
@@ -255,7 +279,7 @@ function pedidoDeMetas(pedido) {
     });
   }
 
-  const marcos = inteiro(pedido, 'quantidadeDeMarcos');
+  const marcos = entre(inteiro(pedido, 'quantidadeDeMarcos'), 'quantidadeDeMarcos', 1, 5);
   return { _c: 'PedidoDeMetas', agora: comoDataHora(quando), metas, quantidadeDeMarcos: marcos === null ? MARCOS_PADRAO : marcos };
 }
 

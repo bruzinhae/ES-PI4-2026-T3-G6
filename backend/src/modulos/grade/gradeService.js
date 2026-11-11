@@ -85,7 +85,7 @@ async function tarefasParaRanking(usuarioId, preferencias, agora) {
         const disciplina = porDisciplina.get(String(tarefa.disciplinaId));
         return [{
             id,
-            titulo: tarefa.titulo,
+            titulo: tarefa.titulo, // só para mostrar na resposta; o servidor não usa
             categoria: tarefa.categoria,
             tipo: tarefa.tipo,
             prioridade: tarefa.prioridade,

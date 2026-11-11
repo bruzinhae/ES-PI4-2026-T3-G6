@@ -20,7 +20,6 @@ public class FiltroDeComunicados implements ObjectInputFilter
         "java.lang.Number", "java.lang.Integer", "java.lang.Long", "java.lang.Double", "java.lang.Boolean"
     };
 
-    @Override
     public ObjectInputFilter.Status checkInput (ObjectInputFilter.FilterInfo info)
     {
         if (info.arrayLength() > MAXIMO_DE_ITENS_DO_VETOR || info.streamBytes() > MAXIMO_DE_BYTES || info.references() > MAXIMO_DE_REFERENCIAS || info.depth() > MAXIMO_DE_PROFUNDIDADE)

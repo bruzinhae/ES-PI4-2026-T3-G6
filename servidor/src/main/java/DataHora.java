@@ -12,7 +12,7 @@ import java.io.*;
  *
  * É uma classe imutável: pode ser usada por várias threads ao mesmo tempo.
  */
-public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
+public class DataHora implements Comparable<DataHora>, Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -29,22 +29,6 @@ public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
         this.deslocamento = deslocamento;
     }
 
-    // O momento de agora, escrito no fuso indicado.
-    public static DataHora agora (int deslocamento)
-    {
-        return DataHora.deMilissegundos (System.currentTimeMillis (), deslocamento);
-    }
-
-    // O instante que fica a tantos milissegundos de 1970-01-01T00:00:00Z, escrito no fuso indicado.
-    public static DataHora deMilissegundos (long milissegundos, int deslocamento)
-    {
-        return new DataHora (dividaParaBaixo (milissegundos, 1000L), (int) restoPositivo (milissegundos, 1000L) * 1000000, deslocamento);
-    }
-
-    public long getSegundos ()    { return this.segundos; }
-    public int getNanos ()        { return this.nanos; }
-    public int getDeslocamento () { return this.deslocamento; }
-
     // Mesmo instante, escrito no fuso de outra data.
     public DataHora noFusoDe (DataHora outra)
     {
@@ -57,7 +41,6 @@ public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
     }
 
     // Negativo se esta data é antes da outra, zero se é o mesmo instante, positivo se é depois (o fuso não conta).
-    @Override
     public int compareTo (DataHora outra)
     {
         if (this.segundos != outra.segundos)
@@ -66,7 +49,6 @@ public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
         return Integer.compare (this.nanos, outra.nanos);
     }
 
-    public boolean antesDe (DataHora outra)       { return this.compareTo (outra) < 0; }
     public boolean depoisDe (DataHora outra)      { return this.compareTo (outra) > 0; }
     public boolean mesmoInstante (DataHora outra) { return this.compareTo (outra) == 0; }
 
@@ -111,7 +93,6 @@ public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
     }
 
     // O mesmo texto ISO-8601 com fuso que a leitura aceita, ex.: 2026-11-12T15:00:00-03:00 (ou ...Z).
-    @Override
     public String toString ()
     {
         StringBuffer texto = new StringBuffer (textoDoDia (this.getDiaLocal ()));
@@ -144,61 +125,6 @@ public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
         return texto.toString ();
     }
 
-    @Override
-    public boolean equals (Object obj)
-    {
-        if (obj == this) return true;
-        if (obj == null) return false;
-
-        if (obj.getClass () != this.getClass ()) return false;
-        DataHora outra = (DataHora) obj;
-
-        if (this.segundos != outra.segundos) return false;
-        if (this.nanos != outra.nanos) return false;
-        if (this.deslocamento != outra.deslocamento) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode ()
-    {
-        int ret = 666;
-
-        ret = ret * 7 + ((Long) this.segundos).hashCode ();
-        ret = ret * 7 + ((Integer) this.nanos).hashCode ();
-        ret = ret * 7 + ((Integer) this.deslocamento).hashCode ();
-
-        if (ret < 0) ret = -ret;
-        return ret;
-    }
-
-    // construtor de copia
-    public DataHora (DataHora modelo) throws Exception
-    {
-        if (modelo == null)
-            throw new Exception ("Modelo ausente");
-
-        this.segundos     = modelo.segundos;
-        this.nanos        = modelo.nanos;
-        this.deslocamento = modelo.deslocamento;
-    }
-
-    @Override
-    public Object clone ()
-    {
-        DataHora ret = null;
-
-        try
-        {
-            ret = new DataHora (this);
-        }
-        catch (Exception erro)
-        {} // sei que nao vai dar erro
-
-        return ret;
-    }
-
     // Divisao que arredonda para baixo (a de Java arredonda em direcao a zero).
     private static long dividaParaBaixo (long dividendo, long divisor)
     {
@@ -224,32 +150,5 @@ public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
             texto = "0" + texto;
 
         return texto;
-    }
-
-    private static boolean bissexto (int ano)
-    {
-        return ano % 4 == 0 && (ano % 100 != 0 || ano % 400 == 0);
-    }
-
-    private static int diasDoMes (int ano, int mes)
-    {
-        switch (mes)
-        {
-            case 2:                    return bissexto (ano) ? 29 : 28;
-            case 4: case 6: case 9: case 11: return 30;
-            default:                   return 31;
-        }
-    }
-
-    // Dias desde 1970-01-01 até a data (calendário gregoriano).
-    private static long diaDaEpoca (int ano, int mes, int dia)
-    {
-        long y   = mes <= 2 ? ano - 1 : ano;
-        long era = dividaParaBaixo (y, 400L);
-        long yoe = y - era * 400L;
-        long doy = (153L * (mes + (mes > 2 ? -3 : 9)) + 2L) / 5L + dia - 1L;
-        long doe = yoe * 365L + yoe / 4L - yoe / 100L + doy;
-
-        return era * 146097L + doe - 719468L;
     }
 }
