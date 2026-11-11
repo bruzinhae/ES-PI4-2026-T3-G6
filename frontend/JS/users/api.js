@@ -214,6 +214,25 @@ const AcaiApi = (function () {
         await requisitar(`/disciplinas/${id}`, { metodo: 'DELETE' });
     }
 
+    async function listarTarefas() {
+        const { tarefas } = await requisitar('/tarefas');
+        return tarefas;
+    }
+
+    async function criarTarefa(dados) {
+        const { tarefa } = await requisitar('/tarefas', { metodo: 'POST', corpo: dados });
+        return tarefa;
+    }
+
+    async function atualizarTarefa(id, alteracoes) {
+        const { tarefa } = await requisitar(`/tarefas/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        return tarefa;
+    }
+
+    async function excluirTarefa(id) {
+        await requisitar(`/tarefas/${id}`, { metodo: 'DELETE' });
+    }
+
     function obterRelatorio(inicio) {
         const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
         return requisitar(`/relatorios${consulta}`);
@@ -415,6 +434,10 @@ const AcaiApi = (function () {
         criarDisciplina,
         atualizarDisciplina,
         excluirDisciplina,
+        listarTarefas,
+        criarTarefa,
+        atualizarTarefa,
+        excluirTarefa,
         obterRelatorio,
         obterSugestoesSofia,
         listarConversaSofia,

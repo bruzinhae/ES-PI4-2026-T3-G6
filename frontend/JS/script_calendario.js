@@ -118,7 +118,7 @@ function criarCardLista(dados) {
 
     card.className = `tarefa${prioridade >= 8 ? ' urgente' : ''}`;
     card.draggable = true;
-    card.dataset.id = dados.id || crypto.randomUUID();
+    card.dataset.id = dados.id;
     card.dataset.filtro = filtros.join(' ');
     card.dataset.titulo = dados.titulo;
     card.dataset.tipo = dados.tipo || 'estudos';
@@ -129,16 +129,24 @@ function criarCardLista(dados) {
     card.dataset.prazo = dados.prazo || '';
     card.dataset.notas = dados.notas || '';
 
-    card.innerHTML = `
-        <div class="tarefa-topo">
-            <strong>${dados.titulo}</strong>
-            <span class="duracao">${dados.duracao || '1h'}</span>
-        </div>
-        <div class="tarefa-meta">
-            <span class="tag ${dados.tipo === 'pessoal' ? 'pessoal' : 'estudos'}">#${dados.tag || 'Estudo'}</span>
-            <span class="prazo${prioridade >= 8 ? ' critico' : ''}">${dados.prazoLabel || 'Sem prazo'}</span>
-        </div>
-    `;
+    const topo = document.createElement('div');
+    topo.className = 'tarefa-topo';
+    const titulo = document.createElement('strong');
+    titulo.textContent = dados.titulo;
+    const duracao = document.createElement('span');
+    duracao.className = 'duracao';
+    duracao.textContent = dados.duracao || '1h';
+    topo.append(titulo, duracao);
+    const meta = document.createElement('div');
+    meta.className = 'tarefa-meta';
+    const tag = document.createElement('span');
+    tag.className = `tag ${dados.tipo === 'pessoal' ? 'pessoal' : 'estudos'}`;
+    tag.textContent = `#${dados.tag || 'Estudo'}`;
+    const prazo = document.createElement('span');
+    prazo.className = `prazo${prioridade >= 8 ? ' critico' : ''}`;
+    prazo.textContent = dados.prazoLabel || 'Sem prazo';
+    meta.append(tag, prazo);
+    card.append(topo, meta);
 
     return card;
 }
@@ -240,7 +248,7 @@ function lerFormulario() {
     const prioridade = Number(campoPrioridade.value);
 
     return {
-        id: campoId.value || crypto.randomUUID(),
+        id: campoId.value,
         origem: campoOrigem.value,
         titulo: campoTitulo.value.trim(),
         tipo: campoTipo.value,
@@ -257,6 +265,58 @@ function lerFormulario() {
             ? new Date(campoPrazo.value).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
             : 'Sem prazo',
     };
+}
+
+function dataParaCampo(data) {
+    if (!data) return '';
+    const valor = new Date(data);
+    if (Number.isNaN(valor.getTime())) return '';
+    const local = new Date(valor.getTime() - valor.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+}
+
+function apresentarTarefa(tarefa) {
+    const tipo = tarefa.categoria === 'pessoal' ? 'pessoal' : 'estudos';
+    const faixas = Math.max(1, Math.round((tarefa.minutosEstimados || 60) / 30));
+    return {
+        id: tarefa.id,
+        titulo: tarefa.titulo,
+        tipo,
+        tag: tarefa.etiqueta || (tipo === 'pessoal' ? 'Pessoal' : 'Estudo'),
+        detalhe: tarefa.local || '',
+        notas: tarefa.observacoes || '',
+        prioridade: tarefa.prioridade || 5,
+        duracao: formatarDuracao(faixas),
+        faixas,
+        prazo: dataParaCampo(tarefa.prazo),
+        prazoLabel: tarefa.prazo ? new Date(tarefa.prazo).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Sem prazo',
+    };
+}
+
+function payloadTarefa(dados) {
+    return {
+        titulo: dados.titulo,
+        categoria: dados.tipo === 'pessoal' ? 'pessoal' : 'estudos',
+        tipo: 'outro',
+        etiqueta: dados.tag,
+        prazo: dados.prazo ? new Date(dados.prazo).toISOString() : null,
+        minutosEstimados: dados.faixas * 30,
+        prioridade: dados.prioridade,
+        local: dados.detalhe || null,
+        observacoes: dados.notas || null,
+    };
+}
+
+async function carregarTarefas() {
+    try {
+        const tarefas = await AcaiApi.listarTarefas();
+        listaTarefas.replaceChildren(...tarefas.map(tarefa => criarCardLista(apresentarTarefa(tarefa))));
+        filtrarTarefas(document.querySelector('.filtro.ativo')?.dataset.filtro || 'todos', document.getElementById('busca-tarefas').value);
+    } catch (erro) {
+        listaTarefas.replaceChildren();
+        atualizarContador();
+        window.alert(erro.message || 'Não foi possível carregar as tarefas.');
+    }
 }
 
 function salvarTarefa(dados) {
@@ -715,18 +775,37 @@ campoPrioridade.addEventListener('input', () => {
     valorPrioridade.textContent = `${campoPrioridade.value}/10`;
 });
 
-formulario.addEventListener('submit', (evento) => {
+formulario.addEventListener('submit', async (evento) => {
     evento.preventDefault();
     const dados = lerFormulario();
     if (!dados.titulo) return;
-    salvarTarefa(dados);
-    fecharModal();
+    const botaoSalvar = document.getElementById('salvar-tarefa');
+    botaoSalvar.disabled = true;
+    try {
+        const payload = payloadTarefa(dados);
+        if (dados.id) await AcaiApi.atualizarTarefa(dados.id, payload);
+        else await AcaiApi.criarTarefa(payload);
+        fecharModal();
+        await carregarTarefas();
+    } catch (erro) {
+        window.alert(erro.message || 'Não foi possível salvar a tarefa.');
+    } finally {
+        botaoSalvar.disabled = false;
+    }
 });
 
-botaoExcluir.addEventListener('click', () => {
+botaoExcluir.addEventListener('click', async () => {
     if (!campoId.value) return;
-    excluirTarefa(campoId.value);
-    fecharModal();
+    botaoExcluir.disabled = true;
+    try {
+        await AcaiApi.excluirTarefa(campoId.value);
+        fecharModal();
+        await carregarTarefas();
+    } catch (erro) {
+        window.alert(erro.message || 'Não foi possível excluir a tarefa.');
+    } finally {
+        botaoExcluir.disabled = false;
+    }
 });
 
 
@@ -762,5 +841,6 @@ document.getElementById('semana-proxima').addEventListener('click', () => {
 });
 
 montarEixoHoras();
+carregarTarefas();
 atualizarContador();
 alternarVisao('semana');
