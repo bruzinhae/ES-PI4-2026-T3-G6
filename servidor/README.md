@@ -10,7 +10,7 @@ A arquitetura segue o exemplo do professor, o *Fazedor de Continhas* (cliente-se
 | `AceitadoraDeConexao` (thread no `accept()`) | `AceitadoraDeConexao` |
 | `SupervisoraDeConexao` (uma thread por cliente, `instanceof`) | `SupervisoraDeConexao` |
 | `Parceiro` (socket + fluxos) | `Parceiro` |
-| `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
+| `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoDeMetas`, `PrioridadeDeMetas`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
 | `Cliente` (console) | `Cliente` |
 
 Além do Fazedor de Continhas, o servidor também aceita os **comandos de texto dos exemplos do outro professor de Java** (`CLIENTESERVIDOR001` e `002`, com `SERVIDOR.java` e `CLIENTE.java`): `OLA`, `DATA`, `HORA` e `FIM`. O `CLIENTE.java` desses exemplos funciona com este servidor sem alteração (veja a seção "Comandos de texto").
@@ -211,6 +211,58 @@ java -cp out br.faculdade.acaistudy.servidor.Cliente OLA localhost 3000     # no
 | Atendimento | Um cliente por vez | Uma thread por cliente |
 | Escuta | Todas as interfaces | Só localhost (o segundo argumento muda) |
 | Comandos | `OLA`, `DATA`, `HORA`, cotações | `OLA`, `DATA`, `HORA`, `FIM` e o pedido de ranking em JSON |
+
+### `pedidoDeMetas` (cliente → servidor) e `prioridadeDeMetas` (servidor → cliente)
+
+Usado pela Sofia na tela de Metas: o servidor decide qual meta merece atenção primeiro e propõe datas para os marcos novos dela. O Gemini só escreve os textos.
+
+```json
+{
+  "tipo": "pedidoDeMetas",
+  "agora": "2026-11-11T15:00:00-03:00",
+  "quantidadeDeMarcos": 3,
+  "metas": [
+    { "id": "m1", "tipo": "projeto", "prioridade": "alta", "progresso": 0, "prazo": "2026-12-15T23:59:00-03:00" }
+  ]
+}
+```
+
+| Campo | Obrigatório | Regra |
+| --- | --- | --- |
+| `agora` | não | ISO-8601 com fuso; as datas dos marcos usam o dia e o fuso dele. Padrão: hora do servidor em -03:00. |
+| `quantidadeDeMarcos` | não | 1 a 5. Padrão 3. |
+| `metas[].id` | sim | Devolvido no ranking como `metaId`. |
+| `metas[].tipo` | não | `geral` (padrão), `disciplina`, `habito` ou `projeto`. |
+| `metas[].prioridade` | não | `baixa`, `media` (padrão) ou `alta`. |
+| `metas[].progresso` | não | 0 a 100. Padrão 0. |
+| `metas[].prazo` | não | ISO-8601; ausente = sem prazo. |
+| `metas[].situacao` | não | Só `ativa` (padrão) entra; as outras são ignoradas. |
+
+```json
+{
+  "tipo": "prioridadeDeMetas",
+  "ranking": [
+    { "metaId": "m1", "nota": 0.55, "atrasada": false,
+      "composicao": { "urgencia": 0, "lacuna": 1, "importancia": 1 } }
+  ],
+  "foco": "m1",
+  "datasDosMarcos": ["2026-11-20", "2026-11-28", "2026-12-07"]
+}
+```
+
+`ranking` vem da maior para a menor nota; `foco` é a primeira (ou `null` sem metas ativas). `datasDosMarcos` vale só para o foco e fica vazia se ele for hábito ou não tiver prazo.
+
+```text
+nota = 0,45 × urgência + 0,35 × lacuna + 0,20 × importância        (cada parte de 0 a 1)
+```
+
+| Parte | Peso | Cálculo |
+| --- | --- | --- |
+| **Urgência** | 45% | Sem prazo: 0,1. Prazo vencido: 1. Senão `1 − dias até o prazo / 14`, no mínimo 0. |
+| **Lacuna** | 35% | `1 − progresso / 100`. |
+| **Importância** | 20% | `baixa` 0,3, `media` 0,6, `alta` 1,0. |
+
+Desempate: prazo mais cedo (sem prazo por último), prioridade maior, `id`. As datas dividem o caminho entre hoje e o prazo em partes iguais, em dias diferentes sempre que couber; meta atrasada recebe hoje. O código está em `ranking/CalculadoraDeMetas.java`.
 
 ### Outros comunicados
 

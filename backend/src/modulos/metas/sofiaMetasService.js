@@ -10,11 +10,13 @@ import { createHash } from 'node:crypto';
 import mongoose from 'mongoose';
 import { env } from '../../config/env.js';
 import { gerarJson } from '../../servicos/clienteGemini.js';
+import { pedirPrioridadeDeMetas } from '../../servicos/clienteRanking.js';
+import { formatarISO } from '../../utils/fuso.js';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
 import * as metaService from './metaService.js';
 
-const VERSAO_PROMPT = 'metas-v2';
+const VERSAO_PROMPT = 'metas-v3';
 const LIMITE_CACHE = 1000;
 const LIMITE_METAS = 20;
 const LIMITE_SUGESTOES = 3;
@@ -55,7 +57,8 @@ const INSTRUCAO_LEITURA = `Você é a Sofia, assistente do AçaíStudy na tela d
 Leia o JSON e responda em português do Brasil, falando diretamente com o estudante.
 
 Regras:
-- Escolha a meta mais atrasada ou, se nenhuma estiver atrasada, a de menor progresso.
+- Se o JSON trouxer metaFoco, essa é a meta escolhida pelo sistema: fale dela e devolva esse id em metaId.
+- Sem metaFoco, escolha a meta mais atrasada ou, se nenhuma estiver atrasada, a de menor progresso.
 - Diga qual é o próximo passo concreto dessa meta. Não repita só o percentual.
 - sugestoes traz de 2 a 3 marcos novos, curtos, que ainda não existem nessa meta.
 - Se a meta for do tipo habito, deixe sugestoes vazio e fale das horas que faltam na semana.
@@ -140,21 +143,25 @@ function sugestoesValidas(brutas, meta) {
     return saida;
 }
 
-function validarLeitura(dados, contexto) {
+function validarLeitura(dados, contexto, prioridade) {
     const comentario = texto(dados?.texto, 400);
     if (!comentario) {
         throw new ErroApi(503, MENSAGEM_INDISPONIVEL);
     }
 
     const porId = new Map(contexto.metas.map((meta) => [meta.id, meta]));
-    const meta = porId.get(dados?.metaId) || porId.get(contexto.focoId) || contexto.metas[0];
+    // Com o servidor no ar, a meta é a que ele escolheu; o texto do Gemini não troca essa decisão.
+    const meta = porId.get(prioridade?.foco) || porId.get(dados?.metaId) || porId.get(contexto.focoId) || contexto.metas[0];
     const pendente = (meta.marcos || []).find((marco) => !marco.atingido);
+    const datas = meta.id === prioridade?.foco ? prioridade.datasDosMarcos : [];
 
     return {
         texto: comentario,
         metaId: meta.id,
         marcoId: pendente?.id || null,
-        sugestoes: sugestoesValidas(dados?.sugestoes, meta),
+        sugestoes: sugestoesValidas(dados?.sugestoes, meta)
+            .map((sugestao, indice) => ({ ...sugestao, dataSugerida: datas[indice] || null })),
+        priorizadoPeloServidor: Boolean(prioridade),
     };
 }
 
@@ -163,6 +170,30 @@ function guardarNoCache(chave, entrada) {
     cache.set(chave, entrada);
     if (cache.size > LIMITE_CACHE) {
         cache.delete(cache.keys().next().value);
+    }
+}
+
+// Pede ao servidor Java qual meta vem primeiro e as datas dos marcos novos. Se ele estiver fora do ar,
+// devolve null e a Sofia segue como antes, escolhendo a meta pelo prompt, sem datas.
+async function priorizarNoServidor(resultado, contexto) {
+    const prazos = new Map((resultado.metas || []).map((meta) => [meta.id, meta.prazo]));
+
+    try {
+        return await pedirPrioridadeDeMetas({
+            agora: formatarISO(Date.now()),
+            quantidadeDeMarcos: LIMITE_SUGESTOES,
+            metas: contexto.metas.map((meta) => ({
+                id: meta.id,
+                titulo: meta.titulo,
+                tipo: meta.tipo,
+                prioridade: meta.prioridade,
+                progresso: meta.progresso,
+                ...(prazos.get(meta.id) && { prazo: new Date(prazos.get(meta.id)).toISOString() }),
+            })),
+        });
+    } catch (erro) {
+        console.warn(`Servidor Java indisponível para priorizar as metas (${erro.message}). Usando só o Gemini.`);
+        return null;
     }
 }
 
@@ -181,9 +212,12 @@ export async function analisar(usuarioId) {
         };
     }
 
-    const prompt = `Metas em JSON:\n${JSON.stringify({ painel: contexto.painel, metas: contexto.metas })}`;
+    const prioridade = await priorizarNoServidor(resultado, contexto);
+    const foco = prioridade?.foco || null;
+    const corpo = { painel: contexto.painel, ...(foco && { metaFoco: foco }), metas: contexto.metas };
+    const prompt = `Metas em JSON:\n${JSON.stringify(corpo)}`;
     const hash = createHash('sha256')
-        .update(`${env.gemini.modelos.join(',')}|${VERSAO_PROMPT}|${prompt}`)
+        .update(`${env.gemini.modelos.join(',')}|${VERSAO_PROMPT}|${prompt}|${prioridade?.datasDosMarcos?.join(',') ?? ''}`)
         .digest('hex');
     const emCache = cache.get(String(usuarioId));
     if (emCache?.hash === hash) {
@@ -197,7 +231,7 @@ export async function analisar(usuarioId) {
         mensagens,
     });
     const leitura = {
-        ...validarLeitura(dados, contexto),
+        ...validarLeitura(dados, contexto, prioridade),
         modelo,
         geradoEm: new Date().toISOString(),
     };

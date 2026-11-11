@@ -317,8 +317,15 @@ if (typeof document !== 'undefined' && document.getElementById('lista-metas')) {
         destino.innerHTML = sugestoes.map((item) => `
             <div class="sugestao-marco">
                 <span>${escapar(item.titulo)}</span>
+                ${item.dataSugerida ? `<small title="Data sugerida pelo servidor, entre hoje e o prazo da meta">${escapar(dataCurta(item.dataSugerida))}</small>` : ''}
                 <button type="button" data-incluir="${escapar(item.titulo)}">Incluir</button>
             </div>`).join('');
+    }
+
+    // "2026-11-20" -> "até 20/11" (sem passar por Date, para o fuso do navegador não mudar o dia).
+    function dataCurta(data) {
+        const [, mes, dia] = String(data).split('-');
+        return mes && dia ? `até ${dia}/${mes}` : '';
     }
 
     function alvoDoBanner() {

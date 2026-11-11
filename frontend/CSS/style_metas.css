@@ -925,6 +925,13 @@ h1 {
     white-space: nowrap;
 }
 
+.sugestao-marco small {
+    color: var(--cinza-500, #6b7280);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 .sugestao-marco button {
     border: 0;
     border-radius: 999px;

@@ -2,8 +2,10 @@ package br.faculdade.acaistudy.servidor;
 
 import br.faculdade.acaistudy.servidor.comunicado.Comunicado;
 import br.faculdade.acaistudy.servidor.comunicado.Erro;
+import br.faculdade.acaistudy.servidor.comunicado.PedidoDeMetas;
 import br.faculdade.acaistudy.servidor.comunicado.PedidoDeRanking;
 import br.faculdade.acaistudy.servidor.comunicado.PedidoParaSair;
+import br.faculdade.acaistudy.servidor.ranking.CalculadoraDeMetas;
 import br.faculdade.acaistudy.servidor.ranking.CalculadoraDeRanking;
 
 import java.net.Socket;
@@ -105,6 +107,17 @@ public class SupervisoraDeConexao extends Thread
                     catch (Exception erro)
                     {
                         this.usuario.receba (new Erro ("Não foi possível calcular o ranking: " + mensagemDe (erro, "erro inesperado")));
+                    }
+                }
+                else if (comunicado instanceof PedidoDeMetas)
+                {
+                    try
+                    {
+                        this.usuario.receba (CalculadoraDeMetas.calcular ((PedidoDeMetas) comunicado));
+                    }
+                    catch (Exception erro)
+                    {
+                        this.usuario.receba (new Erro ("Não foi possível priorizar as metas: " + mensagemDe (erro, "erro inesperado")));
                     }
                 }
                 else if (comunicado instanceof PedidoParaSair)
