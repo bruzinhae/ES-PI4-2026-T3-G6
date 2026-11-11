@@ -1,3 +1,5 @@
+import java.io.*;
+
 /**
  * Meta ativa do estudante, candidata a receber a atencao da Sofia.
  *
@@ -6,8 +8,10 @@
  * progresso  0 a 100, ja calculado pelo backend (marcos atingidos ou horas da semana)
  * prazo      entrega; null quando a meta nao tem prazo
  */
-public class Meta implements Cloneable
+public class Meta implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String   id;
     private String   titulo;
     private String   tipo;

@@ -1,10 +1,14 @@
+import java.io.*;
+
 /**
  * Uma sessao de estudo decidida pela alocacao: qual tarefa, onde (espaco livre) e quando.
  *
  * minutosRestantes o que ainda falta da tarefa depois desta sessao (0 = a tarefa ficou completa)
  */
-public class SessaoAlocada implements Cloneable
+public class SessaoAlocada implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String   espacoId;
     private String   tarefaId;
     private DataHora inicio;
@@ -87,25 +91,6 @@ public class SessaoAlocada implements Cloneable
     public double getEncaixe ()
     {
         return this.encaixe;
-    }
-
-    public Objeto paraObjeto ()
-    {
-        Objeto composicao = new Objeto ();
-        composicao.guarde ("urgencia", this.urgencia);
-        composicao.guarde ("importancia", this.importancia);
-        composicao.guarde ("encaixe", this.encaixe);
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("espacoId", this.espacoId);
-        ret.guarde ("tarefaId", this.tarefaId);
-        ret.guarde ("inicio", this.inicio.toString ());
-        ret.guarde ("fim", this.fim.toString ());
-        ret.guarde ("minutos", this.minutos);
-        ret.guarde ("minutosRestantes", this.minutosRestantes);
-        ret.guarde ("nota", this.nota);
-        ret.guarde ("composicao", composicao);
-        return ret;
     }
 
     // Mesma sessao com mais minutos no fim (usada para juntar sessoes seguidas da mesma tarefa).

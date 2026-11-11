@@ -1,9 +1,13 @@
+import java.io.*;
+
 /**
  * A nota de uma meta e as tres partes que a compoem (cada uma de 0 a 1). Guarda tambem o prazo e o
  * peso da prioridade da meta, que servem de desempate quando as notas sao iguais.
  */
-public class NotaDeMeta implements Comparable<NotaDeMeta>, Cloneable
+public class NotaDeMeta implements Comparable<NotaDeMeta>, Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String   metaId;
     private double   nota;
     private double   urgencia;
@@ -68,20 +72,6 @@ public class NotaDeMeta implements Comparable<NotaDeMeta>, Cloneable
         return this.pesoDaPrioridade;
     }
 
-    public Objeto paraObjeto ()
-    {
-        Objeto composicao = new Objeto ();
-        composicao.guarde ("urgencia", this.urgencia);
-        composicao.guarde ("lacuna", this.lacuna);
-        composicao.guarde ("importancia", this.importancia);
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("metaId", this.metaId);
-        ret.guarde ("nota", this.nota);
-        ret.guarde ("atrasada", this.atrasada);
-        ret.guarde ("composicao", composicao);
-        return ret;
-    }
 
     @Override
     public String toString ()

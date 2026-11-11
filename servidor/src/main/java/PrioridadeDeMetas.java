@@ -6,6 +6,8 @@ import java.util.ArrayList;
  */
 public class PrioridadeDeMetas extends Comunicado
 {
+    private static final long serialVersionUID = 1L;
+
     private ArrayList<NotaDeMeta> ranking;
     private String                foco;
     private ArrayList<String>     datasDosMarcos;
@@ -22,27 +24,9 @@ public class PrioridadeDeMetas extends Comunicado
         this.datasDosMarcos = datasDosMarcos;
     }
 
-    @Override
-    public String tipo ()
-    {
-        return "prioridadeDeMetas";
-    }
-
-    @Override
-    protected Objeto campos ()
-    {
-        ArrayList<Object> itens = new ArrayList<Object> ();
-        for (NotaDeMeta nota : this.ranking)
-            itens.add (nota.paraObjeto ());
-
-        ArrayList<Object> datas = new ArrayList<Object> (this.datasDosMarcos);
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("ranking", itens);
-        ret.guarde ("foco", this.foco);
-        ret.guarde ("datasDosMarcos", datas);
-        return ret;
-    }
+    public ArrayList<NotaDeMeta> getRanking ()      { return this.ranking; }
+    public String getFoco ()                        { return this.foco; }
+    public ArrayList<String> getDatasDosMarcos ()   { return this.datasDosMarcos; }
 
     @Override
     public String toString ()

@@ -1,9 +1,13 @@
+import java.io.*;
+
 /**
  * Tarefa que ficou (total ou parcialmente) sem espaco na alocacao.
  * motivo: "sem_espacos", "nenhum_espaco_antes_do_prazo", "espacos_insuficientes" ou "alocacao_parcial".
  */
-public class TarefaSemAlocacao implements Cloneable
+public class TarefaSemAlocacao implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String tarefaId;
     private String motivo;
     private int    minutosRestantes;
@@ -35,14 +39,6 @@ public class TarefaSemAlocacao implements Cloneable
         return this.minutosRestantes;
     }
 
-    public Objeto paraObjeto ()
-    {
-        Objeto ret = new Objeto ();
-        ret.guarde ("tarefaId", this.tarefaId);
-        ret.guarde ("motivo", this.motivo);
-        ret.guarde ("minutosRestantes", this.minutosRestantes);
-        return ret;
-    }
 
     @Override
     public String toString ()

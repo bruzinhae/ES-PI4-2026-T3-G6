@@ -1,3 +1,5 @@
+import java.io.*;
+
 /**
  * Preferencias de estudo do usuario (vem da tela de Configuracoes).
  *
@@ -8,8 +10,10 @@
  *                 para absorver um resto pequeno demais para virar outra sessao)
  * antifadiga      true coloca uma pausa entre sessoes seguidas na alocacao
  */
-public class Preferencias implements Cloneable
+public class Preferencias implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String  janelaFoco;
     private boolean focoMatinal;
     private int     duracaoMinutos;

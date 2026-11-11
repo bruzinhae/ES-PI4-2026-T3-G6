@@ -1,9 +1,13 @@
+import java.io.*;
+
 /**
  * Tarefa que nao coube em nenhum dos espacos enviados.
  * motivo: "sem_espacos" ou "nenhum_espaco_antes_do_prazo".
  */
-public class TarefaSemEspaco implements Cloneable
+public class TarefaSemEspaco implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String tarefaId;
     private String motivo;
 
@@ -28,13 +32,6 @@ public class TarefaSemEspaco implements Cloneable
         return this.motivo;
     }
 
-    public Objeto paraObjeto ()
-    {
-        Objeto ret = new Objeto ();
-        ret.guarde ("tarefaId", this.tarefaId);
-        ret.guarde ("motivo", this.motivo);
-        return ret;
-    }
 
     @Override
     public String toString ()

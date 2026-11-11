@@ -1,139 +1,159 @@
-import java.net.Socket;
-import java.util.ArrayList;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 /**
  * Atende UM cliente numa thread própria: lê comunicados, responde e repete até o cliente sair.
  * Equivalente à SupervisoraDeConexao do Fazedor de Continhas, mas sem estado por conexão:
- * cada PedidoDeRanking é independente (o servidor não guarda nada entre pedidos).
+ * cada PedidoDeRanking e cada PedidoDeMetas é independente (o servidor não guarda nada entre pedidos).
  */
 public class SupervisoraDeConexao extends Thread
 {
+    // Conexão parada por mais que isto é encerrada.
+    public static final int TEMPO_MAXIMO_OCIOSO_MS = 5 * 60 * 1000;
+
     private Parceiro            usuario;
     private Socket              conexao;
     private ArrayList<Parceiro> usuarios;
 
-    public SupervisoraDeConexao (Socket conexao, ArrayList<Parceiro> usuarios) throws Exception
+    public SupervisoraDeConexao
+    (Socket conexao, ArrayList<Parceiro> usuarios)
+    throws Exception
     {
-        if (conexao == null)
+        if (conexao==null)
             throw new Exception ("Conexao ausente");
-        if (usuarios == null)
+
+        if (usuarios==null)
             throw new Exception ("Usuarios ausentes");
 
         this.conexao  = conexao;
         this.usuarios = usuarios;
     }
 
-    // Exceções como NullPointerException vêm sem mensagem; o cliente sempre recebe um texto.
+    // Excecoes como NullPointerException vem sem mensagem; o cliente sempre recebe um texto.
     private static String mensagemDe (Exception erro, String padrao)
     {
-        return erro.getMessage () == null ? padrao : erro.getMessage ();
-    }
-
-    // Verdadeiro se a linha esta vazia ou so tem espacos em branco.
-    private static boolean soTemEspacos (String linha)
-    {
-        for (int i = 0; i < linha.length (); i++)
-            if (!Character.isWhitespace (linha.charAt (i)))
-                return false;
-
-        return true;
-    }
-
-    // Deslocamento, em segundos, do fuso horário desta máquina (usado nos comandos DATA e HORA).
-    private static int deslocamentoDoFusoLocal ()
-    {
-        return java.util.TimeZone.getDefault ().getOffset (System.currentTimeMillis ()) / 1000;
+        return erro.getMessage()==null ? padrao : erro.getMessage();
     }
 
     @Override
     public void run ()
     {
+        ObjectOutputStream transmissor;
         try
         {
-            this.usuario = new Parceiro (this.conexao);
+            this.conexao.setSoTimeout (TEMPO_MAXIMO_OCIOSO_MS);
+            transmissor =
+            new ObjectOutputStream(
+            this.conexao.getOutputStream());
         }
         catch (Exception erro)
         {
-            try { this.conexao.close (); } catch (Exception falha) {} // só tentando fechar antes de acabar a thread
             return;
         }
 
-        synchronized (this.usuarios)
+        ObjectInputStream receptor=null;
+        try
         {
-            this.usuarios.add (this.usuario);
+            receptor=
+            new ObjectInputStream(
+            this.conexao.getInputStream());
+            receptor.setObjectInputFilter (new FiltroDeComunicados ());
+        }
+        catch (Exception err0)
+        {
+            try
+            {
+                transmissor.close();
+            }
+            catch (Exception falha)
+            {} // so tentando fechar antes de acabar a thread
+
+            return;
         }
 
         try
         {
-            for (;;)
+            this.usuario =
+            new Parceiro (this.conexao,
+                          receptor,
+                          transmissor);
+        }
+        catch (Exception erro)
+        {} // sei que passei os parametros corretos
+
+        try
+        {
+            synchronized (this.usuarios)
             {
-                String linha = this.usuario.envie ();
+                this.usuarios.add (this.usuario);
+            }
 
-                if (linha == null)
-                    break; // o cliente fechou a conexão
+            for(;;)
+            {
+                Comunicado comunicado = this.usuario.envie ();
 
-                if (SupervisoraDeConexao.soTemEspacos (linha))
-                    continue;
-
-                // Comandos de texto dos exemplos da disciplina (OLA, DATA, HORA, FIM).
-                if (ComandosDeTexto.ehPedidoParaSair (linha))
-                    break;
-
-                String respostaDeTexto = ComandosDeTexto.responder (linha, System.currentTimeMillis (), deslocamentoDoFusoLocal ());
-
-                if (respostaDeTexto != null)
+                if (comunicado==null)
+                    return;
+                else if (comunicado instanceof PedidoDeRanking)
                 {
-                    this.usuario.recebaTexto (respostaDeTexto);
-                    continue;
-                }
+                    PedidoDeRanking pedidoDeRanking = (PedidoDeRanking)comunicado;
 
-                Comunicado comunicado;
-
-                try
-                {
-                    comunicado = Comunicado.deJson (linha);
-                }
-                catch (Exception erro)
-                {
-                    // Linha que não é JSON nem comando de texto: orienta quem digitou no console.
-                    String mensagem = linha.trim ().startsWith ("{")
-                        ? mensagemDe (erro, "Pedido inválido")
-                        : "Comando desconhecido. Use OLA, DATA, HORA, FIM ou envie um pedido em JSON.";
-
-                    this.usuario.receba (new Erro (mensagem));
-                    continue;
-                }
-
-                if (comunicado instanceof PedidoDeRanking)
-                {
                     try
                     {
-                        this.usuario.receba (CalculadoraDeRanking.calcular ((PedidoDeRanking) comunicado));
+                        pedidoDeRanking.valide ();
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro ("Não foi possível calcular o ranking: " + mensagemDe (erro, "erro inesperado")));
+                        this.usuario.receba (new Erro (mensagemDe (erro,"Pedido invalido")));
+                        continue;
+                    }
+
+                    try
+                    {
+                        this.usuario.receba (CalculadoraDeRanking.calcular (pedidoDeRanking));
+                    }
+                    catch (Exception erro)
+                    {
+                        this.usuario.receba (new Erro ("Não foi possível calcular o ranking: " + mensagemDe (erro,"erro inesperado")));
                     }
                 }
                 else if (comunicado instanceof PedidoDeMetas)
                 {
+                    PedidoDeMetas pedidoDeMetas = (PedidoDeMetas)comunicado;
+
                     try
                     {
-                        this.usuario.receba (CalculadoraDeMetas.calcular ((PedidoDeMetas) comunicado));
+                        pedidoDeMetas.valide ();
                     }
                     catch (Exception erro)
                     {
-                        this.usuario.receba (new Erro ("Não foi possível priorizar as metas: " + mensagemDe (erro, "erro inesperado")));
+                        this.usuario.receba (new Erro (mensagemDe (erro,"Pedido invalido")));
+                        continue;
+                    }
+
+                    try
+                    {
+                        this.usuario.receba (CalculadoraDeMetas.calcular (pedidoDeMetas));
+                    }
+                    catch (Exception erro)
+                    {
+                        this.usuario.receba (new Erro ("Não foi possível priorizar as metas: " + mensagemDe (erro,"erro inesperado")));
                     }
                 }
                 else if (comunicado instanceof PedidoParaSair)
-                    break;
+                    return;
             }
         }
         catch (Exception erro)
         {
-            // Erro de rede, tempo ocioso esgotado ou mensagem grande demais: encerra esta conexão.
-            try { this.usuario.receba (new Erro (mensagemDe (erro, "Erro de conexao"))); } catch (Exception falha) {}
+            // Erro de rede, tempo ocioso esgotado, objeto de classe proibida ou fluxo corrompido: encerra esta conexao.
+            try
+            {
+                this.usuario.receba (new Erro (mensagemDe (erro,"Erro de conexao")));
+            }
+            catch (Exception falha)
+            {} // so tentando avisar antes de acabar a thread
         }
         finally
         {
@@ -142,7 +162,12 @@ public class SupervisoraDeConexao extends Thread
                 this.usuarios.remove (this.usuario);
             }
 
-            try { this.usuario.adeus (); } catch (Exception falha) {} // só tentando fechar antes de acabar a thread
+            try
+            {
+                this.usuario.adeus();
+            }
+            catch (Exception falha)
+            {} // so tentando fechar antes de acabar a thread
         }
     }
 }

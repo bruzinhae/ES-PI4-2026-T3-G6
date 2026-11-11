@@ -1,9 +1,13 @@
+import java.io.*;
+
 /**
  * Uma tarefa candidata a um espaco, com a nota final e as tres partes que a compoem. Guarda tambem o
  * prazo e a prioridade da tarefa, que servem de desempate quando as notas sao iguais.
  */
-public class Candidato implements Comparable<Candidato>, Cloneable
+public class Candidato implements Comparable<Candidato>, Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String   tarefaId;
     private double   nota;
     private int      minutosNoEspaco;
@@ -75,21 +79,6 @@ public class Candidato implements Comparable<Candidato>, Cloneable
         return this.prioridade;
     }
 
-    public Objeto paraObjeto ()
-    {
-        Objeto composicao = new Objeto ();
-        composicao.guarde ("urgencia", this.urgencia);
-        composicao.guarde ("importancia", this.importancia);
-        composicao.guarde ("encaixe", this.encaixe);
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("tarefaId", this.tarefaId);
-        ret.guarde ("nota", this.nota);
-        ret.guarde ("minutosNoEspaco", this.minutosNoEspaco);
-        ret.guarde ("parcial", this.parcial);
-        ret.guarde ("composicao", composicao);
-        return ret;
-    }
 
     @Override
     public String toString ()

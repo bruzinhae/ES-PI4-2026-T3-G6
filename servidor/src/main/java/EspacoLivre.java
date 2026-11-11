@@ -1,9 +1,13 @@
+import java.io.*;
+
 /**
  * Um intervalo livre da grade, calculado pelo backend Node (grade da semana menos blocos
  * fixos e sessoes ja marcadas). O servidor so recebe e ranqueia candidatos para ele.
  */
-public class EspacoLivre implements Comparable<EspacoLivre>, Cloneable
+public class EspacoLivre implements Comparable<EspacoLivre>, Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String   id;
     private DataHora inicio;
     private DataHora fim;

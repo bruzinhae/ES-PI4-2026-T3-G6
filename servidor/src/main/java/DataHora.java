@@ -1,3 +1,5 @@
+import java.io.*;
+
 /**
  * Um instante com o seu deslocamento de fuso (ex.: 2026-11-12T15:00:00-03:00), sem usar java.time.
  *
@@ -5,13 +7,15 @@
  * segundos. Dois valores com o mesmo instante e fusos diferentes são o mesmo momento
  * (compareTo() ignora o fuso), mas cada um escreve a hora no seu próprio fuso.
  *
- * O texto aceito é o ISO-8601 com fuso: AAAA-MM-DDTHH:MM[:SS[.fração]] seguido de Z, +HH,
- * +HH:MM ou +HH:MM:SS (o sinal também pode ser -). Só anos de 4 dígitos.
+ * Escreve o ISO-8601 com fuso (toString). Quem lê o texto é o cliente em Node, que manda para
+ * o servidor só os três números.
  *
  * É uma classe imutável: pode ser usada por várias threads ao mesmo tempo.
  */
-public class DataHora implements Comparable<DataHora>, Cloneable
+public class DataHora implements Comparable<DataHora>, Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private static final int SEGUNDOS_POR_DIA = 86400;
 
     private long segundos;     // desde 1970-01-01T00:00:00Z
@@ -35,52 +39,6 @@ public class DataHora implements Comparable<DataHora>, Cloneable
     public static DataHora deMilissegundos (long milissegundos, int deslocamento)
     {
         return new DataHora (dividaParaBaixo (milissegundos, 1000L), (int) restoPositivo (milissegundos, 1000L) * 1000000, deslocamento);
-    }
-
-    // Lê o texto ISO-8601 com fuso. Lança Exception se não estiver nesse formato ou se a data não existir.
-    public static DataHora ler (String texto) throws Exception
-    {
-        if (texto == null)
-            throw new Exception ("Data ausente");
-
-        LeitorDeDataHora leitura = new LeitorDeDataHora (texto);
-
-        int ano = leitura.digitos (4);
-        leitura.espere ('-');
-        int mes = leitura.digitos (2);
-        leitura.espere ('-');
-        int dia = leitura.digitos (2);
-        leitura.espereLetra ('T');
-        int hora = leitura.digitos (2);
-        leitura.espere (':');
-        int minuto = leitura.digitos (2);
-
-        int segundo = 0;
-        int nanos   = 0;
-
-        if (leitura.proximoE (':'))
-        {
-            leitura.espere (':');
-            segundo = leitura.digitos (2);
-
-            if (leitura.proximoE ('.'))
-            {
-                leitura.espere ('.');
-                nanos = leitura.fracao ();
-            }
-        }
-
-        int deslocamento = leitura.deslocamento ();
-        leitura.espereFim ();
-
-        if (mes < 1 || mes > 12 || dia < 1 || dia > diasDoMes (ano, mes))
-            throw new Exception ("Data inexistente");
-        if (hora > 23 || minuto > 59 || segundo > 59)
-            throw new Exception ("Hora inexistente");
-
-        long segundos = diaDaEpoca (ano, mes, dia) * SEGUNDOS_POR_DIA + hora * 3600L + minuto * 60L + segundo - deslocamento;
-
-        return new DataHora (segundos, nanos, deslocamento);
     }
 
     public long getSegundos ()    { return this.segundos; }
