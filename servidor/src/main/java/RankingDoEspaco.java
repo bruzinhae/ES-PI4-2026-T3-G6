@@ -1,8 +1,11 @@
+import java.io.*;
 import java.util.ArrayList;
 
 /** Os candidatos de um espaco livre, do mais para o menos recomendado. */
-public class RankingDoEspaco implements Cloneable
+public class RankingDoEspaco implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String               espacoId;
     private ArrayList<Candidato> candidatos;
 
@@ -27,17 +30,6 @@ public class RankingDoEspaco implements Cloneable
         return this.candidatos;
     }
 
-    public Objeto paraObjeto ()
-    {
-        ArrayList<Object> itens = new ArrayList<Object> ();
-        for (Candidato candidato : this.candidatos)
-            itens.add (candidato.paraObjeto ());
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("espacoId", this.espacoId);
-        ret.guarde ("candidatos", itens);
-        return ret;
-    }
 
     @Override
     public String toString ()

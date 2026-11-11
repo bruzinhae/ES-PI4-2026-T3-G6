@@ -1,42 +1,37 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.net.Socket;
-import java.util.ArrayList;
+import java.net.*;
+import java.util.*;
 
 /**
  * Cliente de console para testar o servidor (equivalente ao Cliente do Fazedor de Continhas).
  *
  * Uso: java Cliente [HOST [PORTA]]
- * Mostra um menu: envia um pedido de ranking ou de metas lido de um arquivo JSON, ou os comandos de
- * texto simples (OLA, DATA, HORA) dos exemplos das aulas. O backend Node usa o mesmo protocolo (ver README).
+ * Mostra um menu: envia um pedido de ranking (com alocacao) ou um pedido de metas montados com dados
+ * de exemplo e mostra a resposta. O backend Node usa o mesmo protocolo (ver README).
  */
 public class Cliente
 {
     public static final String HOST_PADRAO  = "localhost";
     public static final int    PORTA_PADRAO = 3000;
 
-    public static final String ARQUIVO_DE_RANKING_PADRAO = "exemplos/pedido-semana-alocacao.json";
-    public static final String ARQUIVO_DE_METAS_PADRAO   = "exemplos/pedido-metas.json";
-
     public static void main (String[] args)
     {
-        if (args.length > 2)
+        if (args.length>2)
         {
             System.err.println ("Uso esperado: java Cliente [HOST [PORTA]]\n");
             return;
         }
 
-        Socket conexao = null;
+        Socket conexao=null;
         try
         {
-            String host  = Cliente.HOST_PADRAO;
-            int    porta = Cliente.PORTA_PADRAO;
+            String host = Cliente.HOST_PADRAO;
+            int    porta= Cliente.PORTA_PADRAO;
 
-            if (args.length > 0)
+            if (args.length>0)
                 host = args[0];
 
-            if (args.length == 2)
-                porta = Integer.parseInt (args[1]);
+            if (args.length==2)
+                porta = Integer.parseInt(args[1]);
 
             conexao = new Socket (host, porta);
         }
@@ -46,10 +41,37 @@ public class Cliente
             return;
         }
 
-        Parceiro servidor = null;
+        java.io.ObjectOutputStream transmissor=null;
         try
         {
-            servidor = new Parceiro (conexao);
+            transmissor =
+            new java.io.ObjectOutputStream(
+            conexao.getOutputStream());
+        }
+        catch (Exception erro)
+        {
+            System.err.println ("Indique o servidor e a porta corretos!\n");
+            return;
+        }
+
+        java.io.ObjectInputStream receptor=null;
+        try
+        {
+            receptor =
+            new java.io.ObjectInputStream(
+            conexao.getInputStream());
+        }
+        catch (Exception erro)
+        {
+            System.err.println ("Indique o servidor e a porta corretos!\n");
+            return;
+        }
+
+        Parceiro servidor=null;
+        try
+        {
+            servidor =
+            new Parceiro (conexao, receptor, transmissor);
         }
         catch (Exception erro)
         {
@@ -65,16 +87,16 @@ public class Cliente
         catch (Exception erro)
         {} // sei que servidor foi instanciado
 
-        tratadoraDeComunicadoDeDesligamento.start ();
+        tratadoraDeComunicadoDeDesligamento.start();
 
-        char opcao = ' ';
+        char opcao=' ';
         do
         {
-            System.out.print ("Sua opcao ([R]anking, [M]etas, [O]la, [D]ata, [H]ora, [T]erminar)? ");
+            System.out.print ("Sua opcao ([R]anking, [M]etas, [T]erminar)? ");
 
             try
             {
-                opcao = Character.toUpperCase (Teclado.getUmChar ());
+                opcao = Character.toUpperCase(Teclado.getUmChar());
             }
             catch (Exception erro)
             {
@@ -82,7 +104,7 @@ public class Cliente
                 continue;
             }
 
-            if ("RMODHT".indexOf (opcao) == -1)
+            if ("RMT".indexOf(opcao)==-1)
             {
                 System.err.println ("Opcao invalida!\n");
                 continue;
@@ -90,35 +112,41 @@ public class Cliente
 
             try
             {
-                if (opcao == 'R' || opcao == 'M')
+                if (opcao=='R')
                 {
-                    String padrao = opcao == 'R' ? ARQUIVO_DE_RANKING_PADRAO : ARQUIVO_DE_METAS_PADRAO;
+                    PedidoDeRanking pedido = Cliente.pedidoDeRankingDeExemplo ();
 
-                    System.out.print ("Arquivo do pedido (Enter para " + padrao + ")? ");
-                    String arquivo = Teclado.getUmString ();
-                    if (arquivo == null || arquivo.trim ().length () == 0)
-                        arquivo = padrao;
-                    System.out.println ();
-
-                    Objeto pedido = null;
-                    try
+                    servidor.receba (pedido);
+                    Comunicado comunicado = null;
+                    do
                     {
-                        pedido = Campos.comoObjeto (Json.ler (Cliente.lerArquivo (arquivo.trim ())), "pedido");
+                        comunicado = (Comunicado)servidor.espie ();
                     }
-                    catch (Exception erro)
-                    {
-                        System.err.println ("Nao foi possivel ler o arquivo: " + erro.getMessage () + "\n");
-                        continue;
-                    }
+                    while (!(comunicado instanceof Ranking) && !(comunicado instanceof Erro));
+                    comunicado = (Comunicado)servidor.envie ();
 
-                    servidor.recebaTexto (Json.escrever (pedido));
-                    String resposta = esperarResposta (servidor);
-                    mostrar (Campos.comoObjeto (Json.ler (resposta), "resposta"), pedido);
+                    if (comunicado instanceof Erro)
+                        System.out.println ("ERRO do servidor: "+comunicado+"\n");
+                    else
+                        Cliente.mostre ((Ranking)comunicado, pedido);
                 }
-                else if (opcao != 'T')
+                else if (opcao=='M')
                 {
-                    servidor.recebaTexto (opcao == 'O' ? "OLA" : opcao == 'D' ? "DATA" : "HORA");
-                    System.out.println (esperarResposta (servidor) + "\n");
+                    PedidoDeMetas pedido = Cliente.pedidoDeMetasDeExemplo ();
+
+                    servidor.receba (pedido);
+                    Comunicado comunicado = null;
+                    do
+                    {
+                        comunicado = (Comunicado)servidor.espie ();
+                    }
+                    while (!(comunicado instanceof PrioridadeDeMetas) && !(comunicado instanceof Erro));
+                    comunicado = (Comunicado)servidor.envie ();
+
+                    if (comunicado instanceof Erro)
+                        System.out.println ("ERRO do servidor: "+comunicado+"\n");
+                    else
+                        Cliente.mostre ((PrioridadeDeMetas)comunicado, pedido);
                 }
             }
             catch (Exception erro)
@@ -139,206 +167,114 @@ public class Cliente
         {}
 
         System.out.println ("Obrigado por usar este programa!");
-        System.exit (0);
+        System.exit(0);
     }
 
-    // Le o arquivo inteiro como um texto so.
-    private static String lerArquivo (String nome) throws Exception
+    // Tres espacos livres nos proximos dias e tres tarefas, pedindo tambem a alocacao.
+    private static PedidoDeRanking pedidoDeRankingDeExemplo () throws Exception
     {
-        BufferedReader arquivo = new BufferedReader (new FileReader (nome));
-        String ret = "";
-        String linha = null;
+        DataHora agora = DataHora.agora (-3*3600);
 
-        while ((linha = arquivo.readLine ()) != null)
-            ret = ret + linha + "\n";
+        ArrayList<EspacoLivre> espacos = new ArrayList<EspacoLivre> ();
+        espacos.add (new EspacoLivre ("e1", agora.maisMinutos(60),      agora.maisMinutos(180)));
+        espacos.add (new EspacoLivre ("e2", agora.maisMinutos(24*60),   agora.maisMinutos(24*60+90)));
+        espacos.add (new EspacoLivre ("e3", agora.maisMinutos(2*24*60), agora.maisMinutos(2*24*60+60)));
 
-        arquivo.close ();
-        return ret;
+        ArrayList<Tarefa> tarefas = new ArrayList<Tarefa> ();
+        tarefas.add (new Tarefa ("t1", "Lista de Grafos",  "estudos", "exercicio", 8,  agora.maisMinutos(3*24*60),  90,  3, 4, "pendente"));
+        tarefas.add (new Tarefa ("t2", "Prova de Calculo", "estudos", "prova",     10, agora.maisMinutos(5*24*60),  120, 5, 5, "pendente"));
+        tarefas.add (new Tarefa ("t3", "Consulta medica",  "pessoal", "outro",     5,  agora.maisMinutos(2*24*60),  30,  null, null, "pendente"));
+
+        return new PedidoDeRanking (agora, Preferencias.padrao(), espacos, tarefas, 5, true);
     }
 
-    // Espera a resposta do servidor: a tratadora tambem le a mesma conexao, entao primeiro se espia e depois se retira a linha.
-    private static String esperarResposta (Parceiro servidor) throws Exception
+    private static PedidoDeMetas pedidoDeMetasDeExemplo () throws Exception
     {
-        String resposta = null;
-        do
-        {
-            resposta = servidor.espie ();
-        }
-        while (resposta == null);
+        DataHora agora = DataHora.agora (-3*3600);
 
-        return servidor.envie ();
+        ArrayList<Meta> metas = new ArrayList<Meta> ();
+        metas.add (new Meta ("m1", "Entregar o projeto final",  "projeto",    "alta",  20, agora.maisMinutos(34*24*60)));
+        metas.add (new Meta ("m2", "Revisar calculo",           "geral",      "baixa", 0,  agora.maisMinutos(100*24*60)));
+        metas.add (new Meta ("m3", "Estudar 10 horas por semana","habito",    "media", 50, null));
+        metas.add (new Meta ("m4", "Apresentar o seminario",    "disciplina", "media", 10, agora.maisMinutos(3*24*60)));
+
+        return new PedidoDeMetas (agora, metas, 3);
     }
 
-    // Verdadeiro se a linha e o comunicado de desligamento que o servidor manda ao ser desativado.
-    public static boolean ehComunicadoDeDesligamento (String linha)
+    private static String tituloDaTarefa (PedidoDeRanking pedido, String id)
     {
-        try
-        {
-            return "comunicadoDeDesligamento".equals (Campos.comoObjeto (Json.ler (linha), "comunicado").get ("tipo"));
-        }
-        catch (Exception erro)
-        {
-            return false; // nao e JSON (ex.: resposta de texto a OLA)
-        }
+        for (Tarefa tarefa:pedido.getTarefas())
+            if (tarefa.getId().equals(id))
+                return tarefa.getTitulo();
+
+        return id;
     }
 
-    // O texto do item da lista cujo "id" e o indicado (ou o proprio id, se nao houver titulo).
-    private static String tituloDoItem (ArrayList<Object> itens, Object id) throws Exception
+    private static void mostre (Ranking ranking, PedidoDeRanking pedido)
     {
-        for (Object item : itens)
+        for (RankingDoEspaco rankingDoEspaco:ranking.getPorEspaco())
         {
-            Objeto objeto = Campos.comoObjeto (item, "item");
+            for (EspacoLivre espaco:pedido.getEspacos())
+                if (espaco.getId().equals(rankingDoEspaco.getEspacoId()))
+                    System.out.println ("Espaco "+espaco.getId()+"  ["+espaco.getInicio()+" ate "+espaco.getFim()+"]");
 
-            if (String.valueOf (objeto.get ("id")).equals (String.valueOf (id)))
-                return String.valueOf (objeto.get ("titulo"));
-        }
-
-        return String.valueOf (id);
-    }
-
-    // Os dois horarios do espaco com o id indicado, ex.: "2026-10-27T14:00:00-03:00 ate 2026-10-27T16:00:00-03:00".
-    private static String horarioDoEspaco (ArrayList<Object> espacos, Object id) throws Exception
-    {
-        for (Object item : espacos)
-        {
-            Objeto espaco = Campos.comoObjeto (item, "espaco");
-
-            if (String.valueOf (espaco.get ("id")).equals (String.valueOf (id)))
-                return espaco.get ("inicio") + " ate " + espaco.get ("fim");
-        }
-
-        return "null";
-    }
-
-    // Alocação decidida pelo servidor (quando o pedido traz "alocar": true).
-    private static void mostrarAlocacao (Objeto resposta, ArrayList<Object> tarefas) throws Exception
-    {
-        System.out.println ("Alocacao sugerida:");
-
-        ArrayList<Object> sessoes = (ArrayList<Object>) resposta.get ("alocacao");
-
-        if (sessoes.size () == 0)
-            System.out.println ("   (nenhuma sessao)");
-
-        for (Object s : sessoes)
-        {
-            Objeto sessao = Campos.comoObjeto (s, "sessao");
-            System.out.printf ("   %s ate %s  %-36s %d min  (faltam %d min)%n",
-                               sessao.get ("inicio"), sessao.get ("fim"),
-                               tituloDoItem (tarefas, sessao.get ("tarefaId")),
-                               ((Double) sessao.get ("minutos")).intValue (),
-                               ((Double) sessao.get ("minutosRestantes")).intValue ());
-        }
-
-        ArrayList<Object> pendentes = (ArrayList<Object>) resposta.get ("semAlocacao");
-
-        for (Object p : pendentes)
-        {
-            Objeto pendente = Campos.comoObjeto (p, "pendente");
-            System.out.println ("   ! " + tituloDoItem (tarefas, pendente.get ("tarefaId")) + ": " + pendente.get ("motivo")
-                                + " (faltam " + ((Double) pendente.get ("minutosRestantes")).intValue () + " min)");
-        }
-
-        if (Boolean.TRUE.equals (resposta.get ("alocacaoTruncada")))
-            System.out.println ("   (alocacao truncada no limite de sessoes)");
-
-        System.out.println ();
-    }
-
-    // Prioridade das metas: da mais para a menos urgente, a meta foco e as datas sugeridas para os marcos.
-    private static void mostrarMetas (Objeto resposta, Objeto pedido) throws Exception
-    {
-        ArrayList<Object> metas = Campos.lista (pedido, "metas", Integer.MAX_VALUE);
-
-        System.out.println ("Metas, da mais para a menos urgente:");
-
-        int posicao = 1;
-        for (Object r : Campos.lista (resposta, "ranking", Integer.MAX_VALUE))
-        {
-            Objeto item = Campos.comoObjeto (r, "meta");
-            Objeto comp = Campos.comoObjeto (item.get ("composicao"), "composicao");
-            System.out.printf ("   %d. %-36s nota %.3f  (urg %.2f, lac %.2f, imp %.2f)%s%n",
-                               posicao++, tituloDoItem (metas, item.get ("metaId")),
-                               (Double) item.get ("nota"), (Double) comp.get ("urgencia"),
-                               (Double) comp.get ("lacuna"), (Double) comp.get ("importancia"),
-                               Boolean.TRUE.equals (item.get ("atrasada")) ? "  [atrasada]" : "");
-        }
-
-        if (resposta.get ("foco") == null)
-        {
-            System.out.println ("   (nenhuma meta ativa)\n");
-            return;
-        }
-
-        System.out.println ("Meta foco: " + tituloDoItem (metas, resposta.get ("foco")));
-
-        ArrayList<Object> datas = (ArrayList<Object>) resposta.get ("datasDosMarcos");
-
-        if (datas.size () == 0)
-            System.out.println ("   (sem datas sugeridas: habito ou meta sem prazo)");
-
-        for (Object d : datas)
-            System.out.println ("   marco ate " + d);
-
-        System.out.println ();
-    }
-
-    private static void mostrar (Objeto resposta, Objeto pedido) throws Exception
-    {
-        if ("erro".equals (resposta.get ("tipo")))
-        {
-            System.out.println ("ERRO do servidor: " + resposta.get ("mensagem") + "\n");
-            return;
-        }
-
-        if ("prioridadeDeMetas".equals (resposta.get ("tipo")))
-        {
-            mostrarMetas (resposta, pedido);
-            return;
-        }
-
-        ArrayList<Object> tarefas  = Campos.lista (pedido, "tarefas", Integer.MAX_VALUE);
-        ArrayList<Object> espacos  = Campos.lista (pedido, "espacos", Integer.MAX_VALUE);
-
-        for (Object r : Campos.lista (resposta, "porEspaco", Integer.MAX_VALUE))
-        {
-            Objeto ranking = Campos.comoObjeto (r, "ranking");
-            System.out.println ("Espaco " + ranking.get ("espacoId") + "  [" + horarioDoEspaco (espacos, ranking.get ("espacoId")) + "]");
-
-            ArrayList<Object> candidatos = (ArrayList<Object>) ranking.get ("candidatos");
-
-            if (candidatos.size () == 0)
+            if (rankingDoEspaco.getCandidatos().size()==0)
                 System.out.println ("   (nenhum candidato)");
 
-            int posicao = 1;
-            for (Object c : candidatos)
-            {
-                Objeto candidato = Campos.comoObjeto (c, "candidato");
-                Objeto comp = Campos.comoObjeto (candidato.get ("composicao"), "composicao");
-                System.out.printf ("   %d. %-36s nota %.3f  (urg %.2f, imp %.2f, enc %.2f)  %d min%s%n",
-                                   posicao++, tituloDoItem (tarefas, candidato.get ("tarefaId")),
-                                   (Double) candidato.get ("nota"), (Double) comp.get ("urgencia"),
-                                   (Double) comp.get ("importancia"), (Double) comp.get ("encaixe"),
-                                   ((Double) candidato.get ("minutosNoEspaco")).intValue (),
-                                   Boolean.TRUE.equals (candidato.get ("parcial")) ? "  [parcial]" : "");
-            }
+            int posicao=1;
+            for (Candidato candidato:rankingDoEspaco.getCandidatos())
+                System.out.printf ("   %d. %-20s nota %.3f  (urg %.2f, imp %.2f, enc %.2f)  %d min%s%n",
+                                   posicao++, tituloDaTarefa(pedido,candidato.getTarefaId()), candidato.getNota(),
+                                   candidato.getUrgencia(), candidato.getImportancia(), candidato.getEncaixe(),
+                                   candidato.getMinutosNoEspaco(), candidato.getParcial() ? "  [parcial]" : "");
 
             System.out.println ();
         }
 
-        if (resposta.get ("alocacao") instanceof ArrayList)
-            mostrarAlocacao (resposta, tarefas);
-
-        ArrayList<Object> sem = (ArrayList<Object>) resposta.get ("semEspaco");
-
-        if (sem.size () != 0)
+        if (ranking.getAlocacao()!=null)
         {
-            System.out.println ("Sem espaco:");
-            for (Object s : sem)
-            {
-                Objeto item = Campos.comoObjeto (s, "tarefa");
-                System.out.println ("   - " + tituloDoItem (tarefas, item.get ("tarefaId")) + " (" + item.get ("motivo") + ")");
-            }
+            System.out.println ("Alocacao sugerida:");
+
+            for (SessaoAlocada sessao:ranking.getAlocacao().getSessoes())
+                System.out.printf ("   %s ate %s  %-20s %d min  (faltam %d min)%n",
+                                   sessao.getInicio(), sessao.getFim(), tituloDaTarefa(pedido,sessao.getTarefaId()),
+                                   sessao.getMinutos(), sessao.getMinutosRestantes());
+
+            for (TarefaSemAlocacao pendente:ranking.getAlocacao().getSemAlocacao())
+                System.out.println ("   ! "+tituloDaTarefa(pedido,pendente.getTarefaId())+": "+pendente.getMotivo()+" (faltam "+pendente.getMinutosRestantes()+" min)");
+
+            System.out.println ();
         }
+
+        for (TarefaSemEspaco sem:ranking.getSemEspaco())
+            System.out.println ("Sem espaco: "+tituloDaTarefa(pedido,sem.getTarefaId())+" ("+sem.getMotivo()+")");
+    }
+
+    private static void mostre (PrioridadeDeMetas prioridade, PedidoDeMetas pedido)
+    {
+        System.out.println ("Metas, da mais para a menos urgente:");
+
+        int posicao=1;
+        for (NotaDeMeta nota:prioridade.getRanking())
+        {
+            String titulo=nota.getMetaId();
+            for (Meta meta:pedido.getMetas())
+                if (meta.getId().equals(nota.getMetaId()))
+                    titulo = meta.getTitulo();
+
+            System.out.printf ("   %d. %-28s nota %.3f  (urg %.2f, lac %.2f, imp %.2f)%s%n",
+                               posicao++, titulo, nota.getNota(), nota.getUrgencia(), nota.getLacuna(),
+                               nota.getImportancia(), nota.getAtrasada() ? "  [atrasada]" : "");
+        }
+
+        System.out.println ("Meta foco: "+prioridade.getFoco());
+
+        if (prioridade.getDatasDosMarcos().size()==0)
+            System.out.println ("   (sem datas sugeridas: habito ou meta sem prazo)");
+
+        for (String data:prioridade.getDatasDosMarcos())
+            System.out.println ("   marco ate "+data);
+
+        System.out.println ();
     }
 }

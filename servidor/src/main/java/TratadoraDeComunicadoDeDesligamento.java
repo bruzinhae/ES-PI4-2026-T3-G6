@@ -1,7 +1,6 @@
 /**
- * Fica de olho nas linhas que chegam do servidor e, se for o comunicado de desligamento,
- * avisa o usuario e encerra o cliente. Igual a do Fazedor de Continhas, mas os comunicados
- * chegam como linhas de JSON (o campo "tipo" faz o papel do instanceof).
+ * Fica de olho nos comunicados que chegam do servidor e, se for o de desligamento, avisa o usuario
+ * e encerra o cliente. Igual a do Fazedor de Continhas.
  */
 public class TratadoraDeComunicadoDeDesligamento extends Thread
 {
@@ -9,7 +8,7 @@ public class TratadoraDeComunicadoDeDesligamento extends Thread
 
     public TratadoraDeComunicadoDeDesligamento (Parceiro servidor) throws Exception
     {
-        if (servidor == null)
+        if (servidor==null)
             throw new Exception ("Servidor ausente");
 
         this.servidor = servidor;
@@ -18,28 +17,23 @@ public class TratadoraDeComunicadoDeDesligamento extends Thread
     @Override
     public void run ()
     {
-        for (;;)
+        for(;;)
         {
             try
             {
-                String linha = this.servidor.espie ();
-
-                if (linha == null)
-                {
-                    System.out.println ("\nO servidor encerrou a conexao;");
-                    System.err.println ("volte mais tarde!\n");
-                    System.exit (0);
-                }
-
-                if (Cliente.ehComunicadoDeDesligamento (linha))
+                if (this.servidor.espie() instanceof ComunicadoDeDesligamento)
                 {
                     System.out.println ("\nO servidor vai ser desligado agora;");
                     System.err.println ("volte mais tarde!\n");
-                    System.exit (0);
+                    System.exit(0);
                 }
             }
             catch (Exception erro)
-            {}
+            {
+                System.out.println ("\nA conexao com o servidor foi encerrada;");
+                System.err.println ("volte mais tarde!\n");
+                System.exit(0);
+            }
         }
     }
 }

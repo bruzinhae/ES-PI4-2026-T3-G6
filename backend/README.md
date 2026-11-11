@@ -125,7 +125,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
 - Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|verde|ambar`; conteúdos embutidos).
   `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
-- A API Node atua como cliente TCP do servidor Java de ranking. `POST /api/ranking` só encaminha o pedido autenticado:
+- A API Node atua como cliente do servidor Java de ranking, no mesmo protocolo do Fazedor de Continhas: o pedido e a resposta são objetos Java serializados, escritos e lidos pelo `servicos/serializacaoJava.js` (sem bibliotecas). `POST /api/ranking` só encaminha o pedido autenticado:
   os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
   do usuário logado (o cliente não manda dados) e usa o mesmo cliente TCP com `alocar: true`.
 - **Sugestões da grade** (`modulos/grade/`): os espaços livres são, em cada dia da semana, a faixa das 07:00 às 21:00 menos os blocos

@@ -19,13 +19,11 @@ Como no exemplo, **não há pacotes** (todas as classes ficam em `src/main/java`
 
 As peças que substituem o que a biblioteca faria:
 
-- `Objeto` é um objeto JSON (pares nome/valor em ordem); `Json` lê e escreve o texto e `Campos` confere os tipos.
-- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`); só aceita anos de 4 dígitos.
+- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`) e escreve o texto ISO-8601.
 - `Ordenador` ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável).
+- `FiltroDeComunicados` é a única peça que o exemplo não tem: ler objetos de um fluxo pode executar código de classes inesperadas, então o servidor só aceita as classes dos comunicados e limita o tamanho do que lê.
 
-Além do Fazedor de Continhas, o servidor também aceita os **comandos de texto dos exemplos do outro professor de Java** (`CLIENTESERVIDOR001` e `002`, com `SERVIDOR.java` e `CLIENTE.java`): `OLA`, `DATA`, `HORA` e `FIM`. O `CLIENTE.java` desses exemplos funciona com este servidor sem alteração (veja a seção "Comandos de texto").
-
-**Diferença em relação ao Continhas:** os comunicados viajam como **uma linha de JSON** (e não como objetos Java serializados), porque o backend Node não lê a serialização do Java. O campo `"tipo"` faz o papel do `instanceof`. Não há bibliotecas externas (o JSON é lido por `Json.java`).
+**Mesmo protocolo do Continhas:** os comunicados são **objetos Java serializados** (`ObjectOutputStream` e `ObjectInputStream`), e a `SupervisoraDeConexao` distingue os pedidos com `instanceof`. O backend em Node não tem as classes Java, então ele escreve e lê o fluxo de bytes da serialização por conta própria (`backend/src/servicos/serializacaoJava.js`). Para isso, cada classe que viaja declara `serialVersionUID = 1L`.
 
 ## Como o servidor se encaixa
 
@@ -49,8 +47,6 @@ java -cp out Servidor 3100       # outra porta
 java -cp out Servidor 3100 0.0.0.0   # (cuidado) escutar em todas as interfaces
 ```
 
-Para o `CLIENTE.java` dos exemplos do outro professor (porta fixa 5000), inicie o servidor passando a porta: `java -cp out Servidor 5000`.
-
 Para desativar, digite `desativar` no console. Os clientes conectados recebem um `comunicadoDeDesligamento`.
 
 Para testar sem o Node, com o cliente de console (um menu, como o do Fazedor de Continhas):
@@ -60,9 +56,9 @@ java -cp out Cliente                  # localhost, porta 3000
 java -cp out Cliente localhost 3100   # outra porta
 ```
 
-As opções são `R` (pedido de ranking e alocação, lido de um arquivo JSON; mostra o ranking em tabela), `M` (pedido de metas), `O`, `D` e `H` (comandos de texto `OLA`, `DATA` e `HORA`) e `T` (terminar). Nos pedidos, Enter usa o arquivo de exemplo (`exemplos/pedido-semana-alocacao.json` ou `exemplos/pedido-metas.json`). Se o servidor for desativado com o cliente aberto, a `TratadoraDeComunicadoDeDesligamento` avisa e encerra o cliente.
+As opções são `R` (pedido de ranking com alocação, montado com dados de exemplo; mostra o ranking e a alocação), `M` (pedido de metas, também de exemplo) e `T` (terminar). Se o servidor for desativado com o cliente aberto, a `TratadoraDeComunicadoDeDesligamento` avisa e encerra o cliente.
 
-`exemplos/pedido-semana.json` foi montado com as tarefas e disciplinas do dicionário de dados. A compilação e execução do servidor não dependem de Maven nem de bibliotecas externas.
+Os arquivos de `exemplos/` são corpos de exemplo para a rota `POST /api/ranking` da API Node (veja "Integração com a API Node"); o `Cliente` de console não os lê. A compilação e execução do servidor não dependem de Maven nem de bibliotecas externas.
 
 ## Testes automatizados
 
@@ -76,13 +72,26 @@ O relatório para a atividade de Teste OO está em [`RELATORIO-TESTES-OO.md`](RE
 
 ## Protocolo
 
-TCP, texto UTF-8, **uma mensagem por linha** (termina em `\n`). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. Linhas em branco são ignoradas. Limites: 2 MB por linha, 2000 espaços e 2000 tarefas por pedido, conexão parada por mais de 5 minutos é encerrada.
+TCP, com os comunicados como **objetos Java serializados** (cabeçalho do fluxo, depois um objeto por mensagem). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. Limites: 8 MB de fluxo por conexão e só as classes dos comunicados (`FiltroDeComunicados`); conexão parada por mais de 5 minutos é encerrada. O servidor valida cada pedido depois de lê-lo (`valide()`, com as mesmas mensagens de antes) e responde com um `Erro` se algo estiver fora do intervalo.
+
+Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a resposta que ela devolve; o backend transforma esse JSON nos comunicados (`PedidoDeRanking` e `PedidoDeMetas`) e converte a resposta (`Ranking` e `PrioridadeDeMetas`) de volta. As tabelas de campos valem para os dois lados.
+
+| Comunicado | Sentido | Campos |
+| --- | --- | --- |
+| `PedidoDeRanking` | cliente → servidor | `agora`, `preferencias`, `espacos`, `tarefas`, `limite`, `alocar` |
+| `Ranking` | servidor → cliente | `porEspaco`, `semEspaco` e, com `alocar`, a `Alocacao` |
+| `PedidoDeMetas` | cliente → servidor | `agora`, `metas`, `quantidadeDeMarcos` |
+| `PrioridadeDeMetas` | servidor → cliente | `ranking`, `foco`, `datasDosMarcos` |
+| `PedidoParaSair` | cliente → servidor | Encerra a conexão. |
+| `Erro` | servidor → cliente | `mensagem`. Pedido fora do intervalo ou falha no cálculo. A conexão continua aberta. |
+| `ComunicadoDeDesligamento` | servidor → cliente | O comando `desativar` foi dado no servidor. |
+
+Datas viajam como `DataHora` (segundos, nanossegundos e fuso). O Node converte o texto ISO-8601 em `DataHora` antes de enviar e de volta ao receber.
 
 ### `pedidoDeRanking` (cliente → servidor)
 
 ```json
 {
-  "tipo": "pedidoDeRanking",
   "agora": "2026-10-27T09:00:00-03:00",
   "preferencias": { "janelaFoco": "tarde", "focoMatinal": true, "duracaoMinutos": 50 },
   "limite": 5,
@@ -194,43 +203,12 @@ O ranking sozinho pode indicar a mesma tarefa como primeira de vários espaços.
 
 Para ver no console: opção `R` do `Cliente` com `exemplos/pedido-semana-alocacao.json`.
 
-### Comandos de texto (estilo dos exemplos das aulas)
-
-Linhas que não começam com `{` são tratadas como **comandos de texto**, sem JSON. A resposta é **uma linha de texto simples**. Não diferenciam maiúsculas de minúsculas, e espaços nas pontas são ignorados.
-
-| Comando | Resposta |
-| --- | --- |
-| `OLA` | `EU SOU O SERVIDOR DE RANKING DO ACAISTUDY. COMO POSSO AJUDA-LO?` |
-| `DATA` | `DATA:dd/MM/yyyy` (data do servidor, ex.: `DATA:04/11/2026`) |
-| `HORA` | `HORA:HH:mm:ss` (hora do servidor, ex.: `HORA:19:12:35`) |
-| `FIM` | Sem resposta; o servidor encerra a conexão. |
-
-Qualquer outro texto recebe um `erro` em JSON orientando os comandos válidos. Texto e JSON podem ser misturados na mesma conexão, e `OLA` serve como **teste de vida** do servidor.
-
-```bash
-java -cp out Cliente                         # nosso cliente de console, opção O
-```
-
-> Os comandos `COTACAODOLAR` e `COTACAOEURO` do exemplo `002` não foram implementados: dependem de uma API externa e não fazem parte do cálculo de ranking.
-
-**Comparação com os exemplos `001` e `002`:**
-
-| | Exemplos `001`/`002` | Este servidor |
-| --- | --- | --- |
-| Transporte | TCP, linhas de texto, `BufferedReader`/`PrintWriter` | O mesmo |
-| Porta | 5000 fixa | 3000 por padrão; use a porta 5000 para o cliente deles |
-| Uma mensagem por conexão | Sim, e o servidor fecha | Aceita, e também várias na mesma conexão |
-| Atendimento | Um cliente por vez | Uma thread por cliente |
-| Escuta | Todas as interfaces | Só localhost (o segundo argumento muda) |
-| Comandos | `OLA`, `DATA`, `HORA`, cotações | `OLA`, `DATA`, `HORA`, `FIM` e o pedido de ranking em JSON |
-
 ### `pedidoDeMetas` (cliente → servidor) e `prioridadeDeMetas` (servidor → cliente)
 
 Usado pela Sofia na tela de Metas: o servidor decide qual meta merece atenção primeiro e propõe datas para os marcos novos dela. O Gemini só escreve os textos.
 
 ```json
 {
-  "tipo": "pedidoDeMetas",
   "agora": "2026-11-11T15:00:00-03:00",
   "quantidadeDeMarcos": 3,
   "metas": [
@@ -276,14 +254,6 @@ nota = 0,45 × urgência + 0,35 × lacuna + 0,20 × importância        (cada pa
 
 Desempate: prazo mais cedo (sem prazo por último), prioridade maior, `id`. As datas dividem o caminho entre hoje e o prazo em partes iguais, em dias diferentes sempre que couber; meta atrasada recebe hoje. O código está em `CalculadoraDeMetas.java`.
 
-### Outros comunicados
-
-| Tipo | Sentido | Quando |
-| --- | --- | --- |
-| `pedidoParaSair` | cliente → servidor | Encerra a conexão (sem resposta). Fechar o socket também funciona. |
-| `erro` (`{ "mensagem": "..." }`) | servidor → cliente | Pedido inválido (JSON quebrado, tipo desconhecido, campo fora do intervalo...). A conexão continua aberta, e uma mensagem grande demais fecha a conexão. |
-| `comunicadoDeDesligamento` | servidor → cliente | O comando `desativar` foi dado no servidor. |
-
 ## Critério de prioridade
 
 ```text
@@ -307,32 +277,22 @@ Os pesos são constantes em `CalculadoraDeRanking.java`.
 
 ## Uso a partir do Node
 
-```js
-import net from 'node:net';
+O backend já traz o cliente pronto (`backend/src/servicos/clienteRanking.js`, com o codec de serialização em `serializacaoJava.js`):
 
-function pedirRanking(pedido, porta = 3000) {
-    return new Promise((resolve, reject) => {
-        const socket = net.connect(porta, '127.0.0.1');
-        let buffer = '';
-        socket.setEncoding('utf8');
-        socket.on('connect', () => socket.write(JSON.stringify({ tipo: 'pedidoDeRanking', ...pedido }) + '\n'));
-        socket.on('data', (parte) => {
-            buffer += parte;
-            if (!buffer.includes('\n')) return;
-            socket.end();
-            const resposta = JSON.parse(buffer.split('\n')[0]);
-            resposta.tipo === 'erro' ? reject(new Error(resposta.mensagem)) : resolve(resposta);
-        });
-        socket.on('error', reject);
-    });
-}
+```js
+import { pedirRanking, pedirPrioridadeDeMetas } from './servicos/clienteRanking.js';
+
+const ranking = await pedirRanking({ agora, espacos, tarefas, alocar: true });
+const metas = await pedirPrioridadeDeMetas({ agora, metas: [...] });
 ```
+
+Os pedidos são os mesmos JSON descritos acima (datas em ISO-8601 com fuso), e as respostas voltam como JSON. Os erros viram `ErroApi`: 400 para pedido inválido, 502 para falha no cálculo, 503 para servidor fora do ar e 504 para demora.
 
 ## Integração com a API Node
 
-A API Node funciona como cliente TCP e disponibiliza `POST /api/ranking` (autenticado). Envie
+A API Node funciona como cliente do servidor e disponibiliza `POST /api/ranking` (autenticado). Envie
 `espacos` e `tarefas`, com `agora`, `preferencias` e `limite` opcionais; o formato é o mesmo
-do pedido de ranking descrito acima, sem o campo `tipo` (a API o acrescenta ao encaminhar).
+do pedido de ranking descrito acima, sem o campo `tipo`.
 A resposta da rota mantém o formato `{ "tipo": "ranking", "porEspaco": [...], "semEspaco": [...] }`.
 
 Por padrão, a API conecta em `127.0.0.1:3000`, que corresponde à configuração padrão deste

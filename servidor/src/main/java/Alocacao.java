@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -5,8 +6,10 @@ import java.util.ArrayList;
  *
  * truncada true se a alocacao parou ao atingir o limite de sessoes por pedido
  */
-public class Alocacao implements Cloneable
+public class Alocacao implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private ArrayList<SessaoAlocada>     sessoes;
     private ArrayList<TarefaSemAlocacao> semAlocacao;
     private boolean                      truncada;
@@ -38,24 +41,6 @@ public class Alocacao implements Cloneable
         return this.truncada;
     }
 
-    // Os campos que a resposta ao pedido de ranking ganha quando o pedido pede a alocacao.
-    public Objeto paraObjeto ()
-    {
-        ArrayList<Object> itens = new ArrayList<Object> ();
-        for (SessaoAlocada sessao : this.sessoes)
-            itens.add (sessao.paraObjeto ());
-
-        ArrayList<Object> sem = new ArrayList<Object> ();
-        for (TarefaSemAlocacao tarefa : this.semAlocacao)
-            sem.add (tarefa.paraObjeto ());
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("alocacao", itens);
-        ret.guarde ("semAlocacao", sem);
-        if (this.truncada)
-            ret.guarde ("alocacaoTruncada", true);
-        return ret;
-    }
 
     @Override
     public String toString ()

@@ -1,90 +1,57 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
-/**
- * A "outra ponta" de uma conexão: embrulha o socket e conversa em comunicados.
- *
- * Mesma ideia do Parceiro do Fazedor de Continhas (receba, envie, adeus), só que os
- * comunicados trafegam como linhas de texto JSON em vez de objetos serializados.
- */
 public class Parceiro
 {
-    // Uma linha maior que isto é recusada (protege a memória do servidor).
-    public static final int TAMANHO_MAXIMO_DA_LINHA = 2_000_000;
+    private Socket             conexao;
+    private ObjectInputStream  receptor;
+    private ObjectOutputStream transmissor;
+    
+    private Comunicado proximoComunicado=null;
 
-    // Conexão parada por mais que isto é encerrada.
-    public static final int TEMPO_MAXIMO_OCIOSO_MS = 5 * 60 * 1000;
+    private Semaphore mutEx = new Semaphore (1,true);
 
-    private Socket         conexao;
-    private BufferedReader receptor;
-    private PrintWriter    transmissor;
-
-    private String proximaLinha = null;
-
-    private Semaphore mutEx = new Semaphore (1, true);
-
-    public Parceiro (Socket conexao) throws Exception
+    public Parceiro (Socket             conexao,
+                     ObjectInputStream  receptor,
+                     ObjectOutputStream transmissor)
+                     throws Exception // se parametro nulos
     {
-        if (conexao == null)
+        if (conexao==null)
             throw new Exception ("Conexao ausente");
 
+        if (receptor==null)
+            throw new Exception ("Receptor ausente");
+
+        if (transmissor==null)
+            throw new Exception ("Transmissor ausente");
+
+        this.conexao     = conexao;
+        this.receptor    = receptor;
+        this.transmissor = transmissor;
+    }
+
+    public void receba (Comunicado x) throws Exception
+    {
         try
         {
-            conexao.setSoTimeout (TEMPO_MAXIMO_OCIOSO_MS);
-            this.receptor    = new BufferedReader (new InputStreamReader (conexao.getInputStream (), StandardCharsets.UTF_8));
-            this.transmissor = new PrintWriter (new OutputStreamWriter (conexao.getOutputStream (), StandardCharsets.UTF_8), false);
+            this.transmissor.writeObject (x);
+            this.transmissor.flush       ();
         }
         catch (IOException erro)
         {
-            throw new Exception ("Erro ao abrir os fluxos da conexao");
+            throw new Exception ("Erro de transmissao");
         }
-
-        this.conexao = conexao;
     }
 
-    // Envia um comunicado (uma linha). Chamadas concorrentes (resposta x desligamento) não se misturam.
-    public synchronized void receba (Comunicado comunicado) throws Exception
-    {
-        if (comunicado == null)
-            throw new Exception ("Comunicado ausente");
-
-        this.transmissor.print (comunicado.paraJson ());
-        this.transmissor.print ('\n');
-        this.transmissor.flush ();
-
-        if (this.transmissor.checkError ())
-            throw new Exception ("Erro de transmissao");
-    }
-
-    // Envia uma resposta em texto simples (uma linha), como nos comandos OLA, DATA e HORA.
-    public synchronized void recebaTexto (String texto) throws Exception
-    {
-        if (texto == null)
-            throw new Exception ("Texto ausente");
-
-        this.transmissor.print (texto.replace ('\n', ' ').replace ('\r', ' '));
-        this.transmissor.print ('\n');
-        this.transmissor.flush ();
-
-        if (this.transmissor.checkError ())
-            throw new Exception ("Erro de transmissao");
-    }
-
-    // Espia a proxima linha enviada pela outra ponta, sem tira-la da fila (envie a tira).
-    // Devolve null quando a outra ponta fechou a conexao.
-    public String espie () throws Exception
+    public Comunicado espie () throws Exception
     {
         try
         {
-            this.mutEx.acquireUninterruptibly ();
-            if (this.proximaLinha == null) this.proximaLinha = this.lerLinha ();
-            return this.proximaLinha;
+            this.mutEx.acquireUninterruptibly();
+            if (this.proximoComunicado==null) this.proximoComunicado = (Comunicado)this.receptor.readObject();
+            return this.proximoComunicado;
         }
         catch (Exception erro)
         {
@@ -92,49 +59,20 @@ public class Parceiro
         }
         finally
         {
-            this.mutEx.release ();
+            this.mutEx.release();
         }
     }
 
-    // Le a proxima linha enviada pelo cliente (a que o espie ja tiver lido, se houver).
-    // Devolve null quando o cliente fechou a conexao.
-    public String envie () throws Exception
+    public Comunicado envie () throws Exception
     {
         try
         {
-            if (this.proximaLinha == null) this.proximaLinha = this.lerLinha ();
-            String ret = this.proximaLinha;
-            this.proximaLinha = null;
+            if (this.proximoComunicado==null) this.proximoComunicado = (Comunicado)this.receptor.readObject();
+            Comunicado ret         = this.proximoComunicado;
+            this.proximoComunicado = null;
             return ret;
         }
         catch (Exception erro)
-        {
-            throw new Exception (erro.getMessage () == null ? "Erro de recepcao" : erro.getMessage ());
-        }
-    }
-
-    private String lerLinha () throws Exception
-    {
-        StringBuffer linha = new StringBuffer ();
-
-        try
-        {
-            for (;;)
-            {
-                int c = this.receptor.read ();
-
-                if (c == -1)
-                    return linha.length () == 0 ? null : linha.toString ();
-                if (c == '\n')
-                    return linha.toString ();
-                if (c != '\r')
-                    linha.append ((char) c);
-
-                if (linha.length () > TAMANHO_MAXIMO_DA_LINHA)
-                    throw new Exception ("Mensagem grande demais");
-            }
-        }
-        catch (IOException erro)
         {
             throw new Exception ("Erro de recepcao");
         }
@@ -144,9 +82,9 @@ public class Parceiro
     {
         try
         {
-            this.transmissor.close ();
-            this.receptor.close ();
-            this.conexao.close ();
+            this.transmissor.close();
+            this.receptor   .close();
+            this.conexao    .close();
         }
         catch (Exception erro)
         {

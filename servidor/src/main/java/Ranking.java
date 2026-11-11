@@ -2,13 +2,16 @@ import java.util.ArrayList;
 
 /**
  * Resposta ao PedidoDeRanking: para cada espaço livre, o vetor de candidatos ordenado por nota
- * (maior primeiro), e a lista das tarefas que não couberam em nenhum espaço.
+ * (maior primeiro), e a lista das tarefas que não couberam em nenhum espaço. Quando o pedido pede a
+ * alocação, vem também a Alocacao (senão ela é null).
  */
 public class Ranking extends Comunicado
 {
+    private static final long serialVersionUID = 1L;
+
     private ArrayList<RankingDoEspaco> porEspaco;
     private ArrayList<TarefaSemEspaco> semEspaco;
-    private Alocacao                   alocacao; // null quando o pedido não pediu alocação
+    private Alocacao                   alocacao;
 
     public Ranking (ArrayList<RankingDoEspaco> porEspaco, ArrayList<TarefaSemEspaco> semEspaco) throws Exception
     {
@@ -27,37 +30,9 @@ public class Ranking extends Comunicado
         this.alocacao  = alocacao;
     }
 
-    @Override
-    public String tipo ()
-    {
-        return "ranking";
-    }
-
-    @Override
-    protected Objeto campos ()
-    {
-        ArrayList<Object> espacos = new ArrayList<Object> ();
-        for (RankingDoEspaco ranking : this.porEspaco)
-            espacos.add (ranking.paraObjeto ());
-
-        ArrayList<Object> sem = new ArrayList<Object> ();
-        for (TarefaSemEspaco tarefa : this.semEspaco)
-            sem.add (tarefa.paraObjeto ());
-
-        Objeto ret = new Objeto ();
-        ret.guarde ("porEspaco", espacos);
-        ret.guarde ("semEspaco", sem);
-
-        if (this.alocacao != null)
-        {
-            Objeto campos = this.alocacao.paraObjeto ();
-
-            for (int i = 0; i < campos.getQuantidade (); i++)
-                ret.guarde (campos.getNome (i), campos.getValor (i));
-        }
-
-        return ret;
-    }
+    public ArrayList<RankingDoEspaco> getPorEspaco ()  { return this.porEspaco; }
+    public ArrayList<TarefaSemEspaco> getSemEspaco ()  { return this.semEspaco; }
+    public Alocacao getAlocacao ()                     { return this.alocacao; }
 
     @Override
     public String toString ()

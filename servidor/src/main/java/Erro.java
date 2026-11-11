@@ -1,6 +1,8 @@
-/** Resposta a um comunicado inválido. A conexão continua aberta (exceto se a mensagem era grande demais). */
+/** Resposta a um comunicado inválido. A conexão continua aberta. */
 public class Erro extends Comunicado
 {
+    private static final long serialVersionUID = 1L;
+
     private String mensagem;
 
     public Erro (String mensagem) throws Exception
@@ -11,18 +13,9 @@ public class Erro extends Comunicado
         this.mensagem = mensagem;
     }
 
-    @Override
-    public String tipo ()
+    public String getMensagem ()
     {
-        return "erro";
-    }
-
-    @Override
-    protected Objeto campos ()
-    {
-        Objeto objeto = new Objeto ();
-        objeto.guarde ("mensagem", this.mensagem);
-        return objeto;
+        return this.mensagem;
     }
 
     @Override

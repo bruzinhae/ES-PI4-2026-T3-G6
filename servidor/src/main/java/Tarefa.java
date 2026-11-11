@@ -1,3 +1,5 @@
+import java.io.*;
+
 /**
  * Tarefa pendente candidata a ser encaixada na grade.
  *
@@ -8,8 +10,10 @@
  * dificuldade      da disciplina (1 a 5), ou null
  * peso             da disciplina (1 a 5), ou null
  */
-public class Tarefa implements Cloneable
+public class Tarefa implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     private String   id;
     private String   titulo;
     private String   categoria;
