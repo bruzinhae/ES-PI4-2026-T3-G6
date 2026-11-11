@@ -1067,7 +1067,7 @@ h2 {
     gap: 8px;
 }
 
-.sugestao-titulo h4 {
+.sugestao-titulo h3 {
     font-family: var(--fonte-titulo);
     font-size: 16px;
     font-weight: 700;
@@ -1140,6 +1140,14 @@ h2 {
 
 .botao-aprovar:hover {
     background: #3e2852;
+}
+
+#botao-ajustar-grade {
+    padding: 10px 22px;
+
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
 }
 
 
