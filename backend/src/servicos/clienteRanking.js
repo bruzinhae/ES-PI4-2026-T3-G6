@@ -3,7 +3,7 @@ import { env } from '../config/env.js';
 import { ErroApi } from '../utils/ErroApi.js';
 
 const TAMANHO_MAXIMO_DA_LINHA = 2_000_000;
-const CAMPOS_DO_PEDIDO = ['agora', 'preferencias', 'limite', 'espacos', 'tarefas'];
+const CAMPOS_DO_PEDIDO = ['agora', 'preferencias', 'limite', 'alocar', 'espacos', 'tarefas'];
 
 function validarPedido(pedido) {
     if (!pedido || typeof pedido !== 'object' || Array.isArray(pedido)) {
@@ -13,6 +13,10 @@ function validarPedido(pedido) {
     const desconhecido = Object.keys(pedido).find((campo) => !CAMPOS_DO_PEDIDO.includes(campo));
     if (desconhecido) {
         throw new ErroApi(400, `Campo não permitido no pedido de ranking: ${desconhecido}.`);
+    }
+
+    if ('alocar' in pedido && typeof pedido.alocar !== 'boolean') {
+        throw new ErroApi(400, 'O campo "alocar" deve ser verdadeiro ou falso.');
     }
 
     for (const campo of ['espacos', 'tarefas']) {
