@@ -97,7 +97,9 @@ TCP, texto UTF-8, **uma mensagem por linha** (termina em `\n`). Pode-se mandar v
 | `agora` | não | ISO-8601 com fuso. Padrão: hora do servidor. Mandar sempre permite resultados reproduzíveis. |
 | `preferencias.janelaFoco` | não | `manha` (08:30–12:00), `tarde` (14:00–18:00) ou `noite` (19:00–22:30). Padrão `manha`. |
 | `preferencias.focoMatinal` | não | `false` ignora a janela de foco. Padrão `true`. |
-| `preferencias.duracaoMinutos` | não | 10 a 240; usada quando a tarefa não tem estimativa. Padrão 50. |
+| `preferencias.duracaoMinutos` | não | 10 a 240; usada quando a tarefa não tem estimativa e, na alocação, como tamanho máximo de cada sessão. Padrão 50. |
+| `preferencias.antifadiga` | não | Só na alocação: `true` põe uma pausa de 10 min entre sessões seguidas; `false` junta sessões seguidas da mesma tarefa. Padrão `true`. |
+| `alocar` | não | `true` pede, além do ranking, a **alocação** (ver "Alocação"). Padrão `false`: a resposta é exatamente a de antes. |
 | `limite` | não | Máximo de candidatos por espaço (1 a 100). Padrão 10. |
 | `espacos[].id`, `inicio`, `fim` | sim | `fim` depois de `inicio`; ISO-8601 com fuso. |
 | `tarefas[].id` | sim | Devolvido no ranking como `tarefaId`. |
@@ -134,9 +136,50 @@ TCP, texto UTF-8, **uma mensagem por linha** (termina em `\n`). Pode-se mandar v
 ```
 
 - `porEspaco` tem **um item por espaço enviado, na mesma ordem**; `candidatos` vem da maior para a menor nota (vazio se ninguém serve).
-- A mesma tarefa pode aparecer em vários espaços: o servidor **ranqueia, não aloca**. Escolher qual tarefa vai em qual espaço, sem repetir, é decisão de quem chama.
+- A mesma tarefa pode aparecer em vários espaços: o **ranking** só ordena os candidatos de cada espaço. Para decidir qual tarefa vai em qual espaço, sem repetir, peça a **alocação** (`"alocar": true`).
 - `parcial: true` quando a tarefa precisa de mais minutos que o espaço; `minutosNoEspaco` é o que caberia ali.
 - `semEspaco`: tarefas ativas que não são candidatas em nenhum espaço. Motivos: `sem_espacos` ou `nenhum_espaco_antes_do_prazo`.
+
+### Alocação (`"alocar": true`)
+
+O ranking sozinho pode indicar a mesma tarefa como primeira de vários espaços. Com `"alocar": true`, a resposta **mantém `porEspaco` e `semEspaco` exatamente como antes** e acrescenta a decisão final, sem tempo repetido nem sessões sobrepostas:
+
+```json
+{
+  "tipo": "ranking",
+  "porEspaco": [ ... ],
+  "semEspaco": [ ... ],
+  "alocacao": [
+    {
+      "espacoId": "e1",
+      "tarefaId": "672006000000000000000002",
+      "inicio": "2026-10-27T14:00:00-03:00",
+      "fim": "2026-10-27T14:50:00-03:00",
+      "minutos": 50,
+      "minutosRestantes": 40,
+      "nota": 0.78,
+      "composicao": { "urgencia": 0.75, "importancia": 0.74, "encaixe": 0.93 }
+    }
+  ],
+  "semAlocacao": [
+    { "tarefaId": "672006000000000000000003", "motivo": "alocacao_parcial", "minutosRestantes": 150 }
+  ]
+}
+```
+
+- `alocacao`: sessões em **ordem cronológica**. `inicio` e `fim` saem no fuso do espaço. `minutosRestantes` é o que ainda falta da tarefa depois da sessão (0 = ficou completa).
+- `semAlocacao`: tarefas que ficaram com minutos pendentes. Motivos: `sem_espacos`, `nenhum_espaco_antes_do_prazo` (nenhum espaço serve por causa do prazo), `espacos_insuficientes` (serviam, mas outras tarefas ficaram com o tempo) ou `alocacao_parcial` (alocou parte; veja `minutosRestantes`).
+- `alocacaoTruncada: true` aparece se o pedido atingiu o limite de 2000 sessões.
+
+**Como a alocação decide** (algoritmo guloso, em `ranking/AlocadoraDeSessoes.java`):
+1. Percorre os espaços em ordem cronológica.
+2. Em cada espaço, escolhe a melhor candidata (a mesma nota do ranking, calculada com os minutos que ainda faltam) e reserva uma sessão.
+3. Desconta os minutos e repete no que sobrou do espaço, até acabar o espaço ou as tarefas.
+4. Uma tarefa maior que `duracaoMinutos` vira várias sessões, em espaços diferentes se preciso. Se depois de uma sessão sobrassem menos de 15 min, a sessão absorve o resto (não há sessões minúsculas).
+5. Com `antifadiga`, há 10 min de pausa entre sessões seguidas no mesmo espaço. Sem ela, sessões seguidas da mesma tarefa são juntadas em uma só.
+6. Se os espaços enviados se sobrepõem, nenhum minuto é reservado duas vezes. A sessão sempre termina antes do prazo (tarefa atrasada pode ir em qualquer espaço).
+
+Para ver no console: `java -cp out br.faculdade.acaistudy.servidor.Cliente exemplos/pedido-semana-alocacao.json localhost 3000`.
 
 ### Comandos de texto (estilo dos exemplos das aulas)
 
@@ -232,9 +275,9 @@ servidor. No backend, configure `RANKING_HOST`, `RANKING_PORT` e `RANKING_TIMEOU
 para alterar o destino e o tempo máximo de resposta. A rota não monta os espaços livres nem
 consulta tarefas no banco: o chamador Node deve enviar esses dados no corpo da requisição.
 
-## Limitações conhecidas (versão inicial)
+## Limitações conhecidas
 
-- Só ranqueia; não faz a alocação final nem evita sobreposição entre as sessões sugeridas.
-- A preferência `antifadiga` (pausas) ainda não entra no cálculo.
-- Tarefas maiores que o espaço aparecem como parciais, mas o servidor não controla o que sobra para outro espaço.
-- Sem testes automatizados (JUnit) ainda: ficam para a issue #37.
+- A alocação é gulosa: boa para uma semana de estudo, mas não busca a combinação ótima entre todas as tarefas.
+- A pausa antifadiga é fixa (10 min). As preferências `rigidez`, `repeticaoEspacada` e `ajusteDinamico` da tela de foco ainda não entram no cálculo.
+- O servidor não guarda nada: persistir as sessões aceitas é função do backend.
+- Os testes JUnit atuais (issue #37) cobrem o protocolo e os modelos; a alocação foi validada por scripts de protocolo e ainda não tem testes JUnit próprios.
