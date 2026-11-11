@@ -34,7 +34,8 @@ import java.util.Set;
  *   4. passa ao próximo espaço.
  *
  * Preferências do usuário que entram aqui:
- *   - duracaoMinutos: tamanho máximo de cada sessão (uma tarefa grande vira várias sessões);
+ *   - duracaoMinutos: tamanho de cada sessão (uma tarefa grande vira várias; uma sessão pode passar até 14 min
+ *     quando o resto seria pequeno demais para virar outra);
  *   - antifadiga: com ela ligada, há uma pausa de 10 minutos entre sessões seguidas no mesmo espaço; desligada,
  *     sessões seguidas da mesma tarefa são juntadas em uma só.
  *
