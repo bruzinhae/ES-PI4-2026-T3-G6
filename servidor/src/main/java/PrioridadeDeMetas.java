@@ -12,23 +12,13 @@ public class PrioridadeDeMetas extends Comunicado
     private String                foco;
     private ArrayList<String>     datasDosMarcos;
 
-    public PrioridadeDeMetas (ArrayList<NotaDeMeta> ranking, String foco, ArrayList<String> datasDosMarcos) throws Exception
+    public PrioridadeDeMetas (ArrayList<NotaDeMeta> ranking, String foco, ArrayList<String> datasDosMarcos)
     {
-        if (ranking == null)
-            throw new Exception ("Ranking de metas ausente");
-        if (datasDosMarcos == null)
-            throw new Exception ("Datas dos marcos ausentes");
-
         this.ranking        = ranking;
         this.foco           = foco;
         this.datasDosMarcos = datasDosMarcos;
     }
 
-    public ArrayList<NotaDeMeta> getRanking ()      { return this.ranking; }
-    public String getFoco ()                        { return this.foco; }
-    public ArrayList<String> getDatasDosMarcos ()   { return this.datasDosMarcos; }
-
-    @Override
     public String toString ()
     {
         return "Prioridade de " + this.ranking.size () + " meta(s), foco: " + this.foco;

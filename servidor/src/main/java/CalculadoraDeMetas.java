@@ -26,8 +26,6 @@ public class CalculadoraDeMetas
     private static final double HORIZONTE_DE_URGENCIA_DIAS = 14.0;
     private static final double URGENCIA_SEM_PRAZO         = 0.1;
 
-    private CalculadoraDeMetas () {}
-
     public static PrioridadeDeMetas calcular (PedidoDeMetas pedido) throws Exception
     {
         DataHora agora = pedido.getAgora ();

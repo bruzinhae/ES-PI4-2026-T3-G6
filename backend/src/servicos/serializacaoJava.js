@@ -4,8 +4,8 @@
  * O servidor de ranking (Java) conversa por ObjectOutputStream e ObjectInputStream, como o Fazedor de
  * Continhas da disciplina. O Node não tem as classes Java, então este arquivo escreve e lê o fluxo de bytes
  * diretamente, seguindo a "Java Object Serialization Specification" (capítulo 6, "Object Serialization
- * Stream Protocol"). Só cobre o que o servidor usa: objetos comuns, ArrayList, String, Integer, Long,
- * Double e Boolean.
+ * Stream Protocol"). Só cobre o que o servidor usa: objetos comuns, ArrayList, String, Integer e os
+ * tipos básicos int, long, double e boolean.
  *
  * Valores que o escritor aceita:
  *   null, string, objeto { _c: 'NomeDaClasse', ...campos }, array (vira ArrayList) e
@@ -20,7 +20,6 @@ const TC_REFERENCE = 0x71;
 const TC_CLASSDESC = 0x72;
 const TC_OBJECT = 0x73;
 const TC_STRING = 0x74;
-const TC_ARRAY = 0x75;
 const TC_BLOCKDATA = 0x77;
 const TC_ENDBLOCKDATA = 0x78;
 const TC_RESET = 0x79;
@@ -75,7 +74,7 @@ const CLASSES = {
     flags: SC_SERIALIZABLE,
     super: null,
     campos: [
-      ['id', STRING], ['titulo', STRING], ['categoria', STRING], ['tipo', STRING], ['prioridade', 'I'], ['prazo', 'LDataHora;'],
+      ['id', STRING], ['categoria', STRING], ['tipo', STRING], ['prioridade', 'I'], ['prazo', 'LDataHora;'],
       ['minutosEstimados', INTEGER], ['dificuldade', INTEGER], ['peso', INTEGER], ['situacao', STRING],
     ],
   },
@@ -83,7 +82,7 @@ const CLASSES = {
     suid: 1n,
     flags: SC_SERIALIZABLE,
     super: null,
-    campos: [['id', STRING], ['titulo', STRING], ['tipo', STRING], ['prioridade', STRING], ['progresso', 'I'], ['prazo', 'LDataHora;']],
+    campos: [['id', STRING], ['tipo', STRING], ['prioridade', STRING], ['progresso', 'I'], ['prazo', 'LDataHora;']],
   },
 };
 
@@ -442,24 +441,9 @@ export class LeitorJava {
         return texto;
       }
       if (tag === TC_OBJECT) return this.objetoComum();
-      if (tag === TC_ARRAY) return this.vetor();
 
       throw new Error(`Marca inesperada no fluxo de objetos (0x${tag.toString(16)}).`);
     }
-  }
-
-  vetor() {
-    const desc = this.descritor();
-    const lista = [];
-    const indice = this.novoHandle(lista);
-    const quantos = this.i32();
-    const tipo = desc.nome[1];
-    for (let i = 0; i < quantos; i++) {
-      if (tipo === 'L' || tipo === '[') lista.push(this.objeto());
-      else throw new Error('Vetores de primitivos não são usados por este servidor.');
-    }
-    this.handles[indice] = lista;
-    return lista;
   }
 
   objetoComum() {
@@ -501,16 +485,7 @@ export class LeitorJava {
     if (tipo === 'J') return Number(this.i64());
     if (tipo === 'Z') return this.byte() !== 0;
     if (tipo === 'D') return this.double();
-    if (tipo === 'B') return this.byte();
-    if (tipo === 'S') return this.u16();
-    if (tipo === 'C') return this.u16();
-    if (tipo === 'F') {
-      this.precisa(4);
-      const v = this.buffer.readFloatBE(this.posicao);
-      this.posicao += 4;
-      return v;
-    }
-    throw new Error(`Tipo primitivo desconhecido: ${tipo}`);
+    throw new Error(`Tipo primitivo sem suporte: ${tipo}`);
   }
 }
 

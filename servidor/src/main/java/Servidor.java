@@ -1,39 +1,31 @@
-import java.util.ArrayList;
+import java.util.*;
 
-/**
- * Servidor de ranking do AçaíStudy (issue #34), baseado no Fazedor de Continhas.
- *
- * Uso: java Servidor [PORTA [HOST]]    (padrão: porta 3000, somente em localhost)
- * Para desativar, digite "desativar" no console.
- */
 public class Servidor
 {
-    public static String PORTA_PADRAO = "3000";
-
+	public static String PORTA_PADRAO = "3000";
+	
     public static void main (String[] args)
     {
-        if (args.length > 2)
+        if (args.length>1)
         {
-            System.err.println ("Uso esperado: java Servidor [PORTA [HOST]]\n");
+            System.err.println ("Uso esperado: java Servidor [PORTA]\n");
             return;
         }
 
-        String porta = Servidor.PORTA_PADRAO;
-        String host  = null;
-
-        if (args.length >= 1)
+        String porta=Servidor.PORTA_PADRAO;
+        
+        if (args.length==1)
             porta = args[0];
 
-        if (args.length == 2)
-            host = args[1];
+        ArrayList<Parceiro> usuarios =
+        new ArrayList<Parceiro> ();
 
-        ArrayList<Parceiro> usuarios = new ArrayList<Parceiro> ();
-
-        AceitadoraDeConexao aceitadoraDeConexao = null;
+        AceitadoraDeConexao aceitadoraDeConexao=null;
         try
         {
-            aceitadoraDeConexao = new AceitadoraDeConexao (porta, host, usuarios);
-            aceitadoraDeConexao.start ();
+            aceitadoraDeConexao =
+            new AceitadoraDeConexao (porta, usuarios);
+            aceitadoraDeConexao.start();
         }
         catch (Exception erro)
         {
@@ -41,28 +33,28 @@ public class Servidor
             return;
         }
 
-        for (;;)
+        for(;;)
         {
-            System.out.println ("O servidor esta ativo na porta " + porta + "! Para desativa-lo,");
+            System.out.println ("O servidor esta ativo! Para desativa-lo,");
             System.out.println ("use o comando \"desativar\"\n");
             System.out.print   ("> ");
 
-            String comando = Teclado.getUmString ();
-
-            if (comando == null)
+            String comando=null;
+            try
             {
-                // Sem console (ex.: rodando em segundo plano): continua ativo ate o processo ser encerrado.
-                try { Thread.sleep (Long.MAX_VALUE); } catch (InterruptedException erro) {}
-                continue;
+                comando = Teclado.getUmString();
             }
+            catch (Exception erro)
+            {}
 
-            if (comando.trim ().toLowerCase ().equals ("desativar"))
+            if (comando.toLowerCase().equals("desativar"))
             {
                 synchronized (usuarios)
                 {
-                    ComunicadoDeDesligamento comunicadoDeDesligamento = new ComunicadoDeDesligamento ();
-
-                    for (Parceiro usuario : usuarios)
+					ComunicadoDeDesligamento comunicadoDeDesligamento =
+                    new ComunicadoDeDesligamento ();
+                    
+                    for (Parceiro usuario:usuarios)
                     {
                         try
                         {
@@ -75,7 +67,7 @@ public class Servidor
                 }
 
                 System.out.println ("O servidor foi desativado!\n");
-                System.exit (0);
+                System.exit(0);
             }
             else
                 System.err.println ("Comando invalido!\n");

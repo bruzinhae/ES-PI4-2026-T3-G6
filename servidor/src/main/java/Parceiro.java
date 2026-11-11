@@ -51,15 +51,12 @@ public class Parceiro
         {
             this.mutEx.acquireUninterruptibly();
             if (this.proximoComunicado==null) this.proximoComunicado = (Comunicado)this.receptor.readObject();
+            this.mutEx.release();
             return this.proximoComunicado;
         }
         catch (Exception erro)
         {
             throw new Exception ("Erro de recepcao");
-        }
-        finally
-        {
-            this.mutEx.release();
         }
     }
 
