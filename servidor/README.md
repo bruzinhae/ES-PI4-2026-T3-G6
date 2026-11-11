@@ -103,6 +103,7 @@ TCP, texto UTF-8, **uma mensagem por linha** (termina em `\n`). Pode-se mandar v
 | `limite` | não | Máximo de candidatos por espaço (1 a 100). Padrão 10. |
 | `espacos[].id`, `inicio`, `fim` | sim | `fim` depois de `inicio`; ISO-8601 com fuso. |
 | `tarefas[].id` | sim | Devolvido no ranking como `tarefaId`. |
+| `tarefas[].categoria` | não | `estudos` (padrão) ou `pessoal`. Qualquer outro valor é erro. Tarefa pessoal não depende da janela de foco no encaixe. |
 | `tarefas[].tipo` | não | `prova`, `trabalho`, `exercicio`, `leitura` ou `outro` (padrão). |
 | `tarefas[].prioridade` | não | 1 a 10, padrão 5. |
 | `tarefas[].prazo` | não | `null` ou ausente = sem prazo. |
@@ -229,7 +230,7 @@ nota = 0,45 × urgência + 0,35 × importância + 0,20 × encaixe        (cada p
 | --- | --- | --- |
 | **Urgência** | 45% | Sem prazo: 0,1. Atrasada ou sem folga: 1. Senão `1 − folga / 14 dias`, onde `folga = prazo − agora − esforço`. É medida a partir de **agora** (e não do espaço) para a nota não favorecer espaços tardios. |
 | **Importância** | 35% | `prioridade / 10`, +0,10 se for `prova`, +0,05 se `trabalho`, +0,02 por ponto de `peso` da disciplina acima ou abaixo de 3. Máximo 1. |
-| **Encaixe** | 20% | 60% tamanho: cabe inteira = `1 − 0,5 × sobra / espaço`; parcial = 0,4. 40% foco: tarefa difícil (prova, trabalho ou disciplina com dificuldade ≥ 4) vale 1,0 se o espaço começa na janela de foco e 0,4 fora; as demais, 0,7. |
+| **Encaixe** | 20% | 60% tamanho: cabe inteira = `1 − 0,5 × sobra / espaço`; parcial = 0,4. 40% foco: tarefa difícil (prova, trabalho ou disciplina com dificuldade ≥ 4) vale 1,0 se o espaço começa na janela de foco e 0,4 fora; as demais, 0,7. Tarefa `pessoal` nunca é "difícil": sempre 0,7. |
 
 Regras fixas, que não são pesos:
 
