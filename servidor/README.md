@@ -13,14 +13,14 @@ A arquitetura segue o exemplo do professor, o *Fazedor de Continhas* (cliente-se
 | `Teclado` | `Teclado` (a mesma classe do exemplo) |
 | `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoDeMetas`, `PrioridadeDeMetas`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
 
-Como no exemplo, **não há pacotes** (as classes ficam em `src/main/java`) e o código só usa o que foi ensinado nas aulas: `ArrayList`, `StringBuffer`, genéricos e interfaces. Não há `record`, lambdas, `Map`/`Set`, `Comparator`, `StringBuilder` nem `java.time`. Os modelos são classes comuns: atributos, getters e `compareTo` onde o servidor ordena. O servidor também **confia no que recebe**, como o do exemplo: quem confere os valores (intervalos, datas e ids) é o cliente, e o cliente é o backend em Node.
+Como no exemplo, **não há pacotes** (as classes ficam em `src/main/java`) e o código só usa o que foi ensinado nas aulas: `ArrayList`, vetores, classes genéricas e `Comparable`. Não há `record`, lambdas, `Map`/`Set`, `Comparator`, `StringBuilder` nem `java.time`. Os modelos são classes comuns: atributos e getters, e um `compareTo` no modelo de `Data` e `Horario` onde o servidor ordena. O servidor também **confia no que recebe**, como o do exemplo: quem confere os valores (intervalos, datas e ids) é o cliente, e o cliente é o backend em Node.
 
 O cliente do Fazedor de Continhas (`Cliente`) não existe aqui: o cliente deste servidor é o backend em Node.
 
 As peças que substituem o que a biblioteca faria:
 
 - `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`) e escreve o texto ISO-8601.
-- `Ordenador` ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável).
+- `Ordenador` é uma classe genérica que ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável) e devolve uma lista nova.
 - `FiltroDeComunicados` é a única peça que o exemplo não tem: ler objetos de um fluxo pode executar código de classes inesperadas, então o servidor só aceita as classes dos comunicados e limita o tamanho do que lê.
 
 **Mesmo protocolo do Continhas:** os comunicados são **objetos Java serializados** (`ObjectOutputStream` e `ObjectInputStream`), e a `SupervisoraDeConexao` distingue os pedidos com `instanceof`. O backend em Node não tem as classes Java, então ele escreve e lê o fluxo de bytes da serialização por conta própria (`backend/src/servicos/serializacaoJava.js`). Para isso, cada classe que viaja declara `serialVersionUID = 1L`.
@@ -73,7 +73,7 @@ Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a 
 | `PedidoDeMetas` | cliente → servidor | `agora`, `metas`, `quantidadeDeMarcos` |
 | `PrioridadeDeMetas` | servidor → cliente | `ranking`, `foco`, `datasDosMarcos` |
 | `PedidoParaSair` | cliente → servidor | Encerra a conexão. |
-| `Erro` | servidor → cliente | `mensagem`. Pedido fora do intervalo ou falha no cálculo. A conexão continua aberta. |
+| `Erro` | servidor → cliente | `mensagem`. Só quando o cálculo falha: os valores fora do intervalo são recusados antes, pelo cliente em Node. A conexão continua aberta. |
 | `ComunicadoDeDesligamento` | servidor → cliente | O comando `desativar` foi dado no servidor. |
 
 Datas viajam como `DataHora` (segundos, nanossegundos e fuso). O Node converte o texto ISO-8601 em `DataHora` antes de enviar e de volta ao receber.
@@ -287,6 +287,17 @@ Por padrão, a API conecta em `127.0.0.1:3000`, que corresponde à configuraçã
 servidor. No backend, configure `RANKING_HOST`, `RANKING_PORT` e `RANKING_TIMEOUT_MS` no `.env`
 para alterar o destino e o tempo máximo de resposta. A rota não monta os espaços livres nem
 consulta tarefas no banco: o chamador Node deve enviar esses dados no corpo da requisição.
+
+## Notas de implementação
+
+O código quase não tem comentários (como o do exemplo do Fazedor de Continhas); o que não é óbvio nele fica aqui.
+
+- **Ids repetidos.** Se duas tarefas (ou metas) chegam com o mesmo `id`, vale a primeira no desempate; na alocação vale a primeira que não está concluída. Por isso `Candidato` e `NotaDeMeta` guardam o prazo e a prioridade dessa primeira.
+- **Desempate.** Os quatro `compareTo` (`DataHora`, `EspacoLivre`, `Candidato` e `NotaDeMeta`) seguem o modelo de `Data` e `Horario`: um atributo por vez, `-666` e `666`, e `0` no fim. O de `DataHora` ignora o fuso.
+- **Sessões seguidas.** Sem antifadiga, a sessão seguinte da mesma tarefa é juntada à anterior: a última sessão da lista sai e entra uma estendida (a última sessão reservada é sempre a última da lista).
+- **Datas.** `DataHora` guarda segundos e nanossegundos desde 1970-01-01T00:00:00Z e o fuso em segundos. `textoDoDia` converte dias em AAAA-MM-DD com o algoritmo de calendário gregoriano de Howard Hinnant (719468 é o número de dias entre 0000-03-01 e 1970-01-01).
+- **Classes sem estado.** `CalculadoraDeRanking`, `AlocadoraDeSessoes` e `CalculadoraDeMetas` não guardam nada, então várias conexões podem usá-las ao mesmo tempo.
+- **Atributos que só a serialização lê.** Várias classes de resposta (`Ranking`, `Alocacao`, `SessaoAlocada` e outras) têm atributos que nenhum método Java lê: quem os lê é o backend em Node, direto do fluxo de objetos.
 
 ## Limitações conhecidas
 

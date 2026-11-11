@@ -1,10 +1,8 @@
 import java.util.*;
 
-// Ordena uma lista usando o compareTo dos proprios elementos (merge sort, que mantem a ordem
-// original dos elementos iguais). Devolve uma lista nova; a original nao muda.
 public class Ordenador<X extends Comparable<X>>
 {
-    public ArrayList<X> ordene (ArrayList<X> lista)
+    public ArrayList<X> ordene (ArrayList<X> lista) // devolve uma lista nova
     {
         X[] elemento = (X[]) new Comparable[lista.size()];
         for (int i=0; i<elemento.length; i++)
@@ -20,8 +18,7 @@ public class Ordenador<X extends Comparable<X>>
         return ret;
     }
 
-    // Ordena a parte do vetor que vai de inicio (inclusive) ate fim (exclusive).
-    private void ordene (X[] elemento, X[] auxiliar, int inicio, int fim)
+    private void ordene (X[] elemento, X[] auxiliar, int inicio, int fim) // [inicio, fim)
     {
         if (fim-inicio < 2)
             return;

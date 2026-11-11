@@ -1,15 +1,5 @@
 import java.io.*;
 
-// Um instante com o seu deslocamento de fuso (ex.: 2026-11-12T15:00:00-03:00), sem usar java.time.
-//
-// Guarda os segundos e os nanossegundos desde 1970-01-01T00:00:00Z e o deslocamento do fuso em
-// segundos. Dois valores com o mesmo instante e fusos diferentes são o mesmo momento
-// (compareTo() ignora o fuso), mas cada um escreve a hora no seu próprio fuso.
-//
-// Escreve o ISO-8601 com fuso (toString). Quem lê o texto é o cliente em Node, que manda para
-// o servidor só os três números.
-//
-// É uma classe imutável: pode ser usada por várias threads ao mesmo tempo.
 public class DataHora implements Comparable<DataHora>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -27,8 +17,7 @@ public class DataHora implements Comparable<DataHora>, Serializable
         this.deslocamento = deslocamento;
     }
 
-    // Mesmo instante, escrito no fuso de outra data.
-    public DataHora noFusoDe (DataHora outra)
+    public DataHora noFusoDe (DataHora outra) // mesmo instante, escrito no fuso da outra
     {
         return new DataHora (this.segundos, this.nanos, outra.deslocamento);
     }
@@ -38,9 +27,8 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return new DataHora (this.segundos + minutos * 60L, this.nanos, this.deslocamento);
     }
 
-    // Negativo se esta data é antes da outra, zero se é o mesmo instante, positivo se é depois (o fuso não conta).
     @Override
-    public int compareTo (DataHora dat)
+    public int compareTo (DataHora dat) // o fuso nao conta
     {
         if (this.segundos<dat.segundos) return -666;
         if (this.segundos>dat.segundos) return  666;
@@ -52,22 +40,22 @@ public class DataHora implements Comparable<DataHora>, Serializable
     public boolean depoisDe (DataHora outra)      { return this.compareTo (outra) > 0; }
     public boolean mesmoInstante (DataHora outra) { return this.compareTo (outra) == 0; }
 
-    // Minutos inteiros desta data até a outra (negativo se a outra é antes), truncados em direção a zero.
-    public long minutosAte (DataHora outra)
+    public long minutosAte (DataHora outra) // minutos inteiros, truncados em direcao a zero
     {
-        long segundosDeDiferenca = outra.segundos - this.segundos + dividaParaBaixo ((long) outra.nanos - this.nanos, 1000000000L);
+        long dif      = outra.segundos - this.segundos;
+        long difNanos = (long) outra.nanos - this.nanos;
 
-        return segundosDeDiferenca / 60L;
+        dif = dif + dividaParaBaixo (difNanos, 1000000000L);
+
+        return dif / 60L;
     }
 
-    // Dia desta data no fuso dela, contado em dias desde 1970-01-01.
-    public long getDiaLocal ()
+    public long getDiaLocal () // dias desde 1970-01-01, no fuso desta data
     {
         return dividaParaBaixo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
     }
 
-    // Segundos desde a meia-noite, no fuso desta data.
-    public int getSegundoDoDia ()
+    public int getSegundoDoDia () // desde a meia-noite, no fuso desta data
     {
         return (int) restoPositivo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
     }
@@ -76,11 +64,10 @@ public class DataHora implements Comparable<DataHora>, Serializable
     public int getMinuto ()  { return this.getSegundoDoDia () / 60 % 60; }
     public int getSegundo () { return this.getSegundoDoDia () % 60; }
 
-    // AAAA-MM-DD do dia (contado desde 1970-01-01).
-    public static String textoDoDia (long diaDaEpoca)
+    public static String textoDoDia (long diaDaEpoca) // AAAA-MM-DD, dias desde 1970-01-01
     {
-        long z   = diaDaEpoca + 719468L;
-        long era = dividaParaBaixo (z, 146097L);
+        long z   = diaDaEpoca + 719468L; // dias de 0000-03-01 ate 1970-01-01
+        long era = dividaParaBaixo (z, 146097L); // blocos de 400 anos (146097 dias)
         long doe = z - era * 146097L;
         long yoe = (doe - doe / 1460L + doe / 36524L - doe / 146096L) / 365L;
         long doy = doe - (365L * yoe + yoe / 4L - yoe / 100L);
@@ -92,21 +79,23 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return preencher (ano, 4) + "-" + preencher (mes, 2) + "-" + preencher (dia, 2);
     }
 
-    // O mesmo texto ISO-8601 com fuso que a leitura aceita, ex.: 2026-11-12T15:00:00-03:00 (ou ...Z).
-    public String toString ()
+    public String toString () // ISO-8601 com fuso: 2026-11-12T15:00:00-03:00 (ou ...Z)
     {
         String texto = textoDoDia (this.getDiaLocal ()) + "T" + preencher (this.getHora (), 2) + ":"
                        + preencher (this.getMinuto (), 2) + ":" + preencher (this.getSegundo (), 2);
 
         if (this.nanos != 0)
         {
-            String fracao = preencher (this.nanos, 9);
-            int fim = fracao.length ();
+            int fracao  = this.nanos; // sem os zeros do fim: 120000000 vira "12"
+            int digitos = 9;
 
-            while (fracao.charAt (fim - 1) == '0')
-                fim--;
+            while (fracao % 10 == 0)
+            {
+                fracao = fracao / 10;
+                digitos--;
+            }
 
-            texto = texto + "." + fracao.substring (0, fim);
+            texto = texto + "." + preencher (fracao, digitos);
         }
 
         if (this.deslocamento == 0)
@@ -114,7 +103,8 @@ public class DataHora implements Comparable<DataHora>, Serializable
 
         int absoluto = Math.abs (this.deslocamento);
 
-        texto = texto + (this.deslocamento < 0 ? "-" : "+") + preencher (absoluto / 3600, 2) + ":" + preencher (absoluto / 60 % 60, 2);
+        texto = texto + (this.deslocamento < 0 ? "-" : "+");
+        texto = texto + preencher (absoluto / 3600, 2) + ":" + preencher (absoluto / 60 % 60, 2);
 
         if (absoluto % 60 != 0)
             texto = texto + ":" + preencher (absoluto % 60, 2);
@@ -122,8 +112,7 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return texto;
     }
 
-    // Divisao que arredonda para baixo (a de Java arredonda em direcao a zero).
-    private static long dividaParaBaixo (long dividendo, long divisor)
+    private static long dividaParaBaixo (long dividendo, long divisor) // arredonda para baixo
     {
         long ret = dividendo / divisor;
 
@@ -133,13 +122,12 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return ret;
     }
 
-    // Resto da divisao que arredonda para baixo (nunca negativo quando o divisor e positivo).
-    private static long restoPositivo (long dividendo, long divisor)
+    private static long restoPositivo (long dividendo, long divisor) // nunca negativo
     {
         return dividendo - dividaParaBaixo (dividendo, divisor) * divisor;
     }
 
-    private static String preencher (long valor, int tamanho)
+    private static String preencher (long valor, int tamanho) // completa com zeros a esquerda
     {
         String texto = "" + valor;
 

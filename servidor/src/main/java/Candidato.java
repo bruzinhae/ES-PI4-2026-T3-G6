@@ -1,7 +1,5 @@
 import java.io.*;
 
-// Uma tarefa candidata a um espaco, com a nota final e as tres partes que a compoem. Guarda tambem o
-// prazo e a prioridade da tarefa, que servem de desempate quando as notas sao iguais.
 public class Candidato implements Comparable<Candidato>, Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -9,14 +7,16 @@ public class Candidato implements Comparable<Candidato>, Serializable
     private String   tarefaId;
     private double   nota;
     private int      minutosNoEspaco;
-    private boolean  parcial;
+    private boolean  parcial; // a tarefa nao cabe inteira no espaco
     private double   urgencia;
     private double   importancia;
     private double   encaixe;
-    private DataHora prazo;
-    private int      prioridade;
+    private DataHora prazo;      // so para desempatar
+    private int      prioridade; // so para desempatar
 
-    public Candidato (String tarefaId, double nota, int minutosNoEspaco, boolean parcial, double urgencia, double importancia, double encaixe, DataHora prazo, int prioridade)
+    public Candidato (String tarefaId, double nota, int minutosNoEspaco, boolean parcial,
+                      double urgencia, double importancia, double encaixe,
+                      DataHora prazo, int prioridade)
     {
         this.tarefaId        = tarefaId;
         this.nota            = nota;
@@ -59,24 +59,13 @@ public class Candidato implements Comparable<Candidato>, Serializable
         return this.encaixe;
     }
 
-    public DataHora getPrazo ()
-    {
-        return this.prazo;
-    }
-
-    public int getPrioridade ()
-    {
-        return this.prioridade;
-    }
-
     @Override
-    public int compareTo (Candidato can)
+    public int compareTo (Candidato can) // nota maior primeiro; depois prazo, prioridade e id
     {
-        // nota maior primeiro; empates: prazo mais cedo (sem prazo por ultimo), prioridade maior e id
         if (this.nota>can.nota) return -666;
         if (this.nota<can.nota) return  666;
 
-        if (this.prazo==null && can.prazo!=null) return  666;
+        if (this.prazo==null && can.prazo!=null) return  666; // sem prazo por ultimo
         if (this.prazo!=null && can.prazo==null) return -666;
         if (this.prazo!=null)
         {
@@ -91,5 +80,4 @@ public class Candidato implements Comparable<Candidato>, Serializable
         if (this.tarefaId.compareTo(can.tarefaId)>0) return  666;
         return 0;
     }
-
 }

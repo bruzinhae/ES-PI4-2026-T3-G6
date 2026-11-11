@@ -1,23 +1,5 @@
 import java.util.*;
 
-// Calcula, para cada espaço livre da grade, o vetor de tarefas candidatas ordenado por nota.
-//
-// Nota = 0,45 x urgência + 0,35 x importância + 0,20 x encaixe   (cada parte vai de 0 a 1)
-//
-//   urgência    quanto o prazo aperta, medido a partir de AGORA e já descontando o esforço
-//               da tarefa (medir a partir do espaço faria a nota favorecer espaços tardios);
-//   importância prioridade do usuário (1 a 10), com reforço para prova/trabalho e para
-//               disciplinas de maior peso;
-//   encaixe     o quanto a tarefa cabe no espaço e se cai na janela de foco do usuário
-//               (tarefa pessoal não depende da janela de foco: usa o valor neutro).
-//
-// Regras fixas (não são pesos):
-//   - tarefa concluída não é candidata;
-//   - a sessão precisa terminar antes do prazo (tarefa já atrasada pode entrar em qualquer espaço);
-//   - espaços com menos de 15 minutos são ignorados (mínimo de uma tarefa);
-//   - desempate: prazo mais cedo, depois maior prioridade, depois id (ver Candidato.compareTo).
-//
-// É uma classe sem estado: pode ser usada por várias threads ao mesmo tempo.
 public class CalculadoraDeRanking
 {
     public static final double PESO_URGENCIA    = 0.45;
@@ -32,8 +14,9 @@ public class CalculadoraDeRanking
     public static Ranking calcular (PedidoDeRanking pedido)
     {
         ArrayList<Tarefa> tarefas = pedido.getTarefas ();
+        DataHora agora = pedido.getAgora ();
+        Preferencias preferencias = pedido.getPreferencias ();
 
-        // Tarefas com o mesmo id valem como uma só para o desempate e para dizer se couberam em algum espaço.
         int[] primeira = CalculadoraDeRanking.indiceDaPrimeiraComOMesmoId (tarefas);
         boolean[] comEspaco = new boolean [tarefas.size ()];
 
@@ -46,8 +29,9 @@ public class CalculadoraDeRanking
             if (espaco.getMinutos () >= MINUTOS_MINIMOS_DO_ESPACO)
                 for (int i = 0; i < tarefas.size (); i++)
                 {
-                    Candidato candidato = avaliar (tarefas.get (i), tarefas.get (primeira[i]), espaco,
-                                                   pedido.getAgora (), pedido.getPreferencias ());
+                    Tarefa referencia = tarefas.get (primeira[i]);
+                    Candidato candidato =
+                    avaliar (tarefas.get (i), referencia, espaco, agora, preferencias);
 
                     if (candidato != null)
                     {
@@ -64,18 +48,23 @@ public class CalculadoraDeRanking
             porEspaco.add (new RankingDoEspaco (espaco.getId (), candidatos));
         }
 
+        String motivo = "nenhum_espaco_antes_do_prazo";
+        if (pedido.getEspacos ().size () == 0)
+            motivo = "sem_espacos";
+
         ArrayList<TarefaSemEspaco> semEspaco = new ArrayList<TarefaSemEspaco> ();
 
         for (int i = 0; i < tarefas.size (); i++)
             if (!tarefas.get (i).concluida () && !comEspaco[primeira[i]])
-                semEspaco.add (new TarefaSemEspaco (tarefas.get (i).getId (),
-                                                    pedido.getEspacos ().size () == 0 ? "sem_espacos" : "nenhum_espaco_antes_do_prazo"));
+                semEspaco.add (new TarefaSemEspaco (tarefas.get (i).getId (), motivo));
 
-        // A alocação só é calculada quando o pedido traz "alocar": true; o ranking por espaço é o mesmo.
-        return new Ranking (porEspaco, semEspaco, pedido.isAlocar () ? AlocadoraDeSessoes.alocar (pedido) : null);
+        Alocacao alocacao = null;
+        if (pedido.isAlocar ())
+            alocacao = AlocadoraDeSessoes.alocar (pedido); // so se o pedido pedir
+
+        return new Ranking (porEspaco, semEspaco, alocacao);
     }
 
-    // Para cada tarefa, a posição da primeira tarefa da lista que tem o mesmo id (ela mesma, se for a primeira).
     static int[] indiceDaPrimeiraComOMesmoId (ArrayList<Tarefa> tarefas)
     {
         int[] ret = new int [tarefas.size ()];
@@ -95,36 +84,38 @@ public class CalculadoraDeRanking
         return ret;
     }
 
-    // Minutos que a tarefa pede no total: a estimativa dela ou, sem estimativa, a duração de sessão preferida.
     static int minutosNecessarios (Tarefa tarefa, Preferencias preferencias)
     {
-        return tarefa.getMinutosEstimados () != null ? tarefa.getMinutosEstimados () : preferencias.getDuracaoMinutos ();
+        if (tarefa.getMinutosEstimados () != null)
+            return tarefa.getMinutosEstimados ();
+
+        return preferencias.getDuracaoMinutos ();
     }
 
-    // Tamanho da sessão: o que a tarefa pede, limitado ao espaço e ao tamanho máximo de sessão. Se depois
-    // desta sessão sobrariam menos de 15 minutos (e eles cabem no espaço), a sessão absorve o resto.
     static int minutosDaSessao (int necessarios, int disponiveis, int limiteDeSessao)
     {
         int sessao = Math.min (Math.min (necessarios, disponiveis), limiteDeSessao);
         int sobra  = necessarios - sessao;
 
         if (sobra > 0 && sobra < MINUTOS_MINIMOS_DO_ESPACO && necessarios <= disponiveis)
-            return necessarios;
+            return necessarios; // a sessao absorve o resto pequeno
 
         return sessao;
     }
 
-    // Devolve null quando a tarefa não pode ser candidata a este espaço.
-    private static Candidato avaliar (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora, Preferencias preferencias)
+    private static Candidato avaliar
+    (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco,
+     DataHora agora, Preferencias preferencias)
     {
-        return avaliar (tarefa, referencia, espaco, agora, preferencias, minutosNecessarios (tarefa, preferencias), SEM_LIMITE_DE_SESSAO);
+        int necessarios = minutosNecessarios (tarefa, preferencias);
+
+        return avaliar (tarefa, referencia, espaco, agora, preferencias,
+                        necessarios, SEM_LIMITE_DE_SESSAO);
     }
 
-    // `necessarios` são os minutos que AINDA faltam da tarefa; `limiteDeSessao` é o tamanho máximo de uma sessão
-    // (SEM_LIMITE_DE_SESSAO no ranking, que não divide a tarefa em sessões).
-    // `referencia` é a tarefa de que o candidato herda o prazo e a prioridade para o desempate.
-    static Candidato avaliar (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora, Preferencias preferencias,
-                              int necessarios, int limiteDeSessao)
+    static Candidato avaliar
+    (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora,
+     Preferencias preferencias, int necessarios, int limiteDeSessao)
     {
         if (tarefa.concluida ())
             return null;
@@ -137,21 +128,24 @@ public class CalculadoraDeRanking
         DataHora fimDaSessao = espaco.getInicio ().maisMinutos (noEspaco);
 
         if (tarefa.getPrazo () != null && !atrasada && fimDaSessao.depoisDe (tarefa.getPrazo ()))
-            return null;
+            return null; // a sessao tem de terminar antes do prazo
 
         double urgencia    = urgencia (tarefa, atrasada, necessarios, agora);
         double importancia = importancia (tarefa);
-        double encaixe     = encaixe (tarefa, espaco, preferencias, necessarios, disponiveis, parcial);
+        double encaixe     =
+        encaixe (tarefa, espaco, preferencias, necessarios, disponiveis, parcial);
 
-        double nota = PESO_URGENCIA * urgencia + PESO_IMPORTANCIA * importancia + PESO_ENCAIXE * encaixe;
+        double nota =
+        PESO_URGENCIA * urgencia + PESO_IMPORTANCIA * importancia + PESO_ENCAIXE * encaixe;
 
         return new Candidato (tarefa.getId (), arredondar (nota), noEspaco, parcial,
-                              arredondar (urgencia), arredondar (importancia), arredondar (encaixe),
-                              referencia.getPrazo (), referencia.getPrioridade ());
+                              arredondar (urgencia), arredondar (importancia),
+                              arredondar (encaixe), referencia.getPrazo (),
+                              referencia.getPrioridade ());
     }
 
-    // 1 = apertado ou atrasado; cai linearmente até 0 quando sobram 14 dias ou mais de folga.
-    private static double urgencia (Tarefa tarefa, boolean atrasada, int minutosNecessarios, DataHora agora)
+    private static double urgencia
+    (Tarefa tarefa, boolean atrasada, int minutosNecessarios, DataHora agora)
     {
         if (tarefa.getPrazo () == null)
             return URGENCIA_SEM_PRAZO;
@@ -163,7 +157,7 @@ public class CalculadoraDeRanking
         if (folgaMinutos <= 0)
             return 1.0;
 
-        return 1.0 - limitar (folgaMinutos / 1440.0 / HORIZONTE_DE_URGENCIA_DIAS);
+        return 1.0 - limitar (folgaMinutos / 1440.0 / HORIZONTE_DE_URGENCIA_DIAS); // 0 com 14 dias
     }
 
     private static double importancia (Tarefa tarefa)
@@ -175,29 +169,44 @@ public class CalculadoraDeRanking
         else if ("trabalho".equals (tarefa.getTipo ()))
             valor += 0.05;
 
-        int peso = tarefa.getPeso () != null ? tarefa.getPeso () : 3;
+        int peso = 3;
+        if (tarefa.getPeso () != null)
+            peso = tarefa.getPeso ();
+
         valor += 0.02 * (peso - 3);
 
         return limitar (valor);
     }
 
-    // 60% o tamanho (cabe inteira, com pouca sobra, é melhor) e 40% a janela de foco.
-    private static double encaixe (Tarefa tarefa, EspacoLivre espaco, Preferencias preferencias,
-                                   int necessarios, int disponiveis, boolean parcial)
+    private static double encaixe
+    (Tarefa tarefa, EspacoLivre espaco, Preferencias preferencias,
+     int necessarios, int disponiveis, boolean parcial)
     {
-        double tamanho = parcial ? 0.4 : 1.0 - 0.5 * (disponiveis - necessarios) / (double) disponiveis;
+        double tamanho = 0.4;
+        if (!parcial)
+            tamanho = 1.0 - 0.5 * (disponiveis - necessarios) / (double) disponiveis;
 
-        boolean dificil = !tarefa.pessoal () && ("prova".equals (tarefa.getTipo ()) || "trabalho".equals (tarefa.getTipo ())
-                          || (tarefa.getDificuldade () != null && tarefa.getDificuldade () >= 4));
+        boolean dificil = "prova".equals (tarefa.getTipo ());
+        if ("trabalho".equals (tarefa.getTipo ()))
+            dificil = true;
+        if (tarefa.getDificuldade () != null && tarefa.getDificuldade () >= 4)
+            dificil = true;
+        if (tarefa.pessoal ())
+            dificil = false; // tarefa pessoal nao depende da janela de foco
 
-        double foco = 0.7;
+        double foco = 0.7; // neutro
         if (preferencias.isFocoMatinal () && dificil)
-            foco = dentroDaJanela (espaco.getInicio ().getSegundoDoDia (), preferencias.getJanelaFoco ()) ? 1.0 : 0.4;
+        {
+            int hora = espaco.getInicio ().getSegundoDoDia ();
+
+            foco = 0.4;
+            if (dentroDaJanela (hora, preferencias.getJanelaFoco ()))
+                foco = 1.0;
+        }
 
         return 0.6 * tamanho + 0.4 * foco;
     }
 
-    // Janelas iguais às da tela de Configurações. A hora vem em segundos desde a meia-noite.
     private static boolean dentroDaJanela (int segundoDoDia, String janela)
     {
         int inicio = 8 * 3600 + 30 * 60; // manha
@@ -224,6 +233,6 @@ public class CalculadoraDeRanking
 
     private static double arredondar (double valor)
     {
-        return (long) (valor * 1000.0 + 0.5) / 1000.0;
+        return (long) (valor * 1000.0 + 0.5) / 1000.0; // tres casas
     }
 }
