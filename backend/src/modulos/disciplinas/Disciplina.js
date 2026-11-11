@@ -6,7 +6,7 @@
 
 import mongoose from 'mongoose';
 
-export const CORES_DISCIPLINA = ['roxo', 'azul', 'verde', 'ambar'];
+export const CORES_DISCIPLINA = ['roxo', 'azul', 'indigo', 'ciano', 'turquesa', 'verde', 'ambar', 'laranja', 'vermelho', 'rosa'];
 export const SITUACOES_DISCIPLINA = ['ativa', 'concluida', 'trancada'];
 export const SITUACOES_CONTEUDO = ['pendente', 'em_andamento', 'concluido'];
 
@@ -74,7 +74,7 @@ const disciplinaSchema = new mongoose.Schema(
             required: [true, 'Informe o nome da disciplina.'],
             trim: true,
             minlength: [2, 'O nome deve ter ao menos 2 caracteres.'],
-            maxlength: [120, 'O nome deve ter no máximo 120 caracteres.'],
+            maxlength: [200, 'O nome deve ter no máximo 200 caracteres.'],
         },
         area: {
             type: String,

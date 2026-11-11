@@ -321,6 +321,11 @@ const AcaiApi = (function () {
         await requisitar(`/metas/${id}`, { metodo: 'DELETE' });
     }
 
+    async function registrarSessaoPomodoro(dados) {
+        const { sessao } = await requisitar('/sessoes-estudo/pomodoro', { metodo: 'POST', corpo: dados });
+        return sessao;
+    }
+
     async function analisarMetas() {
         const { leitura } = await requisitar('/metas/sofia', { metodo: 'POST', corpo: {} });
         return leitura;
@@ -466,6 +471,7 @@ const AcaiApi = (function () {
         criarMeta,
         atualizarMeta,
         excluirMeta,
+        registrarSessaoPomodoro,
         analisarMetas,
         sugerirMarcosMeta,
         obterUsuarioAtual,

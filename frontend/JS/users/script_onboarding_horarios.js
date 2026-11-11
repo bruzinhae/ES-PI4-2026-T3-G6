@@ -388,7 +388,7 @@ async function criarNaGrade(rotina, posicao) {
     if (base.categoria === 'aulas') {
         const disciplina = disciplinaSelecionada();
         if (disciplina) {
-            payload.nome = `Aula de ${disciplina.nome}`.slice(0, 80);
+            payload.nome = `Aula de ${disciplina.nome}`.slice(0, 200);
             payload.disciplinaId = disciplina.id;
         } else if (disciplinas.length === 0) {
             AcaiAvisos.mostrar('Cadastre as disciplinas no passo anterior para ligar a aula a uma matéria.');

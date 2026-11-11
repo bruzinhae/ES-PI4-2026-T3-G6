@@ -29,6 +29,7 @@ import { configuracaoRoutes } from './modulos/configuracoes/configuracaoRoutes.j
 import { canvasRoutes } from './modulos/canvas/canvasRoutes.js';
 import { rankingRoutes } from './modulos/ranking/rankingRoutes.js';
 import { tarefaRoutes } from './modulos/tarefas/tarefaRoutes.js';
+import { sessaoEstudoRoutes } from './modulos/sessoesEstudo/sessaoEstudoRoutes.js';
 
 // Pasta frontend/ na raiz do repositório (backend/src → sobe duas pastas).
 const pastaFrontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend');
@@ -74,6 +75,7 @@ app.use('/api/configuracoes', configuracaoRoutes);
 app.use('/api/canvas', canvasRoutes);
 app.use('/api/ranking', rankingRoutes);
 app.use('/api/tarefas', tarefaRoutes);
+app.use('/api/sessoes-estudo', sessaoEstudoRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);

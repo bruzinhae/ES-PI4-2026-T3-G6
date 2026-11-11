@@ -193,6 +193,15 @@ renderLayout({
         }
     }
 
+    document.addEventListener('acaistudy:pomodoro-registrado', () => {
+        const hoje = new Date();
+        const fim = new Date(inicioSemana);
+        fim.setDate(fim.getDate() + 7);
+        if (hoje >= inicioSemana && hoje < fim) {
+            carregar();
+        }
+    });
+
     document.getElementById('periodo-anterior')?.addEventListener('click', () => {
         inicioSemana.setDate(inicioSemana.getDate() - 7);
         carregar();

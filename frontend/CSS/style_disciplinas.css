@@ -378,6 +378,97 @@ h2 {
     color: #241a00;
 }
 
+.etiqueta-verde {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.etiqueta-indigo {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+.etiqueta-ciano {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.etiqueta-turquesa {
+    background: #ccfbf1;
+    color: #115e59;
+}
+
+.etiqueta-laranja {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.etiqueta-vermelho {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.etiqueta-rosa {
+    background: #fce7f3;
+    color: #9d174d;
+}
+
+#rotulo-disciplina-cor {
+    color: #514c57;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.seletor-cores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.opcao-cor {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 4px 10px 4px 6px;
+    border: 1px solid #dfe2e8;
+    border-radius: 999px;
+    background: #fff;
+    color: #3b3540;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    cursor: pointer;
+}
+
+.opcao-cor span {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.seletor-cores .opcao-cor input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+}
+
+.opcao-cor:has(input:checked) {
+    border-color: #4F3466;
+    box-shadow: 0 0 0 2px rgba(79, 52, 102, .18);
+}
+
+.opcao-cor:has(input:focus-visible) {
+    outline: 2px solid #4F3466;
+    outline-offset: 2px;
+}
+
 .etiqueta-cinza {
     background: var(--cinza-claro);
     color: var(--texto);
@@ -410,6 +501,7 @@ h2 {
     font-weight: 700;
     line-height: 24px;
     min-height: 48px;
+    overflow-wrap: anywhere;
 
     color: var(--tinta);
 }
@@ -430,6 +522,32 @@ h2 {
 .media-disciplina {
     font-weight: 600;
     color: var(--roxo);
+}
+
+.horarios-aula {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.horarios-aula button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--roxo);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    text-align: left;
+}
+
+.horario-vazio {
+    color: var(--cinza-500, #6b7280);
+    font-size: 12px;
+    line-height: 16px;
 }
 
 .botao-grade {

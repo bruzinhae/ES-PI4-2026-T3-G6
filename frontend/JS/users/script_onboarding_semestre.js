@@ -2,7 +2,7 @@ inicializarMenusOnboarding();
 marcarPassoOnboarding('semestre');
 
 const CHAVE_INTRO = 'acaistudy-onboarding-intro';
-const CORES = ['roxo', 'azul', 'verde', 'ambar'];
+const CORES = ['roxo', 'indigo', 'verde', 'laranja', 'azul', 'ciano', 'ambar', 'rosa', 'turquesa', 'vermelho'];
 
 const formulario = document.getElementById('formulario-perfil');
 const formularioDisciplina = document.getElementById('formulario-disciplina');

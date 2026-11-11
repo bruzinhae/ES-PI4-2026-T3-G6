@@ -139,8 +139,8 @@ function validarPayload(dados, parcial = false) {
     }
 
     if (payload.nome !== undefined) {
-        if (typeof payload.nome !== 'string' || payload.nome.trim().length < 2 || payload.nome.trim().length > 120) {
-            throw new ErroApi(400, 'O nome deve ter entre 2 e 120 caracteres.');
+        if (typeof payload.nome !== 'string' || payload.nome.trim().length < 2 || payload.nome.trim().length > 200) {
+            throw new ErroApi(400, 'O nome deve ter entre 2 e 200 caracteres.');
         }
         payload.nome = payload.nome.trim();
     }
@@ -221,6 +221,7 @@ async function horasSemanaisPorDisciplina(usuarioId, disciplinaIds) {
         usuarioId,
         disciplinaId: { $in: disciplinaIds },
         recorrencia: 'semanal',
+        categoria: 'aulas',
     }).select('disciplinaId duracaoMinutos diasSemana');
 
     const mapa = new Map(disciplinaIds.map((id) => [String(id), 0]));

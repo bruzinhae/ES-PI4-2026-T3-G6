@@ -137,9 +137,15 @@
 }
 
 .ponto-disciplina.roxo { background: #4f3466; }
-.ponto-disciplina.azul { background: #087fbd; }
-.ponto-disciplina.verde { background: #18b989; }
+.ponto-disciplina.azul { background: #6750a4; }
+.ponto-disciplina.indigo { background: #1d4ed8; }
+.ponto-disciplina.ciano { background: #0891b2; }
+.ponto-disciplina.turquesa { background: #0f766e; }
+.ponto-disciplina.verde { background: #10b981; }
 .ponto-disciplina.ambar { background: #c9a74d; }
+.ponto-disciplina.laranja { background: #ea580c; }
+.ponto-disciplina.vermelho { background: #dc2626; }
+.ponto-disciplina.rosa { background: #db2777; }
 
 .botao-remover {
     width: 28px;

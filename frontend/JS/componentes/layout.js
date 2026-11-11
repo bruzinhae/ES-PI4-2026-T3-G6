@@ -48,8 +48,14 @@ const NAV_LATERAL = [
 const CORES_DISCIPLINA_HEX = {
     roxo: '#4F3466',
     azul: '#6750A4',
+    indigo: '#1D4ED8',
+    ciano: '#0891B2',
+    turquesa: '#0F766E',
     verde: '#10B981',
     ambar: '#C9A74D',
+    laranja: '#EA580C',
+    vermelho: '#DC2626',
+    rosa: '#DB2777',
 };
 
 const PASTA_ICONES_PADRAO = 'assets/icons/layout';
@@ -534,6 +540,7 @@ async function carregarDisciplinasLaterais() {
 }
 
 const CHAVE_POMODORO = 'acaistudy-pomodoro';
+const CHAVE_FOCOS_PENDENTES = 'acaistudy-pomodoro-sessoes';
 
 function padraoPomodoro() {
     return {
@@ -563,6 +570,67 @@ function lerPomodoro() {
 
 function gravarPomodoro(estado) {
     localStorage.setItem(CHAVE_POMODORO, JSON.stringify(estado));
+}
+
+function lerFocosPendentes() {
+    try {
+        const lista = JSON.parse(localStorage.getItem(CHAVE_FOCOS_PENDENTES) || '[]');
+        return Array.isArray(lista) ? lista : [];
+    } catch {
+        return [];
+    }
+}
+
+function minutosGastosNoFoco(estado) {
+    if (estado.fase !== 'foco') {
+        return 0;
+    }
+    const totalMs = estado.focoMin * 60000;
+    const restante = restanteDoPomodoro(estado);
+    return Math.min(estado.focoMin, Math.round((totalMs - restante) / 60000));
+}
+
+function guardarFoco(minutos, completo) {
+    const inteiro = Math.round(Number(minutos));
+    if (!Number.isInteger(inteiro) || inteiro < 1) {
+        return;
+    }
+    const pendentes = lerFocosPendentes();
+    pendentes.push({
+        id: `${Date.now()}-${pendentes.length}`,
+        minutos: inteiro,
+        completo: Boolean(completo),
+        fim: new Date().toISOString(),
+    });
+    localStorage.setItem(CHAVE_FOCOS_PENDENTES, JSON.stringify(pendentes.slice(-20)));
+    enviarFocosPendentes();
+}
+
+let enviandoFocos = false;
+
+async function enviarFocosPendentes() {
+    if (enviandoFocos || typeof AcaiApi === 'undefined' || !AcaiApi.temUsuarioAtual?.() || !AcaiApi.registrarSessaoPomodoro) {
+        return;
+    }
+    enviandoFocos = true;
+    let enviou = false;
+    try {
+        for (const item of lerFocosPendentes()) {
+            try {
+                await AcaiApi.registrarSessaoPomodoro(item);
+                const atuais = lerFocosPendentes().filter((pendente) => pendente.id !== item.id);
+                localStorage.setItem(CHAVE_FOCOS_PENDENTES, JSON.stringify(atuais));
+                enviou = true;
+            } catch {
+                break;
+            }
+        }
+    } finally {
+        enviandoFocos = false;
+    }
+    if (enviou) {
+        window.dispatchEvent(new Event('acaistudy:pomodoro-registrado'));
+    }
 }
 
 function minutosDaFase(estado) {
@@ -708,6 +776,7 @@ function inicializarPomodoro() {
 
     function concluirFase() {
         const encerrada = estado.fase;
+        const minutosFoco = estado.focoMin;
         const focos = encerrada === 'foco' ? estado.focosNoCiclo + 1 : estado.focosNoCiclo;
         const longa = encerrada === 'foco' && focos >= estado.ciclos;
         const proxima = encerrada === 'foco' ? (longa ? 'pausaLonga' : 'pausa') : 'foco';
@@ -726,6 +795,9 @@ function inicializarPomodoro() {
             aviso: mensagemPomodoro(encerrada, proxima, minutos),
         };
         gravarPomodoro(estado);
+        if (encerrada === 'foco') {
+            guardarFoco(minutosFoco, true);
+        }
         pintar();
         tocarSinalPomodoro();
     }
@@ -762,6 +834,9 @@ function inicializarPomodoro() {
     }
 
     function encerrarSessao() {
+        if (estado.fase === 'foco') {
+            guardarFoco(minutosGastosNoFoco(estado), false);
+        }
         estado = {
             ...estado,
             sessaoAtiva: false,
@@ -842,6 +917,7 @@ function inicializarPomodoro() {
     if (estado.rodando && restanteDoPomodoro(estado) <= 0) concluirFase();
     else pintar();
 
+    enviarFocosPendentes();
     relogioPomodoro = setInterval(verificarFim, 250);
     verificarPomodoroAtual = verificarFim;
     if (!avisoPomodoroLigado) {

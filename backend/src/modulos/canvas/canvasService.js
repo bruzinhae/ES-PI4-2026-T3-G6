@@ -7,11 +7,11 @@ import crypto from 'node:crypto';
 import { isIP } from 'node:net';
 import { env } from '../../config/env.js';
 import { ErroApi } from '../../utils/ErroApi.js';
-import { Disciplina } from '../disciplinas/Disciplina.js';
+import { CORES_DISCIPLINA, Disciplina } from '../disciplinas/Disciplina.js';
 import { Tarefa } from '../tarefas/Tarefa.js';
 import { Usuario } from '../usuarios/Usuario.js';
 
-const CORES = ['roxo', 'azul', 'verde', 'ambar'];
+const CORES = CORES_DISCIPLINA;
 const ESCOPOS = [
     'url:GET|/api/v1/users/:user_id',
     'url:GET|/api/v1/courses',

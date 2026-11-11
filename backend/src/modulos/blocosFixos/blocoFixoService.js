@@ -15,7 +15,7 @@ function validarPayload(dados, parcial = false) {
         const ausente = CAMPOS_OBRIGATORIOS.find(campo => payload[campo] === undefined || payload[campo] === null);
         if (ausente) throw new ErroApi(400, `O campo "${ausente}" e obrigatorio.`);
     }
-    if (payload.nome !== undefined && (typeof payload.nome !== 'string' || payload.nome.trim().length < 2 || payload.nome.trim().length > 80)) throw new ErroApi(400, 'O nome deve ter entre 2 e 80 caracteres.');
+    if (payload.nome !== undefined && (typeof payload.nome !== 'string' || payload.nome.trim().length < 2 || payload.nome.trim().length > 200)) throw new ErroApi(400, 'O nome deve ter entre 2 e 200 caracteres.');
     if (payload.categoria !== undefined && !CATEGORIAS_BLOCO.includes(payload.categoria)) throw new ErroApi(400, 'Categoria de bloco inv\u00e1lida.');
     if (payload.recorrencia !== undefined && !['semanal', 'unico'].includes(payload.recorrencia)) throw new ErroApi(400, 'A recorr\u00eancia deve ser semanal ou \u00fanica.');
     if (payload.horaInicio !== undefined && (typeof payload.horaInicio !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(payload.horaInicio))) throw new ErroApi(400, 'Informe um hor\u00e1rio v\u00e1lido no formato HH:MM.');

@@ -16,7 +16,7 @@
 
     <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=2">
     <link rel="stylesheet" href="CSS/layout.css?v=20">
-    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=17">
+    <link rel="stylesheet" href="CSS/style_disciplinas.css?v=20">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
@@ -280,7 +280,7 @@
                 <div class="form-bloco-grade">
                     <div class="campo-bloco campo-bloco-largo">
                         <label for="disciplina-nome">Nome <b>*</b></label>
-                        <input id="disciplina-nome" name="nome" maxlength="120" placeholder="Ex.: Cálculo II" required>
+                        <input id="disciplina-nome" name="nome" maxlength="200" placeholder="Ex.: Cálculo II" required>
                     </div>
                     <div class="campo-bloco">
                         <label for="disciplina-area">Área <b>*</b></label>
@@ -293,14 +293,20 @@
                             <option value="Humanas"></option>
                         </datalist>
                     </div>
-                    <div class="campo-bloco">
-                        <label for="disciplina-cor">Cor</label>
-                        <select id="disciplina-cor" name="cor">
-                            <option value="roxo">Roxo</option>
-                            <option value="azul">Azul</option>
-                            <option value="verde">Verde</option>
-                            <option value="ambar">Âmbar</option>
-                        </select>
+                    <div class="campo-bloco campo-bloco-largo">
+                        <span id="rotulo-disciplina-cor">Cor</span>
+                        <div class="seletor-cores" role="radiogroup" aria-labelledby="rotulo-disciplina-cor">
+                            <label class="opcao-cor"><input type="radio" name="cor" value="roxo" checked><span style="background:#4F3466"></span>Roxo</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="azul"><span style="background:#6750A4"></span>Lilás</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="indigo"><span style="background:#1D4ED8"></span>Azul</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="ciano"><span style="background:#0891B2"></span>Ciano</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="turquesa"><span style="background:#0F766E"></span>Turquesa</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="verde"><span style="background:#10B981"></span>Verde</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="ambar"><span style="background:#C9A74D"></span>Âmbar</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="laranja"><span style="background:#EA580C"></span>Laranja</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="vermelho"><span style="background:#DC2626"></span>Vermelho</label>
+                            <label class="opcao-cor"><input type="radio" name="cor" value="rosa"><span style="background:#DB2777"></span>Rosa</label>
+                        </div>
                     </div>
                     <div class="campo-bloco">
                         <label for="disciplina-professor">Professor</label>
@@ -367,7 +373,7 @@
             <form id="form-bloco-fixo">
                 <div class="form-bloco-grade">
                     <div class="campo-bloco campo-bloco-largo"><label for="bloco-nome">Nome do compromisso
-                            <b>*</b></label><input id="bloco-nome" name="nome" maxlength="80"
+                            <b>*</b></label><input id="bloco-nome" name="nome" maxlength="200"
                             placeholder="Ex.: Aula de cálculo, trabalho, academia" required></div>
                     <div class="campo-bloco"><label for="bloco-categoria">Categoria <b>*</b></label><select
                             id="bloco-categoria" name="categoria" required>
@@ -379,10 +385,13 @@
                             <option value="translado">Deslocamento</option>
                             <option value="outro">Outro compromisso</option>
                         </select></div>
-                    <div class="campo-bloco"><label for="bloco-disciplina">Disciplina relacionada</label><select
-                            id="bloco-disciplina" name="disciplinaId">
-                            <option value="">Nenhuma</option>
-                        </select></div>
+                    <div class="campo-bloco" id="campo-bloco-disciplina" hidden>
+                        <label for="bloco-disciplina">Matéria <b id="bloco-disciplina-obrigatoria">*</b></label>
+                        <select id="bloco-disciplina" name="disciplinaId">
+                            <option value="">Selecione a matéria</option>
+                        </select>
+                        <small class="dica-campo">Este horário de aula entra na carga da matéria.</small>
+                    </div>
                     <fieldset class="campo-bloco campo-bloco-largo dias-bloco">
                         <legend>Dias da semana <b>*</b></legend>
                         <div class="opcoes-dias"> <label><input type="checkbox" name="diasSemana"
@@ -434,10 +443,10 @@
         </section>
     </div>
 
-    <script src="JS/users/api.js?v=10"></script>
-    <script src="JS/componentes/layout.js?v=27"></script>
+    <script src="JS/users/api.js?v=14"></script>
+    <script src="JS/componentes/layout.js?v=29"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
-    <script src="JS/script_disciplinas.js?v=26"></script>
+    <script src="JS/script_disciplinas.js?v=28"></script>
 
 </body>
 

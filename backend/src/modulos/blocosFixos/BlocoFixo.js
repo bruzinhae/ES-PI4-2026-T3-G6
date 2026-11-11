@@ -4,7 +4,7 @@ export const CATEGORIAS_BLOCO = ['aulas', 'trabalho', 'sono', 'saude', 'pausa', 
 const blocoFixoSchema = new mongoose.Schema({
     usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true, index: true },
     disciplinaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', default: null },
-    nome: { type: String, required: [true, 'Informe o nome do compromisso.'], trim: true, minlength: [2, 'O nome deve ter ao menos 2 caracteres.'], maxlength: [80, 'O nome deve ter no m\u00e1ximo 80 caracteres.'] },
+    nome: { type: String, required: [true, 'Informe o nome do compromisso.'], trim: true, minlength: [2, 'O nome deve ter ao menos 2 caracteres.'], maxlength: [200, 'O nome deve ter no máximo 200 caracteres.'] },
     categoria: { type: String, enum: { values: CATEGORIAS_BLOCO, message: 'Categoria de bloco inv\u00e1lida.' }, required: true },
     recorrencia: { type: String, enum: ['semanal', 'unico'], required: true },
     diasSemana: { type: [Number], default: [] },

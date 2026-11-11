@@ -5,15 +5,27 @@ renderLayout({
 const CORES_HEX = {
     roxo: '#4F3466',
     azul: '#6750A4',
+    indigo: '#1D4ED8',
+    ciano: '#0891B2',
+    turquesa: '#0F766E',
     verde: '#10B981',
     ambar: '#C9A74D',
+    laranja: '#EA580C',
+    vermelho: '#DC2626',
+    rosa: '#DB2777',
 };
 
 const ETIQUETA_CLASSE = {
     roxo: 'etiqueta-lilas',
     azul: 'etiqueta-violeta',
-    verde: 'etiqueta-lilas',
+    indigo: 'etiqueta-indigo',
+    ciano: 'etiqueta-ciano',
+    turquesa: 'etiqueta-turquesa',
+    verde: 'etiqueta-verde',
     ambar: 'etiqueta-ambar',
+    laranja: 'etiqueta-laranja',
+    vermelho: 'etiqueta-vermelho',
+    rosa: 'etiqueta-rosa',
 };
 
 // CRUD de disciplinas via API autenticada.
@@ -26,7 +38,9 @@ const ETIQUETA_CLASSE = {
     const modal = document.getElementById('modal-disciplina');
     const formulario = document.getElementById('form-disciplina');
     const erroForm = document.getElementById('erro-form-disciplina');
+    const DIAS_AULA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     let disciplinas = [];
+    let blocosAula = [];
     let editandoId = null;
 
     const comparadores = {
@@ -47,6 +61,30 @@ const ETIQUETA_CLASSE = {
     function formatarMedia(valor) {
         if (valor === null || valor === undefined || valor === '') return 'Sem média';
         return `Média ${String(valor).replace('.', ',')}`;
+    }
+
+    function idBloco(bloco) {
+        return String(bloco?._id || bloco?.id || '');
+    }
+
+    function fimDoBloco(bloco) {
+        const [hora, minuto] = String(bloco.horaInicio || '00:00').slice(0, 5).split(':').map(Number);
+        const total = hora * 60 + minuto + Number(bloco.duracaoMinutos || 0);
+        return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+    }
+
+    function horariosDaMateria(disciplinaId) {
+        return blocosAula.filter((bloco) => (
+            bloco.categoria === 'aulas'
+            && bloco.recorrencia === 'semanal'
+            && String(bloco.disciplinaId?._id || bloco.disciplinaId || '') === String(disciplinaId)
+        ));
+    }
+
+    function textoHorario(bloco) {
+        const dias = (bloco.diasSemana || []).map((dia) => DIAS_AULA[dia]).filter(Boolean).join(', ');
+        const inicio = String(bloco.horaInicio || '').slice(0, 5);
+        return `${dias} · ${inicio}–${fimDoBloco(bloco)}`;
     }
 
     function formatarHoras(horas) {
@@ -92,6 +130,7 @@ const ETIQUETA_CLASSE = {
         const progresso = disciplina.progresso;
         const creditos = disciplina.creditos != null ? `${disciplina.creditos} créditos` : 'Sem créditos';
         const professor = [disciplina.professor, disciplina.local].filter(Boolean).join(' • ') || 'Professor e local não informados';
+        const horarios = horariosDaMateria(disciplina.id);
         const artigo = document.createElement('article');
         artigo.className = 'cartao-disciplina';
         artigo.style.setProperty('--cor', cor);
@@ -118,7 +157,12 @@ const ETIQUETA_CLASSE = {
                     <p class="media-disciplina">${escapar(formatarMedia(disciplina.media))}</p>
                     <p class="professor">${escapar(professor)}</p>
                 </div>
-                <button type="button" class="botao-grade" data-acao="grade">Colocar na grade</button>
+                <ul class="horarios-aula">
+                    ${horarios.length
+                        ? horarios.map((bloco) => `<li><button type="button" data-horario="${escapar(idBloco(bloco))}">${escapar(textoHorario(bloco))}</button></li>`).join('')
+                        : '<li class="horario-vazio">Nenhum horário de aula vinculado</li>'}
+                </ul>
+                <button type="button" class="botao-grade" data-acao="grade">${horarios.length ? 'Adicionar horário de aula' : 'Vincular horário de aula'}</button>
             </div>
             <div class="cartao-progresso">
                 <div class="progresso-topo">
@@ -134,6 +178,11 @@ const ETIQUETA_CLASSE = {
         artigo.querySelector('[data-acao="excluir"]').addEventListener('click', () => excluirDisciplina(disciplina));
         artigo.querySelector('[data-acao="grade"]').addEventListener('click', () => {
             window.dispatchEvent(new CustomEvent('acaistudy:agendar-disciplina', { detail: { disciplina } }));
+        });
+        artigo.querySelectorAll('[data-horario]').forEach((botao) => {
+            botao.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('acaistudy:editar-bloco', { detail: { id: botao.dataset.horario } }));
+            });
         });
         return artigo;
     }
@@ -226,6 +275,11 @@ const ETIQUETA_CLASSE = {
             AcaiAvisos.mostrar(erro.message || 'Não foi possível excluir a disciplina.');
         }
     }
+
+    window.addEventListener('acaistudy:blocos-atualizados', (evento) => {
+        blocosAula = evento.detail?.blocos || [];
+        if (disciplinas.length) carregar();
+    });
 
     document.getElementById('abrir-cadastro-disciplina')?.addEventListener('click', () => abrirModal());
     document.getElementById('fechar-modal-disciplina')?.addEventListener('click', fecharModal);
@@ -346,6 +400,10 @@ const ETIQUETA_CLASSE = {
     });
     window.addEventListener('acaistudy:agendar-disciplina', (evento) => {
         abrirModal(null, evento.detail?.disciplina);
+    });
+    window.addEventListener('acaistudy:editar-bloco', (evento) => {
+        const id = evento.detail?.id;
+        if (id) abrirModal(id);
     });
     function idDo(bloco) { return bloco._id || bloco.id; }
     function exibirErro(mensagem) { document.querySelector('#erro-form-bloco').textContent = mensagem || 'N\u00e3o foi poss\u00edvel salvar o bloco. Tente novamente.'; }
@@ -548,7 +606,9 @@ const ETIQUETA_CLASSE = {
             const conteudo = document.createElement('div');
             conteudo.className = 'agenda-compromisso-conteudo';
             const nome = document.createElement('strong');
-            nome.textContent = ocorrencia.bloco.nome;
+            nome.textContent = disciplinaVinculo && ocorrencia.bloco.categoria === 'aulas'
+                ? disciplinaVinculo.nome
+                : ocorrencia.bloco.nome;
             const horario = document.createElement('span');
             horario.className = 'agenda-compromisso-horario';
             horario.textContent = `${formatarHora(ocorrencia.inicio)}\u2013${formatarHora(ocorrencia.fim)}`;
@@ -633,7 +693,7 @@ const ETIQUETA_CLASSE = {
         if (nota) {
             nota.textContent = ids.size
                 ? `${ids.size === 1 ? '1 matéria está' : `${ids.size} matérias estão`} no calendário`
-                : 'Use “Colocar na grade” no cartão da matéria';
+                : 'Vincule um horário de aula no cartão da matéria';
         }
     }
     function renderizar() {
@@ -643,7 +703,11 @@ const ETIQUETA_CLASSE = {
         renderizarAgenda();
     }
     async function carregar() {
-        try { blocos = await AcaiApi.listarBlocosFixos(); renderizar(); }
+        try {
+            blocos = await AcaiApi.listarBlocosFixos();
+            renderizar();
+            window.dispatchEvent(new CustomEvent('acaistudy:blocos-atualizados', { detail: { blocos } }));
+        }
         catch (erro) {
             blocos = [];
             renderizar();
@@ -700,12 +764,20 @@ const ETIQUETA_CLASSE = {
         }
         alternarRecorrencia();
         duracaoInformada();
-        document.querySelector('#titulo-modal-bloco-fixo').textContent = bloco ? 'Editar bloco fixo' : disciplina ? 'Colocar na grade' : 'Novo bloco fixo';
+        document.querySelector('#titulo-modal-bloco-fixo').textContent = bloco ? 'Editar bloco fixo' : disciplina ? 'Horário de aula' : 'Novo bloco fixo';
+        atualizarVinculoAula();
         modal.querySelector('.botao-salvar-bloco').textContent = bloco ? 'Salvar alterações' : 'Salvar bloco';
         modal.classList.add('aberto'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('modal-bloco-aberto');
         formulario.elements.nome.focus();
     }
     function fecharModal() { modal.classList.remove('aberto'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('modal-bloco-aberto'); }
+    function atualizarVinculoAula() {
+        const aula = formulario.elements.categoria.value === 'aulas';
+        const campo = document.getElementById('campo-bloco-disciplina');
+        campo.hidden = !aula;
+        seletorDisciplina.required = aula;
+    }
+
     function alternarRecorrencia() {
         const unico = recorrencia.value === 'unico';
         campoData.hidden = !unico;
@@ -759,6 +831,7 @@ const ETIQUETA_CLASSE = {
         }
     });
     recorrencia.addEventListener('change', alternarRecorrencia);
+    formulario.elements.categoria.addEventListener('change', atualizarVinculoAula);
     seletorDisciplina.addEventListener('change', () => {
         preencherPelaDisciplina(disciplinasPorId.get(seletorDisciplina.value), false);
     });
@@ -772,6 +845,11 @@ const ETIQUETA_CLASSE = {
         dados.local = dados.local.trim(); dados.nome = dados.nome.trim(); dados.data = dados.data || null; dados.disciplinaId = dados.disciplinaId.trim() || null;
         dados.horaInicio = String(dados.horaInicio || '').slice(0, 5);
         delete dados.horaFim;
+        if (dados.categoria === 'aulas' && !dados.disciplinaId) {
+            exibirErro('Escolha a matéria deste horário de aula.');
+            return;
+        }
+        if (dados.categoria !== 'aulas') dados.disciplinaId = null;
         const erro = document.querySelector('#erro-form-bloco'); erro.textContent = '';
         if (dados.recorrencia === 'semanal' && !dados.diasSemana.length) { exibirErro('Selecione ao menos um dia da semana.'); return; }
         const duracao = duracaoInformada();
