@@ -134,6 +134,11 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   disciplina. As preferências (`janelaFoco`, `focoMatinal`, `duracaoMinutos`, `antifadiga`) vêm da conta do usuário. Sem tarefas ou
   sem espaços, o campo `motivo` vale `sem_tarefas` ou `sem_espacos` e o servidor Java nem é chamado; com ele fora do ar a rota
   responde 503, e as rotas de sessões continuam funcionando.
+- **Sofia nas metas** (`modulos/metas/sofiaMetasService.js`): `POST /api/metas/sofia` pede primeiro ao servidor Java (`pedidoDeMetas`, via
+  `servicos/clienteRanking.js`) a meta foco e as datas sugeridas para os marcos novos; o Gemini recebe a meta já escolhida e só escreve o
+  comentário e os títulos. Cada sugestão volta com `dataSugerida` (`AAAA-MM-DD` ou `null`). Com o servidor fora do ar, a rota cai no
+  comportamento anterior (o Gemini escolhe a meta, sem datas) e `priorizadoPeloServidor` vem `false`. O marco não tem campo de data: a data
+  é só uma dica na tela, e incluir o marco grava apenas o título.
 - **Sessões de estudo** são o horário planejado de uma tarefa (coleção `sessoes_estudo`). Aceitar uma sugestão é `POST /api/sessoes-estudo`
   com `origem: "ia"`. Sessões `agendada` e `concluida` ocupam horário; `cancelada` e `nao_realizada` o liberam.
 - **Fuso:** a grade usa um deslocamento fixo (`FUSO_OFFSET`, padrão `-03:00`) e as datas da API saem nesse fuso, ex.: `2026-11-09T14:00:00-03:00`.

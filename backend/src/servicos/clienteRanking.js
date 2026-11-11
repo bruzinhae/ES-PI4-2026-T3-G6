@@ -3,40 +3,76 @@ import { env } from '../config/env.js';
 import { ErroApi } from '../utils/ErroApi.js';
 
 const TAMANHO_MAXIMO_DA_LINHA = 2_000_000;
-const CAMPOS_DO_PEDIDO = ['agora', 'preferencias', 'limite', 'alocar', 'espacos', 'tarefas'];
 
-function validarPedido(pedido) {
-    if (!pedido || typeof pedido !== 'object' || Array.isArray(pedido)) {
-        throw new ErroApi(400, 'Envie o pedido de ranking em formato JSON.');
-    }
+// Cada tipo de pedido que o servidor Java entende: o que o backend aceita enviar e o que espera receber.
+const PEDIDO_DE_RANKING = {
+    tipo: 'pedidoDeRanking',
+    tipoDaResposta: 'ranking',
+    prefixoDeErroDeCalculo: 'Não foi possível calcular o ranking:',
+    camposPermitidos: ['agora', 'preferencias', 'limite', 'alocar', 'espacos', 'tarefas'],
+    descricao: 'de ranking',
+    validar(pedido) {
+        if ('alocar' in pedido && typeof pedido.alocar !== 'boolean') {
+            throw new ErroApi(400, 'O campo "alocar" deve ser verdadeiro ou falso.');
+        }
+        listaLimitada(pedido, ['espacos', 'tarefas'], 2000);
+    },
+    respostaValida: (resposta) => Array.isArray(resposta.porEspaco) && Array.isArray(resposta.semEspaco),
+};
 
-    const desconhecido = Object.keys(pedido).find((campo) => !CAMPOS_DO_PEDIDO.includes(campo));
-    if (desconhecido) {
-        throw new ErroApi(400, `Campo não permitido no pedido de ranking: ${desconhecido}.`);
-    }
+const PEDIDO_DE_METAS = {
+    tipo: 'pedidoDeMetas',
+    tipoDaResposta: 'prioridadeDeMetas',
+    prefixoDeErroDeCalculo: 'Não foi possível priorizar as metas:',
+    camposPermitidos: ['agora', 'metas', 'quantidadeDeMarcos'],
+    descricao: 'de metas',
+    validar(pedido) {
+        listaLimitada(pedido, ['metas'], 200);
+    },
+    respostaValida: (resposta) => Array.isArray(resposta.ranking) && Array.isArray(resposta.datasDosMarcos),
+};
 
-    if ('alocar' in pedido && typeof pedido.alocar !== 'boolean') {
-        throw new ErroApi(400, 'O campo "alocar" deve ser verdadeiro ou falso.');
-    }
-
-    for (const campo of ['espacos', 'tarefas']) {
+function listaLimitada(pedido, campos, maximo) {
+    for (const campo of campos) {
         if (!Array.isArray(pedido[campo])) {
             throw new ErroApi(400, `O campo "${campo}" deve ser uma lista.`);
         }
-        if (pedido[campo].length > 2000) {
-            throw new ErroApi(400, `O campo "${campo}" não pode ter mais de 2000 itens.`);
+        if (pedido[campo].length > maximo) {
+            throw new ErroApi(400, `O campo "${campo}" não pode ter mais de ${maximo} itens.`);
         }
     }
+}
 
-    return JSON.stringify({ ...pedido, tipo: 'pedidoDeRanking' });
+function validarPedido(pedido, modelo) {
+    if (!pedido || typeof pedido !== 'object' || Array.isArray(pedido)) {
+        throw new ErroApi(400, `Envie o pedido ${modelo.descricao} em formato JSON.`);
+    }
+
+    const desconhecido = Object.keys(pedido).find((campo) => !modelo.camposPermitidos.includes(campo));
+    if (desconhecido) {
+        throw new ErroApi(400, `Campo não permitido no pedido ${modelo.descricao}: ${desconhecido}.`);
+    }
+
+    modelo.validar(pedido);
+    return JSON.stringify({ ...pedido, tipo: modelo.tipo });
+}
+
+/** Pede ao servidor Java o ranking de tarefas por espaço livre (e, com `alocar`, a alocação). */
+export function pedirRanking(pedido, configuracao = env.rankingJava) {
+    return enviarPedido(pedido, PEDIDO_DE_RANKING, configuracao);
+}
+
+/** Pede ao servidor Java a prioridade das metas, a meta foco e as datas sugeridas para os marcos. */
+export function pedirPrioridadeDeMetas(pedido, configuracao = env.rankingJava) {
+    return enviarPedido(pedido, PEDIDO_DE_METAS, configuracao);
 }
 
 /**
  * Encaminha um pedido ao servidor Java usando o protocolo TCP de uma linha JSON.
  * As opções de conexão podem ser substituídas em testes; em produção usam o .env.
  */
-export async function pedirRanking(pedido, configuracao = env.rankingJava) {
-    const mensagem = validarPedido(pedido);
+async function enviarPedido(pedido, modelo, configuracao) {
+    const mensagem = validarPedido(pedido, modelo);
     if (Buffer.byteLength(mensagem, 'utf8') > TAMANHO_MAXIMO_DA_LINHA) {
         throw new ErroApi(413, 'O pedido de ranking excede o limite de 2 MB.');
     }
@@ -89,16 +125,14 @@ export async function pedirRanking(pedido, configuracao = env.rankingJava) {
             }
 
             if (resposta?.tipo === 'erro') {
-                const erroDeCalculo = resposta.mensagem?.startsWith('Não foi possível calcular o ranking:');
+                const erroDeCalculo = resposta.mensagem?.startsWith(modelo.prefixoDeErroDeCalculo);
                 encerrar(new ErroApi(
                     erroDeCalculo ? 502 : 400,
-                    resposta.mensagem || 'O servidor Java rejeitou o pedido de ranking.',
+                    resposta.mensagem || `O servidor Java rejeitou o pedido ${modelo.descricao}.`,
                 ));
                 return;
             }
-            if (resposta?.tipo !== 'ranking'
-                || !Array.isArray(resposta.porEspaco)
-                || !Array.isArray(resposta.semEspaco)) {
+            if (resposta?.tipo !== modelo.tipoDaResposta || !modelo.respostaValida(resposta)) {
                 encerrar(new ErroApi(502, 'O servidor Java devolveu um tipo de resposta inesperado.'));
                 return;
             }

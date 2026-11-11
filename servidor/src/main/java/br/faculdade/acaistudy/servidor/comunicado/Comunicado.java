@@ -10,7 +10,7 @@ import java.util.Map;
  * Tudo o que trafega entre o servidor e o cliente (o backend Node) é um Comunicado.
  *
  * No exemplo do professor (Fazedor de Continhas) os comunicados são objetos Java
- * serializados. Aqui a hierarquia é a mesma (PedidoDeRanking, Ranking, PedidoParaSair,
+ * serializados. Aqui a hierarquia é a mesma (PedidoDeRanking, Ranking, PedidoDeMetas, PrioridadeDeMetas, PedidoParaSair,
  * ComunicadoDeDesligamento, Erro), mas cada comunicado viaja como UMA LINHA de JSON, porque
  * o Node não lê a serialização de objetos do Java. O campo "tipo" faz o papel do instanceof.
  */
@@ -38,6 +38,8 @@ public abstract class Comunicado
         {
             case "pedidoDeRanking":
                 return PedidoDeRanking.deMapa (mapa);
+            case "pedidoDeMetas":
+                return PedidoDeMetas.deMapa (mapa);
             case "pedidoParaSair":
                 return new PedidoParaSair ();
             default:
