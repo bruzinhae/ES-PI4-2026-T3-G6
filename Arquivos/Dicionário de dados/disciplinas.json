@@ -8,6 +8,7 @@
     "local": "Sala 304 - Bloco B",
     "creditos": 6,
     "peso": 4,
+    "media": 7.5,
     "dificuldade": 5,
     "cor": "roxo",
     "periodoLetivo": "2026/2",
@@ -50,6 +51,8 @@
         "concluidoEm": null
       }
     ],
+    "origem": "canvas",
+    "idExterno": "canvas:curso:10231",
     "criadoEm": "2026-08-03T13:30:00Z",
     "atualizadoEm": "2026-10-27T00:30:00Z"
   },
@@ -62,6 +65,7 @@
     "local": "Lab BD 02",
     "creditos": 4,
     "peso": 5,
+    "media": 9.0,
     "dificuldade": 4,
     "cor": "azul",
     "periodoLetivo": "2026/2",
@@ -104,6 +108,8 @@
         "concluidoEm": null
       }
     ],
+    "origem": "canvas",
+    "idExterno": "canvas:curso:10245",
     "criadoEm": "2026-08-03T13:32:00Z",
     "atualizadoEm": "2026-10-28T01:00:00Z"
   },
@@ -116,6 +122,7 @@
     "local": "Lab 2",
     "creditos": 4,
     "peso": 3,
+    "media": null,
     "dificuldade": 3,
     "cor": "verde",
     "periodoLetivo": "2026/2",
@@ -149,6 +156,8 @@
         "concluidoEm": null
       }
     ],
+    "origem": "manual",
+    "idExterno": null,
     "criadoEm": "2026-08-03T13:35:00Z",
     "atualizadoEm": "2026-10-28T18:00:00Z"
   },
@@ -161,11 +170,14 @@
     "local": null,
     "creditos": null,
     "peso": 3,
+    "media": null,
     "dificuldade": 3,
     "cor": "ambar",
     "periodoLetivo": "2026/2",
     "situacao": "ativa",
     "conteudos": [],
+    "origem": "manual",
+    "idExterno": null,
     "criadoEm": "2026-10-19T18:04:00Z",
     "atualizadoEm": "2026-10-19T18:04:00Z"
   }

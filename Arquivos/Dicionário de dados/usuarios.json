@@ -15,6 +15,25 @@
     "turno": "matutino",
     "metaSemanalHoras": 20,
     "onboardingConcluido": true,
+    "configuracao": {
+      "antifadiga": true,
+      "focoMatinal": true,
+      "repeticaoEspacada": true,
+      "ajusteDinamico": true,
+      "rigidez": "equilibrado",
+      "janelaFoco": "noite",
+      "duracaoMinutos": 90
+    },
+    "canvas": {
+      "instanciaUrl": "https://pucc.instructure.com",
+      "accessToken": "v1.Q2h2bXp4c2Fk.dGFnLWV4ZW1wbG8.Y2lmcmFkby1leGVtcGxv",
+      "refreshToken": "v1.TXZ6a2xwcXJz.dGFnLWV4ZW1wbG8y.Y2lmcmFkby1leGVtcGxvMg",
+      "expiraEm": "2026-10-21T01:40:00Z",
+      "canvasUserId": "48213",
+      "nome": "Larissa Prado",
+      "conectadoEm": "2026-08-05T22:10:00Z",
+      "sincronizadoEm": "2026-10-21T00:40:00Z"
+    },
     "criadoEm": "2026-08-03T13:12:00Z",
     "atualizadoEm": "2026-10-21T00:40:00Z"
   },
@@ -34,6 +53,16 @@
     "turno": null,
     "metaSemanalHoras": 10,
     "onboardingConcluido": false,
+    "configuracao": {
+      "antifadiga": true,
+      "focoMatinal": true,
+      "repeticaoEspacada": true,
+      "ajusteDinamico": true,
+      "rigidez": "equilibrado",
+      "janelaFoco": "manha",
+      "duracaoMinutos": 50
+    },
+    "canvas": null,
     "criadoEm": "2026-10-19T18:02:00Z",
     "atualizadoEm": "2026-10-19T18:05:00Z"
   }

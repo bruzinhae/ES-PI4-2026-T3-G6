@@ -30,7 +30,7 @@
       }
     ],
     "avisos": [],
-    "modelo": "claude-haiku-5-5",
+    "modelo": "gemini-flash-lite-latest",
     "versaoPrompt": "v1.0",
     "tokensEntrada": 3120,
     "tokensSaida": 640,
@@ -56,7 +56,7 @@
     "avisos": [
       "Quinta à noite fica sem tempo livre depois desse ajuste."
     ],
-    "modelo": "claude-haiku-5-5",
+    "modelo": "gemini-flash-lite-latest",
     "versaoPrompt": "v1.0",
     "tokensEntrada": 1980,
     "tokensSaida": 310,
