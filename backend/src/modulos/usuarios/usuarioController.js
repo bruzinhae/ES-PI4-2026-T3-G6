@@ -24,7 +24,13 @@ import { apresentarUsuario, apresentarUsuarios } from './apresentarUsuario.js';
 export async function criar(req, res) {
     const usuario = await usuarioService.criar(req.body);
     const { token, expiraEm } = await authService.criarSessao(usuario._id);
-    res.status(201).json({ usuario: apresentarUsuario(req, usuario), token, expiraEm });
+    const { enviada } = await authService.solicitarConfirmacaoEmail(usuario);
+    res.status(201).json({
+        usuario: apresentarUsuario(req, usuario),
+        token,
+        expiraEm,
+        confirmacaoEnviada: enviada,
+    });
 }
 
 // GET /api/usuarios — devolve todos os usuários (o status padrão já é 200 = OK).
@@ -46,7 +52,13 @@ export async function atualizar(req, res) {
     if (req.body?.senha !== undefined) {
         await authService.encerrarSessoesDoUsuario(usuario._id, req.sessao.id);
     }
-    res.json({ usuario: apresentarUsuario(req, usuario) });
+    const confirmacaoEnviada = usuario.$locals.emailTrocado
+        ? (await authService.solicitarConfirmacaoEmail(usuario)).enviada
+        : undefined;
+    res.json({
+        usuario: apresentarUsuario(req, usuario),
+        ...(confirmacaoEnviada !== undefined && { confirmacaoEnviada }),
+    });
 }
 
 // POST /api/usuarios/:id/avatar — recebe o arquivo (campo `foto`) e devolve o usuário
@@ -67,5 +79,6 @@ export async function removerAvatar(req, res) {
 export async function excluir(req, res) {
     await usuarioService.excluir(req.params.id);
     await authService.encerrarSessoesDoUsuario(req.params.id);
+    await authService.apagarConfirmacoesDoUsuario(req.params.id);
     res.status(204).end();
 }

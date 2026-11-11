@@ -1,5 +1,5 @@
 /**
- * servicos/correio.js — ENVIO DE E-MAIL (link de redefinição de senha).
+ * servicos/correio.js — ENVIO DE E-MAIL (confirmação de conta e redefinição de senha).
  *
  * Usa SMTP (nodemailer). As credenciais ficam no .env (SMTP_HOST, SMTP_USER, SMTP_PASS),
  * nunca no código. Quem chama é o authService, só quando o e-mail já existe na base.
@@ -9,7 +9,8 @@ import nodemailer from 'nodemailer';
 import { env } from '../config/env.js';
 import { ErroApi } from '../utils/ErroApi.js';
 
-const MENSAGEM_FALHA_ENVIO = 'Não foi possível enviar o e-mail de recuperação. Tente novamente em instantes.';
+const MENSAGEM_FALHA_RECUPERACAO = 'Não foi possível enviar o e-mail de recuperação. Tente novamente em instantes.';
+const MENSAGEM_FALHA_CONFIRMACAO = 'Não foi possível enviar o e-mail de confirmação. Tente novamente em instantes.';
 
 let transporte;
 
@@ -61,11 +62,10 @@ function escaparHtml(texto) {
 }
 
 /**
- * HTML do e-mail de recuperação. Layout em tabelas + CSS inline: é o que Gmail, Outlook
- * e Apple Mail aceitam de forma estável. Cores seguem a tela de login (#4f3466).
+ * HTML compartilhado dos e-mails da plataforma. Layout em tabelas + CSS inline: é o que
+ * Gmail, Outlook e Apple Mail aceitam de forma estável. Cores seguem a tela de login (#4f3466).
  */
-function montarHtmlRecuperacao({ saudacao, link }) {
-    const saudacaoHtml = escaparHtml(saudacao);
+function montarHtmlMensagem({ titulo, icone, tituloPrincipal, introHtml, avisoHtml, rotuloBotao, link, notaHtml }) {
     const linkHtml = escaparHtml(link);
 
     return `<!DOCTYPE html>
@@ -73,7 +73,7 @@ function montarHtmlRecuperacao({ saudacao, link }) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redefinir senha — AçaíStudy</title>
+  <title>${titulo}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;-webkit-text-size-adjust:100%;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f1f5f9;padding:32px 16px;">
@@ -97,15 +97,15 @@ function montarHtmlRecuperacao({ saudacao, link }) {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;">
                 <tr>
                   <td style="width:56px;height:56px;border-radius:28px;background-color:rgba(79,52,102,0.10);text-align:center;vertical-align:middle;font-size:26px;line-height:56px;">
-                    🔑
+                    ${icone}
                   </td>
                 </tr>
               </table>
               <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#14111f;">
-                Redefinir sua senha
+                ${tituloPrincipal}
               </h1>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#475569;text-align:left;">
-                ${saudacaoHtml}. Recebemos um pedido para criar uma nova senha na sua conta do AçaíStudy.
+                ${introHtml}
               </p>
             </td>
           </tr>
@@ -115,8 +115,7 @@ function montarHtmlRecuperacao({ saudacao, link }) {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
                 <tr>
                   <td style="padding:14px 16px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#475569;">
-                    <strong style="color:#4f3466;">Este link é só seu.</strong>
-                    Vale por <strong>30 minutos</strong> e só pode ser usado <strong>uma vez</strong>.
+                    ${avisoHtml}
                   </td>
                 </tr>
               </table>
@@ -129,7 +128,7 @@ function montarHtmlRecuperacao({ saudacao, link }) {
                 <tr>
                   <td align="center" bgcolor="#4f3466" style="border-radius:10px;background-color:#4f3466;">
                     <a href="${linkHtml}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">
-                      Criar nova senha
+                      ${rotuloBotao}
                     </a>
                   </td>
                 </tr>
@@ -153,7 +152,7 @@ function montarHtmlRecuperacao({ saudacao, link }) {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #f1f5f9;">
                 <tr>
                   <td style="padding-top:20px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.55;color:#64748b;">
-                    Se você <strong>não pediu</strong> essa redefinição, ignore este e-mail. Sua senha continua a mesma e ninguém consegue usá-la sem o link.
+                    ${notaHtml}
                   </td>
                 </tr>
               </table>
@@ -176,17 +175,22 @@ function montarHtmlRecuperacao({ saudacao, link }) {
 </html>`;
 }
 
+function saudacaoDe(nome) {
+    const primeiroNome = String(nome ?? '').trim().split(/\s+/)[0];
+    return primeiroNome ? `Olá, ${primeiroNome}` : 'Olá';
+}
+
 /**
  * Manda o link único da tela de nova senha. O link já vem pronto (com o token).
  * Falha de SMTP vira ErroApi 503 com uma mensagem genérica — o detalhe fica no log.
  */
 export async function enviarLinkRecuperacaoSenha({ destinatario, nome, link }) {
     if (!correioConfigurado()) {
-        throw new ErroApi(503, MENSAGEM_FALHA_ENVIO);
+        throw new ErroApi(503, MENSAGEM_FALHA_RECUPERACAO);
     }
 
-    const primeiroNome = String(nome ?? '').trim().split(/\s+/)[0];
-    const saudacao = primeiroNome ? `Olá, ${primeiroNome}` : 'Olá';
+    const saudacao = saudacaoDe(nome);
+    const saudacaoHtml = escaparHtml(saudacao);
 
     const texto = [
         `${saudacao}.`,
@@ -207,10 +211,66 @@ export async function enviarLinkRecuperacaoSenha({ destinatario, nome, link }) {
             to: destinatario,
             subject: 'Redefina sua senha do AçaíStudy',
             text: texto,
-            html: montarHtmlRecuperacao({ saudacao, link }),
+            html: montarHtmlMensagem({
+                titulo: 'Redefinir senha — AçaíStudy',
+                icone: '🔑',
+                tituloPrincipal: 'Redefinir sua senha',
+                introHtml: `${saudacaoHtml}. Recebemos um pedido para criar uma nova senha na sua conta do AçaíStudy.`,
+                avisoHtml: '<strong style="color:#4f3466;">Este link é só seu.</strong> Vale por <strong>30 minutos</strong> e só pode ser usado <strong>uma vez</strong>.',
+                rotuloBotao: 'Criar nova senha',
+                link,
+                notaHtml: 'Se você <strong>não pediu</strong> essa redefinição, ignore este e-mail. Sua senha continua a mesma e ninguém consegue usá-la sem o link.',
+            }),
         });
     } catch (erro) {
         console.error('[recuperação de senha] falha ao enviar e-mail:', erro.message);
-        throw new ErroApi(503, MENSAGEM_FALHA_ENVIO);
+        throw new ErroApi(503, MENSAGEM_FALHA_RECUPERACAO);
+    }
+}
+
+/**
+ * Manda o link único da tela de confirmação de conta, no mesmo visual da recuperação.
+ */
+export async function enviarConfirmacaoConta({ destinatario, nome, link }) {
+    if (!correioConfigurado()) {
+        throw new ErroApi(503, MENSAGEM_FALHA_CONFIRMACAO);
+    }
+
+    const saudacao = saudacaoDe(nome);
+    const saudacaoHtml = escaparHtml(saudacao);
+
+    const texto = [
+        `${saudacao}.`,
+        '',
+        'Sua conta no AçaíStudy foi criada. Confirme que este e-mail é seu para validar o perfil.',
+        'Este link é só seu, vale por 24 horas e só pode ser usado uma vez:',
+        '',
+        link,
+        '',
+        'Se você não criou esta conta, ignore este e-mail.',
+        '',
+        'AçaíStudy',
+    ].join('\n');
+
+    try {
+        await obterTransporte().sendMail({
+            from: env.smtp.from,
+            to: destinatario,
+            subject: 'Confirme sua conta do AçaíStudy',
+            text: texto,
+            html: montarHtmlMensagem({
+                titulo: 'Confirme sua conta — AçaíStudy',
+                icone: '✉️',
+                tituloPrincipal: 'Confirme sua conta',
+                introHtml: `${saudacaoHtml}. Sua conta no AçaíStudy foi criada. Confirme que este e-mail é seu para validar o perfil.`,
+                avisoHtml: '<strong style="color:#4f3466;">Este link é só seu.</strong> Vale por <strong>24 horas</strong> e só pode ser usado <strong>uma vez</strong>.',
+                rotuloBotao: 'Confirmar minha conta',
+                link,
+                notaHtml: 'Se você <strong>não criou</strong> esta conta, ignore este e-mail. Ninguém confirma o endereço sem o link.',
+            }),
+        });
+    } catch (erro) {
+        console.error('[confirmação de conta] falha ao enviar e-mail:', erro.message);
+        throw new ErroApi(503, MENSAGEM_FALHA_CONFIRMACAO);
     }
 }

@@ -1,6 +1,12 @@
 inicializarMenusOnboarding();
 marcarPassoOnboarding('semestre');
 
+const avisoConfirmacao = sessionStorage.getItem('acaistudy-aviso-confirmacao');
+if (avisoConfirmacao) {
+    sessionStorage.removeItem('acaistudy-aviso-confirmacao');
+    AcaiAvisos.mostrar(avisoConfirmacao, avisoConfirmacao.includes('não saiu') ? 'erro' : 'ok');
+}
+
 const CHAVE_INTRO = 'acaistudy-onboarding-intro';
 const CORES = ['roxo', 'indigo', 'verde', 'laranja', 'azul', 'ciano', 'ambar', 'rosa', 'turquesa', 'vermelho'];
 

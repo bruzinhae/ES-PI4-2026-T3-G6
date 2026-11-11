@@ -89,7 +89,9 @@ const AcaiApi = (function () {
     async function criarUsuario(dados) {
         const resposta = await requisitar('/usuarios', { metodo: 'POST', corpo: dados, publica: true });
 
-        return guardarSessao(resposta);
+        guardarSessao(resposta);
+
+        return resposta;
     }
 
     // Login: confere e-mail e senha na API, que abre uma sessão (token) para este navegador.
@@ -114,6 +116,26 @@ const AcaiApi = (function () {
     // Define a senha nova com o token que veio no link (?token=...).
     function redefinirSenha(token, senha) {
         return requisitar('/auth/redefinir-senha', { metodo: 'POST', corpo: { token, senha }, publica: true });
+    }
+
+    function conferirConfirmacaoEmail(token) {
+        const consulta = new URLSearchParams({ token });
+
+        return requisitar(`/auth/confirmar-email?${consulta}`, { publica: true });
+    }
+
+    async function confirmarEmail(token) {
+        const dados = await requisitar('/auth/confirmar-email', { metodo: 'POST', corpo: { token }, publica: true });
+
+        if (dados?.usuario?.id && dados.usuario.id === obterIdAtual()) {
+            guardarUsuario(dados.usuario);
+        }
+
+        return dados?.usuario;
+    }
+
+    function reenviarConfirmacaoEmail() {
+        return requisitar('/auth/reenviar-confirmacao', { metodo: 'POST', corpo: {} });
     }
 
     // Logout: encerra a sessão na API e esquece o usuário neste navegador.
@@ -144,10 +166,15 @@ const AcaiApi = (function () {
     }
 
     async function atualizarUsuario(id, alteracoes) {
-        const { usuario } = await requisitar(`/usuarios/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        const dados = await requisitar(`/usuarios/${id}`, { metodo: 'PATCH', corpo: alteracoes });
+        const { usuario } = dados;
 
         if (id === obterIdAtual()) {
             guardarUsuario(usuario);
+        }
+
+        if (dados.confirmacaoEnviada !== undefined) {
+            usuario.confirmacaoEnviada = dados.confirmacaoEnviada;
         }
 
         return usuario;
@@ -435,6 +462,9 @@ const AcaiApi = (function () {
         recuperarSenha,
         conferirLinkRedefinicao,
         redefinirSenha,
+        conferirConfirmacaoEmail,
+        confirmarEmail,
+        reenviarConfirmacaoEmail,
         listarUsuarios,
         obterUsuario,
         atualizarUsuario,

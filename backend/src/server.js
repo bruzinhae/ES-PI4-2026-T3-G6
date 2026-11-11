@@ -42,9 +42,9 @@ app.listen(env.porta, async () => {
     const correio = await verificarCorreio();
 
     if (correio.ok) {
-        console.log('E-mail: SMTP pronto para enviar o link de redefinição de senha.');
+        console.log('E-mail: SMTP pronto para confirmação de conta e redefinição de senha.');
     } else {
-        console.warn(`E-mail: recuperação de senha sem envio — ${correio.motivo}`);
+        console.warn(`E-mail: confirmação de conta e recuperação de senha sem envio — ${correio.motivo}`);
     }
 });
 

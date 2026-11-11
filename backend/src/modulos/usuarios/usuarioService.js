@@ -154,9 +154,12 @@ export async function atualizar(id, dados = {}) {
     // Trocou de e-mail de verdade (não só mudou maiúsculas)? Então:
     //   - o novo e-mail não pode pertencer a outra conta;
     //   - o novo endereço ainda não foi confirmado, logo emailVerificado volta a false.
+    let emailTrocado = false;
+
     if ('email' in alteracoes && normalizarEmail(alteracoes.email) !== usuario.emailNormalizado) {
         await garantirEmailLivre(alteracoes.email, usuario._id);
         usuario.emailVerificado = false;
+        emailTrocado = true;
     }
 
     // Troca de senha: valida o tamanho e guarda apenas o novo hash.
@@ -167,6 +170,7 @@ export async function atualizar(id, dados = {}) {
 
     usuario.set(alteracoes);
     await usuario.save();
+    usuario.$locals.emailTrocado = emailTrocado;
 
     return usuario;
 }

@@ -457,8 +457,26 @@ img {
 }
 
 .selo-verificado[hidden],
+.nota-confirmacao[hidden],
 .link-acao[hidden] {
     display: none;
+}
+
+.nota-confirmacao {
+    margin: 6px 0 0;
+    color: #6b6570;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.nota-confirmacao button {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: #4f3466;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .selo-verificado {

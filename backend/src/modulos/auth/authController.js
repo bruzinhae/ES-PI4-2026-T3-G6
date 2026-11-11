@@ -31,6 +31,29 @@ export async function redefinirSenha(req, res) {
     res.status(204).end();
 }
 
+// GET /api/auth/confirmar-email?token= — a tela confere o link ao abrir. 204 = ainda vale.
+export async function conferirConfirmacao(req, res) {
+    await authService.conferirLinkConfirmacao(req.query.token);
+    res.status(204).end();
+}
+
+// POST /api/auth/confirmar-email — marca o e-mail como verificado. Devolve o usuário.
+export async function confirmarEmail(req, res) {
+    const usuario = await authService.confirmarEmail(req.body?.token);
+    res.json({ usuario: apresentarUsuario(req, usuario) });
+}
+
+// POST /api/auth/reenviar-confirmacao — outro e-mail para a conta logada.
+export async function reenviarConfirmacao(req, res) {
+    const { enviada, jaVerificado } = await authService.reenviarConfirmacaoEmail(req.usuario);
+    res.json({
+        confirmacaoEnviada: enviada,
+        mensagem: jaVerificado
+            ? 'Este e-mail já está confirmado.'
+            : 'Enviamos outro e-mail para confirmar sua conta.',
+    });
+}
+
 // POST /api/auth/logout — encerra a sessão usada na requisição. 204 = sem corpo.
 export async function sair(req, res) {
     await authService.encerrarSessao(req.sessao.id);

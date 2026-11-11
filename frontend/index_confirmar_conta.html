@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/icons/favicon.png" type="image/png">
+
+    <title>AçaíStudy - Confirmar conta</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style_login.css?v=3">
+    <link rel="stylesheet" href="CSS/avisos.css?v=1">
+</head>
+
+<body class="pagina-login">
+
+    <header class="cabecalho-login">
+
+        <a class="marca" href="index.html" aria-label="AçaíStudy - página inicial">
+            <img class="logo" src="assets/icons/layout/logo.png" alt="AçaíStudy - Sua organização nos estudos" width="209" height="54">
+        </a>
+
+        <div class="acoes-cabecalho">
+            <span>Já confirmou?</span>
+            <a class="botao-criar-conta" href="index_login.html">
+                <span>Entrar</span>
+                <img src="assets/icons/login/seta.svg" alt="" width="12" height="12">
+            </a>
+        </div>
+
+    </header>
+
+
+    <main class="principal-login">
+
+        <section class="cartao-login cartao-recuperar cartao-nova-senha" aria-labelledby="titulo-confirmar">
+
+            <div class="icone-recuperar" aria-hidden="true">
+                <img src="assets/icons/login/email.svg" alt="" width="22" height="22">
+            </div>
+
+            <div class="titulos-login">
+                <h1 id="titulo-confirmar">Confirme sua conta</h1>
+                <p id="texto-confirmar">O link do e-mail valida que este endereço é seu. A confirmação fica salva no seu perfil.</p>
+            </div>
+
+            <div class="aviso-link" id="aviso-link" hidden>
+                <p id="texto-aviso-link"></p>
+                <a href="index_login.html">Ir para o login</a>
+            </div>
+
+            <button type="button" class="botao-entrar" id="botao-confirmar" disabled>
+                <span>Confirmar minha conta</span>
+                <img src="assets/icons/login/seta.svg" alt="" width="12" height="12" class="icone-seta-clara">
+            </button>
+
+            <a class="link-voltar" href="index_login.html">
+                <img src="assets/icons/login/seta-voltar.svg" alt="" width="12" height="12">
+                <span>Voltar para o Login</span>
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <footer class="rodape-login">
+        <p>© 2026 AçaíStudy. Todos os direitos reservados. Feito para a sua máxima organização acadêmica.</p>
+    </footer>
+
+    <script src="JS/users/api.js?v=15"></script>
+    <script src="JS/componentes/avisos.js?v=1"></script>
+    <script src="JS/users/script_confirmar_conta.js?v=1"></script>
+</body>
+</html>

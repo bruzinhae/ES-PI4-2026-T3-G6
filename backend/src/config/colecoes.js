@@ -8,6 +8,7 @@
 
 import { Sessao } from '../modulos/auth/Sessao.js';
 import { RecuperacaoSenha } from '../modulos/auth/RecuperacaoSenha.js';
+import { ConfirmacaoEmail } from '../modulos/auth/ConfirmacaoEmail.js';
 import { Usuario } from '../modulos/usuarios/Usuario.js';
 import { Disciplina } from '../modulos/disciplinas/Disciplina.js';
 import { BlocoFixo } from '../modulos/blocosFixos/BlocoFixo.js';
@@ -21,6 +22,7 @@ const MODELS = [
     Usuario,
     Sessao,
     RecuperacaoSenha,
+    ConfirmacaoEmail,
     Disciplina,
     BlocoFixo,
     Tarefa,

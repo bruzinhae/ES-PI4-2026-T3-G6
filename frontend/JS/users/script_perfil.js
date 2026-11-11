@@ -56,6 +56,7 @@ function preencherTela(usuario) {
     document.getElementById('resumo-nome').textContent = usuario.nome;
     document.getElementById('resumo-curso').textContent = descreverCurso(usuario);
     document.getElementById('selo-verificado').hidden = !usuario.emailVerificado;
+    document.getElementById('nota-confirmacao').hidden = Boolean(usuario.emailVerificado);
     document.getElementById('botao-remover-foto').hidden = !usuario.urlAvatar;
 
     atualizarTrilhaMeta();
@@ -121,8 +122,14 @@ botaoSalvar?.addEventListener('click', async () => {
     botaoSalvar.disabled = true;
 
     try {
-        preencherTela(await AcaiApi.atualizarUsuarioAtual(lerFormulario()));
+        const usuario = await AcaiApi.atualizarUsuarioAtual(lerFormulario());
+        preencherTela(usuario);
         mostrarRetornoSalvar('Salvo');
+        if (usuario.confirmacaoEnviada === true) {
+            AcaiAvisos.mostrar('Enviamos um e-mail para confirmar o novo endereço.', 'ok');
+        } else if (usuario.confirmacaoEnviada === false) {
+            AcaiAvisos.mostrar('O e-mail mudou, mas a confirmação não saiu. Use Reenviar e-mail.');
+        }
     } catch (erro) {
         botaoSalvar.disabled = false;
         AcaiAvisos.mostrar(erro.message);
@@ -198,6 +205,20 @@ document.getElementById('botao-excluir-conta')?.addEventListener('click', async 
         window.location.href = 'index_criar_conta.html';
     } catch (erro) {
         AcaiAvisos.mostrar(erro.message);
+    }
+});
+
+document.getElementById('reenviar-confirmacao')?.addEventListener('click', async () => {
+    const botao = document.getElementById('reenviar-confirmacao');
+    botao.disabled = true;
+
+    try {
+        const resposta = await AcaiApi.reenviarConfirmacaoEmail();
+        AcaiAvisos.mostrar(resposta.mensagem || 'Enviamos outro e-mail de confirmação.', resposta.confirmacaoEnviada ? 'ok' : 'aviso');
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message);
+    } finally {
+        botao.disabled = false;
     }
 });
 

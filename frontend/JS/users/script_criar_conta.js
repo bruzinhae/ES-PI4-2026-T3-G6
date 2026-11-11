@@ -108,7 +108,13 @@
         botaoCriar.disabled = true;
 
         try {
-            await AcaiApi.criarUsuario({ nome, email, senha, aceitouTermos: true });
+            const resposta = await AcaiApi.criarUsuario({ nome, email, senha, aceitouTermos: true });
+            sessionStorage.setItem(
+                'acaistudy-aviso-confirmacao',
+                resposta.confirmacaoEnviada
+                    ? 'Enviamos um e-mail para confirmar sua conta. Abra o link para validar o endereço.'
+                    : 'Sua conta foi criada, mas o e-mail de confirmação não saiu. Peça o reenvio no perfil.',
+            );
         } catch (erro) {
             // 409 = e-mail já cadastrado; demais erros aparecem no campo de senha.
             marcarErro(erro.status === 409 ? cEmail : cSenha, erro.message);

@@ -11,9 +11,10 @@ import bcrypt from 'bcryptjs';
 import { Usuario } from '../usuarios/Usuario.js';
 import { Sessao, DURACAO_SESSAO_MS } from './Sessao.js';
 import { RecuperacaoSenha, DURACAO_RECUPERACAO_MS } from './RecuperacaoSenha.js';
+import { ConfirmacaoEmail, DURACAO_CONFIRMACAO_MS } from './ConfirmacaoEmail.js';
 import { trocarSenha } from '../usuarios/usuarioService.js';
 import { env } from '../../config/env.js';
-import { correioConfigurado, enviarLinkRecuperacaoSenha } from '../../servicos/correio.js';
+import { correioConfigurado, enviarConfirmacaoConta, enviarLinkRecuperacaoSenha } from '../../servicos/correio.js';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { gerarToken, hashDoToken } from '../../utils/token.js';
 import { normalizarEmail } from '../../utils/validacoes.js';
@@ -163,6 +164,110 @@ export async function solicitarRecuperacaoSenha({ email } = {}) {
     }
 
     console.log(`[recuperação de senha] e-mail enviado para ${usuario.email}`);
+}
+
+const MENSAGEM_CONFIRMACAO_INVALIDA = 'Link inválido ou expirado. Peça um novo e-mail de confirmação.';
+const MENSAGEM_CONFIRMACAO_INDISPONIVEL = 'Não foi possível enviar o e-mail de confirmação. Tente novamente em instantes.';
+
+async function buscarConfirmacaoValida(token) {
+    const confirmacao = typeof token === 'string' && token
+        ? await ConfirmacaoEmail.findById(hashDoToken(token))
+        : null;
+
+    if (!confirmacao || confirmacao.usadoEm || confirmacao.expiraEm <= new Date()) {
+        throw new ErroApi(400, MENSAGEM_CONFIRMACAO_INVALIDA);
+    }
+
+    return confirmacao;
+}
+
+/**
+ * Gera o link de confirmação, grava o hash em tokens_confirmacao_email e envia o e-mail.
+ * Links anteriores ainda não usados desta conta são apagados.
+ */
+async function emitirConfirmacaoEmail(usuario) {
+    if (!correioConfigurado()) {
+        console.error('[confirmação de conta] SMTP não configurado (SMTP_HOST, SMTP_USER, SMTP_PASS).');
+        throw new ErroApi(503, MENSAGEM_CONFIRMACAO_INDISPONIVEL);
+    }
+
+    await ConfirmacaoEmail.deleteMany({ usuarioId: usuario._id, usadoEm: null });
+
+    const token = gerarToken();
+    const idToken = hashDoToken(token);
+
+    await ConfirmacaoEmail.create({
+        _id: idToken,
+        usuarioId: usuario._id,
+        emailNormalizado: usuario.emailNormalizado,
+        expiraEm: new Date(Date.now() + DURACAO_CONFIRMACAO_MS),
+    });
+
+    const link = `${env.frontendUrl}/index_confirmar_conta.html?token=${encodeURIComponent(token)}`;
+
+    try {
+        await enviarConfirmacaoConta({
+            destinatario: usuario.email,
+            nome: usuario.nome,
+            link,
+        });
+    } catch (erro) {
+        await ConfirmacaoEmail.deleteOne({ _id: idToken });
+        throw erro;
+    }
+
+    console.log(`[confirmação de conta] e-mail enviado para ${usuario.email}`);
+}
+
+/**
+ * Chamado logo depois de criar a conta (e ao trocar o e-mail). Se o envio falhar, a conta
+ * continua existindo: a resposta diz que a confirmação não saiu e o perfil pode reenviar.
+ */
+export async function solicitarConfirmacaoEmail(usuario) {
+    try {
+        await emitirConfirmacaoEmail(usuario);
+        return { enviada: true };
+    } catch (erro) {
+        console.error('[confirmação de conta]', erro.message);
+        return { enviada: false };
+    }
+}
+
+// Quem já está logado pede outro e-mail. Conta já confirmada não gera link novo.
+export async function reenviarConfirmacaoEmail(usuario) {
+    if (usuario.emailVerificado) {
+        return { enviada: false, jaVerificado: true };
+    }
+
+    await emitirConfirmacaoEmail(usuario);
+    return { enviada: true };
+}
+
+export function conferirLinkConfirmacao(token) {
+    return buscarConfirmacaoValida(token);
+}
+
+/**
+ * Marca emailVerificado no usuário e consome o token. O link só vale para o endereço
+ * que estava na conta quando ele foi gerado.
+ */
+export async function confirmarEmail(token) {
+    const confirmacao = await buscarConfirmacaoValida(token);
+    const usuario = await Usuario.findById(confirmacao.usuarioId);
+
+    if (!usuario || usuario.emailNormalizado !== confirmacao.emailNormalizado) {
+        throw new ErroApi(400, MENSAGEM_CONFIRMACAO_INVALIDA);
+    }
+
+    usuario.emailVerificado = true;
+    await usuario.save();
+    confirmacao.usadoEm = new Date();
+    await confirmacao.save();
+    return usuario;
+}
+
+export async function apagarConfirmacoesDoUsuario(usuarioId) {
+    await ConfirmacaoEmail.deleteMany({ usuarioId });
 }
 
 // A tela de nova senha confere o link ao abrir, antes de pedir a senha.

@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="CSS/layout.css?v=20">
-    <link rel="stylesheet" href="CSS/style_perfil.css?v=3">
+    <link rel="stylesheet" href="CSS/style_perfil.css?v=4">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
@@ -112,6 +112,10 @@
                                         Verificado
                                     </span>
                                 </span>
+                                <p class="nota-confirmacao" id="nota-confirmacao" hidden>
+                                    Este e-mail ainda não foi confirmado.
+                                    <button type="button" id="reenviar-confirmacao">Reenviar e-mail</button>
+                                </p>
                             </label>
 
                             <label class="campo">
@@ -306,10 +310,10 @@
 
     </main>
 
-    <script src="JS/users/api.js?v=14"></script>
+    <script src="JS/users/api.js?v=15"></script>
     <script src="JS/componentes/layout.js?v=29"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
-    <script src="JS/users/script_perfil.js?v=6"></script>
+    <script src="JS/users/script_perfil.js?v=7"></script>
 
 </body>
 </html>
