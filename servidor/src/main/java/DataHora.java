@@ -57,29 +57,14 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return dif / 60L;
     }
 
-    public long getDiaLocal () // dias desde 1970-01-01, no fuso desta data
+    public int getDiaLocal () // dias desde 1970-01-01, no fuso desta data
     {
-        return dividaParaBaixo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
+        return (int) dividaParaBaixo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
     }
 
     public int getSegundoDoDia () // desde a meia-noite, no fuso desta data
     {
         return (int) restoPositivo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
-    }
-
-    public static String textoDoDia (long diaDaEpoca) // AAAA-MM-DD, dias desde 1970-01-01
-    {
-        long z   = diaDaEpoca + 719468L; // dias de 0000-03-01 ate 1970-01-01
-        long era = dividaParaBaixo (z, 146097L); // blocos de 400 anos (146097 dias)
-        long doe = z - era * 146097L;
-        long yoe = (doe - doe / 1460L + doe / 36524L - doe / 146096L) / 365L;
-        long doy = doe - (365L * yoe + yoe / 4L - yoe / 100L);
-        long mp  = (5L * doy + 2L) / 153L;
-        long dia = doy - (153L * mp + 2L) / 5L + 1L;
-        long mes = mp < 10 ? mp + 3 : mp - 9;
-        long ano = yoe + era * 400L + (mes <= 2 ? 1 : 0);
-
-        return preencher (ano, 4) + "-" + preencher (mes, 2) + "-" + preencher (dia, 2);
     }
 
     private static long dividaParaBaixo (long dividendo, long divisor) // arredonda para baixo
@@ -95,15 +80,5 @@ public class DataHora implements Comparable<DataHora>, Serializable
     private static long restoPositivo (long dividendo, long divisor) // nunca negativo
     {
         return dividendo - dividaParaBaixo (dividendo, divisor) * divisor;
-    }
-
-    private static String preencher (long valor, int tamanho) // completa com zeros a esquerda
-    {
-        String texto = "" + valor;
-
-        while (texto.length () < tamanho)
-            texto = "0" + texto;
-
-        return texto;
     }
 }

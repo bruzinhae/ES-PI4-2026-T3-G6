@@ -321,6 +321,11 @@ function respostaDeRanking(r) {
   return resposta;
 }
 
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
+// O servidor devolve cada marco como o número do dia (dias desde 1970-01-01, no fuso de `agora`).
+const textoDoDia = (dia) => new Date(dia * MS_POR_DIA).toISOString().slice(0, 10);
+
 const respostaDeMetas = (r) => ({
   tipo: 'prioridadeDeMetas',
   ranking: r.ranking.map((n) => ({
@@ -330,7 +335,7 @@ const respostaDeMetas = (r) => ({
     composicao: { urgencia: n.urgencia, lacuna: n.lacuna, importancia: n.importancia },
   })),
   foco: r.foco,
-  datasDosMarcos: r.datasDosMarcos,
+  datasDosMarcos: r.diasDosMarcos.map(textoDoDia),
 });
 
 // --------------------------------------------------------------------------------------- modelos
@@ -444,7 +449,15 @@ async function enviarPedido(pedido, modelo, configuracao) {
         return;
       }
 
-      encerrar(null, modelo.converter(resposta));
+      let convertida;
+      try {
+        convertida = modelo.converter(resposta);
+      } catch {
+        encerrar(new ErroApi(502, 'O servidor Java de ranking devolveu uma resposta inválida.'));
+        return;
+      }
+
+      encerrar(null, convertida);
     });
 
     socket.on('error', () => {

@@ -24,15 +24,15 @@ public class CalculadoraDeMetas
         notas = new Ordenador<NotaDeMeta> ().ordene (notas);
 
         String foco = notas.size () == 0 ? null : notas.get (0).getMetaId ();
-        ArrayList<String> datas = new ArrayList<String> ();
+        ArrayList<Integer> dias = new ArrayList<Integer> ();
 
         if (foco != null)
         {
             Meta meta = metas.get (CalculadoraDeMetas.posicaoDoId (metas, foco));
-            datas = datasDosMarcos (meta, agora, pedido.getQuantidadeDeMarcos ());
+            dias = diasDosMarcos (meta, agora, pedido.getQuantidadeDeMarcos ());
         }
 
-        return new PrioridadeDeMetas (notas, foco, datas);
+        return new PrioridadeDeMetas (notas, foco, dias);
     }
 
     private static int posicaoDoId (ArrayList<Meta> metas, String id)
@@ -83,18 +83,18 @@ public class CalculadoraDeMetas
 
     static int diasAteOPrazo (Meta meta, DataHora agora)
     {
-        long hoje  = agora.getDiaLocal ();
-        long prazo = meta.getPrazo ().noFusoDe (agora).getDiaLocal ();
+        int hoje  = agora.getDiaLocal ();
+        int prazo = meta.getPrazo ().noFusoDe (agora).getDiaLocal ();
 
-        return (int) Math.max (0, prazo - hoje); // atrasada ou com prazo hoje: zero
+        return Math.max (0, prazo - hoje); // atrasada ou com prazo hoje: zero
     }
 
-    static ArrayList<String> datasDosMarcos (Meta meta, DataHora agora, int quantidade)
+    static ArrayList<Integer> diasDosMarcos (Meta meta, DataHora agora, int quantidade)
     {
-        ArrayList<String> datas = new ArrayList<String> ();
+        ArrayList<Integer> marcos = new ArrayList<Integer> ();
 
         if (meta.habito () || meta.getPrazo () == null)
-            return datas;
+            return marcos;
 
         int dias = diasAteOPrazo (meta, agora);
         int anterior = 0;
@@ -106,10 +106,10 @@ public class CalculadoraDeMetas
             dia = Math.min (dia, dias);
             anterior = dia;
 
-            datas.add (DataHora.textoDoDia (agora.getDiaLocal () + dia));
+            marcos.add (agora.getDiaLocal () + dia);
         }
 
-        return datas;
+        return marcos;
     }
 
     private static double limitar (double valor)

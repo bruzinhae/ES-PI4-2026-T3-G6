@@ -19,7 +19,7 @@ O cliente do Fazedor de Continhas (`Cliente`) não existe aqui: o cliente deste 
 
 As peças que substituem o que a biblioteca faria:
 
-- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`); o servidor só escreve o dia (`AAAA-MM-DD`) das datas dos marcos.
+- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`) e conta minutos e dias; o servidor não escreve datas em texto, quem escreve é o Node.
 - `Ordenador` é uma classe genérica que ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável) e devolve uma lista nova.
 - `FiltroDeComunicados` é a única peça que o exemplo não tem: ler objetos de um fluxo pode executar código de classes inesperadas, então o servidor só aceita as classes dos comunicados e limita o tamanho do que lê.
 
@@ -71,12 +71,12 @@ Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a 
 | `PedidoDeRanking` | cliente → servidor | `agora`, `preferencias`, `espacos`, `tarefas`, `limite`, `alocar` |
 | `Ranking` | servidor → cliente | `porEspaco`, `semEspaco` e, com `alocar`, a `Alocacao` |
 | `PedidoDeMetas` | cliente → servidor | `agora`, `metas`, `quantidadeDeMarcos` |
-| `PrioridadeDeMetas` | servidor → cliente | `ranking`, `foco`, `datasDosMarcos` |
+| `PrioridadeDeMetas` | servidor → cliente | `ranking`, `foco`, `diasDosMarcos` |
 | `PedidoParaSair` | cliente → servidor | Encerra a conexão. |
 | `Erro` | servidor → cliente | `mensagem`. Só quando o cálculo falha: os valores fora do intervalo são recusados antes, pelo cliente em Node. A conexão continua aberta. |
 | `ComunicadoDeDesligamento` | servidor → cliente | O comando `desativar` foi dado no servidor. |
 
-Datas viajam como `DataHora` (segundos, nanossegundos e fuso). O Node converte o texto ISO-8601 em `DataHora` antes de enviar e de volta ao receber.
+Datas viajam como `DataHora` (segundos, nanossegundos e fuso). O Node converte o texto ISO-8601 em `DataHora` antes de enviar e de volta ao receber. Os marcos das metas voltam como o número do dia (`diasDosMarcos`: dias desde 1970-01-01, no fuso de `agora`) e o Node escreve o `AAAA-MM-DD`.
 
 ### `pedidoDeRanking` (cliente → servidor)
 
@@ -295,7 +295,7 @@ O código quase não tem comentários (como o do exemplo do Fazedor de Continhas
 - **Ids repetidos.** Se duas tarefas (ou metas) chegam com o mesmo `id`, vale a primeira no desempate; na alocação vale a primeira que não está concluída. Por isso `Candidato` e `NotaDeMeta` guardam o prazo e a prioridade dessa primeira.
 - **Desempate.** Os quatro `compareTo` (`DataHora`, `EspacoLivre`, `Candidato` e `NotaDeMeta`) seguem o modelo de `Data` e `Horario`: um atributo por vez, `-666` e `666`, e `0` no fim. O de `DataHora` ignora o fuso.
 - **Sessões seguidas.** Sem antifadiga, a sessão seguinte da mesma tarefa é juntada à anterior: a última sessão da lista sai e entra uma estendida (a última sessão reservada é sempre a última da lista).
-- **Datas.** `DataHora` guarda segundos e nanossegundos desde 1970-01-01T00:00:00Z e o fuso em segundos. `textoDoDia` converte dias em AAAA-MM-DD com o algoritmo de calendário gregoriano de Howard Hinnant (719468 é o número de dias entre 0000-03-01 e 1970-01-01).
+- **Datas.** `DataHora` guarda segundos e nanossegundos desde 1970-01-01T00:00:00Z e o fuso em segundos. O servidor só faz conta com instantes e com o número do dia (`getDiaLocal`: dias desde 1970-01-01 no fuso da data). Escrever o AAAA-MM-DD fica com o Node, que usa o `Date` do JavaScript.
 - **Classes sem estado.** `CalculadoraDeRanking`, `AlocadoraDeSessoes` e `CalculadoraDeMetas` não guardam nada, então várias conexões podem usá-las ao mesmo tempo.
 - **Atributos que só a serialização lê.** Várias classes de resposta (`Ranking`, `Alocacao`, `SessaoAlocada` e outras) têm atributos que nenhum método Java lê: quem os lê é o backend em Node, direto do fluxo de objetos.
 
