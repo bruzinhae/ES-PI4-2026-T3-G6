@@ -19,7 +19,7 @@ O cliente do Fazedor de Continhas (`Cliente`) não existe aqui: o cliente deste 
 
 As peças que substituem o que a biblioteca faria:
 
-- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`) e escreve o texto ISO-8601.
+- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`); o servidor só escreve o dia (`AAAA-MM-DD`) das datas dos marcos.
 - `Ordenador` é uma classe genérica que ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável) e devolve uma lista nova.
 - `FiltroDeComunicados` é a única peça que o exemplo não tem: ler objetos de um fluxo pode executar código de classes inesperadas, então o servidor só aceita as classes dos comunicados e limita o tamanho do que lê.
 

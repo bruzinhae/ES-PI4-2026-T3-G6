@@ -11,12 +11,35 @@ public class PedidoDeRanking extends Comunicado
     private int                     limite; // maximo de candidatos por espaco
     private boolean                 alocar; // pede tambem a alocacao
 
-    public DataHora getAgora ()                 { return this.agora; }
-    public Preferencias getPreferencias ()      { return this.preferencias; }
-    public ArrayList<EspacoLivre> getEspacos () { return this.espacos; }
-    public ArrayList<Tarefa> getTarefas ()      { return this.tarefas; }
-    public int getLimite ()                     { return this.limite; }
-    public boolean isAlocar ()                 { return this.alocar; }
+    public DataHora getAgora ()
+    {
+        return this.agora;
+    }
+
+    public Preferencias getPreferencias ()
+    {
+        return this.preferencias;
+    }
+
+    public ArrayList<EspacoLivre> getEspacos ()
+    {
+        return this.espacos;
+    }
+
+    public ArrayList<Tarefa> getTarefas ()
+    {
+        return this.tarefas;
+    }
+
+    public int getLimite ()
+    {
+        return this.limite;
+    }
+
+    public boolean isAlocar ()
+    {
+        return this.alocar;
+    }
 
     public String toString ()
     {

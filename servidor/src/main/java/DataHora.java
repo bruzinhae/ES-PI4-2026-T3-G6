@@ -37,8 +37,15 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return 0;
     }
 
-    public boolean depoisDe (DataHora outra)      { return this.compareTo (outra) > 0; }
-    public boolean mesmoInstante (DataHora outra) { return this.compareTo (outra) == 0; }
+    public boolean depoisDe (DataHora outra)
+    {
+        return this.compareTo (outra) > 0;
+    }
+
+    public boolean mesmoInstante (DataHora outra)
+    {
+        return this.compareTo (outra) == 0;
+    }
 
     public long minutosAte (DataHora outra) // minutos inteiros, truncados em direcao a zero
     {
@@ -60,10 +67,6 @@ public class DataHora implements Comparable<DataHora>, Serializable
         return (int) restoPositivo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
     }
 
-    public int getHora ()    { return this.getSegundoDoDia () / 3600; }
-    public int getMinuto ()  { return this.getSegundoDoDia () / 60 % 60; }
-    public int getSegundo () { return this.getSegundoDoDia () % 60; }
-
     public static String textoDoDia (long diaDaEpoca) // AAAA-MM-DD, dias desde 1970-01-01
     {
         long z   = diaDaEpoca + 719468L; // dias de 0000-03-01 ate 1970-01-01
@@ -77,39 +80,6 @@ public class DataHora implements Comparable<DataHora>, Serializable
         long ano = yoe + era * 400L + (mes <= 2 ? 1 : 0);
 
         return preencher (ano, 4) + "-" + preencher (mes, 2) + "-" + preencher (dia, 2);
-    }
-
-    public String toString () // ISO-8601 com fuso: 2026-11-12T15:00:00-03:00 (ou ...Z)
-    {
-        String texto = textoDoDia (this.getDiaLocal ()) + "T" + preencher (this.getHora (), 2) + ":"
-                       + preencher (this.getMinuto (), 2) + ":" + preencher (this.getSegundo (), 2);
-
-        if (this.nanos != 0)
-        {
-            int fracao  = this.nanos; // sem os zeros do fim: 120000000 vira "12"
-            int digitos = 9;
-
-            while (fracao % 10 == 0)
-            {
-                fracao = fracao / 10;
-                digitos--;
-            }
-
-            texto = texto + "." + preencher (fracao, digitos);
-        }
-
-        if (this.deslocamento == 0)
-            return texto + "Z";
-
-        int absoluto = Math.abs (this.deslocamento);
-
-        texto = texto + (this.deslocamento < 0 ? "-" : "+");
-        texto = texto + preencher (absoluto / 3600, 2) + ":" + preencher (absoluto / 60 % 60, 2);
-
-        if (absoluto % 60 != 0)
-            texto = texto + ":" + preencher (absoluto % 60, 2);
-
-        return texto;
     }
 
     private static long dividaParaBaixo (long dividendo, long divisor) // arredonda para baixo
