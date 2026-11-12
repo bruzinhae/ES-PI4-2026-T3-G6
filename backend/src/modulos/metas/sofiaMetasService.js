@@ -182,7 +182,8 @@ async function priorizarNoServidor(resultado, contexto) {
         return await pedirPrioridadeDeMetas({
             agora: formatarISO(Date.now()),
             quantidadeDeMarcos: LIMITE_SUGESTOES,
-            metas: contexto.metas.map((meta) => ({
+            // Hábito não recebe marcos, então não disputa o foco com as metas que recebem.
+            metas: contexto.metas.filter((meta) => meta.tipo !== 'habito').map((meta) => ({
                 id: meta.id,
                 tipo: meta.tipo,
                 prioridade: meta.prioridade,
