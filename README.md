@@ -52,13 +52,28 @@ npm run dev
 
 API única em Node.js (`backend/`), organizada em módulos (`backend/src/modulos/`). Veja [backend/README.md](backend/README.md).
 
-O servidor Java de ranking é um serviço TCP separado. Inicie-o na porta 3000 antes de usar
-`POST /api/ranking` no backend Node; a API encaminha o pedido autenticado ao Java. Veja
-[servidor/README.md](servidor/README.md) e [backend/README.md](backend/README.md) para detalhes.
+## Servidor Java
+
+O servidor Java (`servidor/`) é um serviço TCP separado, na porta 3000. O backend Node é o cliente dele e o usa em três lugares:
+o "Ajuste da grade" do calendário e o card de ajuste da página de Disciplinas (`GET /api/grade/sugestoes`),
+o botão "Sugerir marcos" das Metas (a Sofia) e `POST /api/ranking`. Sem ele, a grade responde 503 e a Sofia volta a usar só o Gemini.
+
+Para subir (Java 17, sem Maven e sem dependências):
+
+```bash
+cd servidor/src/main/java
+javac *.java
+java Servidor            # porta 3000
+```
+
+Depois de mudar o código do servidor, recompile e reinicie. Veja [servidor/README.md](servidor/README.md) e
+[backend/README.md](backend/README.md) para detalhes.
 
 ## Frontend
 
-Abra os arquivos em `frontend/` no navegador (ou via extensão Live Server apontando para essa pasta). Criar conta, login e perfil usam a API (`frontend/JS/users/api.js`); as demais telas ainda são mock.
+Com o backend no ar, as páginas já abrem em `http://localhost:3001/index.html`, porque o mesmo servidor entrega o `frontend/`. Também dá para abrir a pasta com a extensão Live Server (a API em `localhost:3001` libera CORS no desenvolvimento).
+
+Todas as telas, menos a home (`index.html`), usam a API pelo cliente `frontend/JS/users/api.js`: conta e perfil, calendário, disciplinas e blocos fixos, metas, relatórios e configurações. O token fica em `localStorage` (`acaistudy-token`) e, para apontar para outra API, defina `window.ACAISTUDY_API_URL`.
 
 Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/index_login.html`.
 
@@ -71,9 +86,13 @@ Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/
 │   ├── CSS/                          # estilos
 │   ├── JS/                           # scripts (JS/users/: login, cadastro, perfil, onboarding e cliente da API de usuários)
 │   └── assets/                       # ícones e imagens
-└── backend/
-    ├── docker-compose.yml            # MongoDB local (opcional)
-    ├── .env.example                  # modelo da URI Atlas
-    ├── package.json
-    └── src/                          # API Node.js (config, middlewares, utils, modulos/)
+├── backend/
+│   ├── docker-compose.yml            # MongoDB local (opcional)
+│   ├── .env.example                  # modelo das variáveis de ambiente (Atlas, SMTP, Canvas, Gemini, servidor Java)
+│   ├── package.json
+│   └── src/                          # API Node.js (config, middlewares, servicos, utils, modulos/)
+├── servidor/                         # servidor Java de ranking, alocação e metas (veja servidor/README.md)
+│   └── src/main/java/                # código do servidor (compile com javac *.java)
+└── Arquivos/
+    └── Dicionário de dados/          # um JSON por coleção do MongoDB
 ```

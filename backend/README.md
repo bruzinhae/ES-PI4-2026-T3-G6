@@ -1,7 +1,9 @@
 # API do AçaíStudy (Node.js + MongoDB)
 
-API única do projeto: cada área é um módulo em `src/modulos/` (hoje só `usuarios`, que salva na
-coleção `usuarios` seguindo `Arquivos/Dicionário de dados/usuarios.json`).
+API única do projeto: cada área é um módulo em `src/modulos/` (usuários e autenticação, disciplinas,
+blocos fixos, tarefas, sessões de estudo, metas, relatórios, configurações, Canvas, grade e ranking).
+Os dados seguem o dicionário em `Arquivos/Dicionário de dados/`. Algumas rotas dependem do servidor
+Java de ranking (`servidor/`) e do Gemini; veja "Serviços externos" e "Variáveis de ambiente".
 
 ## Como rodar
 
@@ -36,6 +38,34 @@ MongoDB: conexão OK com o banco 'acaistudy'
 
 O mesmo servidor entrega as páginas do `frontend/` e a API.
 
+## Serviços externos
+
+Todos são opcionais para subir a API, mas algumas telas dependem deles:
+
+- **Servidor Java de ranking** (`servidor/`, porta 3000): usado por `POST /api/ranking`, por `GET /api/grade/sugestoes`
+  (Ajuste da grade e card de Disciplinas) e pelas metas da Sofia. Em `servidor/src/main/java`, rode `javac *.java` e
+  `java Servidor` (veja [servidor/README.md](../servidor/README.md)). Depois de mudar o código do servidor, recompile e reinicie.
+  Sem ele, a grade responde 503 e a Sofia nas metas volta a usar só o Gemini.
+- **Gemini** (`GEMINI_API_KEY`): a Sofia dos relatórios e das metas. Sem a chave, essas rotas respondem 503.
+- **SMTP**: e-mails de recuperação de senha e de confirmação de conta.
+- **Canvas LMS**: importação de cursos e atividades.
+
+## Variáveis de ambiente
+
+Modelo em `.env.example`; quem lê é `src/config/env.js`.
+
+| Variável | Para que serve | Padrão |
+| -------- | -------------- | ------ |
+| `MONGODB_URI` | Conexão do MongoDB (Atlas ou local) | `mongodb://localhost:27017/acaistudy` |
+| `PORT` | Porta da API | `3001` |
+| `CORS_ORIGIN` | Origens do frontend liberadas, separadas por vírgula (`*` libera todas) | `*` no exemplo |
+| `FRONTEND_URL` | Base dos links enviados por e-mail e da volta do Canvas | `http://localhost:PORT` |
+| `RANKING_HOST`, `RANKING_PORT`, `RANKING_TIMEOUT_MS` | Servidor Java de ranking | `127.0.0.1`, `3000`, `5000` |
+| `FUSO_OFFSET` | Fuso fixo da grade | `-03:00` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Envio de e-mail (`SMTP_FROM` é opcional e, sem ele, vale o `SMTP_USER`) | sem padrão |
+| `CANVAS_BASE_URL`, `CANVAS_CLIENT_ID`, `CANVAS_CLIENT_SECRET` | Canvas; sem client id e secret, vale o token gerado pelo aluno | sem padrão |
+| `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_MODEL_RESERVA`, `GEMINI_TIMEOUT_MS` | Sofia (chave, modelo principal, modelo de reserva e limite de cada tentativa em ms) | modelos e limite no `.env.example` |
+
 ## Endpoints
 
 Erros sempre voltam como `{ "mensagem": "..." }`.
@@ -49,6 +79,9 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | POST | `/api/auth/recuperar-senha` | **Esqueci minha senha** — `{ email }` → 200 com a mesma mensagem se o envio estiver ok (não revela se a conta existe). Se o e-mail estiver cadastrado, manda um link único, válido por 30 min, para `index_nova_senha.html`. 503 se o SMTP falhar |
 | GET | `/api/auth/redefinir-senha?token=` | Confere se o link ainda vale (204) ou se está inválido, usado ou expirado (400). Não consome o token |
 | POST | `/api/auth/redefinir-senha` | `{ token, senha }` → 204; 400 se o link for inválido, usado ou expirado. Troca a senha e encerra todas as sessões do usuário |
+| GET | `/api/auth/confirmar-email?token=` | Confere se o link de confirmação de e-mail ainda vale |
+| POST | `/api/auth/confirmar-email` | `{ token }` → `{ usuario }` com `emailVerificado: true` |
+| POST | `/api/auth/reenviar-confirmacao` 🔒 | Manda outro e-mail de confirmação → `{ confirmacaoEnviada, mensagem }` (avisa se o e-mail já está confirmado) |
 | POST | `/api/auth/logout` 🔒 | Encerra a sessão atual (204) |
 | GET | `/api/auth/eu` 🔒 | Usuário dono do token → `{ usuario }` |
 | GET | `/api/usuarios` 🔒 | **Read** — lista todos → `{ usuarios }` |
@@ -62,6 +95,10 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | GET | `/api/blocos-fixos/:id` 🔒 | Busca um bloco pertencente ao usuário autenticado |
 | PATCH | `/api/blocos-fixos/:id` 🔒 | Atualiza os campos enviados e valida novamente o bloco e conflitos |
 | DELETE | `/api/blocos-fixos/:id` 🔒 | Exclui um bloco pertencente ao usuário autenticado (204) |
+| GET | `/api/tarefas` 🔒 | Lista as tarefas do usuário |
+| POST | `/api/tarefas` 🔒 | Cria uma tarefa (`titulo`, `categoria` = `estudos`\|`pessoal`, `tipo` = `prova`\|`exercicio`\|`trabalho`\|`leitura`\|`outro`, `prioridade`, `prazo`, `minutosEstimados`, `disciplinaId`, `situacao` = `pendente`\|`em_andamento`\|`concluida`) |
+| PATCH | `/api/tarefas/:id` 🔒 | Atualiza os campos enviados |
+| DELETE | `/api/tarefas/:id` 🔒 | Exclui a tarefa |
 | GET | `/api/disciplinas` 🔒 | Lista as disciplinas do usuário (`?situacao=ativa` filtra). Inclui `progresso` e `horasSemanais` |
 | GET | `/api/disciplinas/ativas` 🔒 | Resumo (`id`, `nome`, `cor`) para selects de vínculo |
 | POST | `/api/disciplinas` 🔒 | Cria disciplina (`nome`, `area` obrigatórios; `professor`, `local`, `creditos`, `media`, `dificuldade`, `cor`, `periodoLetivo`, `situacao`, `conteudos` opcionais). `media` é a nota desta matéria, de 0 a 10 |
@@ -79,6 +116,8 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | GET | `/api/metas/:id` 🔒 | Busca uma meta do usuário |
 | PATCH | `/api/metas/:id` 🔒 | Atualiza os campos enviados, inclusive marcos |
 | DELETE | `/api/metas/:id` 🔒 | Exclui a meta (204) |
+| POST | `/api/metas/sofia` 🔒 | Leitura da Sofia sobre as metas: o servidor Java escolhe a meta foco e as datas dos marcos, e o Gemini escreve o comentário e os títulos (veja "Sofia nas metas") |
+| POST | `/api/metas/sofia/marcos` 🔒 | Sugere marcos para uma meta ainda não salva (`titulo` obrigatório; `tipo`, `disciplinaId`, `prazo`, `existentes` opcionais) → `{ sugestao }`. Hábito volta sem marcos |
 | GET | `/api/configuracoes` 🔒 | Preferências da Sofia e o resumo da semana (sessões, blocos e horários sobrepostos) |
 | PATCH | `/api/configuracoes` 🔒 | Salva as preferências enviadas (`antifadiga`, `focoMatinal`, `repeticaoEspacada`, `ajusteDinamico`, `rigidez`, `janelaFoco`, `duracaoMinutos`) |
 | GET | `/api/canvas` 🔒 | Diz se o Canvas está conectado. Não devolve token |
@@ -88,7 +127,7 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | POST | `/api/canvas/sincronizar` 🔒 | Atualiza disciplinas e atividades já ligadas ao Canvas |
 | DELETE | `/api/canvas` 🔒 | Remove a conexão. O que já foi importado permanece |
 | POST | `/api/ranking` 🔒 | Envia espaços livres, tarefas e preferências ao servidor Java e devolve o ranking |
-| GET | `/api/grade/sugestoes?semana=` 🔒 | Sugestões de estudo para a semana (`semana` é qualquer dia no formato `AAAA-MM-DD`; padrão: a semana atual). Monta os espaços livres, pede a alocação ao servidor Java e devolve `{ semana, espacosLivres, motivo, sugestoes, semAlocacao }`. **Não grava nada** |
+| GET | `/api/grade/sugestoes?semana=` 🔒 | Sugestões de estudo para a semana (`semana` é qualquer dia no formato `AAAA-MM-DD`; padrão: a semana atual). Monta os espaços livres, pede a alocação ao servidor Java e devolve `{ semana, geradoEm, espacosLivres, minutosLivres, motivo, sugestoes, semAlocacao }` (`minutosLivres` é o tempo livre da semana, de agora em diante). **Não grava nada** |
 | GET | `/api/sessoes-estudo?de=&ate=&situacao=` 🔒 | Sessões de estudo do período `[de, ate)` (`AAAA-MM-DD` ou data e hora ISO; padrão: a semana atual; máximo de 62 dias). As canceladas só aparecem com `situacao=cancelada` |
 | POST | `/api/sessoes-estudo` 🔒 | Cria uma sessão agendada (`inicio`, `fim`, e `tarefaId` ou `titulo`; opcionais `disciplinaId`, `origem` = `manual`\|`ia`, `tipoFoco`). Dura de 15 a 480 min e **responde 409 se o horário choca com um bloco fixo ou outra sessão** |
 | PATCH | `/api/sessoes-estudo/:id` 🔒 | Move ou ajusta a sessão (`inicio`, `fim`, `titulo`, `situacao`, `tipoFoco`). Revalida o conflito; cancelar libera o horário |
@@ -97,9 +136,10 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | GET | `/api/saude` | Health check |
 
 O corpo de `POST /api/ranking` segue o protocolo descrito em [servidor/README.md](../servidor/README.md):
-`{ espacos, tarefas, agora?, preferencias?, limite? }`. O chamador deve montar os espaços livres
+`{ espacos, tarefas, agora?, preferencias?, limite?, alocar? }`. O chamador deve montar os espaços livres
 da agenda e enviar as tarefas pendentes; a API encaminha o pedido ao servidor Java e retorna
-`{ tipo: "ranking", porEspaco, semEspaco }`. A rota exige autenticação. Configure
+`{ tipo: "ranking", porEspaco, semEspaco }` e, com `alocar: true`, também `alocacao` e `semAlocacao`
+(e `alocacaoTruncada` se passar do limite de sessões). A rota exige autenticação. Configure
 `RANKING_HOST`, `RANKING_PORT` e `RANKING_TIMEOUT_MS` no `.env` se o servidor Java não estiver
 em `127.0.0.1:3000`. Se o serviço estiver indisponível, a API responde com erro HTTP explícito.
 
@@ -123,7 +163,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   `req.usuario` e `req.sessao` estão disponíveis.
 - Blocos fixos são armazenados na coleção `blocos_rotina` (conforme o dicionário de dados), sempre associados a `usuarioId`. A API valida
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
-- Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|verde|ambar`; conteúdos embutidos).
+- Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|indigo|ciano|turquesa|verde|ambar|laranja|vermelho|rosa`; conteúdos embutidos).
   `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
 - A API Node atua como cliente do servidor Java de ranking, no mesmo protocolo do Fazedor de Continhas: o pedido e a resposta são objetos Java serializados, escritos e lidos pelo `servicos/serializacaoJava.js` (sem bibliotecas). `POST /api/ranking` só encaminha o pedido autenticado:
   os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
@@ -138,7 +178,9 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   `servicos/clienteRanking.js`) a meta foco e as datas sugeridas para os marcos novos; o Gemini recebe a meta já escolhida e só escreve o
   comentário e os títulos. Cada sugestão volta com `dataSugerida` (`AAAA-MM-DD` ou `null`). Com o servidor fora do ar, a rota cai no
   comportamento anterior (o Gemini escolhe a meta, sem datas) e `priorizadoPeloServidor` vem `false`. O marco não tem campo de data: a data
-  é só uma dica na tela, e incluir o marco grava apenas o título.
+  é só uma dica na tela, e incluir o marco grava apenas o título. Metas de hábito não entram no pedido ao servidor (hábito não recebe
+  marcos e, se entrasse, poderia ganhar o foco e deixar a tela sem sugestões). O servidor devolve os marcos como número do dia
+  (`diasDosMarcos`, dias desde 1970-01-01) e o `clienteRanking.js` escreve o `AAAA-MM-DD`.
 - **Sessões de estudo** são o horário planejado de uma tarefa (coleção `sessoes_estudo`). Aceitar uma sugestão é `POST /api/sessoes-estudo`
   com `origem: "ia"`. Sessões `agendada` e `concluida` ocupam horário; `cancelada` e `nao_realizada` o liberam.
 - **Fuso:** a grade usa um deslocamento fixo (`FUSO_OFFSET`, padrão `-03:00`) e as datas da API saem nesse fuso, ex.: `2026-11-09T14:00:00-03:00`.
@@ -146,8 +188,8 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   em hábito sem marcos, é as horas estudadas na semana sobre `metaSemanalHoras`. O painel não inventa previsão de IA:
   a consistência usa as sessões já encerradas e o ritmo é a média do progresso das metas ativas.
 - Na subida, `config/colecoes.js` cria/sincroniza todas as coleções do dicionário: `usuarios`, `sessoes_autenticacao`,
-  `tokens_recuperacao_senha`, `disciplinas`, `blocos_rotina`, `tarefas`, `metas`, `sessoes_estudo`, `planos_ia`.
-  Metas têm CRUD em `/api/metas`. Tarefas, sessões e planos de IA têm schema; as rotas dessas áreas entram nas próximas entregas.
+  `tokens_recuperacao_senha`, `tokens_confirmacao_email`, `disciplinas`, `blocos_rotina`, `tarefas`, `metas`, `sessoes_estudo`,
+  `conversas_sofia`, `planos_ia`. Metas, tarefas e sessões de estudo têm CRUD próprio; `planos_ia` tem schema, mas ainda não tem rotas.
 - O frontend guarda o token em `localStorage` (`acaistudy-token`) e o envia em toda requisição (`JS/users/api.js`).
 - Canvas: o token de acesso fica cifrado no documento do usuário e some de toda resposta JSON. A sincronização
   grava `origem: "canvas"` e `idExterno` em disciplinas e tarefas, então uma nova sincronização atualiza em vez de duplicar.
@@ -166,19 +208,24 @@ backend/
     ├── app.js                     # Express: CORS, JSON, registro das rotas de cada módulo, erros
     ├── config/                    # variáveis de ambiente e conexão (compartilhado)
     ├── middlewares/               # tratamento de erros e autenticação (compartilhado)
-    ├── servicos/                  # correio.js — envio do link de redefinição de senha
+    ├── servicos/                  # correio.js (e-mails), clienteGemini.js (Sofia), clienteRanking.js (cliente do servidor Java)
+    │                              # e serializacaoJava.js (leitura e escrita dos objetos serializados)
     ├── utils/                     # ErroApi, validações e tokens (compartilhado)
     └── modulos/
         ├── auth/                  # sessões e recuperação de senha
         ├── usuarios/              # contas e perfil
         ├── disciplinas/           # CRUD completo (schema + service + rotas)
         ├── blocosFixos/           # blocos_rotina
-        ├── tarefas/               # schema Tarefa.js (coleção pronta)
-        ├── metas/                 # CRUD e painel da tela de metas
+        ├── tarefas/               # CRUD de tarefas (estudos e pessoais)
+        ├── metas/                 # CRUD, painel da tela de metas e a Sofia das metas
         ├── configuracoes/         # preferências da Sofia gravadas no usuário
         ├── canvas/                # conexão com o Canvas LMS e importação de cursos/atividades
-        ├── sessoesEstudo/         # schema SessaoEstudo.js (coleção pronta)
-        └── planosIa/              # schema PlanoIa.js (coleção pronta)
+        ├── sessoesEstudo/         # sessões de estudo: CRUD, conflitos de horário e pomodoro
+        ├── grade/                 # sugestões de estudo da semana (espaços livres + servidor Java)
+        ├── ranking/               # POST /api/ranking, encaminha ao servidor Java
+        ├── relatorios/            # painel da semana e conversa com a Sofia
+        ├── cabecalho/             # gauge da rotina e avisos de sessão
+        └── planosIa/              # schema PlanoIa.js (coleção pronta, sem rotas)
 
 Novo módulo: crie `src/modulos/<nome>/` com o mesmo padrão (model, service, controller, routes)
 e registre as rotas em `src/app.js`.
