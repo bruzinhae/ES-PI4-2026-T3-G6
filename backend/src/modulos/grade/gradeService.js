@@ -121,11 +121,13 @@ export async function sugerir(usuarioId, semana) {
         tarefasParaRanking(usuarioId, preferencias, agora),
     ]);
     const espacos = espacosLivres(ocupacoes, inicioSemana, agora);
+    const minutosLivres = espacos.reduce((soma, espaco) => soma + (Date.parse(espaco.fim) - Date.parse(espaco.inicio)) / MINUTO, 0);
 
     const resposta = {
         semana: { inicio: formatarISO(inicioSemana), fim: formatarISO(fimSemana) },
         geradoEm: formatarISO(agora),
         espacosLivres: espacos.length,
+        minutosLivres,
         motivo: null,
         sugestoes: [],
         semAlocacao: [],
