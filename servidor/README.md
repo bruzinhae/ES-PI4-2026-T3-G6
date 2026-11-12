@@ -21,7 +21,6 @@ As peças que substituem o que a biblioteca faria:
 
 - `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`) e conta minutos e dias; o servidor não escreve datas em texto, quem escreve é o Node.
 - `Ordenador` é uma classe genérica que ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável) e devolve uma lista nova.
-- `FiltroDeComunicados` é a única peça que o exemplo não tem: ler objetos de um fluxo pode executar código de classes inesperadas, então o servidor só aceita as classes dos comunicados e limita o tamanho do que lê.
 
 **Mesmo protocolo do Continhas:** os comunicados são **objetos Java serializados** (`ObjectOutputStream` e `ObjectInputStream`), e a `SupervisoraDeConexao` distingue os pedidos com `instanceof`. O backend em Node não tem as classes Java, então ele escreve e lê o fluxo de bytes da serialização por conta própria (`backend/src/servicos/serializacaoJava.js`). Para isso, cada classe que viaja declara `serialVersionUID = 1L`.
 
@@ -62,7 +61,7 @@ O relatório para a atividade de Teste OO está em [`RELATORIO-TESTES-OO.md`](RE
 
 ## Protocolo
 
-TCP, com os comunicados como **objetos Java serializados** (cabeçalho do fluxo, depois um objeto por mensagem). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. O `FiltroDeComunicados` só deixa o servidor ler as classes dos comunicados (até 8 MB por conexão). Como no Fazedor de Continhas, **o servidor confia no que recebe**: quem confere os valores (prioridade de 1 a 10, datas, intervalos e ids) é o cliente, e o cliente em Node faz isso antes de enviar. Se o cálculo falhar, o servidor responde com um `Erro`.
+TCP, com os comunicados como **objetos Java serializados** (cabeçalho do fluxo, depois um objeto por mensagem). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. Como no Fazedor de Continhas, **o servidor confia no que recebe**: quem confere os valores (prioridade de 1 a 10, datas, intervalos e ids) é o cliente, e o cliente em Node faz isso antes de enviar. Se o cálculo falhar, o servidor responde com um `Erro`.
 
 Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a resposta que ela devolve; o backend transforma esse JSON nos comunicados (`PedidoDeRanking` e `PedidoDeMetas`) e converte a resposta (`Ranking` e `PrioridadeDeMetas`) de volta. As tabelas de campos valem para os dois lados.
 
