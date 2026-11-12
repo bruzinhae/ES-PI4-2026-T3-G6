@@ -47,17 +47,15 @@ java Servidor 3100       # outra porta
 
 Para desativar, digite `desativar` no console (o servidor só roda com console, como o do exemplo). Os clientes conectados recebem um `ComunicadoDeDesligamento`.
 
-Para testar, suba o backend e use `POST /api/ranking` (veja "Integração com a API Node") ou o botão "Ajuste da grade" do calendário.
+Para testar, suba o backend e use o botão "Ajuste da grade" do calendário (ou o "Ajustar" da página de Disciplinas), o "Sugerir marcos" das Metas ou `POST /api/ranking` (veja "Integração com a API Node"). Depois de mudar o código, recompile e reinicie o servidor: a versão antiga não entende o protocolo novo.
 
 ## Testes automatizados
 
-Os testes JUnit 5 (que ainda usam as classes antigas e precisam ser adaptados) cobrem partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro do serviço `SupervisoraDeConexao`, usando uma conexão TCP local. Requerem Maven; execute na pasta `servidor/`:
+Os testes JUnit 5 em `servidor/src/test` foram escritos para a versão anterior do servidor (com pacotes e protocolo em JSON) e **ainda não compilam** com o código atual: precisam ser adaptados às classes sem pacote e ao protocolo de objetos serializados. Eles cobriam partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro da `SupervisoraDeConexao`, com uma conexão TCP local. Só os testes usam Maven; até a adaptação, `mvn test` falha (`mvn compile` compila o servidor normalmente).
 
 ```bash
-mvn test
+mvn test      # na pasta servidor/, depois que os testes forem adaptados
 ```
-
-O relatório para a atividade de Teste OO está em [`RELATORIO-TESTES-OO.md`](RELATORIO-TESTES-OO.md).
 
 ## Protocolo
 
@@ -303,4 +301,4 @@ O código quase não tem comentários (como o do exemplo do Fazedor de Continhas
 - A alocação é gulosa: boa para uma semana de estudo, mas não busca a combinação ótima entre todas as tarefas.
 - A pausa antifadiga é fixa (10 min). As preferências `rigidez`, `repeticaoEspacada` e `ajusteDinamico` da tela de foco ainda não entram no cálculo.
 - O servidor não guarda nada: persistir as sessões aceitas é função do backend.
-- Os testes JUnit atuais (issue #37) cobrem o protocolo e os modelos; a alocação foi validada por scripts de protocolo e ainda não tem testes JUnit próprios.
+- Os testes JUnit (issue #37) são da versão anterior e precisam ser adaptados. A alocação e as metas foram conferidas por scripts de pedidos fora do repositório e ainda não têm testes JUnit próprios.
