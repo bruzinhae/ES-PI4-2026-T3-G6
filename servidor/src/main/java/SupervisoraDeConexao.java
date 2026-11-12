@@ -43,7 +43,6 @@ public class SupervisoraDeConexao extends Thread
             receptor=
             new ObjectInputStream(
             this.conexao.getInputStream());
-            receptor.setObjectInputFilter (new FiltroDeComunicados ());
         }
         catch (Exception err0)
         {
