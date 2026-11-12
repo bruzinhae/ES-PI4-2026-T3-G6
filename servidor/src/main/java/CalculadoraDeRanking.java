@@ -233,6 +233,6 @@ public class CalculadoraDeRanking
 
     private static double arredondar (double valor)
     {
-        return (long) (valor * 1000.0 + 0.5) / 1000.0; // tres casas
+        return (int) (valor * 1000.0 + 0.5) / 1000.0; // tres casas
     }
 }

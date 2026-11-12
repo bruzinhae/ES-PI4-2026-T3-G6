@@ -4,7 +4,7 @@ public class DataHora implements Comparable<DataHora>, Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    private static final int SEGUNDOS_POR_DIA = 86400;
+    private static final long SEGUNDOS_POR_DIA = 86400;
 
     private long segundos;     // desde 1970-01-01T00:00:00Z
     private int  nanos;        // 0 a 999999999
@@ -50,7 +50,7 @@ public class DataHora implements Comparable<DataHora>, Serializable
     public long minutosAte (DataHora outra) // minutos inteiros, truncados em direcao a zero
     {
         long dif      = outra.segundos - this.segundos;
-        long difNanos = (long) outra.nanos - this.nanos;
+        long difNanos = outra.nanos - this.nanos;
 
         dif = dif + dividaParaBaixo (difNanos, 1000000000L);
 
@@ -59,12 +59,12 @@ public class DataHora implements Comparable<DataHora>, Serializable
 
     public int getDiaLocal () // dias desde 1970-01-01, no fuso desta data
     {
-        return (int) dividaParaBaixo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
+        return (int) dividaParaBaixo (this.segundos + this.deslocamento, SEGUNDOS_POR_DIA);
     }
 
     public int getSegundoDoDia () // desde a meia-noite, no fuso desta data
     {
-        return (int) restoPositivo (this.segundos + this.deslocamento, (long) SEGUNDOS_POR_DIA);
+        return (int) restoPositivo (this.segundos + this.deslocamento, SEGUNDOS_POR_DIA);
     }
 
     private static long dividaParaBaixo (long dividendo, long divisor) // arredonda para baixo
