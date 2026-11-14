@@ -1588,25 +1588,105 @@ body.modal-aberto {
 
 .detalhes-sessao {
     display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 8px 16px;
+    grid-template-columns: minmax(90px, max-content) minmax(0, 1fr);
+    gap: 0 16px;
     margin: 0;
-    padding: 4px 24px 18px;
+    padding: 4px 0 20px;
     font-size: 14px;
 }
 
 .detalhes-sessao dt {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0edf2;
     color: var(--cinza-500, #6b7280);
     font-weight: 600;
 }
 
 .detalhes-sessao dd {
     margin: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0edf2;
     overflow-wrap: anywhere;
+    color: var(--titulo);
 }
 
 .modal-sessao-cartao {
-    max-width: 460px;
+    width: min(100%, 500px);
+    padding-bottom: 0;
+}
+
+.modal-sessao-cartao .modal-cabecalho {
+    grid-template-columns: 40px minmax(0, 1fr) 24px;
+    margin-bottom: 18px;
+}
+
+.modal-rodape {
+    margin: 0 -22px;
+    padding: 14px 22px 18px;
+    border-top: 1px solid #edf0f3;
+    background: #fff;
+}
+
+.modal-rodape-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal-rodape-acoes button {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.modal-rodape-acoes .botao-excluir-modal {
+    margin-right: auto;
+}
+
+.modal-rodape-acoes .botao-cancelar-modal {
+    border: 1px solid #dfe2e8;
+    background: #fff;
+    color: #514c57;
+}
+
+.modal-rodape-acoes .botao-salvar-modal {
+    border: 1px solid var(--roxo);
+    background: var(--roxo);
+    color: #fff;
+}
+
+.modal-rodape-acoes button:focus-visible,
+.modal-fechar:focus-visible {
+    outline: 3px solid rgba(86, 48, 107, .25);
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .modal-sessao-cartao {
+        padding: 18px 18px 0;
+    }
+
+    .modal-rodape {
+        margin: 0 -18px;
+        padding: 12px 18px 16px;
+    }
+
+    .modal-rodape-acoes {
+        flex-wrap: wrap;
+    }
+
+    .modal-rodape-acoes button {
+        flex: 1 1 auto;
+    }
+
+    .modal-rodape-acoes .botao-excluir-modal {
+        margin-right: 0;
+    }
 }
 
 /* Sugestão média (45 a 90 min): título e botões na mesma linha, horário embaixo. */

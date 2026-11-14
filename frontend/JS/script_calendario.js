@@ -702,7 +702,7 @@ function abrirDetalhes(item) {
 
     linhaDeDetalhe(lista, 'Duração', formatarDuracao(duracao));
     if (ehSessao) {
-        linhaDeDetalhe(lista, 'Tarefa', tarefaDaSessao(item.sessao)?.titulo);
+        linhaDeDetalhe(lista, 'Tarefa', tarefaDaSessao(item.sessao)?.titulo || item.sessao.titulo);
         linhaDeDetalhe(lista, 'Origem', item.sessao.origem === 'ia' ? 'Sugerida pela Sofia' : 'Agendada por você');
         if (concluida && item.sessao.minutosRealizados) linhaDeDetalhe(lista, 'Realizado', formatarDuracao(item.sessao.minutosRealizados));
     } else {
@@ -735,13 +735,14 @@ async function alterarSessaoAberta(acao) {
         if (acao === 'remover') {
             const confirmou = await AcaiAvisos.confirmar({
                 titulo: 'Remover sessão?',
-                texto: `A sessão "${sessao.titulo}" será removida da grade. A tarefa continua pendente.`,
+                texto: `A sessão "${sessao.titulo}" será removida da grade e a tarefa voltará para a lista de pendentes.`,
                 confirmar: 'Remover',
                 cancelar: 'Voltar',
                 perigo: true,
             });
             if (!confirmou) return;
             await AcaiApi.excluirSessao(sessao.id);
+            await carregarTarefas();
         } else {
             await AcaiApi.atualizarSessao(sessao.id, { situacao: 'concluida' });
         }
