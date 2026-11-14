@@ -94,6 +94,8 @@ export async function criar(usuarioId, dados) {
         idValido(corpo.tarefaId, 'tarefa');
         tarefa = await Tarefa.findOne({ _id: corpo.tarefaId, usuarioId });
         if (!tarefa) throw new ErroApi(400, 'A tarefa selecionada não existe ou não pertence a esta conta.');
+        const jaAgendada = await SessaoEstudo.exists({ usuarioId, tarefaId: tarefa._id, situacao: 'agendada' });
+        if (jaAgendada) throw new ErroApi(409, 'Esta tarefa já está agendada. Remova a sessão atual antes de agendá-la novamente.');
     }
 
     let disciplinaId = corpo.disciplinaId ?? tarefa?.disciplinaId ?? null;

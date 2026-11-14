@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { Tarefa, CATEGORIAS_TAREFA, TIPOS_TAREFA } from './Tarefa.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
+import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 
 const CAMPOS = ['titulo', 'categoria', 'tipo', 'etiqueta', 'prazo', 'minutosEstimados', 'prioridade', 'local', 'observacoes', 'disciplinaId'];
 
@@ -53,8 +54,17 @@ async function validarDisciplinaDoUsuario(usuarioId, disciplinaId) {
     }
 }
 
-export function listar(usuarioId) {
-    return Tarefa.find({ usuarioId, situacao: { $ne: 'concluida' } }).sort({ prazo: 1, criadoEm: -1 });
+export async function listar(usuarioId) {
+    const idsAgendados = await SessaoEstudo.distinct('tarefaId', {
+        usuarioId,
+        situacao: 'agendada',
+        tarefaId: { $ne: null },
+    });
+    return Tarefa.find({
+        usuarioId,
+        situacao: { $ne: 'concluida' },
+        _id: { $nin: idsAgendados },
+    }).sort({ prazo: 1, criadoEm: -1 });
 }
 
 export async function criar(usuarioId, dados) {

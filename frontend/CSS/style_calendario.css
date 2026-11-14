@@ -183,6 +183,12 @@ img {
     padding-right: 2px;
 }
 
+.lista-tarefas.destino-soltura {
+    outline: 2px dashed var(--roxo);
+    outline-offset: -3px;
+    background: #f5effb;
+}
+
 .tarefa {
     padding: 12px;
 

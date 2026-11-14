@@ -644,8 +644,22 @@ async function agendarTarefa(card, alvo) {
             fim: new Date(alvo.inicio + duracao * MINUTO).toISOString(),
             origem: 'manual',
         });
+        await carregarTarefas();
     } catch (erro) {
         avisar(erro.message || 'Não foi possível agendar a sessão.');
+    }
+    await recarregar();
+}
+
+async function devolverTarefaParaLista(id) {
+    const sessao = estado.sessoes.find((item) => item.id === id);
+    if (!sessao || sessao.situacao !== 'agendada') return;
+
+    try {
+        await AcaiApi.excluirSessao(id);
+        await carregarTarefas();
+    } catch (erro) {
+        avisar(erro.message || 'Não foi possível devolver a tarefa para a lista.');
     }
     await recarregar();
 }
@@ -800,7 +814,7 @@ async function aceitarSugestao(indice) {
 async function aceitarUma(indice) {
     const criada = await aceitarSugestao(indice);
     estado.sugestoes.splice(indice, 1); // aceita ou não coube mais: não fica na tela
-    if (criada) await carregarSessoes();
+    if (criada) await Promise.all([carregarSessoes(), carregarTarefas()]);
     renderizar();
 }
 
@@ -816,6 +830,7 @@ async function aceitarTodas() {
     estado.sugestoes = [];
     botao.disabled = false;
     if (falhas) avisar(`${plural(falhas, 'sessão', 'sessões')} não ${falhas === 1 ? 'pôde' : 'puderam'} ser criada${falhas === 1 ? '' : 's'}.`, 'aviso');
+    await carregarTarefas();
     await recarregar();
 }
 
@@ -910,6 +925,7 @@ function limparArrasto() {
     itemArrastado = null;
     fantasma.hidden = true;
     gradeDias.querySelectorAll('.coluna-dia').forEach((coluna) => coluna.classList.remove('destino-soltura'));
+    listaTarefas.classList.remove('destino-soltura');
 }
 
 listaTarefas.addEventListener('dragstart', (evento) => {
@@ -952,6 +968,24 @@ gradeDias.addEventListener('drop', async (evento) => {
 
     if (item.tipo === 'tarefa') await agendarTarefa(item.card, alvo);
     else await moverSessao(item.id, alvo);
+});
+
+listaTarefas.addEventListener('dragover', (evento) => {
+    if (itemArrastado?.tipo !== 'sessao') return;
+    evento.preventDefault();
+    listaTarefas.classList.add('destino-soltura');
+});
+
+listaTarefas.addEventListener('dragleave', (evento) => {
+    if (!listaTarefas.contains(evento.relatedTarget)) listaTarefas.classList.remove('destino-soltura');
+});
+
+listaTarefas.addEventListener('drop', async (evento) => {
+    if (itemArrastado?.tipo !== 'sessao') return;
+    evento.preventDefault();
+    const id = itemArrastado.id;
+    limparArrasto();
+    await devolverTarefaParaLista(id);
 });
 
 /* Cliques na grade: aceitar ou recusar sugestão, ver detalhes de sessão ou bloco */
