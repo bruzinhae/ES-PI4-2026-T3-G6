@@ -51,7 +51,7 @@ Para testar, suba o backend e use o botão "Ajuste da grade" do calendário (ou 
 
 ## Testes automatizados
 
-Os testes JUnit 5 em `servidor/src/test` foram escritos para a versão anterior do servidor (com pacotes e protocolo em JSON) e **ainda não compilam** com o código atual: precisam ser adaptados às classes sem pacote e ao protocolo de objetos serializados. Eles cobriam partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro da `SupervisoraDeConexao`, com uma conexão TCP local. Só os testes usam Maven; até a adaptação, `mvn test` falha (`mvn compile` compila o servidor normalmente).
+Os testes JUnit 5 em `servidor/src/test` cobrem partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro da `SupervisoraDeConexao`, com uma conexão TCP local usando o protocolo atual de objetos serializados. Os testes ficam no pacote padrão, assim como as classes do servidor. Só os testes usam Maven:
 
 ```bash
 mvn test      # na pasta servidor/, depois que os testes forem adaptados
