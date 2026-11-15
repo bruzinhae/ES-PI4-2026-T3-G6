@@ -21,10 +21,24 @@ class TarefaTest
     }
 
     @Test
+    void concluidaNaoReconheceTarefaEmAndamento() throws Exception
+    {
+        // Mantém tarefas em andamento elegíveis para o ranking.
+        assertFalse (tarefaComSituacao ("em_andamento").concluida ());
+    }
+
+    @Test
     void concluidaTrataSituacaoAusenteComoNaoConcluida() throws Exception
     {
         // Trata estado ausente como tarefa ainda não concluída.
         assertFalse (tarefaComSituacao (null).concluida ());
+    }
+
+    @Test
+    void concluidaDistingueMaiusculasNoEstado() throws Exception
+    {
+        // Reconhece somente o valor de estado definido pelo protocolo.
+        assertFalse (tarefaComSituacao ("Concluida").concluida ());
     }
 
     private static Tarefa tarefaComSituacao (String situacao)

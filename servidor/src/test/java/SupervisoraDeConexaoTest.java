@@ -73,6 +73,121 @@ class SupervisoraDeConexaoTest
         assertTrue (((String) campo (resposta, "mensagem")).contains ("Nao foi possivel calcular o ranking"));
     }
 
+    @Test
+    void tarefaConcluidaNaoApareceNoRankingNemNaListaSemEspaco()
+    throws Exception
+    {
+        // Exclui tarefas concluídas tanto dos candidatos quanto das tarefas sem espaço.
+        DataHora agora = new DataHora (1_000_000L, 0, 0);
+        PedidoDeRanking pedido = pedidoDeRanking (
+            agora,
+            List.of (new EspacoLivre ("e1", agora, agora.maisMinutos (60))),
+            List.of (
+                tarefa ("t1", "concluida", 30, agora.maisMinutos (120)),
+                tarefa ("t2", "pendente", 30, agora.maisMinutos (120))),
+            3);
+
+        Ranking resposta = (Ranking) atenderPedido (pedido);
+        List<?> rankings = (List<?>) campo (resposta, "porEspaco");
+        List<?> candidatos = (List<?>) campo (rankings.get (0), "candidatos");
+
+        assertEquals (1, candidatos.size ());
+        assertEquals ("t2", ((Candidato) candidatos.get (0)).getTarefaId ());
+        assertTrue (((List<?>) campo (resposta, "semEspaco")).isEmpty ());
+    }
+
+    @Test
+    void espacoCurtoNaoGeraCandidatoERegistraTarefaSemEspaco()
+    throws Exception
+    {
+        // Registra como sem espaço a tarefa que não cabe no intervalo mínimo aceito.
+        DataHora agora = new DataHora (1_000_000L, 0, 0);
+        PedidoDeRanking pedido = pedidoDeRanking (
+            agora,
+            List.of (new EspacoLivre ("e1", agora, agora.maisMinutos (14))),
+            List.of (tarefa ("t1", "pendente", 10, agora.maisMinutos (120))),
+            3);
+
+        Ranking resposta = (Ranking) atenderPedido (pedido);
+        List<?> rankings = (List<?>) campo (resposta, "porEspaco");
+        List<?> semEspaco = (List<?>) campo (resposta, "semEspaco");
+
+        assertTrue (((List<?>) campo (rankings.get (0), "candidatos")).isEmpty ());
+        assertEquals (1, semEspaco.size ());
+        assertEquals ("t1", campo (semEspaco.get (0), "tarefaId"));
+        assertEquals ("nenhum_espaco_antes_do_prazo", campo (semEspaco.get (0), "motivo"));
+    }
+
+    @Test
+    void prazoAnteriorAoFimDoEspacoImpedeCandidato()
+    throws Exception
+    {
+        // Não recomenda uma tarefa cujo prazo ocorre antes do fim da sessão.
+        DataHora agora = new DataHora (1_000_000L, 0, 0);
+        PedidoDeRanking pedido = pedidoDeRanking (
+            agora,
+            List.of (new EspacoLivre ("e1", agora, agora.maisMinutos (30))),
+            List.of (tarefa ("t1", "pendente", 30, agora.maisMinutos (15))),
+            3);
+
+        Ranking resposta = (Ranking) atenderPedido (pedido);
+        List<?> semEspaco = (List<?>) campo (resposta, "semEspaco");
+
+        assertTrue (((List<?>) campo (((List<?>) campo (resposta, "porEspaco")).get (0), "candidatos")).isEmpty ());
+        assertEquals (1, semEspaco.size ());
+        assertEquals ("t1", campo (semEspaco.get (0), "tarefaId"));
+    }
+
+    @Test
+    void semEspacosInformaMotivoEspecifico()
+    throws Exception
+    {
+        // Distingue a ausência total de espaços de um espaço incompatível com a tarefa.
+        DataHora agora = new DataHora (1_000_000L, 0, 0);
+        PedidoDeRanking pedido = pedidoDeRanking (
+            agora,
+            List.of (),
+            List.of (tarefa ("t1", "pendente", 30, agora.maisMinutos (120))),
+            3);
+
+        Ranking resposta = (Ranking) atenderPedido (pedido);
+        List<?> semEspaco = (List<?>) campo (resposta, "semEspaco");
+
+        assertTrue (((List<?>) campo (resposta, "porEspaco")).isEmpty ());
+        assertEquals (1, semEspaco.size ());
+        assertEquals ("sem_espacos", campo (semEspaco.get (0), "motivo"));
+    }
+
+    private static PedidoDeRanking pedidoDeRanking (
+        DataHora agora, List<EspacoLivre> espacos, List<Tarefa> tarefas, int limite)
+    throws ReflectiveOperationException
+    {
+        Preferencias preferencias = new Preferencias ();
+        definir (preferencias, "janelaFoco", "manha");
+        definir (preferencias, "duracaoMinutos", 50);
+
+        PedidoDeRanking pedido = new PedidoDeRanking ();
+        definir (pedido, "agora", agora);
+        definir (pedido, "preferencias", preferencias);
+        definir (pedido, "limite", limite);
+        definir (pedido, "espacos", new ArrayList<> (espacos));
+        definir (pedido, "tarefas", new ArrayList<> (tarefas));
+        return pedido;
+    }
+
+    private static Tarefa tarefa (String id, String situacao, int minutos, DataHora prazo)
+    throws ReflectiveOperationException
+    {
+        Tarefa tarefa = new Tarefa ();
+        definir (tarefa, "id", id);
+        definir (tarefa, "tipo", "exercicio");
+        definir (tarefa, "prioridade", 5);
+        definir (tarefa, "prazo", prazo);
+        definir (tarefa, "minutosEstimados", minutos);
+        definir (tarefa, "situacao", situacao);
+        return tarefa;
+    }
+
     private static Comunicado atenderPedido (Comunicado pedido)
     {
         ArrayList<Parceiro> usuarios = new ArrayList<> ();

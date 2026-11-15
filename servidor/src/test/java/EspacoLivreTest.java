@@ -30,6 +30,30 @@ class EspacoLivreTest
         assertEquals (0, espaco.getMinutos ());
     }
 
+    @Test
+    void minutosTruncaDuracaoPositivaParaMinutosInteiros()
+    {
+        // Mantém somente os minutos completos do intervalo.
+        EspacoLivre espaco = new EspacoLivre (
+            "e3",
+            dataHora ("2026-03-08T12:00:00Z"),
+            dataHora ("2026-03-08T12:01:59Z"));
+
+        assertEquals (1, espaco.getMinutos ());
+    }
+
+    @Test
+    void minutosTruncaDuracaoNegativaEmDirecaoAZero()
+    {
+        // Preserva o truncamento para zero em intervalos negativos menores que um minuto.
+        EspacoLivre espaco = new EspacoLivre (
+            "e4",
+            dataHora ("2026-03-08T12:00:59Z"),
+            dataHora ("2026-03-08T12:00:00Z"));
+
+        assertEquals (0, espaco.getMinutos ());
+    }
+
     private static DataHora dataHora (String texto)
     {
         OffsetDateTime data = OffsetDateTime.parse (texto);
