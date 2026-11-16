@@ -1,3 +1,6 @@
+package modelo;
+
+import json.*;
 import java.util.*;
 
 public class Alocacao

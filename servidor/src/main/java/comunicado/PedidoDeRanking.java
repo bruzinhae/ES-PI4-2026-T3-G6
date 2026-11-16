@@ -1,3 +1,7 @@
+package comunicado;
+
+import json.*;
+import modelo.*;
 import java.time.*;
 import java.util.*;
 

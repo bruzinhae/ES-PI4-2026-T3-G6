@@ -1,3 +1,5 @@
+package comunicado;
+
 public class ComunicadoDeDesligamento extends Comunicado
 {
     @Override

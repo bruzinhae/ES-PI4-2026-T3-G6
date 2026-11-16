@@ -1,3 +1,7 @@
+package conexao;
+
+import comunicado.*;
+import json.*;
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.Semaphore;

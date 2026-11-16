@@ -1,3 +1,7 @@
+package modelo;
+
+import json.*;
+
 public class TarefaSemAlocacao
 {
     private String tarefaId;

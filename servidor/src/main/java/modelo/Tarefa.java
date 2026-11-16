@@ -1,3 +1,6 @@
+package modelo;
+
+import json.*;
 import java.time.*;
 
 public class Tarefa
