@@ -62,8 +62,8 @@ Para subir (Java 17, sem Maven e sem dependências):
 
 ```bash
 cd servidor/src/main/java
-javac *.java
-java Servidor            # porta 3000
+javac -d out Servidor.java
+java -cp out Servidor            # porta 3000
 ```
 
 Depois de mudar o código do servidor, recompile e reinicie. Veja [servidor/README.md](servidor/README.md) e
@@ -92,7 +92,7 @@ Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/
 │   ├── package.json
 │   └── src/                          # API Node.js (config, middlewares, servicos, utils, modulos/)
 ├── servidor/                         # servidor Java de ranking, alocação e metas (veja servidor/README.md)
-│   └── src/main/java/                # código do servidor (compile com javac *.java)
+│   └── src/main/java/                # código do servidor, em pastas (compile com javac -d out Servidor.java)
 └── Arquivos/
     └── Dicionário de dados/          # um JSON por coleção do MongoDB
 ```
