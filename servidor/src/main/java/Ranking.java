@@ -2,8 +2,6 @@ import java.util.*;
 
 public class Ranking extends Comunicado
 {
-    private static final long serialVersionUID = 1L;
-
     private ArrayList<RankingDoEspaco> porEspaco;
     private ArrayList<TarefaSemEspaco> semEspaco;
     private Alocacao                   alocacao; // null se o pedido nao pediu alocacao
@@ -16,9 +14,11 @@ public class Ranking extends Comunicado
         this.alocacao  = alocacao;
     }
 
+    @Override
     public String toString ()
     {
-        return "Ranking de " + this.porEspaco.size () + " espaco(s), " +
-               this.semEspaco.size () + " tarefa(s) sem espaco";
+        return "{\"tipo\":\"ranking\",\"porEspaco\":" + EscritorDeJson.lista (this.porEspaco) +
+               ",\"semEspaco\":" + EscritorDeJson.lista (this.semEspaco) +
+               ",\"alocacao\":"  + this.alocacao + "}";
     }
 }

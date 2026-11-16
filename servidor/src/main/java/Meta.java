@@ -1,14 +1,21 @@
-import java.io.*;
+import java.time.*;
 
-public class Meta implements Serializable
+public class Meta
 {
-    private static final long serialVersionUID = 1L;
+    private String         id;
+    private String         tipo;       // geral, disciplina, habito ou projeto
+    private String         prioridade; // baixa, media ou alta
+    private int            progresso;  // de 0 a 100
+    private OffsetDateTime prazo;      // null se a meta nao tem prazo
 
-    private String   id;
-    private String   tipo;       // geral, disciplina, habito ou projeto
-    private String   prioridade; // baixa, media ou alta
-    private int      progresso;  // de 0 a 100
-    private DataHora prazo;      // null se a meta nao tem prazo
+    public Meta (ObjetoJson json) throws Exception
+    {
+        this.id         = json.getTexto          ("id");
+        this.tipo       = json.getTexto          ("tipo");
+        this.prioridade = json.getTexto          ("prioridade");
+        this.progresso  = json.getInteiro        ("progresso");
+        this.prazo      = json.getDataHoraOuNula ("prazo");
+    }
 
     public String getId ()
     {
@@ -25,7 +32,7 @@ public class Meta implements Serializable
         return this.progresso;
     }
 
-    public DataHora getPrazo ()
+    public OffsetDateTime getPrazo ()
     {
         return this.prazo;
     }

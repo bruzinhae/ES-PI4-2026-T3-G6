@@ -1,9 +1,5 @@
-import java.io.*;
-
-public class TarefaSemAlocacao implements Serializable
+public class TarefaSemAlocacao
 {
-    private static final long serialVersionUID = 1L;
-
     private String tarefaId;
     private String motivo;
     private int    minutosRestantes;
@@ -13,5 +9,13 @@ public class TarefaSemAlocacao implements Serializable
         this.tarefaId         = tarefaId;
         this.motivo           = motivo;
         this.minutosRestantes = minutosRestantes;
+    }
+
+    @Override
+    public String toString ()
+    {
+        return "{\"tarefaId\":"        + EscritorDeJson.texto (this.tarefaId) +
+               ",\"motivo\":"          + EscritorDeJson.texto (this.motivo) +
+               ",\"minutosRestantes\":" + this.minutosRestantes + "}";
     }
 }

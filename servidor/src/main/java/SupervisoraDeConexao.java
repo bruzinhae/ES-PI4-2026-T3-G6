@@ -25,24 +25,26 @@ public class SupervisoraDeConexao extends Thread
     public void run ()
     {
 
-        ObjectOutputStream transmissor;
+        PrintWriter transmissor;
         try
         {
             transmissor =
-            new ObjectOutputStream(
-            this.conexao.getOutputStream());
+            new PrintWriter(
+            new OutputStreamWriter(
+            this.conexao.getOutputStream(), "UTF-8"), true);
         }
         catch (Exception erro)
         {
             return;
         }
         
-        ObjectInputStream receptor=null;
+        BufferedReader receptor=null;
         try
         {
             receptor=
-            new ObjectInputStream(
-            this.conexao.getInputStream());
+            new BufferedReader(
+            new InputStreamReader(
+            this.conexao.getInputStream(), "UTF-8"));
         }
         catch (Exception err0)
         {

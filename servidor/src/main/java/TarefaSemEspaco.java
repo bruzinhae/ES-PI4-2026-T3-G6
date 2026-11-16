@@ -1,9 +1,5 @@
-import java.io.*;
-
-public class TarefaSemEspaco implements Serializable
+public class TarefaSemEspaco
 {
-    private static final long serialVersionUID = 1L;
-
     private String tarefaId;
     private String motivo; // sem_espacos ou nenhum_espaco_antes_do_prazo
 
@@ -11,5 +7,12 @@ public class TarefaSemEspaco implements Serializable
     {
         this.tarefaId = tarefaId;
         this.motivo   = motivo;
+    }
+
+    @Override
+    public String toString ()
+    {
+        return "{\"tarefaId\":" + EscritorDeJson.texto (this.tarefaId) +
+               ",\"motivo\":"   + EscritorDeJson.texto (this.motivo) + "}";
     }
 }

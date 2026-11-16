@@ -1,3 +1,5 @@
+import java.time.*;
+import java.time.temporal.*;
 import java.util.*;
 
 public class CalculadoraDeMetas
@@ -11,7 +13,7 @@ public class CalculadoraDeMetas
 
     public static PrioridadeDeMetas calcular (PedidoDeMetas pedido)
     {
-        DataHora agora = pedido.getAgora ();
+        OffsetDateTime agora = pedido.getAgora ();
         ArrayList<Meta> metas = pedido.getMetas ();
 
         ArrayList<NotaDeMeta> notas = new ArrayList<NotaDeMeta> ();
@@ -21,18 +23,18 @@ public class CalculadoraDeMetas
             notas.add (avaliar (metas.get (i), metas.get (primeira), agora));
         }
 
-        notas = new Ordenador<NotaDeMeta> ().ordene (notas);
+        Collections.sort (notas);
 
         String foco = notas.size () == 0 ? null : notas.get (0).getMetaId ();
-        ArrayList<Integer> dias = new ArrayList<Integer> ();
+        ArrayList<String> datas = new ArrayList<String> ();
 
         if (foco != null)
         {
             Meta meta = metas.get (CalculadoraDeMetas.posicaoDoId (metas, foco));
-            dias = diasDosMarcos (meta, agora, pedido.getQuantidadeDeMarcos ());
+            datas = datasDosMarcos (meta, agora, pedido.getQuantidadeDeMarcos ());
         }
 
-        return new PrioridadeDeMetas (notas, foco, dias);
+        return new PrioridadeDeMetas (notas, foco, datas);
     }
 
     private static int posicaoDoId (ArrayList<Meta> metas, String id)
@@ -44,9 +46,9 @@ public class CalculadoraDeMetas
         return -1;
     }
 
-    static NotaDeMeta avaliar (Meta meta, Meta referencia, DataHora agora)
+    static NotaDeMeta avaliar (Meta meta, Meta referencia, OffsetDateTime agora)
     {
-        boolean atrasada = meta.getPrazo () != null && !meta.getPrazo ().depoisDe (agora);
+        boolean atrasada = meta.getPrazo () != null && !meta.getPrazo ().isAfter (agora);
 
         double urgencia    = urgencia (meta, atrasada, agora);
         double lacuna      = limitar (1.0 - meta.getProgresso () / 100.0);
@@ -60,14 +62,14 @@ public class CalculadoraDeMetas
                                referencia.getPrazo (), pesoDaPrioridade (referencia));
     }
 
-    private static double urgencia (Meta meta, boolean atrasada, DataHora agora)
+    private static double urgencia (Meta meta, boolean atrasada, OffsetDateTime agora)
     {
         if (meta.getPrazo () == null)
             return URGENCIA_SEM_PRAZO;
         if (atrasada)
             return 1.0;
 
-        double dias = agora.minutosAte (meta.getPrazo ()) / 1440.0;
+        double dias = Duration.between (agora, meta.getPrazo ()).toMinutes () / 1440.0;
         return 1.0 - limitar (dias / HORIZONTE_DE_URGENCIA_DIAS); // chega a 0 com 14 dias
     }
 
@@ -81,20 +83,22 @@ public class CalculadoraDeMetas
         return 0.6;
     }
 
-    static int diasAteOPrazo (Meta meta, DataHora agora)
+    static int diasAteOPrazo (Meta meta, OffsetDateTime agora)
     {
-        int hoje  = agora.getDiaLocal ();
-        int prazo = meta.getPrazo ().noFusoDe (agora).getDiaLocal ();
+        LocalDate hoje  = agora.toLocalDate ();
+        LocalDate prazo = meta.getPrazo ().withOffsetSameInstant (agora.getOffset ()).toLocalDate ();
 
-        return Math.max (0, prazo - hoje); // atrasada ou com prazo hoje: zero
+        return (int) Math.max (0, ChronoUnit.DAYS.between (hoje, prazo)); // atrasada ou com prazo hoje: zero
     }
 
-    static ArrayList<Integer> diasDosMarcos (Meta meta, DataHora agora, int quantidade)
+    static ArrayList<String> datasDosMarcos (Meta meta, OffsetDateTime agora, int quantidade)
     {
-        ArrayList<Integer> marcos = new ArrayList<Integer> ();
+        ArrayList<String> datas = new ArrayList<String> ();
 
         if (meta.habito () || meta.getPrazo () == null)
-            return marcos;
+            return datas;
+
+        LocalDate hoje = agora.toLocalDate ();
 
         int dias = diasAteOPrazo (meta, agora);
         int anterior = 0;
@@ -106,10 +110,10 @@ public class CalculadoraDeMetas
             dia = Math.min (dia, dias);
             anterior = dia;
 
-            marcos.add (agora.getDiaLocal () + dia);
+            datas.add (hoje.plusDays (dia).toString ());
         }
 
-        return marcos;
+        return datas;
     }
 
     private static double limitar (double valor)

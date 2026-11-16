@@ -1,20 +1,31 @@
-import java.io.*;
+import java.time.*;
 
-public class Tarefa implements Serializable
+public class Tarefa
 {
-    private static final long serialVersionUID = 1L;
-
     public static final String CATEGORIA_PESSOAL = "pessoal";
 
-    private String   id;
-    private String   categoria;        // estudos ou pessoal
-    private String   tipo;             // prova, trabalho, exercicio, leitura ou outro
-    private int      prioridade;       // de 1 a 10
-    private DataHora prazo;            // null se a tarefa nao tem prazo
-    private Integer  minutosEstimados; // null se nao informado
-    private Integer  dificuldade;      // da disciplina, de 1 a 5 (ou null)
-    private Integer  peso;             // da disciplina, de 1 a 5 (ou null)
-    private String   situacao;         // pendente, em_andamento ou concluida
+    private String         id;
+    private String         categoria;        // estudos ou pessoal
+    private String         tipo;             // prova, trabalho, exercicio, leitura ou outro
+    private int            prioridade;       // de 1 a 10
+    private OffsetDateTime prazo;            // null se a tarefa nao tem prazo
+    private Integer        minutosEstimados; // null se nao informado
+    private Integer        dificuldade;      // da disciplina, de 1 a 5 (ou null)
+    private Integer        peso;             // da disciplina, de 1 a 5 (ou null)
+    private String         situacao;         // pendente, em_andamento ou concluida
+
+    public Tarefa (ObjetoJson json) throws Exception
+    {
+        this.id               = json.getTexto           ("id");
+        this.categoria        = json.getTexto           ("categoria");
+        this.tipo             = json.getTexto           ("tipo");
+        this.prioridade       = json.getInteiro         ("prioridade");
+        this.prazo            = json.getDataHoraOuNula  ("prazo");
+        this.minutosEstimados = json.getInteiroOuNulo   ("minutosEstimados");
+        this.dificuldade      = json.getInteiroOuNulo   ("dificuldade");
+        this.peso             = json.getInteiroOuNulo   ("peso");
+        this.situacao         = json.getTexto           ("situacao");
+    }
 
     public String getId ()
     {
@@ -31,7 +42,7 @@ public class Tarefa implements Serializable
         return this.prioridade;
     }
 
-    public DataHora getPrazo ()
+    public OffsetDateTime getPrazo ()
     {
         return this.prazo;
     }
