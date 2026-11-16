@@ -9,20 +9,29 @@ A arquitetura segue o exemplo do professor, o *Fazedor de Continhas* (cliente-se
 | `Servidor` (main, porta 3000, comando `desativar`) | `Servidor` |
 | `AceitadoraDeConexao` (thread no `accept()`) | `AceitadoraDeConexao` |
 | `SupervisoraDeConexao` (uma thread por cliente, `instanceof`) | `SupervisoraDeConexao` |
-| `Parceiro` (socket + fluxos, `receba`, `espie`, `envie`, `adeus`) | `Parceiro` |
+| `Parceiro` (socket + fluxos, `receba`, `espie`, `envie`, `adeus`) | `Parceiro` (as mesmas operações, mas com texto: uma linha de JSON por comunicado) |
 | `Teclado` | `Teclado` (a mesma classe do exemplo) |
 | `Comunicado`, `PedidoDeOperacao`, `Resultado`, `PedidoParaSair`, `ComunicadoDeDesligamento` | `Comunicado`, `PedidoDeRanking`, `Ranking`, `PedidoDeMetas`, `PrioridadeDeMetas`, `PedidoParaSair`, `ComunicadoDeDesligamento`, `Erro` |
 
-Como no exemplo, **não há pacotes** (as classes ficam em `src/main/java`) e o código só usa o que foi ensinado nas aulas: `ArrayList`, vetores, classes genéricas e `Comparable`. Não há `record`, lambdas, `Map`/`Set`, `Comparator`, `StringBuilder` nem `java.time`. Os modelos são classes comuns: atributos e getters, e um `compareTo` no modelo de `Data` e `Horario` onde o servidor ordena. O servidor também **confia no que recebe**, como o do exemplo: quem confere os valores (intervalos, datas e ids) é o cliente, e o cliente é o backend em Node.
+O professor liberou três mudanças em relação ao exemplo: comunicar por texto (JSON, que é string), usar `java.time` e organizar o código em pastas. O funcionamento continua o do exemplo: `Servidor`, `AceitadoraDeConexao`, `SupervisoraDeConexao` e `Parceiro` com a mesma estrutura, e a `SupervisoraDeConexao` distingue os comunicados com `instanceof`. O código de domínio (ranking, alocação e metas) é nosso e usa `ArrayList`, `Collections.sort` e `OffsetDateTime`. O servidor também **confia no que recebe**, como o do exemplo: quem confere os valores (intervalos, datas e ids) é o cliente, e o cliente é o backend em Node.
 
 O cliente do Fazedor de Continhas (`Cliente`) não existe aqui: o cliente deste servidor é o backend em Node.
 
-As peças que substituem o que a biblioteca faria:
+As classes ficam em pastas (cada pasta é um pacote); na raiz só estão `Servidor` e `Teclado`, como no exemplo:
 
-- `DataHora` guarda o instante e o fuso (por exemplo `2026-11-12T15:00:00-03:00`) e conta minutos e dias; o servidor não escreve datas em texto, quem escreve é o Node.
-- `Ordenador` é uma classe genérica que ordena uma `ArrayList` pelo `compareTo` dos elementos (merge sort, estável) e devolve uma lista nova.
+```text
+src/main/java/
+├── Servidor.java, Teclado.java
+├── conexao/     AceitadoraDeConexao, SupervisoraDeConexao, Parceiro
+├── comunicado/  Comunicado, ComunicadoDeDesligamento, PedidoParaSair, PedidoDeRanking,
+│                PedidoDeMetas, Ranking, PrioridadeDeMetas, Erro
+├── modelo/      Tarefa, Meta, EspacoLivre, Preferencias, Candidato, RankingDoEspaco, Alocacao,
+│                SessaoAlocada, TarefaSemEspaco, TarefaSemAlocacao, NotaDeMeta
+├── calculo/     CalculadoraDeRanking, AlocadoraDeSessoes, CalculadoraDeMetas
+└── json/        LeitorDeJson, ObjetoJson, EscritorDeJson
+```
 
-**Mesmo protocolo do Continhas:** os comunicados são **objetos Java serializados** (`ObjectOutputStream` e `ObjectInputStream`), e a `SupervisoraDeConexao` distingue os pedidos com `instanceof`. O backend em Node não tem as classes Java, então ele escreve e lê o fluxo de bytes da serialização por conta própria (`backend/src/servicos/serializacaoJava.js`). Para isso, cada classe que viaja declara `serialVersionUID = 1L`.
+**Protocolo em texto:** cada mensagem é uma **linha de JSON** com o campo `tipo`. O `Parceiro` lê uma linha (`readLine`), o `LeitorDeJson` (escrito à mão, sem biblioteca) a transforma num `ObjetoJson` e o `tipo` decide qual comunicado construir: `PedidoDeRanking`, `PedidoDeMetas` ou `PedidoParaSair`. Para responder, o `Parceiro.receba` escreve o `toString` do comunicado, que é o seu JSON. O `Parceiro` continua com `receba`, `envie`, `espie` e `adeus`, e a `SupervisoraDeConexao` continua distinguindo os pedidos com `instanceof`.
 
 ## Como o servidor se encaixa
 
@@ -40,10 +49,12 @@ Front → API Node (autenticada) ──► Servidor Java (este)
 Requer Java 17 (sem Maven e sem dependências). Em `servidor/src/main/java`:
 
 ```bash
-javac *.java
-java Servidor            # porta 3000
-java Servidor 3100       # outra porta
+javac -d out Servidor.java
+java -cp out Servidor            # porta 3000
+java -cp out Servidor 3100       # outra porta
 ```
+
+O `javac` compila também as classes das pastas, porque o `Servidor` as usa.
 
 Para desativar, digite `desativar` no console (o servidor só roda com console, como o do exemplo). Os clientes conectados recebem um `ComunicadoDeDesligamento`.
 
@@ -51,7 +62,7 @@ Para testar, suba o backend e use o botão "Ajuste da grade" do calendário (ou 
 
 ## Testes automatizados
 
-Os testes JUnit 5 em `servidor/src/test` cobrem partições intraclasse de `Tarefa` e `EspacoLivre` e os cenários normal e de erro da `SupervisoraDeConexao`, com uma conexão TCP local usando o protocolo atual de objetos serializados. Os testes ficam no pacote padrão, assim como as classes do servidor. Só os testes usam Maven:
+Os testes JUnit 5 em `servidor/src/test` ainda são da versão anterior do servidor (objetos serializados e sem pastas) e **não compilam** com o código atual: ficam para o Bernardo adaptar ao protocolo em JSON e aos pacotes. Só os testes usam Maven:
 
 ```bash
 mvn test      # na pasta servidor/, depois que os testes forem adaptados
@@ -59,21 +70,21 @@ mvn test      # na pasta servidor/, depois que os testes forem adaptados
 
 ## Protocolo
 
-TCP, com os comunicados como **objetos Java serializados** (cabeçalho do fluxo, depois um objeto por mensagem). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. Como no Fazedor de Continhas, **o servidor confia no que recebe**: quem confere os valores (prioridade de 1 a 10, datas, intervalos e ids) é o cliente, e o cliente em Node faz isso antes de enviar. Se o cálculo falhar, o servidor responde com um `Erro`.
+TCP, com uma **linha de JSON** por mensagem (texto em UTF-8, terminada em `\n`). Pode-se mandar vários pedidos na mesma conexão ou abrir uma conexão por pedido. Como no Fazedor de Continhas, **o servidor confia no que recebe**: quem confere os valores (prioridade de 1 a 10, datas, intervalos e ids) é o cliente, e o cliente em Node faz isso antes de enviar. Se o cálculo falhar, o servidor responde com um `Erro`.
 
-Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a resposta que ela devolve; o backend transforma esse JSON nos comunicados (`PedidoDeRanking` e `PedidoDeMetas`) e converte a resposta (`Ranking` e `PrioridadeDeMetas`) de volta. As tabelas de campos valem para os dois lados.
+Os blocos JSON abaixo mostram o **corpo da API Node** (`POST /api/ranking`) e a resposta que ela devolve; o backend confere esse JSON e o manda ao servidor em uma linha, com o campo `tipo` (`pedidoDeRanking` ou `pedidoDeMetas`), e converte a resposta (`ranking` ou `prioridadeDeMetas`) de volta para o formato da API. As tabelas de campos valem para os dois lados.
 
 | Comunicado | Sentido | Campos |
 | --- | --- | --- |
 | `PedidoDeRanking` | cliente → servidor | `agora`, `preferencias`, `espacos`, `tarefas`, `limite`, `alocar` |
 | `Ranking` | servidor → cliente | `porEspaco`, `semEspaco` e, com `alocar`, a `Alocacao` |
 | `PedidoDeMetas` | cliente → servidor | `agora`, `metas`, `quantidadeDeMarcos` |
-| `PrioridadeDeMetas` | servidor → cliente | `ranking`, `foco`, `diasDosMarcos` |
+| `PrioridadeDeMetas` | servidor → cliente | `ranking`, `foco`, `datasDosMarcos` |
 | `PedidoParaSair` | cliente → servidor | Encerra a conexão. |
 | `Erro` | servidor → cliente | `mensagem`. Só quando o cálculo falha: os valores fora do intervalo são recusados antes, pelo cliente em Node. A conexão continua aberta. |
 | `ComunicadoDeDesligamento` | servidor → cliente | O comando `desativar` foi dado no servidor. |
 
-Datas viajam como `DataHora` (segundos, nanossegundos e fuso). O Node converte o texto ISO-8601 em `DataHora` antes de enviar e de volta ao receber. Os marcos das metas voltam como o número do dia (`diasDosMarcos`: dias desde 1970-01-01, no fuso de `agora`) e o Node escreve o `AAAA-MM-DD`.
+Datas viajam como texto ISO-8601 com fuso (por exemplo `2026-11-12T15:00:00-03:00`), e o servidor as lê com `OffsetDateTime`. O Node confere e normaliza o texto antes de enviar e reescreve as datas da resposta no formato da API. As datas dos marcos das metas (`datasDosMarcos`) são escritas pelo servidor, no formato `AAAA-MM-DD`.
 
 ### `pedidoDeRanking` (cliente → servidor)
 
@@ -262,7 +273,7 @@ Os pesos são constantes em `CalculadoraDeRanking.java`.
 
 ## Uso a partir do Node
 
-O backend já traz o cliente pronto (`backend/src/servicos/clienteRanking.js`, com o codec de serialização em `serializacaoJava.js`):
+O backend já traz o cliente pronto (`backend/src/servicos/clienteRanking.js`):
 
 ```js
 import { pedirRanking, pedirPrioridadeDeMetas } from './servicos/clienteRanking.js';
@@ -290,15 +301,15 @@ consulta tarefas no banco: o chamador Node deve enviar esses dados no corpo da r
 O código quase não tem comentários (como o do exemplo do Fazedor de Continhas); o que não é óbvio nele fica aqui.
 
 - **Ids repetidos.** Se duas tarefas (ou metas) chegam com o mesmo `id`, vale a primeira no desempate; na alocação vale a primeira que não está concluída. Por isso `Candidato` e `NotaDeMeta` guardam o prazo e a prioridade dessa primeira.
-- **Desempate.** Os quatro `compareTo` (`DataHora`, `EspacoLivre`, `Candidato` e `NotaDeMeta`) seguem o modelo de `Data` e `Horario`: um atributo por vez, `-666` e `666`, e `0` no fim. O de `DataHora` ignora o fuso.
+- **Desempate.** Os três `compareTo` (`EspacoLivre`, `Candidato` e `NotaDeMeta`) comparam um atributo por vez e `Collections.sort` usa o resultado. Datas são comparadas pelo instante (`isBefore`, `isAfter` e `isEqual`), sem olhar o fuso.
 - **Sessões seguidas.** Sem antifadiga, a sessão seguinte da mesma tarefa é juntada à anterior: a última sessão da lista sai e entra uma estendida (a última sessão reservada é sempre a última da lista).
-- **Datas.** `DataHora` guarda segundos e nanossegundos desde 1970-01-01T00:00:00Z e o fuso em segundos. O servidor só faz conta com instantes e com o número do dia (`getDiaLocal`: dias desde 1970-01-01 no fuso da data). Escrever o AAAA-MM-DD fica com o Node, que usa o `Date` do JavaScript.
+- **Datas.** O servidor usa `OffsetDateTime` (`java.time`). O dia local é o do fuso do `agora`: `toLocalDate`, e a diferença de dias entre o prazo e hoje é `ChronoUnit.DAYS.between`.
 - **Classes sem estado.** `CalculadoraDeRanking`, `AlocadoraDeSessoes` e `CalculadoraDeMetas` não guardam nada, então várias conexões podem usá-las ao mesmo tempo.
-- **Atributos que só a serialização lê.** Várias classes de resposta (`Ranking`, `Alocacao`, `SessaoAlocada` e outras) têm atributos que nenhum método Java lê: quem os lê é o backend em Node, direto do fluxo de objetos.
+- **Pedidos sem construtor comum.** Os pedidos e os dados que chegam (`PedidoDeRanking`, `Tarefa`, `Meta`, `EspacoLivre` e `Preferencias`) têm um construtor que recebe o `ObjetoJson` já lido; as respostas escrevem o seu JSON no `toString`, e é isso que o `Parceiro.receba` envia.
 
 ## Limitações conhecidas
 
 - A alocação é gulosa: boa para uma semana de estudo, mas não busca a combinação ótima entre todas as tarefas.
 - A pausa antifadiga é fixa (10 min). As preferências `rigidez`, `repeticaoEspacada` e `ajusteDinamico` da tela de foco ainda não entram no cálculo.
 - O servidor não guarda nada: persistir as sessões aceitas é função do backend.
-- Os testes JUnit (issue #37) são da versão anterior e precisam ser adaptados. A alocação e as metas foram conferidas por scripts de pedidos fora do repositório e ainda não têm testes JUnit próprios.
+- Os testes JUnit (issue #37) são da versão anterior e precisam ser adaptados. A alocação e as metas foram conferidas comparando as respostas com as da versão anterior do servidor, com milhares de pedidos, mas ainda não têm testes JUnit próprios.

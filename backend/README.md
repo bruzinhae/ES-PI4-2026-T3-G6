@@ -43,8 +43,8 @@ O mesmo servidor entrega as páginas do `frontend/` e a API.
 Todos são opcionais para subir a API, mas algumas telas dependem deles:
 
 - **Servidor Java de ranking** (`servidor/`, porta 3000): usado por `POST /api/ranking`, por `GET /api/grade/sugestoes`
-  (Ajuste da grade e card de Disciplinas) e pelas metas da Sofia. Em `servidor/src/main/java`, rode `javac *.java` e
-  `java Servidor` (veja [servidor/README.md](../servidor/README.md)). Depois de mudar o código do servidor, recompile e reinicie.
+  (Ajuste da grade e card de Disciplinas) e pelas metas da Sofia. Em `servidor/src/main/java`, rode `javac -d out Servidor.java` e
+  `java -cp out Servidor` (veja [servidor/README.md](../servidor/README.md)). Depois de mudar o código do servidor, recompile e reinicie.
   Sem ele, a grade responde 503 e a Sofia nas metas volta a usar só o Gemini.
 - **Gemini** (`GEMINI_API_KEY`): a Sofia dos relatórios e das metas. Sem a chave, essas rotas respondem 503.
 - **SMTP**: e-mails de recuperação de senha e de confirmação de conta.
@@ -165,7 +165,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
 - Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|indigo|ciano|turquesa|verde|ambar|laranja|vermelho|rosa`; conteúdos embutidos).
   `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
-- A API Node atua como cliente do servidor Java de ranking, no mesmo protocolo do Fazedor de Continhas: o pedido e a resposta são objetos Java serializados, escritos e lidos pelo `servicos/serializacaoJava.js` (sem bibliotecas). `POST /api/ranking` só encaminha o pedido autenticado:
+- A API Node atua como cliente do servidor Java de ranking, falando texto: cada mensagem é uma linha de JSON com o campo `tipo`, montada e lida pelo `servicos/clienteRanking.js`. `POST /api/ranking` só encaminha o pedido autenticado:
   os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
   do usuário logado (o cliente não manda dados) e usa o mesmo cliente TCP com `alocar: true`.
 - **Sugestões da grade** (`modulos/grade/`): os espaços livres são, em cada dia da semana, a faixa das 07:00 às 21:00 menos os blocos
@@ -209,7 +209,7 @@ backend/
     ├── config/                    # variáveis de ambiente e conexão (compartilhado)
     ├── middlewares/               # tratamento de erros e autenticação (compartilhado)
     ├── servicos/                  # correio.js (e-mails), clienteGemini.js (Sofia), clienteRanking.js (cliente do servidor Java)
-    │                              # e serializacaoJava.js (leitura e escrita dos objetos serializados)
+    │                              # (o cliente também escreve e lê as linhas de JSON do servidor)
     ├── utils/                     # ErroApi, validações e tokens (compartilhado)
     └── modulos/
         ├── auth/                  # sessões e recuperação de senha
