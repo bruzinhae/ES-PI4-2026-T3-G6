@@ -1,18 +1,23 @@
-import java.io.*;
+import java.time.*;
 
-public class EspacoLivre implements Comparable<EspacoLivre>, Serializable
+public class EspacoLivre implements Comparable<EspacoLivre>
 {
-    private static final long serialVersionUID = 1L;
+    private String         id;
+    private OffsetDateTime inicio;
+    private OffsetDateTime fim;
 
-    private String   id;
-    private DataHora inicio;
-    private DataHora fim;
-
-    public EspacoLivre (String id, DataHora inicio, DataHora fim)
+    public EspacoLivre (String id, OffsetDateTime inicio, OffsetDateTime fim)
     {
         this.id     = id;
         this.inicio = inicio;
         this.fim    = fim;
+    }
+
+    public EspacoLivre (ObjetoJson json) throws Exception
+    {
+        this.id     = json.getTexto    ("id");
+        this.inicio = json.getDataHora ("inicio");
+        this.fim    = json.getDataHora ("fim");
     }
 
     public String getId ()
@@ -20,28 +25,27 @@ public class EspacoLivre implements Comparable<EspacoLivre>, Serializable
         return this.id;
     }
 
-    public DataHora getInicio ()
+    public OffsetDateTime getInicio ()
     {
         return this.inicio;
     }
 
-    public DataHora getFim ()
+    public OffsetDateTime getFim ()
     {
         return this.fim;
     }
 
     public int getMinutos ()
     {
-        return (int) this.inicio.minutosAte (this.fim);
+        return (int) Duration.between (this.inicio, this.fim).toMinutes ();
     }
 
     @Override
     public int compareTo (EspacoLivre esp)
     {
-        if (this.inicio.compareTo(esp.inicio)<0) return -666;
-        if (this.inicio.compareTo(esp.inicio)>0) return  666;
-        if (this.id.compareTo(esp.id)<0) return -666;
-        if (this.id.compareTo(esp.id)>0) return  666;
-        return 0;
+        if (!this.inicio.isEqual (esp.inicio))
+            return this.inicio.isBefore (esp.inicio) ? -1 : 1;
+
+        return this.id.compareTo (esp.id);
     }
 }

@@ -1,10 +1,7 @@
-import java.io.*;
 import java.util.*;
 
-public class RankingDoEspaco implements Serializable
+public class RankingDoEspaco
 {
-    private static final long serialVersionUID = 1L;
-
     private String               espacoId;
     private ArrayList<Candidato> candidatos; // do mais para o menos recomendado
 
@@ -12,5 +9,12 @@ public class RankingDoEspaco implements Serializable
     {
         this.espacoId   = espacoId;
         this.candidatos = candidatos;
+    }
+
+    @Override
+    public String toString ()
+    {
+        return "{\"espacoId\":" + EscritorDeJson.texto (this.espacoId) +
+               ",\"candidatos\":" + EscritorDeJson.lista (this.candidatos) + "}";
     }
 }

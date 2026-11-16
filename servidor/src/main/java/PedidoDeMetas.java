@@ -1,14 +1,22 @@
+import java.time.*;
 import java.util.*;
 
 public class PedidoDeMetas extends Comunicado
 {
-    private static final long serialVersionUID = 1L;
-
-    private DataHora        agora;
-    private ArrayList<Meta> metas;
+    private OffsetDateTime  agora;
+    private ArrayList<Meta> metas = new ArrayList<Meta> ();
     private int             quantidadeDeMarcos; // marcos novos a propor, de 1 a 5
 
-    public DataHora getAgora ()
+    public PedidoDeMetas (ObjetoJson json) throws Exception
+    {
+        this.agora              = json.getDataHora ("agora");
+        this.quantidadeDeMarcos = json.getInteiro ("quantidadeDeMarcos");
+
+        for (ObjetoJson meta : json.getObjetos ("metas"))
+            this.metas.add (new Meta (meta));
+    }
+
+    public OffsetDateTime getAgora ()
     {
         return this.agora;
     }
@@ -21,11 +29,5 @@ public class PedidoDeMetas extends Comunicado
     public int getQuantidadeDeMarcos ()
     {
         return this.quantidadeDeMarcos;
-    }
-
-    public String toString ()
-    {
-        return "Pedido de metas: " + this.metas.size () + " meta(s), " +
-               this.quantidadeDeMarcos + " marco(s)";
     }
 }

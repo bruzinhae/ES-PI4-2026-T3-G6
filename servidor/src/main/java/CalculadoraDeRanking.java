@@ -1,3 +1,4 @@
+import java.time.*;
 import java.util.*;
 
 public class CalculadoraDeRanking
@@ -14,7 +15,7 @@ public class CalculadoraDeRanking
     public static Ranking calcular (PedidoDeRanking pedido)
     {
         ArrayList<Tarefa> tarefas = pedido.getTarefas ();
-        DataHora agora = pedido.getAgora ();
+        OffsetDateTime agora = pedido.getAgora ();
         Preferencias preferencias = pedido.getPreferencias ();
 
         int[] primeira = CalculadoraDeRanking.indiceDaPrimeiraComOMesmoId (tarefas);
@@ -40,7 +41,7 @@ public class CalculadoraDeRanking
                     }
                 }
 
-            candidatos = new Ordenador<Candidato> ().ordene (candidatos);
+            Collections.sort (candidatos);
 
             while (candidatos.size () > pedido.getLimite ())
                 candidatos.remove (candidatos.size () - 1);
@@ -105,7 +106,7 @@ public class CalculadoraDeRanking
 
     private static Candidato avaliar
     (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco,
-     DataHora agora, Preferencias preferencias)
+     OffsetDateTime agora, Preferencias preferencias)
     {
         int necessarios = minutosNecessarios (tarefa, preferencias);
 
@@ -114,7 +115,7 @@ public class CalculadoraDeRanking
     }
 
     static Candidato avaliar
-    (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, DataHora agora,
+    (Tarefa tarefa, Tarefa referencia, EspacoLivre espaco, OffsetDateTime agora,
      Preferencias preferencias, int necessarios, int limiteDeSessao)
     {
         if (tarefa.concluida ())
@@ -124,10 +125,10 @@ public class CalculadoraDeRanking
         int noEspaco    = minutosDaSessao (necessarios, disponiveis, limiteDeSessao);
         boolean parcial = necessarios > disponiveis;
 
-        boolean atrasada = tarefa.getPrazo () != null && !tarefa.getPrazo ().depoisDe (agora);
-        DataHora fimDaSessao = espaco.getInicio ().maisMinutos (noEspaco);
+        boolean atrasada = tarefa.getPrazo () != null && !tarefa.getPrazo ().isAfter (agora);
+        OffsetDateTime fimDaSessao = espaco.getInicio ().plusMinutes (noEspaco);
 
-        if (tarefa.getPrazo () != null && !atrasada && fimDaSessao.depoisDe (tarefa.getPrazo ()))
+        if (tarefa.getPrazo () != null && !atrasada && fimDaSessao.isAfter (tarefa.getPrazo ()))
             return null; // a sessao tem de terminar antes do prazo
 
         double urgencia    = urgencia (tarefa, atrasada, necessarios, agora);
@@ -145,14 +146,14 @@ public class CalculadoraDeRanking
     }
 
     private static double urgencia
-    (Tarefa tarefa, boolean atrasada, int minutosNecessarios, DataHora agora)
+    (Tarefa tarefa, boolean atrasada, int minutosNecessarios, OffsetDateTime agora)
     {
         if (tarefa.getPrazo () == null)
             return URGENCIA_SEM_PRAZO;
         if (atrasada)
             return 1.0;
 
-        double folgaMinutos = agora.minutosAte (tarefa.getPrazo ()) - minutosNecessarios;
+        double folgaMinutos = Duration.between (agora, tarefa.getPrazo ()).toMinutes () - minutosNecessarios;
 
         if (folgaMinutos <= 0)
             return 1.0;
@@ -197,7 +198,7 @@ public class CalculadoraDeRanking
         double foco = 0.7; // neutro
         if (preferencias.isFocoMatinal () && dificil)
         {
-            int hora = espaco.getInicio ().getSegundoDoDia ();
+            int hora = espaco.getInicio ().toLocalTime ().toSecondOfDay ();
 
             foco = 0.4;
             if (dentroDaJanela (hora, preferencias.getJanelaFoco ()))

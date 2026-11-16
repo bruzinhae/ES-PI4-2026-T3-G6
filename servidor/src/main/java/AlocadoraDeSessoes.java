@@ -1,3 +1,4 @@
+import java.time.*;
 import java.util.*;
 
 public class AlocadoraDeSessoes
@@ -11,7 +12,7 @@ public class AlocadoraDeSessoes
     public static Alocacao alocar (PedidoDeRanking pedido)
     {
         Preferencias preferencias = pedido.getPreferencias ();
-        DataHora agora = pedido.getAgora ();
+        OffsetDateTime agora = pedido.getAgora ();
         int duracao = preferencias.getDuracaoMinutos ();
         int pausa = preferencias.isAntifadiga () ? PAUSA_ANTIFADIGA_MINUTOS : 0;
 
@@ -35,10 +36,10 @@ public class AlocadoraDeSessoes
         }
 
         ArrayList<EspacoLivre> espacos = new ArrayList<EspacoLivre> (pedido.getEspacos ());
-        espacos = new Ordenador<EspacoLivre> ().ordene (espacos);
+        Collections.sort (espacos);
 
         ArrayList<SessaoAlocada> sessoes = new ArrayList<SessaoAlocada> ();
-        DataHora ocupadoAte = null;
+        OffsetDateTime ocupadoAte = null;
         boolean truncada = false;
 
         for (EspacoLivre espaco : espacos)
@@ -46,16 +47,16 @@ public class AlocadoraDeSessoes
             if (truncada)
                 break;
 
-            DataHora cursor = espaco.getInicio ();
+            OffsetDateTime cursor = espaco.getInicio ();
 
-            if (ocupadoAte != null && ocupadoAte.depoisDe (cursor))
-                cursor = ocupadoAte.noFusoDe (espaco.getInicio ()); // espacos que se sobrepoem
+            if (ocupadoAte != null && ocupadoAte.isAfter (cursor))
+                cursor = ocupadoAte.withOffsetSameInstant (espaco.getInicio ().getOffset ()); // espacos que se sobrepoem
 
             int indiceDaUltima = -1; // ultima sessao reservada neste espaco
 
             for (;;)
             {
-                int disponiveis = (int) cursor.minutosAte (espaco.getFim ());
+                int disponiveis = (int) Duration.between (cursor, espaco.getFim ()).toMinutes ();
 
                 if (disponiveis < MINUTOS_MINIMOS_DO_ESPACO)
                     break;
@@ -100,10 +101,10 @@ public class AlocadoraDeSessoes
                 int faltaDepois = restante[indiceDaMelhor] - minutos;
                 restante[indiceDaMelhor] = faltaDepois;
 
-                DataHora fimDaSessao = cursor.maisMinutos (minutos);
+                OffsetDateTime fimDaSessao = cursor.plusMinutes (minutos);
                 SessaoAlocada ultima = indiceDaUltima >= 0 ? sessoes.get (indiceDaUltima) : null;
 
-                if (pausa == 0 && ultima != null && ultima.getFim ().mesmoInstante (cursor)
+                if (pausa == 0 && ultima != null && ultima.getFim ().isEqual (cursor)
                     && ultima.getTarefaId ().equals (melhor.getTarefaId ()))
                 {
                     sessoes.remove (indiceDaUltima); // a ultima sessao e sempre a ultima da lista
@@ -122,7 +123,7 @@ public class AlocadoraDeSessoes
                 }
 
                 ocupadoAte = fimDaSessao;
-                cursor = fimDaSessao.maisMinutos (pausa);
+                cursor = fimDaSessao.plusMinutes (pausa);
             }
         }
 

@@ -1,9 +1,9 @@
 import net from 'node:net';
 import { env } from '../config/env.js';
 import { ErroApi } from '../utils/ErroApi.js';
-import { EscritorJava, FaltamBytes, LeitorJava } from './serializacaoJava.js';
 
-const TAMANHO_MAXIMO = 2_000_000;
+const TAMANHO_MAXIMO = 2_000_000; // do pedido
+const TAMANHO_MAXIMO_DA_RESPOSTA = 16_000_000; // texto ocupa mais que bytes: um ranking grande passa de 2 MB
 const MAXIMO_DE_ITENS = 2000;
 const MAXIMO_DE_METAS = 200;
 const LIMITE_PADRAO = 10;
@@ -14,10 +14,10 @@ const FORMATO_DA_DATA = '2026-10-27T09:00:00-03:00';
 const FUSO_PADRAO = -3 * 3600;
 
 /**
- * Cliente do servidor Java (servidor/). Fala o protocolo do Fazedor de Continhas: o pedido e a resposta são
- * objetos Java serializados (ver serializacaoJava.js). Este arquivo transforma o pedido em JSON que o resto do
- * backend monta (datas em ISO-8601 com fuso) nos comunicados do servidor, e a resposta nos mesmos objetos
- * JSON de antes, para que as rotas e a grade não precisem saber do formato.
+ * Cliente do servidor Java (servidor/). Fala texto: cada mensagem é uma linha de JSON, com o campo "tipo" dizendo
+ * qual comunicado é. Este arquivo confere o pedido que o resto do backend monta (datas em ISO-8601 com fuso),
+ * escreve a linha para o servidor e converte a resposta nos mesmos objetos JSON de antes, para que as rotas e a
+ * grade não precisem saber do formato.
  */
 
 // ------------------------------------------------------------------------------------------- datas
@@ -100,7 +100,7 @@ export function formatarDataHora({ segundos, nanos, deslocamento }) {
   return texto;
 }
 
-const comoDataHora = (valor) => (valor ? { _c: 'DataHora', ...valor } : null);
+const comoDataHora = (valor) => (valor ? formatarDataHora(valor) : null); // o servidor lê o texto ISO-8601
 
 // ------------------------------------------------------------------------------- leitura dos campos
 
@@ -157,8 +157,6 @@ function dataHora(pedido, nome, obrigatorio) {
   return lida;
 }
 
-const comoInteger = (valor) => (valor === null ? null : { _c: 'java.lang.Integer', value: valor });
-
 // O servidor confia no que recebe (como o do Fazedor de Continhas); quem confere os intervalos é o cliente.
 function entre(valor, nome, minimo, maximo) {
   if (valor !== null && (valor < minimo || valor > maximo)) throw new ErroApi(400, `"${nome}" deve estar entre ${minimo} e ${maximo}`);
@@ -180,14 +178,13 @@ const agora = () => ({ segundos: Math.floor(Date.now() / 1000), nanos: (Date.now
 function pedidoDeRanking(pedido) {
   const quando = dataHora(pedido, 'agora', false) || agora();
 
-  let preferencias = { _c: 'Preferencias', janelaFoco: 'manha', focoMatinal: true, duracaoMinutos: 50, antifadiga: true };
+  let preferencias = { janelaFoco: 'manha', focoMatinal: true, duracaoMinutos: 50, antifadiga: true };
   if (pedido.preferencias !== undefined && pedido.preferencias !== null) {
     const p = objeto(pedido.preferencias, 'preferencias');
     const janelaFoco = texto(p, 'janelaFoco', 'manha');
     if (!JANELAS_DE_FOCO.includes(janelaFoco)) throw new ErroApi(400, '"janelaFoco" deve ser manha, tarde ou noite');
     const duracao = entre(inteiro(p, 'duracaoMinutos'), 'duracaoMinutos', 10, 240);
     preferencias = {
-      _c: 'Preferencias',
       janelaFoco,
       focoMatinal: logico(p, 'focoMatinal', true),
       duracaoMinutos: duracao === null ? 50 : duracao,
@@ -200,7 +197,7 @@ function pedidoDeRanking(pedido) {
     const inicio = dataHora(e, 'inicio', true);
     const fim = dataHora(e, 'fim', true);
     if (!depoisDe(fim, inicio)) throw new ErroApi(400, 'Em "espacos", o "fim" deve ser depois do "inicio"');
-    return { _c: 'EspacoLivre', id: idObrigatorio(texto(e, 'id')), inicio: comoDataHora(inicio), fim: comoDataHora(fim) };
+    return { id: idObrigatorio(texto(e, 'id')), inicio: comoDataHora(inicio), fim: comoDataHora(fim) };
   });
 
   const tarefas = lista(pedido, 'tarefas', MAXIMO_DE_ITENS).map((item) => {
@@ -223,22 +220,21 @@ function pedidoDeRanking(pedido) {
     const tipo = texto(t, 'tipo', 'outro');
     const minutosEstimados = entre(inteiro(t, 'minutosEstimados'), 'minutosEstimados', 15, 1440);
     return {
-      _c: 'Tarefa',
       id,
       categoria,
       tipo,
       prioridade: prioridade === null ? 5 : prioridade,
       prazo: comoDataHora(prazo),
-      minutosEstimados: comoInteger(minutosEstimados),
-      dificuldade: comoInteger(dificuldade),
-      peso: comoInteger(peso),
+      minutosEstimados,
+      dificuldade,
+      peso,
       situacao: texto(t, 'situacao', 'pendente'),
     };
   });
 
   const limite = entre(inteiro(pedido, 'limite'), 'limite', 1, 100);
   return {
-    _c: 'PedidoDeRanking',
+    tipo: 'pedidoDeRanking',
     agora: comoDataHora(quando),
     preferencias,
     espacos,
@@ -270,7 +266,6 @@ function pedidoDeMetas(pedido) {
     const progresso = entre(inteiro(m, 'progresso'), 'progresso', 0, 100);
     const prazo = dataHora(m, 'prazo', false);
     metas.push({
-      _c: 'Meta',
       id: idObrigatorio(texto(m, 'id')),
       tipo,
       prioridade,
@@ -280,7 +275,7 @@ function pedidoDeMetas(pedido) {
   }
 
   const marcos = entre(inteiro(pedido, 'quantidadeDeMarcos'), 'quantidadeDeMarcos', 1, 5);
-  return { _c: 'PedidoDeMetas', agora: comoDataHora(quando), metas, quantidadeDeMarcos: marcos === null ? MARCOS_PADRAO : marcos };
+  return { tipo: 'pedidoDeMetas', agora: comoDataHora(quando), metas, quantidadeDeMarcos: marcos === null ? MARCOS_PADRAO : marcos };
 }
 
 // ------------------------------------------------------------------------ comunicados → respostas
@@ -288,8 +283,8 @@ function pedidoDeMetas(pedido) {
 const sessao = (s) => ({
   espacoId: s.espacoId,
   tarefaId: s.tarefaId,
-  inicio: formatarDataHora(s.inicio),
-  fim: formatarDataHora(s.fim),
+  inicio: formatarDataHora(lerDataHora(s.inicio)),
+  fim: formatarDataHora(lerDataHora(s.fim)),
   minutos: s.minutos,
   minutosRestantes: s.minutosRestantes,
   nota: s.nota,
@@ -321,11 +316,6 @@ function respostaDeRanking(r) {
   return resposta;
 }
 
-const MS_POR_DIA = 24 * 60 * 60 * 1000;
-
-// O servidor devolve cada marco como o número do dia (dias desde 1970-01-01, no fuso de `agora`).
-const textoDoDia = (dia) => new Date(dia * MS_POR_DIA).toISOString().slice(0, 10);
-
 const respostaDeMetas = (r) => ({
   tipo: 'prioridadeDeMetas',
   ranking: r.ranking.map((n) => ({
@@ -335,7 +325,7 @@ const respostaDeMetas = (r) => ({
     composicao: { urgencia: n.urgencia, lacuna: n.lacuna, importancia: n.importancia },
   })),
   foco: r.foco,
-  datasDosMarcos: r.diasDosMarcos.map(textoDoDia),
+  datasDosMarcos: r.datasDosMarcos,
 });
 
 // --------------------------------------------------------------------------------------- modelos
@@ -344,7 +334,7 @@ const PEDIDO_DE_RANKING = {
   camposPermitidos: ['agora', 'preferencias', 'limite', 'alocar', 'espacos', 'tarefas'],
   descricao: 'de ranking',
   montar: pedidoDeRanking,
-  classeDaResposta: 'Ranking',
+  tipoDaResposta: 'ranking',
   converter: respostaDeRanking,
   prefixoDeErroDeCalculo: 'Nao foi possivel calcular o ranking:',
 };
@@ -353,7 +343,7 @@ const PEDIDO_DE_METAS = {
   camposPermitidos: ['agora', 'metas', 'quantidadeDeMarcos'],
   descricao: 'de metas',
   montar: pedidoDeMetas,
-  classeDaResposta: 'PrioridadeDeMetas',
+  tipoDaResposta: 'prioridadeDeMetas',
   converter: respostaDeMetas,
   prefixoDeErroDeCalculo: 'Nao foi possivel priorizar as metas:',
 };
@@ -378,11 +368,8 @@ function montarMensagem(pedido, modelo) {
 
   const comunicado = modelo.montar(pedido);
 
-  const escritor = new EscritorJava();
-  escritor.cabecalho();
-  escritor.objeto(comunicado);
-  escritor.objeto({ _c: 'PedidoParaSair' }); // depois da resposta o servidor fecha a conexão
-  return escritor.buffer();
+  // Uma linha por comunicado. Depois da resposta, o pedido para sair faz o servidor fechar a conexão.
+  return `${JSON.stringify(comunicado)}\n${JSON.stringify({ tipo: 'pedidoParaSair' })}\n`;
 }
 
 /**
@@ -391,13 +378,14 @@ function montarMensagem(pedido, modelo) {
  */
 async function enviarPedido(pedido, modelo, configuracao) {
   const mensagem = montarMensagem(pedido, modelo);
-  if (mensagem.length > TAMANHO_MAXIMO) {
+  if (Buffer.byteLength(mensagem) > TAMANHO_MAXIMO) {
     throw new ErroApi(413, 'O pedido de ranking excede o limite de 2 MB.');
   }
 
   return new Promise((resolve, reject) => {
     const socket = net.createConnection({ host: configuracao.host, port: configuracao.port });
-    let recebido = Buffer.alloc(0);
+    socket.setEncoding('utf8');
+    let recebido = '';
     let finalizado = false;
 
     function encerrar(erro, resultado) {
@@ -419,24 +407,24 @@ async function enviarPedido(pedido, modelo, configuracao) {
     });
 
     socket.on('data', (parte) => {
-      recebido = Buffer.concat([recebido, parte]);
-      if (recebido.length > TAMANHO_MAXIMO) {
-        encerrar(new ErroApi(502, 'A resposta do servidor Java de ranking excede o limite de 2 MB.'));
+      recebido += parte;
+      if (recebido.length > TAMANHO_MAXIMO_DA_RESPOSTA) {
+        encerrar(new ErroApi(502, 'A resposta do servidor Java de ranking excede o limite de 16 MB.'));
         return;
       }
 
+      const fim = recebido.indexOf('\n');
+      if (fim === -1) return; // a resposta ainda não chegou inteira
+
       let resposta;
       try {
-        const leitor = new LeitorJava(recebido);
-        if (!leitor.cabecalho()) return;
-        resposta = leitor.objeto();
-      } catch (erro) {
-        if (erro instanceof FaltamBytes) return; // a resposta ainda não chegou inteira
+        resposta = JSON.parse(recebido.slice(0, fim));
+      } catch {
         encerrar(new ErroApi(502, 'O servidor Java de ranking devolveu uma resposta inválida.'));
         return;
       }
 
-      if (resposta?._c === 'Erro') {
+      if (resposta?.tipo === 'erro') {
         const erroDeCalculo = typeof resposta.mensagem === 'string' && resposta.mensagem.startsWith(modelo.prefixoDeErroDeCalculo);
         encerrar(new ErroApi(
           erroDeCalculo ? 502 : 400,
@@ -444,7 +432,7 @@ async function enviarPedido(pedido, modelo, configuracao) {
         ));
         return;
       }
-      if (resposta?._c !== modelo.classeDaResposta) {
+      if (resposta?.tipo !== modelo.tipoDaResposta) {
         encerrar(new ErroApi(502, 'O servidor Java devolveu um tipo de resposta inesperado.'));
         return;
       }

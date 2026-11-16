@@ -1,7 +1,5 @@
 public class Erro extends Comunicado
 {
-    private static final long serialVersionUID = 1L;
-
     private String mensagem;
 
     public Erro (String mensagem)
@@ -9,8 +7,9 @@ public class Erro extends Comunicado
         this.mensagem = mensagem;
     }
 
+    @Override
     public String toString ()
     {
-        return this.mensagem;
+        return "{\"tipo\":\"erro\",\"mensagem\":" + EscritorDeJson.texto (this.mensagem) + "}";
     }
 }

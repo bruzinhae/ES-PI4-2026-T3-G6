@@ -1,21 +1,20 @@
 import java.io.*;
 import java.net.*;
-import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class Parceiro
 {
-    private Socket             conexao;
-    private ObjectInputStream  receptor;
-    private ObjectOutputStream transmissor;
-    
+    private Socket         conexao;
+    private BufferedReader receptor;
+    private PrintWriter    transmissor;
+
     private Comunicado proximoComunicado=null;
 
     private Semaphore mutEx = new Semaphore (1,true);
 
-    public Parceiro (Socket             conexao,
-                     ObjectInputStream  receptor,
-                     ObjectOutputStream transmissor)
+    public Parceiro (Socket         conexao,
+                     BufferedReader receptor,
+                     PrintWriter    transmissor)
                      throws Exception // se parametro nulos
     {
         if (conexao==null)
@@ -34,15 +33,11 @@ public class Parceiro
 
     public void receba (Comunicado x) throws Exception
     {
-        try
-        {
-            this.transmissor.writeObject (x);
-            this.transmissor.flush       ();
-        }
-        catch (IOException erro)
-        {
+        this.transmissor.println (x); // o toString de cada comunicado e o seu JSON
+        this.transmissor.flush   ();
+
+        if (this.transmissor.checkError ())
             throw new Exception ("Erro de transmissao");
-        }
     }
 
     public Comunicado espie () throws Exception
@@ -50,7 +45,7 @@ public class Parceiro
         try
         {
             this.mutEx.acquireUninterruptibly();
-            if (this.proximoComunicado==null) this.proximoComunicado = (Comunicado)this.receptor.readObject();
+            if (this.proximoComunicado==null) this.proximoComunicado = this.leComunicado ();
             this.mutEx.release();
             return this.proximoComunicado;
         }
@@ -64,7 +59,7 @@ public class Parceiro
     {
         try
         {
-            if (this.proximoComunicado==null) this.proximoComunicado = (Comunicado)this.receptor.readObject();
+            if (this.proximoComunicado==null) this.proximoComunicado = this.leComunicado ();
             Comunicado ret         = this.proximoComunicado;
             this.proximoComunicado = null;
             return ret;
@@ -87,5 +82,27 @@ public class Parceiro
         {
             throw new Exception ("Erro de desconexao");
         }
+    }
+
+    private Comunicado leComunicado () throws Exception // uma linha de texto = um comunicado em JSON
+    {
+        String linha = this.receptor.readLine ();
+
+        if (linha==null)
+            return null; // o parceiro fechou a conexao
+
+        ObjetoJson json = new LeitorDeJson (linha).leObjeto ();
+        String     tipo = json.getTexto ("tipo");
+
+        if (tipo.equals ("pedidoDeRanking"))
+            return new PedidoDeRanking (json);
+
+        if (tipo.equals ("pedidoDeMetas"))
+            return new PedidoDeMetas (json);
+
+        if (tipo.equals ("pedidoParaSair"))
+            return new PedidoParaSair ();
+
+        throw new Exception ("Tipo de comunicado desconhecido: " + tipo);
     }
 }
