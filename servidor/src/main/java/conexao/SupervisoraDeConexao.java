@@ -1,3 +1,7 @@
+package conexao;
+
+import calculo.*;
+import comunicado.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;

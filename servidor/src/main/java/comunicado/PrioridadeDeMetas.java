@@ -1,3 +1,7 @@
+package comunicado;
+
+import json.*;
+import modelo.*;
 import java.util.*;
 
 public class PrioridadeDeMetas extends Comunicado

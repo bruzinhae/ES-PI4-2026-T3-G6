@@ -1,3 +1,7 @@
+package modelo;
+
+import json.*;
+
 public class TarefaSemEspaco
 {
     private String tarefaId;

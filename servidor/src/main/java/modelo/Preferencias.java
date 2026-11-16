@@ -1,3 +1,7 @@
+package modelo;
+
+import json.*;
+
 public class Preferencias
 {
     private String  janelaFoco;     // manha, tarde ou noite

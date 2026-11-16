@@ -1,3 +1,5 @@
+import comunicado.*;
+import conexao.*;
 import java.util.*;
 
 public class Servidor

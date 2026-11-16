@@ -1,3 +1,7 @@
+package comunicado;
+
+import json.*;
+
 public class Erro extends Comunicado
 {
     private String mensagem;
