@@ -1,3 +1,6 @@
+package modelo;
+
+import json.*;
 import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
@@ -42,9 +45,12 @@ class TarefaTest
     }
 
     private static Tarefa tarefaComSituacao (String situacao)
-    throws ReflectiveOperationException
+    throws Exception
     {
-        Tarefa tarefa = new Tarefa ();
+        String json = "{\"id\":\"t\",\"categoria\":\"estudos\",\"tipo\":\"outro\"," +
+                      "\"prioridade\":5,\"situacao\":\"pendente\"}";
+        Tarefa tarefa = new Tarefa (new LeitorDeJson (json).leObjeto ());
+
         Field atributo = Tarefa.class.getDeclaredField ("situacao");
         atributo.setAccessible (true);
         atributo.set (tarefa, situacao);

@@ -1,3 +1,5 @@
+package modelo;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -54,12 +56,8 @@ class EspacoLivreTest
         assertEquals (0, espaco.getMinutos ());
     }
 
-    private static DataHora dataHora (String texto)
+    private static OffsetDateTime dataHora (String texto)
     {
-        OffsetDateTime data = OffsetDateTime.parse (texto);
-        return new DataHora (
-            data.toEpochSecond (),
-            data.getNano (),
-            data.getOffset ().getTotalSeconds ());
+        return OffsetDateTime.parse (texto);
     }
 }
