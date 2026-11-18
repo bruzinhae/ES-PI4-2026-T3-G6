@@ -120,12 +120,12 @@ function atualizarResumo() {
 
     resumoJanela.textContent = janela.rotulo;
     resumoDuracao.textContent = `${duracao} min`;
-    resumoPausa.textContent = `A cada ${duracao} min`;
+    resumoPausa.textContent = estado.antifadiga ? 'Pausa de 10 min entre sessões' : 'Sem pausa automática';
     resumoRigidez.textContent = rigidezRotulo[estado.rigidez];
-    metaAntifadiga.textContent = `Limite contínuo: ${Math.max(duracao, 90)} min`;
+    metaAntifadiga.textContent = estado.antifadiga ? 'Pausa de 10 min entre sessões' : 'Proteção desligada';
 
     const regras = [];
-    if (estado.antifadiga) regras.push('limita blocos contínuos');
+    if (estado.antifadiga) regras.push('pausa 10 min entre sessões');
     if (estado.repeticao) regras.push('reserva revisões espaçadas');
     if (estado.dinamico) regras.push('recalcula a semana quando algo muda');
 

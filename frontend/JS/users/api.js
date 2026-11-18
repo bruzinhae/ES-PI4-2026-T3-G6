@@ -180,6 +180,29 @@ const AcaiApi = (function () {
         return usuario;
     }
 
+    async function exportarUsuario(id) {
+        return requisitar(`/usuarios/${id}/exportar`);
+    }
+
+    async function listarSessoesAuth() {
+        const { sessoes } = await requisitar('/auth/sessoes');
+        return sessoes;
+    }
+
+    async function encerrarOutrasSessoes() {
+        return requisitar('/auth/sessoes/encerrar-outras', { metodo: 'POST' });
+    }
+
+    async function listarPlanosIa() {
+        const { planos } = await requisitar('/planos-ia');
+        return planos;
+    }
+
+    async function decidirPlanoIa(id, situacao) {
+        const { plano } = await requisitar(`/planos-ia/${id}/decidir`, { metodo: 'POST', corpo: { situacao } });
+        return plano;
+    }
+
     async function excluirUsuario(id) {
         await requisitar(`/usuarios/${id}`, { metodo: 'DELETE' });
 
@@ -305,9 +328,12 @@ const AcaiApi = (function () {
         return requisitar(`/relatorios/sofia/conversa${consulta}`);
     }
 
-    function abrirConversaSofia(inicio) {
-        const consulta = inicio ? `?inicio=${encodeURIComponent(inicio)}` : '';
-        return requisitar(`/relatorios/sofia/conversa/abrir${consulta}`, { metodo: 'POST' });
+    function abrirConversaSofia(inicio, atualizar = false) {
+        const consulta = new URLSearchParams();
+        if (inicio) consulta.set('inicio', inicio);
+        if (atualizar) consulta.set('atualizar', '1');
+        const sufixo = consulta.toString() ? `?${consulta}` : '';
+        return requisitar(`/relatorios/sofia/conversa/abrir${sufixo}`, { metodo: 'POST' });
     }
 
     function enviarConversaSofia(inicio, texto) {
@@ -498,6 +524,11 @@ const AcaiApi = (function () {
         listarUsuarios,
         obterUsuario,
         atualizarUsuario,
+        exportarUsuario,
+        listarSessoesAuth,
+        encerrarOutrasSessoes,
+        listarPlanosIa,
+        decidirPlanoIa,
         excluirUsuario,
         listarBlocosFixos,
         criarBlocoFixo,

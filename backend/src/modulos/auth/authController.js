@@ -8,7 +8,10 @@ import { apresentarUsuario } from '../usuarios/apresentarUsuario.js';
 
 // POST /api/auth/login — devolve o usuário e o token da nova sessão.
 export async function entrar(req, res) {
-    const { usuario, token, expiraEm } = await authService.entrar(req.body);
+    const { usuario, token, expiraEm } = await authService.entrar({
+        ...req.body,
+        agente: req.get('user-agent'),
+    });
     res.json({ usuario: apresentarUsuario(req, usuario), token, expiraEm });
 }
 
@@ -52,6 +55,24 @@ export async function reenviarConfirmacao(req, res) {
             ? 'Este e-mail já está confirmado.'
             : 'Enviamos outro e-mail para confirmar sua conta.',
     });
+}
+
+export async function listarSessoes(req, res) {
+    const sessoes = await authService.listarSessoes(req.usuario._id);
+    res.json({
+        sessoes: sessoes.map((sessao) => ({
+            id: sessao.id,
+            atual: sessao.id === req.sessao.id,
+            criadaEm: sessao.criadoEm,
+            expiraEm: sessao.expiraEm,
+            agente: sessao.agente || 'Dispositivo',
+        })),
+    });
+}
+
+export async function encerrarOutras(req, res) {
+    await authService.encerrarSessoesDoUsuario(req.usuario._id, req.sessao.id);
+    res.json({ mensagem: 'As outras sessões foram encerradas.' });
 }
 
 // POST /api/auth/logout — encerra a sessão usada na requisição. 204 = sem corpo.

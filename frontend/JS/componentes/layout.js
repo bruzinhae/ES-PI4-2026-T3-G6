@@ -23,7 +23,7 @@ const NAV_LATERAL = [
         id: 'metas',
         href: 'index_metas.html',
         icone: 'nav-metas.svg',
-        rotulo: 'Tarefas & Metas',
+        rotulo: 'Metas',
         largura: 13.5,
         altura: 13.5,
     },
@@ -177,8 +177,8 @@ function renderHeader({ paginaAtiva, pastaIcones, mostrarAlternador }) {
                     <nav class="lista-perfil">
                         <a href="index_perfil.html">Meu perfil</a>
                         <a href="index_configuracoes.html">Configurações</a>
-                        <a href="#">Assinatura</a>
-                        <a href="#">Ajuda</a>
+                        <a href="index_assinatura.html">Assinatura</a>
+                        <a href="index_ajuda.html">Ajuda</a>
                     </nav>
 
                     <a href="index_login.html" class="botao-sair">Sair da conta</a>
@@ -243,6 +243,11 @@ ${navegacao}
                 <label>Pausa <input id="pomodoro-pausa" type="number" min="1" max="60" value="5"> min</label>
                 <label>Pausa longa <input id="pomodoro-pausa-longa" type="number" min="1" max="60" value="15"> min</label>
                 <label>Ciclos <input id="pomodoro-ciclos" type="number" min="2" max="8" value="4"></label>
+                <label>Matéria
+                    <select id="pomodoro-disciplina">
+                        <option value="">Sem matéria</option>
+                    </select>
+                </label>
                 <button type="submit">Salvar</button>
             </form>
 
@@ -420,13 +425,13 @@ function renderizarDisciplinasLaterais(disciplinas = []) {
             ? `${disciplina.horasSemanais}h`
             : '';
         return `
-                <div class="disciplina" title="${nome}${horas ? ` • ${horas}` : ''}">
+                <button type="button" class="disciplina" data-disciplina="${escaparHtml(disciplina.id)}" title="${nome}${horas ? ` • ${horas}` : ''}">
                     <div>
                         <span class="ponto-disciplina" style="background: ${cor}"></span>
                         <span>${nome}</span>
                     </div>
                     <span class="horas">${escaparHtml(horas)}</span>
-                </div>`;
+                </button>`;
     }).join('\n');
 }
 
@@ -526,6 +531,16 @@ async function carregarCabecalho() {
 }
 
 async function carregarDisciplinasLaterais() {
+    const lista = document.getElementById('lista-disciplinas-laterais');
+    if (lista && !lista.dataset.foco) {
+        lista.dataset.foco = '1';
+        lista.addEventListener('click', (evento) => {
+            const botao = evento.target.closest('[data-disciplina]');
+            const seletor = document.getElementById('pomodoro-disciplina');
+            if (!botao || !seletor) return;
+            seletor.value = botao.dataset.disciplina;
+        });
+    }
     if (typeof AcaiApi === 'undefined' || !AcaiApi.temUsuarioAtual?.()) {
         renderizarDisciplinasLaterais([]);
         return;
@@ -534,6 +549,14 @@ async function carregarDisciplinasLaterais() {
     try {
         const disciplinas = await AcaiApi.listarDisciplinas({ situacao: 'ativa' });
         renderizarDisciplinasLaterais(disciplinas);
+        const seletor = document.getElementById('pomodoro-disciplina');
+        if (seletor) {
+            const atual = seletor.value;
+            seletor.innerHTML = '<option value="">Sem matéria</option>' + disciplinas.map((disciplina) => (
+                `<option value="${escaparHtml(disciplina.id)}">${escaparHtml(disciplina.nome)}</option>`
+            )).join('');
+            if (atual) seletor.value = atual;
+        }
     } catch {
         renderizarDisciplinasLaterais([]);
     }
@@ -601,6 +624,7 @@ function guardarFoco(minutos, completo) {
         minutos: inteiro,
         completo: Boolean(completo),
         fim: new Date().toISOString(),
+        disciplinaId: document.getElementById('pomodoro-disciplina')?.value || null,
     });
     localStorage.setItem(CHAVE_FOCOS_PENDENTES, JSON.stringify(pendentes.slice(-20)));
     enviarFocosPendentes();

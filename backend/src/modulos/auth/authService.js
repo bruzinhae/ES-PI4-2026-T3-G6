@@ -30,10 +30,11 @@ const HASH_FALSO = bcrypt.hashSync('senha-que-nunca-sera-usada', 10);
  * Cria uma sessão para o usuário e devolve o token (texto) e a data de expiração.
  * O token só existe aqui; no banco fica apenas o hash dele.
  */
-export async function criarSessao(usuarioId) {
+export async function criarSessao(usuarioId, agente = null) {
     const token = gerarToken();
     const expiraEm = new Date(Date.now() + DURACAO_SESSAO_MS);
-    await Sessao.create({ _id: hashDoToken(token), usuarioId, expiraEm });
+    const descricao = typeof agente === 'string' ? agente.slice(0, 300) : null;
+    await Sessao.create({ _id: hashDoToken(token), usuarioId, expiraEm, agente: descricao });
     return { token, expiraEm };
 }
 
@@ -42,7 +43,7 @@ export async function criarSessao(usuarioId) {
  * E-mail sem conta, conta só do Google (sem hashSenha) e senha errada respondem o MESMO
  * 401, para não revelar quais e-mails estão cadastrados.
  */
-export async function entrar({ email, senha } = {}) {
+export async function entrar({ email, senha, agente } = {}) {
     const usuario = typeof email === 'string'
         ? await Usuario.findOne({ emailNormalizado: normalizarEmail(email) })
         : null;
@@ -55,7 +56,7 @@ export async function entrar({ email, senha } = {}) {
         throw new ErroApi(401, MENSAGEM_LOGIN_INVALIDO);
     }
 
-    const { token, expiraEm } = await criarSessao(usuario._id);
+    const { token, expiraEm } = await criarSessao(usuario._id, agente);
     return { usuario, token, expiraEm };
 }
 
@@ -85,6 +86,10 @@ export async function encerrarSessao(sessaoId) {
  * Apaga todas as sessões de um usuário. `manterSessaoId` preserva uma delas: usado quando
  * a senha muda (encerra os outros dispositivos, mas não derruba quem acabou de trocar).
  */
+export async function listarSessoes(usuarioId) {
+    return Sessao.find({ usuarioId, expiraEm: { $gt: new Date() } }).sort({ criadoEm: -1 });
+}
+
 export async function encerrarSessoesDoUsuario(usuarioId, manterSessaoId = null) {
     await Sessao.deleteMany({
         usuarioId,

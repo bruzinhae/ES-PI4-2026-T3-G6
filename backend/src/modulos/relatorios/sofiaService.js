@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto';
 import { env } from '../../config/env.js';
 import { gerarJson } from '../../servicos/clienteGemini.js';
 import { ErroApi } from '../../utils/ErroApi.js';
+import { minutosDoDia as minutosNoFuso } from '../../utils/fuso.js';
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { CONFIGURACAO_PADRAO } from '../configuracoes/configuracaoService.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
@@ -80,7 +81,8 @@ function hora(minutos) {
 }
 
 function minutosDoDia(data) {
-    return data.getHours() * 60 + data.getMinutes();
+    if (!data) return 0;
+    return minutosNoFuso(data instanceof Date ? data.getTime() : data);
 }
 
 function dataHora(data) {
@@ -406,23 +408,31 @@ export async function listarConversa(usuarioId, inicioQuery) {
     return apresentarConversa(conversa, chaveData(inicio));
 }
 
-export async function abrirConversa(usuarioId, inicioQuery) {
+export async function abrirConversa(usuarioId, inicioQuery, atualizar = false) {
     const inicio = resolverInicio(inicioQuery);
     const chave = chaveData(inicio);
     let conversa = await buscarConversa(usuarioId, inicio);
 
-    if (!conversa) {
+    const analiseNova = async () => {
         const analise = await obterSugestoes(usuarioId, chave);
+        return textoAbertura(analise);
+    };
+
+    if (!conversa) {
         try {
             conversa = await ConversaSofia.create({
                 usuarioId,
                 inicioSemana: chave,
-                mensagens: [{ papel: 'sofia', texto: textoAbertura(analise) }],
+                mensagens: [{ papel: 'sofia', texto: await analiseNova() }],
             });
         } catch (erro) {
             if (erro?.code !== 11000) throw erro;
             conversa = await buscarConversa(usuarioId, inicio);
         }
+    } else if (atualizar && conversa.mensagens[0]) {
+        conversa.mensagens[0].texto = await analiseNova();
+        conversa.markModified('mensagens');
+        await conversa.save();
     }
 
     return apresentarConversa(conversa, chave);

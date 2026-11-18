@@ -12,6 +12,7 @@ public class AlocadoraDeSessoes
     public static final int MAXIMO_DE_SESSOES = 2000; // por pedido; ao chegar aqui marca truncada
 
     private static final int MINUTOS_MINIMOS_DO_ESPACO = 15;
+    private static final int DURACAO_MAXIMA_MINUTOS = 480;
 
     public static Alocacao alocar (PedidoDeRanking pedido)
     {
@@ -109,7 +110,8 @@ public class AlocadoraDeSessoes
                 SessaoAlocada ultima = indiceDaUltima >= 0 ? sessoes.get (indiceDaUltima) : null;
 
                 if (pausa == 0 && ultima != null && ultima.getFim ().isEqual (cursor)
-                    && ultima.getTarefaId ().equals (melhor.getTarefaId ()))
+                    && ultima.getTarefaId ().equals (melhor.getTarefaId ())
+                    && ultima.getMinutos () + minutos <= DURACAO_MAXIMA_MINUTOS)
                 {
                     sessoes.remove (indiceDaUltima); // a ultima sessao e sempre a ultima da lista
                     sessoes.add (ultima.estendida (minutos, faltaDepois));

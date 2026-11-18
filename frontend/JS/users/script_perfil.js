@@ -192,7 +192,7 @@ document.getElementById('botao-remover-foto')?.addEventListener('click', async (
 document.getElementById('botao-excluir-conta')?.addEventListener('click', async () => {
     const confirmado = await AcaiAvisos.confirmar({
         titulo: 'Excluir conta',
-        texto: 'A conta, as disciplinas e as metas saem de vez. Essa ação não pode ser desfeita.',
+        texto: 'A conta, as disciplinas, as tarefas, as metas, as sessões e as conversas saem de vez. Essa ação não pode ser desfeita.',
         confirmar: 'Excluir conta',
     });
 
@@ -219,6 +219,106 @@ document.getElementById('reenviar-confirmacao')?.addEventListener('click', async
         AcaiAvisos.mostrar(erro.message);
     } finally {
         botao.disabled = false;
+    }
+});
+
+function textoQuando(data) {
+    if (!data) return 'Ainda não houve troca de senha nesta conta.';
+    const dias = Math.floor((Date.now() - new Date(data).getTime()) / 86400000);
+    if (dias <= 0) return 'Senha alterada hoje.';
+    if (dias === 1) return 'Senha alterada ontem.';
+    return `Senha alterada há ${dias} dias.`;
+}
+
+async function carregarSeguranca(usuario) {
+    const textoSenha = document.getElementById('texto-senha');
+    if (textoSenha) textoSenha.textContent = textoQuando(usuario.senhaAlteradaEm);
+    try {
+        const sessoes = await AcaiApi.listarSessoesAuth();
+        const atual = sessoes.find((item) => item.atual);
+        const outras = sessoes.length - (atual ? 1 : 0);
+        const agente = atual?.agente ? atual.agente.split(') ')[0].slice(0, 80) : 'Este navegador';
+        document.getElementById('texto-sessoes').textContent = outras
+            ? `${agente} • sessão atual, mais ${outras} ${outras === 1 ? 'dispositivo' : 'dispositivos'}`
+            : `${agente} • única sessão ativa`;
+    } catch {
+        document.getElementById('texto-sessoes').textContent = 'Não foi possível listar as sessões.';
+    }
+    try {
+        const [disciplinas, planos] = await Promise.all([
+            AcaiApi.listarDisciplinas({ situacao: 'ativa' }),
+            AcaiApi.listarPlanosIa(),
+        ]);
+        document.getElementById('uso-disciplinas').textContent = String(disciplinas.length);
+        const mes = new Date().getMonth();
+        const doMes = planos.filter((plano) => new Date(plano.criadoEm).getMonth() === mes).length;
+        document.getElementById('uso-ia').textContent = `${doMes} neste mês`;
+    } catch {
+        document.getElementById('uso-disciplinas').textContent = '—';
+    }
+}
+
+const originalPreencher = preencherTela;
+preencherTela = function preencherComSeguranca(usuario) {
+    originalPreencher(usuario);
+    carregarSeguranca(usuario);
+};
+
+const formSenha = document.getElementById('form-senha');
+document.getElementById('botao-alterar-senha')?.addEventListener('click', () => {
+    formSenha.hidden = false;
+});
+document.getElementById('cancelar-senha')?.addEventListener('click', () => {
+    formSenha.reset();
+    formSenha.hidden = true;
+});
+formSenha?.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const erro = document.getElementById('erro-senha');
+    const dados = new FormData(formSenha);
+    if (dados.get('senha') !== dados.get('confirmacao')) {
+        erro.hidden = false;
+        erro.textContent = 'A confirmação não confere com a nova senha.';
+        return;
+    }
+    try {
+        const usuario = await AcaiApi.atualizarUsuarioAtual({
+            senhaAtual: dados.get('senhaAtual'),
+            senha: dados.get('senha'),
+        });
+        preencherTela(usuario);
+        formSenha.reset();
+        formSenha.hidden = true;
+        erro.hidden = true;
+        AcaiAvisos.mostrar('Senha alterada. As outras sessões foram encerradas.', 'ok');
+    } catch (falha) {
+        erro.hidden = false;
+        erro.textContent = falha.message;
+    }
+});
+
+document.getElementById('botao-encerrar-sessoes')?.addEventListener('click', async () => {
+    try {
+        await AcaiApi.encerrarOutrasSessoes();
+        if (usuarioAtual) await carregarSeguranca(usuarioAtual);
+        AcaiAvisos.mostrar('As outras sessões foram encerradas.', 'ok');
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message);
+    }
+});
+
+document.getElementById('botao-exportar-dados')?.addEventListener('click', async () => {
+    try {
+        const dados = await AcaiApi.exportarUsuario(usuarioAtual.id);
+        const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'acaistudy-dados.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    } catch (erro) {
+        AcaiAvisos.mostrar(erro.message);
     }
 });
 

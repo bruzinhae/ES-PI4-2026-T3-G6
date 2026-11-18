@@ -22,3 +22,9 @@ export function minutosDaSemana(blocos = []) {
         soma + (Number(bloco.duracaoMinutos) || 0) * (bloco.diasSemana?.length || 0) / (intervalo[bloco.recorrencia] || 1)
     ), 0);
 }
+
+// Horas que contam para a meta de estudo: aulas e blocos ligados a uma disciplina.
+// Sono, trabalho, translado e o resto da rotina pessoal ficam de fora.
+export function minutosDeEstudo(blocos = []) {
+    return minutosDaSemana(blocos.filter((bloco) => bloco.categoria === 'aulas' || bloco.disciplinaId));
+}

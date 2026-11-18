@@ -42,6 +42,11 @@ public class SessaoAlocada
         return this.fim;
     }
 
+    public int getMinutos ()
+    {
+        return this.minutos;
+    }
+
     public SessaoAlocada estendida (int minutosExtras, int novosMinutosRestantes)
     {
         OffsetDateTime novoFim = this.fim.plusMinutes (minutosExtras);

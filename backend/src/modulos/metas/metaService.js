@@ -5,6 +5,7 @@
 
 import mongoose from 'mongoose';
 import { ErroApi } from '../../utils/ErroApi.js';
+import { DIA, chaveDoDia, inicioDaSemana as inicioSemanaMs, inicioDoDia as inicioDiaMs, instanteLocal } from '../../utils/fuso.js';
 import { selecionarCampos } from '../../utils/validacoes.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
@@ -23,24 +24,37 @@ function limparVazio(valor) {
 }
 
 function inicioDoDia(data) {
-    return new Date(data.getFullYear(), data.getMonth(), data.getDate());
+    return new Date(inicioDiaMs(data.getTime()));
 }
 
 function inicioDaSemana(data) {
-    const inicio = inicioDoDia(data);
-    inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
-    return inicio;
+    return new Date(inicioSemanaMs(data.getTime()));
 }
 
 function somarDias(data, dias) {
-    const copia = new Date(data);
-    copia.setDate(copia.getDate() + dias);
-    return copia;
+    return new Date(data.getTime() + dias * DIA);
 }
 
 function diferencaDias(agora, prazo) {
     const ms = inicioDoDia(prazo).getTime() - inicioDoDia(agora).getTime();
-    return Math.round(ms / 86400000);
+    return Math.round(ms / DIA);
+}
+
+// 1º semestre encerra em 15/07; 2º semestre, em 15/12. Não usa o prazo mais distante das metas.
+function fimDoSemestre(agora) {
+    const [ano, mes, dia] = chaveDoDia(agora.getTime()).split('-').map(Number);
+    let alvoAno = ano;
+    let alvoMes = 7;
+    let alvoDia = 15;
+    if (mes > 7 || (mes === 7 && dia > 15)) {
+        if (mes > 12 || (mes === 12 && dia > 15)) {
+            alvoAno += 1;
+        } else {
+            alvoMes = 12;
+        }
+    }
+    const chave = `${alvoAno}-${String(alvoMes).padStart(2, '0')}-${String(alvoDia).padStart(2, '0')}`;
+    return new Date(instanteLocal(chave));
 }
 
 function lerData(valor, rotulo) {
@@ -368,13 +382,7 @@ function montarPainel(metas, contexto) {
         ? Math.round((contexto.cumpridas / contexto.previstas) * 100)
         : 0;
 
-    const fim = relevantes.reduce((maior, meta) => {
-        if (!meta.prazo) {
-            return maior;
-        }
-        const instante = new Date(meta.prazo).getTime();
-        return instante > maior ? instante : maior;
-    }, 0);
+    const fimSemestre = fimDoSemestre(contexto.agora);
 
     const proxima = ativas
         .filter((meta) => meta.diasParaPrazo !== null)
@@ -436,7 +444,7 @@ function montarPainel(metas, contexto) {
                 : 'Nenhuma sessão de estudo encerrada nesta semana.',
         },
         prazo: {
-            diasRestantes: fim ? diferencaDias(contexto.agora, new Date(fim)) : null,
+            diasRestantes: diferencaDias(contexto.agora, fimSemestre),
             nota: notaProxima,
         },
         previsao: {

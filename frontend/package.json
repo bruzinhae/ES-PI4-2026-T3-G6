@@ -1,0 +1,10 @@
+{
+  "name": "acaistudy-frontend",
+  "private": true,
+  "scripts": {
+    "test": "jest --testEnvironment=node JS/script_metas.test.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

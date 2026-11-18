@@ -71,7 +71,15 @@ export function tratarErros(erro, _req, res, _next) {
     //    checagem — aí é o próprio banco que barra a segunda, e caímos aqui.
     //    Status 409 = Conflict.
     if (erro?.code === 11000) {
-        return res.status(409).json({ mensagem: 'Já existe uma conta com este e-mail.' });
+        const campo = Object.keys(erro.keyPattern || erro.keyValue || {})[0] || '';
+        const mensagens = {
+            emailNormalizado: 'Já existe uma conta com este e-mail.',
+            idExterno: 'Este item do Canvas já foi importado.',
+            inicioSemana: 'Já existe um registro para esta semana.',
+        };
+        return res.status(409).json({
+            mensagem: mensagens[campo] || 'Já existe um registro com estes dados.',
+        });
     }
 
     // 5) JSON malformado no corpo da requisição (ex.: vírgula sobrando).

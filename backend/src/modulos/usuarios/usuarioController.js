@@ -23,7 +23,7 @@ import { apresentarUsuario, apresentarUsuarios } from './apresentarUsuario.js';
 // 201 = Created (recurso criado com sucesso).
 export async function criar(req, res) {
     const usuario = await usuarioService.criar(req.body);
-    const { token, expiraEm } = await authService.criarSessao(usuario._id);
+    const { token, expiraEm } = await authService.criarSessao(usuario._id, req.get('user-agent'));
     const { enviada } = await authService.solicitarConfirmacaoEmail(usuario);
     res.status(201).json({
         usuario: apresentarUsuario(req, usuario),
@@ -33,9 +33,9 @@ export async function criar(req, res) {
     });
 }
 
-// GET /api/usuarios — devolve todos os usuários (o status padrão já é 200 = OK).
+// GET /api/usuarios — só a conta da sessão. Não lista as outras.
 export async function listar(req, res) {
-    const usuarios = await usuarioService.listar();
+    const usuarios = usuarioService.listarProprio(req.usuario);
     res.json({ usuarios: apresentarUsuarios(req, usuarios) });
 }
 
@@ -72,6 +72,12 @@ export async function definirAvatar(req, res) {
 export async function removerAvatar(req, res) {
     const usuario = await usuarioService.removerAvatar(req.params.id);
     res.json({ usuario: apresentarUsuario(req, usuario) });
+}
+
+// GET /api/usuarios/:id/exportar — JSON da conta, sem senha nem tokens.
+export async function exportar(req, res) {
+    const dados = await usuarioService.exportar(req.params.id);
+    res.json(dados);
 }
 
 // DELETE /api/usuarios/:id — exclui o usuário e todas as sessões dele.

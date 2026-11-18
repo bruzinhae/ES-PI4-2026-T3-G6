@@ -15,7 +15,7 @@ export async function listarConversa(req, res) {
 
 // POST /api/relatorios/sofia/conversa/abrir?inicio=AAAA-MM-DD — grava a análise da semana.
 export async function abrirConversa(req, res) {
-    const conversa = await sofiaService.abrirConversa(req.usuario._id, req.query.inicio);
+    const conversa = await sofiaService.abrirConversa(req.usuario._id, req.query.inicio, req.query.atualizar === '1');
     res.json({ conversa });
 }
 

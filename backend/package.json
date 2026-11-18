@@ -6,7 +6,9 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "test": "node --test src/utils/rotinaSemanal.test.js",
+    "test:java": "mvn -f ../servidor/pom.xml test"
   },
   "engines": {
     "node": ">=20"

@@ -258,7 +258,12 @@ lista.addEventListener('click', async (evento) => {
     const disciplina = disciplinas.find((item) => item.id === id);
     if (!disciplina) return;
 
-    const confirmou = window.confirm(`Remover "${disciplina.nome}"? Horários já ligados a ela continuam na grade, só deixam de apontar para a disciplina.`);
+    const confirmou = await AcaiAvisos.confirmar({
+        titulo: 'Remover disciplina',
+        texto: `Remover "${disciplina.nome}"? As tarefas e sessões dessa matéria saem junto. Os horários na grade continuam, sem o vínculo.`,
+        confirmar: 'Remover',
+        perigo: true,
+    });
     if (!confirmou) return;
 
     botao.disabled = true;

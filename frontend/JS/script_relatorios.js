@@ -161,9 +161,12 @@ renderLayout({
         const cobertura = rotina.metaHoras
             ? `A rotina cobre ${rotina.horas}h das ${rotina.metaHoras}h da meta semanal (${rotina.percentual}%).`
             : `A rotina desta semana soma ${rotina.horas || 0}h. Defina a meta de horas no perfil para ver o percentual.`;
-        document.getElementById('texto-insight').textContent = semHorario
-            ? `${cobertura} ${semHorario.nome} ainda não tem horário fixo.`
-            : cobertura;
+        const coberturaEl = document.getElementById('texto-cobertura');
+        if (coberturaEl) {
+            coberturaEl.textContent = semHorario
+                ? `${cobertura} ${semHorario.nome} ainda não tem horário fixo.`
+                : cobertura;
+        }
     }
 
     // A Sofia responde depois do painel. O contador descarta a resposta de uma semana que já saiu da tela.
@@ -193,7 +196,7 @@ renderLayout({
         }
     }
 
-    document.addEventListener('acaistudy:pomodoro-registrado', () => {
+    window.addEventListener('acaistudy:pomodoro-registrado', () => {
         const hoje = new Date();
         const fim = new Date(inicioSemana);
         fim.setDate(fim.getDate() + 7);
@@ -233,7 +236,9 @@ renderLayout({
     function mostrarPerguntas(visivel) {
         formConversa.hidden = !visivel;
         notaTema.hidden = !visivel;
-        botaoAnalisar.hidden = visivel;
+        botaoAnalisar.hidden = false;
+        botaoAnalisar.disabled = false;
+        botaoAnalisar.textContent = visivel ? 'Atualizar análise' : 'Analisar';
     }
 
     function pintarPerguntas(mensagens) {
@@ -282,7 +287,7 @@ renderLayout({
         try {
             const { sofia } = await AcaiApi.obterSugestoesSofia(inicio);
             if (pedido !== ultimoPedidoSofia) return;
-            const { conversa } = await AcaiApi.abrirConversaSofia(inicio);
+            const { conversa } = await AcaiApi.abrirConversaSofia(inicio, true);
             if (pedido !== ultimoPedidoSofia) return;
             textoInsight.textContent = sofia.resumo;
             seloSofia.textContent = {

@@ -26,9 +26,8 @@ blocoFixoSchema.pre('validate', function () {
         if (this.diasSemana?.length) this.invalidate('diasSemana', 'Blocos de data \u00fanica n\u00e3o devem ter dias da semana.');
     }
     if (this.diasSemana?.some(dia => !Number.isInteger(dia) || dia < 0 || dia > 6)) this.invalidate('diasSemana', 'Os dias devem ser n\u00fameros entre 0 (segunda) e 6 (domingo).');
-    if (this.horaInicio && Number.isInteger(this.duracaoMinutos)) {
-        const [h, m] = this.horaInicio.split(':').map(Number);
-        if (h * 60 + m + this.duracaoMinutos > 1440) this.invalidate('duracaoMinutos', 'O hor\u00e1rio e a dura\u00e7\u00e3o ultrapassam o fim do dia.');
+    if (this.horaInicio && Number.isInteger(this.duracaoMinutos) && this.duracaoMinutos > 1440) {
+        this.invalidate('duracaoMinutos', 'A duração máxima é 24 horas.');
     }
 });
 blocoFixoSchema.index({ usuarioId: 1, recorrencia: 1, diasSemana: 1 });

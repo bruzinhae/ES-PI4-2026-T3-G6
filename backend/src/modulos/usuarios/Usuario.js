@@ -59,6 +59,11 @@ const usuarioSchema = new mongoose.Schema(
             default: null,
         },
 
+        senhaAlteradaEm: {
+            type: Date,
+            default: null,
+        },
+
         // Como a conta foi criada/entra: senha própria ('local') ou login com Google.
         provedorAutenticacao: {
             type: String,

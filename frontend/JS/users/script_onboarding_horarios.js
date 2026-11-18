@@ -5,7 +5,7 @@ const calendario = document.querySelector('.calendario');
 const dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const horaInicial = 6;
-const horaFinal = 23;
+const horaFinal = 24;
 const faixasPorHora = 2;
 const totalFaixas = (horaFinal - horaInicial) * faixasPorHora;
 const totalMinutosSemana = 7 * 24 * 60;
@@ -78,10 +78,8 @@ function minutosDe(hora) {
     return horas * 60 + minutos;
 }
 
-function duracaoQueCabe(horaInicio, desejada) {
-    const restante = 24 * 60 - minutosDe(horaInicio);
-    const cabivel = Math.floor(restante / 30) * 30;
-    return Math.max(30, Math.min(desejada, cabivel));
+function duracaoQueCabe(_horaInicio, desejada) {
+    return Math.max(30, Math.min(desejada, 24 * 60));
 }
 
 function indiceFaixaDe(horaInicio) {
@@ -151,9 +149,10 @@ function posicionar(bloco, indiceDia, indiceFaixa, duracaoFaixas) {
     const rotulo = bloco.querySelector('.horario-movido');
     if (rotulo) {
         const inicio = formatarHorario(indiceFaixa);
-        const fimMinutos = horaInicial * 60 + (indiceFaixa + duracaoVisivel) * 30;
+        const fimAbsoluto = horaInicial * 60 + indiceFaixa * 30 + duracaoFaixas * 30;
+        const fimMinutos = fimAbsoluto % (24 * 60);
         const fim = `${String(Math.floor(fimMinutos / 60)).padStart(2, '0')}:${String(fimMinutos % 60).padStart(2, '0')}`;
-        rotulo.textContent = `${dias[indiceDia]} · ${inicio}–${fim}`;
+        rotulo.textContent = `${dias[indiceDia]} · ${inicio}–${fim}${fimAbsoluto >= 24 * 60 ? ' (+1)' : ''}`;
     }
 }
 
@@ -369,10 +368,6 @@ async function criarNaGrade(rotina, posicao) {
     const base = dadosDoArraste(rotina);
     let horaInicio = formatarHorario(posicao.indiceFaixa);
     let duracao = duracaoQueCabe(horaInicio, base.duracaoMinutos);
-
-    if (duracao < base.duracaoMinutos) {
-        AcaiAvisos.mostrar('O bloco foi encurtado para não passar da meia-noite. Ajuste o restante depois, em Disciplinas.');
-    }
 
     const payload = {
         nome: base.nome,

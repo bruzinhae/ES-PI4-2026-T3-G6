@@ -146,8 +146,8 @@ const ETIQUETA_CLASSE = {
                         <button type="button" data-acao="editar" aria-label="Editar disciplina">
                             <img src="assets/icons/disciplinas/editar.svg" alt="" width="10.5" height="10.5">
                         </button>
-                        <button type="button" data-acao="excluir" aria-label="Excluir disciplina">
-                            <img src="assets/icons/disciplinas/mais-opcoes.svg" alt="" width="2.33" height="9.33">
+                        <button type="button" data-acao="excluir" aria-label="Excluir disciplina" title="Excluir disciplina">
+                            Excluir
                         </button>
                     </div>
                 </div>
@@ -212,7 +212,8 @@ const ETIQUETA_CLASSE = {
 
     async function carregar() {
         try {
-            disciplinas = await AcaiApi.listarDisciplinas({ situacao: 'ativa' });
+            const situacao = document.getElementById('filtrar-situacao')?.value || 'ativa';
+            disciplinas = await AcaiApi.listarDisciplinas(situacao === 'todas' ? {} : { situacao });
             renderizar();
         } catch (erro) {
             disciplinas = [];
@@ -290,6 +291,7 @@ const ETIQUETA_CLASSE = {
     document.addEventListener('keydown', (evento) => {
         if (evento.key === 'Escape' && modal.classList.contains('aberto')) fecharModal();
     });
+    document.getElementById('filtrar-situacao')?.addEventListener('change', carregar);
     filtrarArea.addEventListener('change', atualizarLista);
     ordenar.addEventListener('change', atualizarLista);
 
@@ -428,14 +430,19 @@ const ETIQUETA_CLASSE = {
             texto.textContent = 'O bloco fica neste intervalo, no mesmo dia.';
             return null;
         }
-        const duracao = minutosDe(fim) - minutosDe(inicio);
-        if (duracao <= 0) {
-            texto.textContent = 'O horário de fim precisa ser depois do início.';
+        let duracao = minutosDe(fim) - minutosDe(inicio);
+        if (duracao < 0) duracao += 1440;
+        if (duracao === 0) {
+            texto.textContent = 'O horário de fim precisa ser diferente do início.';
             return null;
         }
         if (duracao < 15) {
             texto.textContent = 'O bloco precisa durar pelo menos 15 minutos.';
             return null;
+        }
+        if (minutosDe(fim) <= minutosDe(inicio)) {
+            texto.textContent = `Duração: ${formatarDuracao(duracao)}. O bloco atravessa a meia-noite.`;
+            return duracao;
         }
         texto.textContent = `Duração: ${formatarDuracao(duracao)}.`;
         return duracao;
@@ -493,7 +500,17 @@ const ETIQUETA_CLASSE = {
             return diasDaSemana.flatMap((data, indice) => {
                 const ocorreNoDia = recorrenteNaData(bloco, data)
                     || bloco.recorrencia === 'unico' && formatoData(bloco.data) === chaveData(data);
-                return ocorreNoDia ? [{ bloco, data, inicio, fim: inicio + duracao }] : [];
+                if (!ocorreNoDia) return [];
+                if (inicio + duracao <= 1440) return [{ bloco, data, inicio, fim: inicio + duracao }];
+                const proximo = new Date(data);
+                proximo.setDate(proximo.getDate() + 1);
+                const fimSemana = new Date(inicioSemana);
+                fimSemana.setDate(fimSemana.getDate() + 7);
+                const partes = [{ bloco, data, inicio, fim: 1440 }];
+                if (proximo >= inicioSemana && proximo < fimSemana) {
+                    partes.push({ bloco, data: proximo, inicio: 0, fim: inicio + duracao - 1440 });
+                }
+                return partes;
             });
         }).sort((a, b) => a.inicio - b.inicio || a.bloco.nome.localeCompare(b.bloco.nome, 'pt-BR'));
     }
@@ -769,7 +786,7 @@ const ETIQUETA_CLASSE = {
             formulario.elements.inicioRecorrencia.value = formatoData(bloco.inicioRecorrencia || bloco.criadoEm || chaveData(new Date()));
             formulario.elements.horaInicio.value = String(bloco.horaInicio).slice(0, 5);
             const fimMinutos = minutosDe(bloco.horaInicio) + Number(bloco.duracaoMinutos);
-            formulario.elements.horaFim.value = fimMinutos >= 1440 ? '23:59' : horaDe(fimMinutos);
+            formulario.elements.horaFim.value = horaDe(fimMinutos % 1440);
             formulario.elements.prioridade.value = bloco.prioridade;
             formulario.elements.local.value = bloco.local || '';
             formulario.elements.fixo.checked = Boolean(bloco.fixo);
@@ -832,9 +849,26 @@ const ETIQUETA_CLASSE = {
                         ? recorrenteNaData(novo, new Date(`${formatoData(outro.data)}T12:00:00`))
                         : recorrenciasConflitam(novo, outro);
             if (!conflitoDeDia) return false;
-            return min(dados.horaInicio) < min(outro.horaInicio) + Number(outro.duracaoMinutos) && min(outro.horaInicio) < min(dados.horaInicio) + Number(dados.duracaoMinutos);
+            const fatias = (ini, dur) => (ini + dur <= 1440 ? [[ini, ini + dur]] : [[ini, 1440], [0, ini + dur - 1440]]);
+            const a = fatias(min(dados.horaInicio), Number(dados.duracaoMinutos));
+            const b = fatias(min(outro.horaInicio), Number(outro.duracaoMinutos));
+            return a.some(([a1, a2]) => b.some(([b1, b2]) => a1 < b2 && b1 < a2));
         });
     }
+    document.getElementById('exportar-grade')?.addEventListener('click', () => {
+        const hora = (minutos) => `${String(Math.floor(minutos / 60)).padStart(2, '0')}:${String(minutos % 60).padStart(2, '0')}`;
+        const linhas = blocos.map((bloco) => {
+            const inicio = minutosDe(bloco.horaInicio);
+            const fim = (inicio + Number(bloco.duracaoMinutos)) % 1440;
+            return `<tr><td>${bloco.nome}</td><td>${bloco.categoria}</td><td>${bloco.horaInicio}</td><td>${hora(fim)}</td></tr>`;
+        }).join('');
+        const janela = window.open('', '_blank');
+        if (!janela) return;
+        janela.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Grade AçaíStudy</title><style>body{font-family:Inter,sans-serif;padding:32px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body><h1>Grade de horários</h1><table><thead><tr><th>Compromisso</th><th>Categoria</th><th>Início</th><th>Fim</th></tr></thead><tbody>${linhas || '<tr><td colspan="4">Nenhum bloco</td></tr>'}</tbody></table></body></html>`);
+        janela.document.close();
+        janela.focus();
+        janela.print();
+    });
     document.querySelector('#abrir-cadastro-bloco').addEventListener('click', () => abrirModal());
     document.querySelector('#semana-anterior').addEventListener('click', () => {
         inicioSemana.setDate(inicioSemana.getDate() - 7);

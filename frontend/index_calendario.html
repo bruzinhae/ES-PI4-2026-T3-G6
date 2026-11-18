@@ -11,8 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=20">
-    <link rel="stylesheet" href="CSS/style_calendario.css?v=10">
+    <link rel="stylesheet" href="CSS/layout.css?v=21">
+    <link rel="stylesheet" href="CSS/style_calendario.css?v=13">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
@@ -84,7 +84,15 @@
                                 <span><i class="ponto estudos"></i> Estudos</span>
                                 <span><i class="ponto pessoal"></i> Pessoal</span>
                             </div>
-                            <button type="button" class="botao-camadas">Camadas</button>
+                            <div class="menu-camadas">
+                                <button type="button" class="botao-camadas" id="botao-camadas" aria-expanded="false" aria-controls="painel-camadas">Camadas</button>
+                                <div class="painel-camadas" id="painel-camadas" hidden>
+                                    <label><input type="checkbox" data-camada="aulas" checked> Aulas</label>
+                                    <label><input type="checkbox" data-camada="estudos" checked> Estudos</label>
+                                    <label><input type="checkbox" data-camada="pessoal" checked> Pessoal</label>
+                                    <label><input type="checkbox" data-camada="sugestoes" checked> Sugestões</label>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -92,6 +100,7 @@
                     <div class="barra-sugestoes" id="barra-sugestoes" hidden>
                         <p id="texto-sugestoes" role="status"></p>
                         <div class="barra-sugestoes-acoes">
+                            <button type="button" id="ver-ajuste">Ver atividades</button>
                             <button type="button" class="botao-aceitar-todas" id="aceitar-todas">Aceitar todas</button>
                             <button type="button" class="botao-descartar" id="descartar-sugestoes">Descartar</button>
                         </div>
@@ -186,6 +195,27 @@
         </section>
     </div>
 
+    <div class="modal-fundo" id="modal-ajuste" aria-hidden="true">
+        <section class="modal-cartao modal-ajuste-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-ajuste">
+            <header class="modal-cabecalho">
+                <div class="modal-icone" aria-hidden="true">✦</div>
+                <div class="modal-texto">
+                    <h2 id="titulo-modal-ajuste">Ajuste da grade</h2>
+                    <p id="subtitulo-modal-ajuste"></p>
+                </div>
+                <button class="modal-fechar" type="button" id="fechar-modal-ajuste" aria-label="Fechar">×</button>
+            </header>
+            <div id="lista-ajuste"></div>
+            <footer class="modal-rodape">
+                <div class="modal-rodape-acoes">
+                    <button class="botao-excluir-modal" type="button" id="descartar-ajuste">Descartar</button>
+                    <button class="botao-cancelar-modal" type="button" id="fechar-ajuste">Manter na grade</button>
+                    <button class="botao-salvar-modal" type="button" id="aceitar-ajuste">Aceitar todas</button>
+                </div>
+            </footer>
+        </section>
+    </div>
+
     <div class="modal-fundo" id="modal-tarefa" aria-hidden="true">
         <section class="modal-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-tarefa">
             <header class="modal-cabecalho">
@@ -209,7 +239,7 @@
                         <label for="titulo-tarefa">Título <b>*</b></label>
                         <small><span id="contador-titulo">0</span>/80</small>
                     </div>
-                    <input id="titulo-tarefa" name="titulo" type="text" maxlength="80" placeholder="Ex.: Revisar prova de Cálculo IV" required>
+                    <input id="titulo-tarefa" name="titulo" type="text" maxlength="160" placeholder="Ex.: Revisar prova de Cálculo IV" required>
                 </div>
 
                 <div class="grade-modal">
@@ -293,6 +323,7 @@
                 </div>
 
                 <footer class="acoes-modal">
+                    <button class="botao-excluir-modal" type="button" id="concluir-tarefa" hidden>Concluir</button>
                     <button class="botao-excluir-modal" type="button" id="excluir-tarefa" hidden>Excluir</button>
                     <button class="botao-cancelar-modal" type="button" id="cancelar-modal">Cancelar</button>
                     <button class="botao-salvar-modal" type="submit" id="salvar-tarefa">＋ &nbsp; Salvar tarefa</button>
@@ -304,7 +335,7 @@
     <script src="JS/users/api.js?v=15"></script>
     <script src="JS/componentes/layout.js?v=29"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>
-    <script src="JS/script_calendario.js?v=11"></script>
+    <script src="JS/script_calendario.js?v=14"></script>
 
 </body>
 </html>

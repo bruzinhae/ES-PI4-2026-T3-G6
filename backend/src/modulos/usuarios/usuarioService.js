@@ -15,6 +15,16 @@ import { Usuario } from './Usuario.js';
 import { apagarFotos, gravarFoto } from './avatarArquivo.js';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { normalizarEmail, selecionarCampos, validarSenha } from '../../utils/validacoes.js';
+import { Sessao } from '../auth/Sessao.js';
+import { RecuperacaoSenha } from '../auth/RecuperacaoSenha.js';
+import { ConfirmacaoEmail } from '../auth/ConfirmacaoEmail.js';
+import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
+import { Disciplina } from '../disciplinas/Disciplina.js';
+import { Meta } from '../metas/Meta.js';
+import { PlanoIa } from '../planosIa/PlanoIa.js';
+import { ConversaSofia } from '../relatorios/ConversaSofia.js';
+import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
+import { Tarefa } from '../tarefas/Tarefa.js';
 
 // "Custo" do bcrypt: quantas rodadas (2^10 = 1024) de processamento para gerar o hash.
 // Quanto maior, mais lento para um atacante testar senhas por força bruta — e também mais
@@ -107,16 +117,15 @@ export async function trocarSenha(id, senhaNova) {
 
     const usuario = await buscarPorId(id);
     usuario.hashSenha = await bcrypt.hash(senhaNova, BCRYPT_CUSTO);
+    usuario.senhaAlteradaEm = new Date();
     await usuario.save();
 }
 
 /**
- * READ (todos) — lista os usuários, do mais recente para o mais antigo (-1 = decrescente).
- * Atenção: a rota exige login, mas devolve os dados de todos os usuários para qualquer
- * usuário logado. Restrinja antes de usar com dados reais.
+ * A listagem pública de contas não existe: cada sessão só enxerga a própria.
  */
-export function listar() {
-    return Usuario.find().sort({ criadoEm: -1 });
+export function listarProprio(usuario) {
+    return [usuario];
 }
 
 /**
@@ -162,10 +171,22 @@ export async function atualizar(id, dados = {}) {
         emailTrocado = true;
     }
 
-    // Troca de senha: valida o tamanho e guarda apenas o novo hash.
+    // Troca de senha logada: exige a senha atual. A recuperação por e-mail usa trocarSenha.
     if (dados.senha !== undefined) {
+        if (!usuario.hashSenha) {
+            throw new ErroApi(400, 'Esta conta não tem senha local para alterar.');
+        }
+        const senhaAtualConfere = typeof dados.senhaAtual === 'string'
+            && await bcrypt.compare(dados.senhaAtual, usuario.hashSenha);
+        if (!senhaAtualConfere) {
+            throw new ErroApi(400, 'A senha atual não confere.');
+        }
         validarSenha(dados.senha);
+        if (dados.senha === dados.senhaAtual) {
+            throw new ErroApi(400, 'A nova senha precisa ser diferente da atual.');
+        }
         usuario.hashSenha = await bcrypt.hash(dados.senha, BCRYPT_CUSTO);
+        usuario.senhaAlteradaEm = new Date();
     }
 
     usuario.set(alteracoes);
@@ -215,5 +236,50 @@ export async function excluir(id) {
         throw new ErroApi(404, 'Usuário não encontrado.');
     }
 
-    await apagarFotos(id);
+    await Promise.all([
+        apagarFotos(id),
+        Disciplina.deleteMany({ usuarioId: id }),
+        BlocoFixo.deleteMany({ usuarioId: id }),
+        Tarefa.deleteMany({ usuarioId: id }),
+        Meta.deleteMany({ usuarioId: id }),
+        SessaoEstudo.deleteMany({ usuarioId: id }),
+        PlanoIa.deleteMany({ usuarioId: id }),
+        ConversaSofia.deleteMany({ usuarioId: id }),
+        Sessao.deleteMany({ usuarioId: id }),
+        RecuperacaoSenha.deleteMany({ usuarioId: id }),
+        ConfirmacaoEmail.deleteMany({ usuarioId: id }),
+    ]);
+}
+
+export async function exportar(id) {
+    const usuario = await buscarPorId(id);
+    const filtro = { usuarioId: id };
+    const [disciplinas, blocos, tarefas, metas, sessoes, planos] = await Promise.all([
+        Disciplina.find(filtro).lean(),
+        BlocoFixo.find(filtro).lean(),
+        Tarefa.find(filtro).lean(),
+        Meta.find(filtro).lean(),
+        SessaoEstudo.find(filtro).lean(),
+        PlanoIa.find(filtro).lean(),
+    ]);
+
+    return {
+        exportadoEm: new Date().toISOString(),
+        usuario: {
+            nome: usuario.nome,
+            email: usuario.email,
+            instituicao: usuario.instituicao,
+            curso: usuario.curso,
+            semestre: usuario.semestre,
+            turno: usuario.turno,
+            metaSemanalHoras: usuario.metaSemanalHoras,
+            configuracao: usuario.configuracao,
+        },
+        disciplinas,
+        blocos,
+        tarefas,
+        metas,
+        sessoes,
+        planos,
+    };
 }

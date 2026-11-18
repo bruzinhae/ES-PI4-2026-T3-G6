@@ -10,8 +10,8 @@ const FUSO_MINUTOS = -180;
 const MINUTO = 60000;
 const DIA = 24 * 60 * MINUTO;
 
-const HORA_INICIAL = 7;
-const TOTAL_HORAS = 14;
+const HORA_INICIAL = 6;
+const TOTAL_HORAS = 18;
 const ALTURA_LINHA = 56;
 
 const DIAS = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
@@ -96,6 +96,20 @@ const valorPrioridade = document.getElementById('valor-prioridade');
 const contadorTitulo = document.getElementById('contador-titulo');
 
 const modalSessao = document.getElementById('modal-sessao');
+const modalAjuste = document.getElementById('modal-ajuste');
+const listaAjuste = document.getElementById('lista-ajuste');
+
+const ROTULO_FOCO = { ALTO: 'Alto', MEDIO: 'Médio', BAIXO: 'Baixo' };
+const ROTULO_TIPO = { prova: 'Prova', trabalho: 'Trabalho', exercicio: 'Exercício', leitura: 'Leitura', outro: 'Outro' };
+const ROTULO_CATEGORIA = { estudos: 'Estudos', pessoal: 'Pessoal' };
+const ROTULO_SEM_ESPACO = {
+    alocacao_parcial: 'Só coube parte do tempo. O restante não entrou nesta semana.',
+    sem_espacos: 'Não há horário livre na grade.',
+    espacos_insuficientes: 'Os horários livres são menores do que esta atividade.',
+    nenhum_espaco_antes_do_prazo: 'Não há horário livre antes do prazo.',
+};
+
+let ajusteOcupado = false;
 
 const estado = {
     inicioSemana: inicioDaSemana(Date.now()),
@@ -105,7 +119,7 @@ const estado = {
     blocos: [],
     sessoes: [],
     sugestoes: [],
-    semAlocacao: 0,
+    semAlocacao: [],
     metaHoras: null,
     carga: 0, // identifica a última carga, para ignorar respostas antigas
 };
@@ -372,6 +386,7 @@ function criarEvento({ classe, titulo, detalhe, extra, inicio, fim }) {
     const evento = el('div', `evento ${classe}${tamanho}`);
     evento.style.setProperty('--inicio', String((ini - HORA_INICIAL * 60) / 60));
     evento.style.setProperty('--duracao', String((fimMin - ini) / 60));
+    evento.title = `${titulo} · ${horario(inicio)} – ${horario(fim)}`;
     evento.append(
         el('strong', null, titulo),
         el('small', null, `${horario(inicio)} – ${horario(fim)}${detalhe ? ` · ${detalhe}` : ''}`),
@@ -396,20 +411,32 @@ function renderGrade() {
         coluna.dataset.data = chave;
         coluna.classList.toggle('hoje', chave === hoje);
 
-        blocosDoDia(chave, i).forEach((bloco) => {
-            const inicio = inicioDoBloco(bloco, chave);
+        const desenharBloco = (bloco, inicio, fim, chaveDia) => {
             const evento = criarEvento({
                 classe: `${classeDoBloco(bloco.categoria)} bloco-fixo`,
                 titulo: bloco.nome,
                 detalhe: bloco.local,
                 inicio,
-                fim: inicio + bloco.duracaoMinutos * MINUTO,
+                fim,
             });
             if (!evento) return;
             evento.dataset.bloco = bloco.id || bloco._id;
-            evento.dataset.data = chave;
+            evento.dataset.data = chaveDia;
             evento.tabIndex = 0;
             coluna.appendChild(evento);
+        };
+
+        blocosDoDia(chave, i).forEach((bloco) => {
+            const inicio = inicioDoBloco(bloco, chave);
+            desenharBloco(bloco, inicio, inicio + bloco.duracaoMinutos * MINUTO, chave);
+        });
+
+        const chaveOntem = chaveDoDia(dia - DIA);
+        blocosDoDia(chaveOntem, (i + 6) % 7).forEach((bloco) => {
+            const inicio = inicioDoBloco(bloco, chaveOntem);
+            const fim = inicio + bloco.duracaoMinutos * MINUTO;
+            const meiaNoite = instante(chave, 0);
+            if (fim > meiaNoite) desenharBloco(bloco, meiaNoite, fim, chave);
         });
     });
 
@@ -423,7 +450,7 @@ function renderGrade() {
         const concluida = sessao.situacao === 'concluida';
         const evento = criarEvento({
             classe: `${tarefa?.categoria === 'pessoal' ? 'pessoal' : 'estudo'}${concluida ? ' concluido' : ''} sessao`,
-            titulo: sessao.titulo,
+            titulo: sessao.titulo || tarefa?.titulo || 'Sessão de estudo',
             detalhe: formatarDuracao((fim - inicio) / MINUTO),
             extra: concluida ? 'Concluída' : sessao.origem === 'ia' ? '#Sofia' : '',
             inicio,
@@ -452,7 +479,8 @@ function renderGrade() {
         if (!evento) return;
 
         evento.dataset.sugestao = String(indice);
-        evento.append(el('em', null, `Foco: ${sugestao.foco} · Sem conflitos`));
+        const foco = ROTULO_FOCO[sugestao.foco] || sugestao.foco;
+        evento.append(el('em', null, `Foco: ${foco} · Sem conflitos`));
 
         const acoes = el('div', 'sugestao-acoes');
         [['aceitar', '✓', 'Aceitar'], ['recusar', '✕', 'Recusar']].forEach(([acao, icone, rotulo]) => {
@@ -569,7 +597,7 @@ function renderBarraSugestoes() {
     if (!total) return;
 
     textoSugestoes.textContent = `A Sofia sugeriu ${plural(total, 'sessão', 'sessões')} de estudo para esta semana`
-        + (estado.semAlocacao ? ` · ${plural(estado.semAlocacao, 'tarefa', 'tarefas')} sem espaço suficiente` : '');
+        + (estado.semAlocacao.length ? ` · ${plural(estado.semAlocacao.length, 'tarefa', 'tarefas')} sem espaço suficiente` : '');
 }
 
 function renderizar() {
@@ -635,7 +663,7 @@ function alvoDoSolte(evento) {
 
 async function agendarTarefa(card, alvo) {
     const pedido = Number(card.dataset.minutos) || 60;
-    const duracao = Math.max(15, Math.min(pedido, HORA_INICIAL * 60 + TOTAL_HORAS * 60 - alvo.minutos)); // não passa das 21:00
+    const duracao = Math.max(15, Math.min(pedido, HORA_INICIAL * 60 + TOTAL_HORAS * 60 - alvo.minutos));
 
     try {
         await AcaiApi.criarSessao({
@@ -758,7 +786,7 @@ async function alterarSessaoAberta(acao) {
 
 const MENSAGENS_SEM_SUGESTAO = {
     sem_tarefas: 'Você não tem tarefas pendentes para encaixar nesta semana.',
-    sem_espacos: 'Não há horários livres nesta semana (a grade vai das 07:00 às 21:00).',
+    sem_espacos: 'Não há horários livres nesta semana (a grade vai das 06:00 às 23:00).',
 };
 
 async function pedirSugestoes() {
@@ -774,7 +802,7 @@ async function pedirSugestoes() {
     try {
         const resposta = await AcaiApi.obterSugestoesGrade(chaveDoDia(estado.inicioSemana));
         estado.sugestoes = resposta.sugestoes;
-        estado.semAlocacao = resposta.semAlocacao.length;
+        estado.semAlocacao = resposta.semAlocacao || [];
 
         if (!resposta.sugestoes.length) {
             avisar(MENSAGENS_SEM_SUGESTAO[resposta.motivo]
@@ -782,6 +810,7 @@ async function pedirSugestoes() {
         }
     } catch (erro) {
         estado.sugestoes = [];
+        estado.semAlocacao = [];
         avisar(erro.status === 503
             ? 'O serviço de sugestões está indisponível no momento. Sua grade continua funcionando normalmente.'
             : erro.message || 'Não foi possível calcular as sugestões.');
@@ -792,19 +821,172 @@ async function pedirSugestoes() {
     }
 
     renderizar();
+    if (estado.sugestoes.length) abrirModalAjuste();
+}
+
+function textoQuando(iso) {
+    const ms = Date.parse(iso || '');
+    if (Number.isNaN(ms)) return '';
+    return `${formatarDia(ms)} · ${horario(ms)}`;
+}
+
+function dadoAjuste(rotulo, valor, largo) {
+    if (!valor) return null;
+    const item = el('div', largo ? 'ajuste-largo' : '');
+    item.append(el('dt', null, rotulo), el('dd', null, valor));
+    return item;
+}
+
+function cartaoSugestao(sugestao, indice) {
+    const inicio = Date.parse(sugestao.inicio);
+    const fim = Date.parse(sugestao.fim);
+    const artigo = el('article', 'ajuste-item');
+    artigo.dataset.indice = String(indice);
+
+    const topo = el('div', 'ajuste-item-topo');
+    topo.append(
+        el('h3', null, sugestao.titulo || 'Atividade'),
+        el('span', 'ajuste-foco', `Foco ${ROTULO_FOCO[sugestao.foco] || sugestao.foco || '—'}`),
+    );
+
+    const contexto = [ROTULO_TIPO[sugestao.tipo], ROTULO_CATEGORIA[sugestao.categoria], sugestao.etiqueta]
+        .filter(Boolean)
+        .join(' · ');
+
+    const dados = el('dl', 'ajuste-dados');
+    [
+        dadoAjuste('Quando', Number.isNaN(inicio) ? '' : `${formatarDia(inicio)} · ${horario(inicio)} – ${horario(fim)}`, true),
+        dadoAjuste('Duração desta sessão', formatarDuracao(sugestao.minutos || 0)),
+        dadoAjuste('Tempo da atividade', sugestao.minutosEstimados ? formatarDuracao(sugestao.minutosEstimados) : ''),
+        dadoAjuste('Ainda falta', sugestao.minutosRestantes > 0 ? formatarDuracao(sugestao.minutosRestantes) : ''),
+        dadoAjuste('Prazo', textoQuando(sugestao.prazo)),
+        dadoAjuste('Prioridade', sugestao.prioridade != null ? `${sugestao.prioridade}/10` : ''),
+        dadoAjuste('Local', sugestao.local),
+        dadoAjuste('Notas', sugestao.observacoes, true),
+    ].forEach((item) => {
+        if (item) dados.append(item);
+    });
+
+    const acoes = el('div', 'ajuste-item-acoes');
+    [['recusar', 'Não incluir'], ['aceitar', 'Adicionar à grade']].forEach(([acao, rotulo]) => {
+        const botao = el('button', null, rotulo);
+        botao.type = 'button';
+        botao.dataset.acao = acao;
+        acoes.append(botao);
+    });
+
+    artigo.append(topo);
+    if (contexto) artigo.append(el('p', 'ajuste-contexto', contexto));
+    artigo.append(dados, acoes);
+    return artigo;
+}
+
+function pintarModalAjuste() {
+    const total = estado.sugestoes.length;
+    const materias = new Set(estado.sugestoes.map((item) => item.disciplina || 'Sem disciplina'));
+    document.getElementById('subtitulo-modal-ajuste').textContent = total
+        ? `${plural(total, 'atividade entra', 'atividades entram')} na semana, em ${plural(materias.size, 'matéria', 'matérias')}. Na grade o texto fica resumido; aqui está a informação completa.`
+        : 'Nenhuma atividade coube na grade desta semana.';
+    document.getElementById('aceitar-ajuste').disabled = total === 0;
+
+    listaAjuste.replaceChildren();
+    const grupos = new Map();
+    estado.sugestoes.forEach((sugestao, indice) => {
+        const nome = sugestao.disciplina || 'Sem disciplina';
+        if (!grupos.has(nome)) grupos.set(nome, []);
+        grupos.get(nome).push(cartaoSugestao(sugestao, indice));
+    });
+    grupos.forEach((cartoes, nome) => {
+        const grupo = el('section', 'ajuste-grupo');
+        grupo.append(el('h3', 'ajuste-materia', nome), ...cartoes);
+        listaAjuste.append(grupo);
+    });
+
+    if (!estado.semAlocacao.length) return;
+
+    const fora = el('section', 'ajuste-fora');
+    fora.append(el('h3', null, 'Não entraram nesta semana'));
+    estado.semAlocacao.forEach((item) => {
+        const artigo = el('article');
+        artigo.append(el('strong', null, item.titulo || 'Atividade'));
+        if (item.disciplina) artigo.append(el('p', null, item.disciplina));
+        artigo.append(el('p', null, ROTULO_SEM_ESPACO[item.motivo] || 'Não há horário livre para esta atividade.'));
+        if (item.minutosRestantes > 0) artigo.append(el('p', null, `Ainda faltam ${formatarDuracao(item.minutosRestantes)}.`));
+        fora.append(artigo);
+    });
+    listaAjuste.append(fora);
+}
+
+function abrirModalAjuste() {
+    pintarModalAjuste();
+    modalAjuste.classList.add('aberto');
+    modalAjuste.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-aberto');
+    document.getElementById('fechar-modal-ajuste').focus();
+}
+
+function fecharModalAjuste() {
+    modalAjuste.classList.remove('aberto');
+    modalAjuste.setAttribute('aria-hidden', 'true');
+    if (!modal.classList.contains('aberto') && !modalSessao.classList.contains('aberto')) {
+        document.body.classList.remove('modal-aberto');
+    }
+}
+
+function sincronizarModalAjuste() {
+    if (!modalAjuste.classList.contains('aberto')) return;
+    if (!estado.sugestoes.length && !estado.semAlocacao.length) fecharModalAjuste();
+    else pintarModalAjuste();
+}
+
+function descartarSugestoes() {
+    estado.sugestoes = [];
+    estado.semAlocacao = [];
+    fecharModalAjuste();
+    renderizar();
+}
+
+const DURACAO_MINIMA = 15;
+const DURACAO_MAXIMA = 480;
+
+function fatiasDaSugestao(sugestao) {
+    const inicio = Date.parse(sugestao.inicio);
+    const fim = Date.parse(sugestao.fim);
+    const fatias = [];
+    let cursor = inicio;
+
+    while (fim - cursor >= DURACAO_MINIMA * MINUTO) {
+        const minutos = Math.min(DURACAO_MAXIMA, Math.round((fim - cursor) / MINUTO));
+        if (minutos < DURACAO_MINIMA) break;
+        fatias.push({
+            inicio: new Date(cursor).toISOString(),
+            fim: new Date(cursor + minutos * MINUTO).toISOString(),
+        });
+        cursor += minutos * MINUTO;
+    }
+
+    return fatias;
 }
 
 async function aceitarSugestao(indice) {
     const sugestao = estado.sugestoes[indice];
     if (!sugestao) return false;
 
+    const fatias = fatiasDaSugestao(sugestao);
+    if (!fatias.length) {
+        avisar('Essa sugestão é curta demais para virar uma sessão.');
+        return false;
+    }
+
     try {
-        await AcaiApi.criarSessao({
-            tarefaId: sugestao.tarefaId,
-            inicio: new Date(Date.parse(sugestao.inicio)).toISOString(),
-            fim: new Date(Date.parse(sugestao.fim)).toISOString(),
-            origem: 'ia',
-        });
+        for (const fatia of fatias) {
+            await AcaiApi.criarSessao({
+                tarefaId: sugestao.tarefaId,
+                inicio: fatia.inicio,
+                fim: fatia.fim,
+                origem: 'ia',
+            });
+        }
         return true;
     } catch (erro) {
         avisar(erro.message || 'Não foi possível aceitar a sugestão.');
@@ -817,9 +999,11 @@ async function aceitarUma(indice) {
     estado.sugestoes.splice(indice, 1); // aceita ou não coube mais: não fica na tela
     if (criada) await Promise.all([carregarSessoes(), carregarTarefas()]);
     renderizar();
+    sincronizarModalAjuste();
 }
 
 async function aceitarTodas() {
+    fecharModalAjuste();
     const botao = document.getElementById('aceitar-todas');
     botao.disabled = true;
 
@@ -864,6 +1048,7 @@ function abrirModal(modo, tarefa = {}) {
     contadorTitulo.textContent = String(campoTitulo.value.length);
 
     botaoExcluir.hidden = !editando;
+    document.getElementById('concluir-tarefa').hidden = !editando;
     modal.classList.add('aberto');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-aberto');
@@ -878,6 +1063,7 @@ function fecharModal() {
     campoDuracao.value = '2';
     campoPrioridade.value = '5';
     botaoExcluir.hidden = true;
+    document.getElementById('concluir-tarefa').hidden = true;
 }
 
 function lerFormulario() {
@@ -1001,11 +1187,17 @@ gradeDias.addEventListener('click', (evento) => {
         else {
             estado.sugestoes.splice(indice, 1);
             renderizar();
+            sincronizarModalAjuste();
         }
         return;
     }
 
     const bloco = evento.target.closest('.evento');
+    if (bloco?.dataset.sugestao != null) {
+        abrirModalAjuste();
+        return;
+    }
+
     if (bloco?.dataset.sessao) {
         const sessao = estado.sessoes.find((item) => item.id === bloco.dataset.sessao);
         if (sessao) abrirDetalhes({ tipo: 'sessao', titulo: sessao.titulo, sessao });
@@ -1062,9 +1254,33 @@ document.getElementById('semana-proxima').addEventListener('click', () => mover(
 
 botaoSugerir.addEventListener('click', pedirSugestoes);
 document.getElementById('aceitar-todas').addEventListener('click', aceitarTodas);
-document.getElementById('descartar-sugestoes').addEventListener('click', () => {
-    estado.sugestoes = [];
-    renderizar();
+document.getElementById('aceitar-ajuste').addEventListener('click', aceitarTodas);
+document.getElementById('ver-ajuste').addEventListener('click', abrirModalAjuste);
+document.getElementById('descartar-sugestoes').addEventListener('click', descartarSugestoes);
+document.getElementById('descartar-ajuste').addEventListener('click', descartarSugestoes);
+document.getElementById('fechar-modal-ajuste').addEventListener('click', fecharModalAjuste);
+document.getElementById('fechar-ajuste').addEventListener('click', fecharModalAjuste);
+modalAjuste.addEventListener('click', (evento) => {
+    if (evento.target === modalAjuste) fecharModalAjuste();
+});
+listaAjuste.addEventListener('click', async (evento) => {
+    const botao = evento.target.closest('[data-acao]');
+    const cartao = botao?.closest('[data-indice]');
+    if (!botao || !cartao || ajusteOcupado) return;
+
+    ajusteOcupado = true;
+    listaAjuste.querySelectorAll('button').forEach((item) => { item.disabled = true; });
+    try {
+        const indice = Number(cartao.dataset.indice);
+        if (botao.dataset.acao === 'aceitar') await aceitarUma(indice);
+        else {
+            estado.sugestoes.splice(indice, 1);
+            renderizar();
+            sincronizarModalAjuste();
+        }
+    } finally {
+        ajusteOcupado = false;
+    }
 });
 
 /* Detalhes da sessão */
@@ -1083,6 +1299,10 @@ document.getElementById('botao-nova-tarefa').addEventListener('click', () => abr
 
 document.addEventListener('keydown', (evento) => {
     if (evento.key !== 'Escape') return;
+    if (modalAjuste.classList.contains('aberto')) {
+        fecharModalAjuste();
+        return;
+    }
     if (modal.classList.contains('aberto')) fecharModal();
     if (modalSessao.classList.contains('aberto')) fecharDetalhes();
 });
@@ -1129,6 +1349,14 @@ formulario.addEventListener('submit', async (evento) => {
 
 botaoExcluir.addEventListener('click', async () => {
     if (!campoId.value) return;
+    const confirmou = await AcaiAvisos.confirmar({
+        titulo: 'Excluir tarefa?',
+        texto: `“${campoTitulo.value.trim() || 'Esta tarefa'}” sai da lista e as sessões ligadas a ela também.`,
+        confirmar: 'Excluir',
+        cancelar: 'Voltar',
+        perigo: true,
+    });
+    if (!confirmou) return;
     botaoExcluir.disabled = true;
 
     try {
@@ -1140,6 +1368,34 @@ botaoExcluir.addEventListener('click', async () => {
     } finally {
         botaoExcluir.disabled = false;
     }
+});
+
+document.getElementById('concluir-tarefa').addEventListener('click', async () => {
+    if (!campoId.value) return;
+    const botao = document.getElementById('concluir-tarefa');
+    botao.disabled = true;
+    try {
+        await AcaiApi.atualizarTarefa(campoId.value, { situacao: 'concluida' });
+        fecharModal();
+        await carregarTarefas();
+        await recarregar();
+    } catch (erro) {
+        avisar(erro.message || 'Não foi possível concluir a tarefa.');
+    } finally {
+        botao.disabled = false;
+    }
+});
+
+const painelCamadas = document.getElementById('painel-camadas');
+document.getElementById('botao-camadas')?.addEventListener('click', () => {
+    const aberto = painelCamadas.hidden;
+    painelCamadas.hidden = !aberto;
+    document.getElementById('botao-camadas').setAttribute('aria-expanded', String(aberto));
+});
+painelCamadas?.addEventListener('change', (evento) => {
+    const caixa = evento.target.closest('[data-camada]');
+    if (!caixa) return;
+    gradeDias.classList.toggle(`oculta-${caixa.dataset.camada}`, !caixa.checked);
 });
 
 /* ---------- Início ---------- */

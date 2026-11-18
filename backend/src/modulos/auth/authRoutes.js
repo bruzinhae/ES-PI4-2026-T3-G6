@@ -16,4 +16,6 @@ authRoutes.get('/confirmar-email', controller.conferirConfirmacao);    // GET /a
 authRoutes.post('/confirmar-email', controller.confirmarEmail);        // POST /api/auth/confirmar-email → marca emailVerificado
 authRoutes.post('/reenviar-confirmacao', exigirAutenticacao, controller.reenviarConfirmacao);
 authRoutes.post('/logout', exigirAutenticacao, controller.sair);      // POST /api/auth/logout → encerra a sessão atual
+authRoutes.get('/sessoes', exigirAutenticacao, controller.listarSessoes);
+authRoutes.post('/sessoes/encerrar-outras', exigirAutenticacao, controller.encerrarOutras);
 authRoutes.get('/eu', exigirAutenticacao, controller.eu);             // GET  /api/auth/eu     → usuário da sessão

@@ -9,7 +9,10 @@ import { DIA, MINUTO, dataValida, inicioDaSemana, instanteLocal } from '../../ut
 import { Disciplina } from '../disciplinas/Disciplina.js';
 import { conflitoCom, ocupacoesDoPeriodo } from '../grade/ocupacao.js';
 import { Tarefa } from '../tarefas/Tarefa.js';
+import { Usuario } from '../usuarios/Usuario.js';
 import { SessaoEstudo, ORIGENS_SESSAO, SITUACOES_SESSAO, TIPOS_FOCO } from './SessaoEstudo.js';
+
+const DIAS_REVISAO = [1, 4, 13];
 
 const LIMITE_ATRASO_MS = 14 * 24 * 60 * 60 * 1000;
 const CAMPOS_DE_CRIACAO = ['titulo', 'tarefaId', 'disciplinaId', 'inicio', 'fim', 'origem', 'tipoFoco', 'revisaoEspacada'];
@@ -94,8 +97,6 @@ export async function criar(usuarioId, dados) {
         idValido(corpo.tarefaId, 'tarefa');
         tarefa = await Tarefa.findOne({ _id: corpo.tarefaId, usuarioId });
         if (!tarefa) throw new ErroApi(400, 'A tarefa selecionada não existe ou não pertence a esta conta.');
-        const jaAgendada = await SessaoEstudo.exists({ usuarioId, tarefaId: tarefa._id, situacao: 'agendada' });
-        if (jaAgendada) throw new ErroApi(409, 'Esta tarefa já está agendada. Remova a sessão atual antes de agendá-la novamente.');
     }
 
     let disciplinaId = corpo.disciplinaId ?? tarefa?.disciplinaId ?? null;
@@ -146,6 +147,10 @@ export async function atualizar(usuarioId, id, dados) {
 
     const situacao = corpo.situacao ?? sessao.situacao;
     const mudouHorario = corpo.inicio !== undefined || corpo.fim !== undefined;
+    const concluindo = situacao === 'concluida' && sessao.situacao !== 'concluida';
+    if (concluindo && inicio.getTime() > Date.now() + 60_000) {
+        throw new ErroApi(400, 'Não é possível concluir uma sessão que ainda não começou.');
+    }
     if (mudouHorario) validarPeriodo(inicio, fim);
     if (['agendada', 'concluida'].includes(situacao) && (mudouHorario || corpo.situacao !== undefined)) {
         await garantirHorarioLivre(usuarioId, inicio, fim, sessao._id);
@@ -156,8 +161,43 @@ export async function atualizar(usuarioId, id, dados) {
     sessao.fim = fim;
     sessao.situacao = situacao;
     if (corpo.tipoFoco !== undefined) sessao.tipoFoco = corpo.tipoFoco;
+    if (concluindo) {
+        sessao.minutosRealizados = Math.max(1, Math.round((fim.getTime() - inicio.getTime()) / MINUTO));
+    }
     await sessao.save();
+    if (concluindo) await agendarRevisoes(usuarioId, sessao);
     return sessao;
+}
+
+async function agendarRevisoes(usuarioId, sessao) {
+    if (sessao.revisaoEspacada) return;
+    const usuario = await Usuario.findById(usuarioId).select('configuracao.repeticaoEspacada');
+    if (usuario?.configuracao?.repeticaoEspacada === false) return;
+
+    for (const dias of DIAS_REVISAO) {
+        const inicio = new Date(sessao.inicio.getTime() + dias * DIA);
+        const fim = new Date(sessao.fim.getTime() + dias * DIA);
+        const titulo = `Revisão D+${dias}: ${sessao.titulo}`.slice(0, 160);
+        const jaExiste = await SessaoEstudo.exists({ usuarioId, titulo, inicio, disciplinaId: sessao.disciplinaId ?? null });
+        if (jaExiste) continue;
+        try {
+            await garantirHorarioLivre(usuarioId, inicio, fim);
+        } catch {
+            continue;
+        }
+        await SessaoEstudo.create({
+            usuarioId,
+            tarefaId: sessao.tarefaId,
+            disciplinaId: sessao.disciplinaId,
+            titulo,
+            inicio,
+            fim,
+            origem: 'ia',
+            situacao: 'agendada',
+            tipoFoco: sessao.tipoFoco,
+            revisaoEspacada: true,
+        });
+    }
 }
 
 export async function excluir(usuarioId, id) {
@@ -182,10 +222,32 @@ export async function registrarPomodoro(usuarioId, dados = {}) {
         throw new ErroApi(400, 'O fim do foco precisa estar nas últimas duas semanas.');
     }
 
+    let disciplinaId = null;
+    let tarefaId = null;
+    if (dados.tarefaId) {
+        idValido(dados.tarefaId, 'tarefa');
+        const tarefa = await Tarefa.findOne({ _id: dados.tarefaId, usuarioId });
+        if (!tarefa) throw new ErroApi(400, 'A tarefa selecionada não existe ou não pertence a esta conta.');
+        tarefaId = tarefa._id;
+        disciplinaId = tarefa.disciplinaId;
+    }
+    if (dados.disciplinaId) {
+        idValido(dados.disciplinaId, 'disciplina');
+        if (!await Disciplina.exists({ _id: dados.disciplinaId, usuarioId })) {
+            throw new ErroApi(400, 'A disciplina selecionada não existe ou não pertence a esta conta.');
+        }
+        disciplinaId = dados.disciplinaId;
+    }
+
     const completo = dados.completo !== false;
+    const titulo = typeof dados.titulo === 'string' && dados.titulo.trim().length >= 2
+        ? dados.titulo.trim().slice(0, 160)
+        : 'Foco Pomodoro';
     const sessao = await SessaoEstudo.create({
         usuarioId,
-        titulo: 'Foco Pomodoro',
+        tarefaId,
+        disciplinaId,
+        titulo,
         inicio: new Date(fim.getTime() - minutos * 60_000),
         fim,
         origem: 'manual',

@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { ErroApi } from '../../utils/ErroApi.js';
-import { Tarefa, CATEGORIAS_TAREFA, TIPOS_TAREFA } from './Tarefa.js';
+import { Tarefa, CATEGORIAS_TAREFA, SITUACOES_TAREFA, TIPOS_TAREFA } from './Tarefa.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 
-const CAMPOS = ['titulo', 'categoria', 'tipo', 'etiqueta', 'prazo', 'minutosEstimados', 'prioridade', 'local', 'observacoes', 'disciplinaId'];
+const LIMITE_TITULO = 160;
+const CAMPOS = ['titulo', 'categoria', 'tipo', 'etiqueta', 'prazo', 'minutosEstimados', 'prioridade', 'local', 'observacoes', 'disciplinaId', 'situacao'];
 
 function idValido(id) {
     if (!mongoose.isValidObjectId(id)) throw new ErroApi(400, 'ID de tarefa inválido.');
@@ -17,7 +18,7 @@ function validar(dados, parcial = false) {
     const payload = Object.fromEntries(Object.entries(dados).map(([campo, valor]) => [campo, valor === '' ? null : valor]));
     if (!parcial && (!payload.titulo || typeof payload.titulo !== 'string' || payload.titulo.trim().length < 2)) throw new ErroApi(400, 'O título deve ter ao menos 2 caracteres.');
     if (payload.titulo !== undefined) {
-        if (typeof payload.titulo !== 'string' || payload.titulo.trim().length < 2 || payload.titulo.trim().length > 80) throw new ErroApi(400, 'O título deve ter entre 2 e 80 caracteres.');
+        if (typeof payload.titulo !== 'string' || payload.titulo.trim().length < 2 || payload.titulo.trim().length > LIMITE_TITULO) throw new ErroApi(400, `O título deve ter entre 2 e ${LIMITE_TITULO} caracteres.`);
         payload.titulo = payload.titulo.trim();
     }
     if (payload.disciplinaId !== undefined && payload.disciplinaId !== null && !mongoose.isValidObjectId(payload.disciplinaId)) throw new ErroApi(400, 'ID de disciplina inválido.');
@@ -45,6 +46,9 @@ function validar(dados, parcial = false) {
         payload.prioridade = Number(payload.prioridade);
         if (!Number.isInteger(payload.prioridade) || payload.prioridade < 1 || payload.prioridade > 10) throw new ErroApi(400, 'A prioridade deve ser um número inteiro entre 1 e 10.');
     }
+    if (payload.situacao !== undefined && !SITUACOES_TAREFA.includes(payload.situacao)) {
+        throw new ErroApi(400, 'Situação de tarefa inválida.');
+    }
     return payload;
 }
 
@@ -60,11 +64,17 @@ export async function listar(usuarioId) {
         situacao: 'agendada',
         tarefaId: { $ne: null },
     });
-    return Tarefa.find({
+    const tarefas = await Tarefa.find({
         usuarioId,
         situacao: { $ne: 'concluida' },
         _id: { $nin: idsAgendados },
-    }).sort({ prazo: 1, criadoEm: -1 });
+    });
+    return tarefas.sort((a, b) => {
+        if (!a.prazo && !b.prazo) return b.criadoEm - a.criadoEm;
+        if (!a.prazo) return 1;
+        if (!b.prazo) return -1;
+        return a.prazo - b.prazo || b.criadoEm - a.criadoEm;
+    });
 }
 
 export async function criar(usuarioId, dados) {
@@ -89,4 +99,5 @@ export async function excluir(usuarioId, id) {
     idValido(id);
     const tarefa = await Tarefa.findOneAndDelete({ _id: id, usuarioId });
     if (!tarefa) throw new ErroApi(404, 'Tarefa não encontrada.');
+    await SessaoEstudo.deleteMany({ usuarioId, tarefaId: id });
 }

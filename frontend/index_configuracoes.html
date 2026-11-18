@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=20">
+    <link rel="stylesheet" href="CSS/layout.css?v=21">
     <link rel="stylesheet" href="CSS/style_configuracoes.css?v=3">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
@@ -146,7 +146,7 @@
                                     </label>
                                 </div>
                                 <p>Redistribui blocos densos automaticamente quando detecta sobrecarga cognitiva na semana.</p>
-                                <span class="meta-configuracao" id="meta-antifadiga">Limite contínuo: 90 min</span>
+                                <span class="meta-configuracao" id="meta-antifadiga">Pausa de 10 min entre sessões</span>
                             </article>
 
                             <article class="cartao-configuracao">
@@ -161,6 +161,20 @@
                                     </label>
                                 </div>
                                 <p>Aloca disciplinas de alta densidade cognitiva na sua janela de maior desempenho.</p>
+                                <label class="campo-config">Janela de foco
+                                    <select id="config-janela" name="config-janela">
+                                        <option value="manha">Manhã · 08:30 – 12:00</option>
+                                        <option value="tarde">Tarde · 14:00 – 18:00</option>
+                                        <option value="noite">Noite · 19:00 – 22:30</option>
+                                    </select>
+                                </label>
+                                <label class="campo-config">Duração do bloco
+                                    <select id="config-duracao" name="config-duracao">
+                                        <option value="25">25 min</option>
+                                        <option value="50">50 min</option>
+                                        <option value="90">90 min</option>
+                                    </select>
+                                </label>
                                 <span class="meta-configuracao" id="meta-foco">Janela: 08:30 – 12:00</span>
                             </article>
 
@@ -195,6 +209,8 @@
                             </article>
 
                         </div>
+
+                        <section id="lista-planos" class="lista-planos" hidden></section>
 
                         <div class="bloco-rigidez">
                             <div class="rigidez-texto">

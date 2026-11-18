@@ -7,44 +7,42 @@
  */
 
 import { ErroApi } from '../../utils/ErroApi.js';
+import { DIA, chaveDoDia, dataValida, diaDaSemana, inicioDaSemana as inicioSemanaMs, instanteLocal, minutosDoDia } from '../../utils/fuso.js';
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { Disciplina } from '../disciplinas/Disciplina.js';
 import { Meta } from '../metas/Meta.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 import { Usuario } from '../usuarios/Usuario.js';
-import { minutosDaSemana, resumoRotina } from '../../utils/rotinaSemanal.js';
+import { minutosDeEstudo, resumoRotina } from '../../utils/rotinaSemanal.js';
 
 export const ROTULOS_DIA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
 export function inicioDaSemana(data) {
-    const inicio = new Date(data.getFullYear(), data.getMonth(), data.getDate());
-    inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
-    inicio.setHours(0, 0, 0, 0);
-    return inicio;
+    const ms = data instanceof Date ? data.getTime() : Date.now();
+    return new Date(inicioSemanaMs(ms));
 }
 
 export function somarDias(data, dias) {
-    const copia = new Date(data);
-    copia.setDate(copia.getDate() + dias);
-    return copia;
+    return new Date(data.getTime() + dias * DIA);
 }
 
 export function chaveData(data) {
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}`;
+    const ms = data instanceof Date ? data.getTime() : data;
+    return chaveDoDia(ms);
 }
 
 function rotuloPeriodo(inicio, fimExclusivo) {
-    const ultimo = somarDias(fimExclusivo, -1);
-    const formato = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' });
-    const limpar = (data) => formato.format(data).replace('.', '');
-    return `${limpar(inicio)} – ${limpar(ultimo)}`;
+    const formatar = (data) => {
+        const [, mes, dia] = chaveData(data).split('-').map(Number);
+        return `${String(dia).padStart(2, '0')} de ${MESES[mes - 1]}`;
+    };
+    return `${formatar(inicio)} – ${formatar(somarDias(fimExclusivo, -1))}`;
 }
 
 export function indiceSegunda(data) {
-    return (data.getDay() + 6) % 7;
+    const ms = data instanceof Date ? data.getTime() : data;
+    return diaDaSemana(ms);
 }
 
 function percentualGrupo(metas) {
@@ -83,7 +81,7 @@ function resumirSessoes(sessoes, agora) {
         pomodorosConcluidos += Number(sessao.pomodorosConcluidos) || 0;
         pomodorosPlanejados += Number(sessao.pomodorosPlanejados) || 0;
         diasComEstudo.add(chaveData(inicio));
-        const hora = inicio.getHours();
+        const hora = Math.floor(minutosDoDia(inicio.getTime()) / 60);
         porHora.set(hora, (porHora.get(hora) || 0) + realizados);
     }
 
@@ -127,15 +125,10 @@ export function resolverInicio(inicioQuery) {
     if (!inicioQuery) {
         return inicioDaSemana(new Date());
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(inicioQuery)) {
+    if (!dataValida(inicioQuery)) {
         throw new ErroApi(400, 'Informe a semana no formato AAAA-MM-DD.');
     }
-    const [ano, mes, dia] = inicioQuery.split('-').map(Number);
-    const data = new Date(ano, mes - 1, dia);
-    if (Number.isNaN(data.getTime()) || data.getDate() !== dia) {
-        throw new ErroApi(400, 'Informe uma data válida.');
-    }
-    return inicioDaSemana(data);
+    return inicioDaSemana(new Date(instanteLocal(inicioQuery)));
 }
 
 export async function montarRelatorio(usuarioId, inicioQuery) {
@@ -156,7 +149,7 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
             situacao: 'concluida',
         }).select('minutosRealizados inicio').lean(),
         Disciplina.find({ usuarioId, situacao: 'ativa' }).sort({ nome: 1 }).lean(),
-        BlocoFixo.find({ usuarioId, recorrencia: { $in: ['semanal', 'quinzenal', 'a_cada_3_semanas'] } }).select('disciplinaId duracaoMinutos diasSemana recorrencia').lean(),
+        BlocoFixo.find({ usuarioId, recorrencia: { $in: ['semanal', 'quinzenal', 'a_cada_3_semanas'] } }).select('categoria disciplinaId duracaoMinutos diasSemana recorrencia').lean(),
         Meta.find({ usuarioId, situacao: { $ne: 'cancelada' } }).lean(),
         Usuario.findById(usuarioId).select('metaSemanalHoras'),
     ]);
@@ -183,15 +176,23 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
     }
 
     const metaHoras = usuario?.metaSemanalHoras || null;
-    const rotina = resumoRotina(minutosDaSemana(blocos), metaHoras);
+    const rotina = resumoRotina(minutosDeEstudo(blocos), metaHoras);
+    const estudados = new Map();
+    for (const sessao of sessoes) {
+        if (sessao.situacao !== 'concluida' || !sessao.disciplinaId) continue;
+        const chave = String(sessao.disciplinaId);
+        estudados.set(chave, (estudados.get(chave) || 0) + (Number(sessao.minutosRealizados) || 0));
+    }
     const linhas = disciplinas.map((disciplina) => {
         const minutosSemana = minutosPorDisciplina.get(String(disciplina._id)) || 0;
-        const parte = resumoRotina(minutosSemana, metaHoras);
+        const minutosMeta = minutosSemana > 0 ? minutosSemana : (Number(disciplina.creditos) > 0 ? disciplina.creditos * 60 : 0);
+        const realizados = estudados.get(String(disciplina._id)) || 0;
+        const horas = Math.round((minutosSemana / 60) * 10) / 10;
         return {
             id: String(disciplina._id),
             nome: disciplina.nome,
-            horasSemanais: parte.horas,
-            progresso: parte.percentual,
+            horasSemanais: horas,
+            progresso: minutosMeta > 0 ? Math.min(100, Math.round((realizados / minutosMeta) * 100)) : null,
             naGrade: minutosSemana > 0,
         };
     }).sort((a, b) => b.horasSemanais - a.horasSemanais || a.nome.localeCompare(b.nome, 'pt'));
@@ -254,9 +255,9 @@ export async function montarRelatorio(usuarioId, inicioQuery) {
                 status: foco.naGrade ? 'Na rotina' : 'Sem horário',
                 emDia: foco.naGrade,
                 nota: foco.naGrade
-                    ? (metaHoras
-                        ? `${foco.horasSemanais}h, ${foco.progresso}% da meta semanal de ${metaHoras}h.`
-                        : `${foco.horasSemanais}h na rotina. Defina a meta de horas no perfil.`)
+                    ? (foco.progresso === null
+                        ? `${foco.horasSemanais}h na rotina.`
+                        : `${foco.horasSemanais}h de aula. ${foco.progresso}% já estudado nesta semana.`)
                     : 'Ainda sem horário fixo na semana.',
             }
             : {

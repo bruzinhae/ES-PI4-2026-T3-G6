@@ -31,6 +31,7 @@ import { rankingRoutes } from './modulos/ranking/rankingRoutes.js';
 import { gradeRoutes } from './modulos/grade/gradeRoutes.js';
 import { tarefaRoutes } from './modulos/tarefas/tarefaRoutes.js';
 import { sessaoEstudoRoutes } from './modulos/sessoesEstudo/sessaoEstudoRoutes.js';
+import { planoIaRoutes } from './modulos/planosIa/planoIaRoutes.js';
 
 // Pasta frontend/ na raiz do repositório (backend/src → sobe duas pastas).
 const pastaFrontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend');
@@ -78,6 +79,7 @@ app.use('/api/ranking', rankingRoutes);
 app.use('/api/tarefas', tarefaRoutes);
 app.use('/api/sessoes-estudo', sessaoEstudoRoutes);
 app.use('/api/grade', gradeRoutes);
+app.use('/api/planos-ia', planoIaRoutes);
 
 // /api/auth: login, logout e consulta da sessão atual (modulos/auth/authRoutes.js).
 app.use('/api/auth', authRoutes);

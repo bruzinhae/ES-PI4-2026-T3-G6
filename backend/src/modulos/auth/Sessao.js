@@ -34,6 +34,11 @@ const sessaoSchema = new mongoose.Schema(
             required: true,
             index: { expires: 0 }, // TTL: apagar o documento quando expiraEm for atingido
         },
+        agente: {
+            type: String,
+            default: null,
+            maxlength: 300,
+        },
     },
     {
         collection: 'sessoes_autenticacao',

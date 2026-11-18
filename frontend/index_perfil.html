@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="CSS/layout.css?v=20">
+    <link rel="stylesheet" href="CSS/layout.css?v=21">
     <link rel="stylesheet" href="CSS/style_perfil.css?v=4">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
@@ -178,19 +178,30 @@
                             <div class="linha-seguranca">
                                 <div>
                                     <strong>Senha de Acesso</strong>
-                                    <p>Última atualização realizada há 7 meses (criptografada)</p>
+                                    <p id="texto-senha">Carregando a data da última troca...</p>
                                 </div>
 
-                                <button type="button" class="botao-claro">Alterar Senha</button>
+                                <button type="button" class="botao-claro" id="botao-alterar-senha">Alterar Senha</button>
                             </div>
+
+                            <form id="form-senha" class="form-senha" hidden>
+                                <label>Senha atual <input type="password" name="senhaAtual" autocomplete="current-password" required></label>
+                                <label>Nova senha <input type="password" name="senha" autocomplete="new-password" minlength="8" required></label>
+                                <label>Confirmar nova senha <input type="password" name="confirmacao" autocomplete="new-password" minlength="8" required></label>
+                                <div class="acoes-portabilidade">
+                                    <button type="submit" class="botao-claro">Salvar senha</button>
+                                    <button type="button" class="link-acao" id="cancelar-senha">Cancelar</button>
+                                </div>
+                                <p class="aviso aviso-erro" id="erro-senha" hidden></p>
+                            </form>
 
                             <div class="linha-seguranca">
                                 <div>
                                     <strong>Sessões Ativas</strong>
-                                    <p>MacBook Pro 14” (Curitiba, Brasil) • Sessão Atual</p>
+                                    <p id="texto-sessoes">Carregando sessões...</p>
                                 </div>
 
-                                <button type="button" class="link-acao perigo">Encerrar Outras</button>
+                                <button type="button" class="link-acao perigo" id="botao-encerrar-sessoes">Encerrar Outras</button>
                             </div>
 
                         </div>
@@ -207,7 +218,7 @@
                             </div>
 
                             <div class="acoes-portabilidade">
-                                <button type="button" class="link-acao">Exportar Dados</button>
+                                <button type="button" class="link-acao" id="botao-exportar-dados">Exportar Dados</button>
                                 <button type="button" class="link-acao perigo" id="botao-excluir-conta">Excluir Conta</button>
                             </div>
                         </div>
@@ -233,7 +244,7 @@
                             <div class="uso-item">
                                 <div class="uso-topo">
                                     <span>Otimizações por IA</span>
-                                    <strong>3 de 5/mês</strong>
+                                    <strong id="uso-ia">—</strong>
                                 </div>
                                 <div class="trilha-uso">
                                     <span style="width: 60%"></span>
@@ -243,7 +254,7 @@
                             <div class="uso-item">
                                 <div class="uso-topo">
                                     <span>Disciplinas Ativas</span>
-                                    <strong>4 de 6</strong>
+                                    <strong id="uso-disciplinas">—</strong>
                                 </div>
                                 <div class="trilha-uso">
                                     <span style="width: 66%"></span>
@@ -252,7 +263,7 @@
 
                         </div>
 
-                        <p class="nota-plano">Você tem mais 2 slots livres para esse semestre.</p>
+                        <p class="nota-plano" id="nota-plano">O plano gratuito não limita o número de disciplinas.</p>
 
                     </section>
 
@@ -281,9 +292,9 @@
                             </li>
                         </ul>
 
-                        <button type="button" class="botao-upgrade">
+                        <a class="botao-upgrade" href="index_assinatura.html">
                             Fazer Upgrade • R$ 19,90/mês
-                        </button>
+                        </a>
 
                         <p class="nota-pro">Cancele quando quiser • Desconto semestral de 25%</p>
 
@@ -297,7 +308,7 @@
                             <strong>Dúvidas sobre o plano educacional?</strong>
                             <p>
                                 Estudantes de instituições parceiras podem ter subsídio parcial.
-                                <a href="#">Consultar convênio da universidade ›</a>
+                                <a href="index_ajuda.html">Consultar convênio da universidade ›</a>
                             </p>
                         </div>
                     </div>

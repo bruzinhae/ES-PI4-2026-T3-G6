@@ -5,9 +5,12 @@
 import mongoose from 'mongoose';
 import { ErroApi } from '../../utils/ErroApi.js';
 import { selecionarCampos } from '../../utils/validacoes.js';
+import { DIA, inicioDaSemana } from '../../utils/fuso.js';
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
+import { Meta } from '../metas/Meta.js';
+import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
+import { Tarefa } from '../tarefas/Tarefa.js';
 import { Usuario } from '../usuarios/Usuario.js';
-import { resumoRotina } from '../../utils/rotinaSemanal.js';
 import {
     CORES_DISCIPLINA,
     Disciplina,
@@ -42,15 +45,21 @@ function idValido(id, rotulo = 'disciplina') {
     }
 }
 
-function apresentar(disciplina, horasSemanaisMinutos = 0, metaHoras = null) {
+function apresentar(disciplina, minutosAula = 0, minutosEstudados = 0, metaHoras = null) {
     const json = disciplina.toJSON();
-    const rotina = resumoRotina(horasSemanaisMinutos, metaHoras);
-
+    const horas = Math.round(((Number(minutosAula) || 0) / 60) * 10) / 10;
+    const metaMinutos = minutosAula > 0
+        ? minutosAula
+        : (Number(disciplina.creditos) > 0 ? Number(disciplina.creditos) * 60 : 0);
+    const progresso = metaMinutos > 0
+        ? Math.min(100, Math.round(((Number(minutosEstudados) || 0) / metaMinutos) * 100))
+        : null;
+    const metaConta = Number(metaHoras);
     return {
         ...json,
-        horasSemanais: rotina.horas,
-        metaSemanalHoras: rotina.metaHoras,
-        progresso: rotina.percentual,
+        horasSemanais: horas,
+        metaSemanalHoras: Number.isFinite(metaConta) && metaConta > 0 ? metaConta : null,
+        progresso,
     };
 }
 
@@ -235,6 +244,23 @@ async function horasSemanaisPorDisciplina(usuarioId, disciplinaIds) {
     return mapa;
 }
 
+async function minutosEstudadosPorDisciplina(usuarioId, disciplinaIds) {
+    const inicio = inicioDaSemana(Date.now());
+    const sessoes = await SessaoEstudo.find({
+        usuarioId,
+        disciplinaId: { $in: disciplinaIds },
+        situacao: 'concluida',
+        inicio: { $gte: new Date(inicio), $lt: new Date(inicio + 7 * DIA) },
+    }).select('disciplinaId minutosRealizados');
+
+    const mapa = new Map(disciplinaIds.map((id) => [String(id), 0]));
+    for (const sessao of sessoes) {
+        const chave = String(sessao.disciplinaId);
+        mapa.set(chave, (mapa.get(chave) || 0) + (Number(sessao.minutosRealizados) || 0));
+    }
+    return mapa;
+}
+
 export async function listar(usuarioId, { situacao } = {}) {
     const filtro = { usuarioId };
     if (situacao) {
@@ -242,14 +268,17 @@ export async function listar(usuarioId, { situacao } = {}) {
     }
 
     const disciplinas = await Disciplina.find(filtro).sort({ nome: 1 });
-    const [horas, metaHoras] = await Promise.all([
-        horasSemanaisPorDisciplina(usuarioId, disciplinas.map((item) => item._id)),
+    const ids = disciplinas.map((item) => item._id);
+    const [horas, estudados, metaHoras] = await Promise.all([
+        horasSemanaisPorDisciplina(usuarioId, ids),
+        minutosEstudadosPorDisciplina(usuarioId, ids),
         metaDoUsuario(usuarioId),
     ]);
 
     return disciplinas.map((disciplina) => apresentar(
         disciplina,
         horas.get(String(disciplina._id)) || 0,
+        estudados.get(String(disciplina._id)) || 0,
         metaHoras,
     ));
 }
@@ -274,11 +303,17 @@ export async function buscarPorId(usuarioId, id) {
         throw new ErroApi(404, 'Disciplina não encontrada.');
     }
 
-    const [horas, metaHoras] = await Promise.all([
+    const [horas, estudados, metaHoras] = await Promise.all([
         horasSemanaisPorDisciplina(usuarioId, [disciplina._id]),
+        minutosEstudadosPorDisciplina(usuarioId, [disciplina._id]),
         metaDoUsuario(usuarioId),
     ]);
-    return apresentar(disciplina, horas.get(String(disciplina._id)) || 0, metaHoras);
+    return apresentar(
+        disciplina,
+        horas.get(String(disciplina._id)) || 0,
+        estudados.get(String(disciplina._id)) || 0,
+        metaHoras,
+    );
 }
 
 export async function criar(usuarioId, dados) {
@@ -293,7 +328,7 @@ export async function criar(usuarioId, dados) {
         conteudos: payload.conteudos || [],
     });
 
-    return apresentar(disciplina, 0, await metaDoUsuario(usuarioId));
+    return apresentar(disciplina, 0, 0, await metaDoUsuario(usuarioId));
 }
 
 export async function atualizar(usuarioId, id, dados) {
@@ -312,11 +347,17 @@ export async function atualizar(usuarioId, id, dados) {
     disciplina.set(payload);
     await disciplina.save();
 
-    const [horas, metaHoras] = await Promise.all([
+    const [horas, estudados, metaHoras] = await Promise.all([
         horasSemanaisPorDisciplina(usuarioId, [disciplina._id]),
+        minutosEstudadosPorDisciplina(usuarioId, [disciplina._id]),
         metaDoUsuario(usuarioId),
     ]);
-    return apresentar(disciplina, horas.get(String(disciplina._id)) || 0, metaHoras);
+    return apresentar(
+        disciplina,
+        horas.get(String(disciplina._id)) || 0,
+        estudados.get(String(disciplina._id)) || 0,
+        metaHoras,
+    );
 }
 
 export async function excluir(usuarioId, id) {
@@ -327,9 +368,10 @@ export async function excluir(usuarioId, id) {
         throw new ErroApi(404, 'Disciplina não encontrada.');
     }
 
-    // Remove o vínculo dos blocos; o compromisso em si permanece.
-    await BlocoFixo.updateMany(
-        { usuarioId, disciplinaId: id },
-        { $set: { disciplinaId: null } }
-    );
+    await Promise.all([
+        Tarefa.deleteMany({ usuarioId, disciplinaId: id }),
+        SessaoEstudo.deleteMany({ usuarioId, disciplinaId: id }),
+        Meta.updateMany({ usuarioId, disciplinaId: id }, { $set: { disciplinaId: null } }),
+        BlocoFixo.updateMany({ usuarioId, disciplinaId: id }, { $set: { disciplinaId: null } }),
+    ]);
 }

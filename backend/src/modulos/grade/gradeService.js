@@ -6,11 +6,15 @@ import { Disciplina } from '../disciplinas/Disciplina.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 import { Tarefa } from '../tarefas/Tarefa.js';
 import { Usuario } from '../usuarios/Usuario.js';
+import { registrar as registrarPlano } from '../planosIa/planoIaService.js';
 import { ocupacoesDoPeriodo } from './ocupacao.js';
 
-// Faixa do dia em que a grade aceita estudo: a mesma do calendário (07:00 às 21:00).
-const JANELA_DO_DIA = { inicio: '07:00', fim: '21:00' };
+// A grade cobre a janela da noite (até 22:30) e o começo da manhã.
+const JANELA_DO_DIA = { inicio: '06:00', fim: '23:00' };
+const LIMITE_POR_RIGIDEZ = { flexivel: 4, equilibrado: 8, intensivo: 40 };
 const MINUTOS_MINIMOS_DO_ESPACO = 15;
+const DURACAO_MINIMA = 15;
+const DURACAO_MAXIMA = 480;
 const ARREDONDAMENTO = 5 * MINUTO;
 
 function resolverSemana(semana, agora) {
@@ -54,8 +58,8 @@ function espacosLivres(ocupacoes, inicioSemana, agora) {
 
 function preferenciasDoUsuario(usuario) {
     const atual = usuario.configuracao?.toObject?.() || usuario.configuracao || {};
-    const { janelaFoco, focoMatinal, duracaoMinutos, antifadiga } = { ...CONFIGURACAO_PADRAO, ...atual };
-    return { janelaFoco, focoMatinal, duracaoMinutos, antifadiga };
+    const { janelaFoco, focoMatinal, duracaoMinutos, antifadiga, rigidez, ajusteDinamico, repeticaoEspacada } = { ...CONFIGURACAO_PADRAO, ...atual };
+    return { janelaFoco, focoMatinal, duracaoMinutos, antifadiga, rigidez, ajusteDinamico, repeticaoEspacada };
 }
 
 // Tarefas abertas (de estudo e pessoais), já descontando o que está agendado em sessões futuras.
@@ -73,16 +77,29 @@ async function tarefasParaRanking(usuarioId, preferencias, agora) {
 
     const idsDisciplina = [...new Set(tarefas.map((tarefa) => tarefa.disciplinaId).filter(Boolean).map(String))];
     const disciplinas = idsDisciplina.length
-        ? await Disciplina.find({ _id: { $in: idsDisciplina }, usuarioId }).select('dificuldade peso').lean()
+        ? await Disciplina.find({ _id: { $in: idsDisciplina }, usuarioId }).select('nome dificuldade peso').lean()
         : [];
     const porDisciplina = new Map(disciplinas.map((disciplina) => [String(disciplina._id), disciplina]));
+    const detalhes = new Map();
 
-    return tarefas.flatMap((tarefa) => {
+    const paraRanking = tarefas.flatMap((tarefa) => {
         const id = String(tarefa._id);
         const falta = (tarefa.minutosEstimados ?? preferencias.duracaoMinutos) - (planejados.get(id) || 0);
         if (falta <= 0) return [];
 
         const disciplina = porDisciplina.get(String(tarefa.disciplinaId));
+        detalhes.set(id, {
+            titulo: tarefa.titulo,
+            categoria: tarefa.categoria || 'estudos',
+            tipo: tarefa.tipo || 'outro',
+            etiqueta: tarefa.etiqueta || null,
+            disciplina: disciplina?.nome || null,
+            prazo: tarefa.prazo ? tarefa.prazo.toISOString() : null,
+            local: tarefa.local || null,
+            observacoes: tarefa.observacoes || null,
+            prioridade: tarefa.prioridade ?? null,
+            minutosEstimados: tarefa.minutosEstimados ?? null,
+        });
         return [{
             id,
             titulo: tarefa.titulo, // só para mostrar na resposta; o servidor não usa
@@ -95,9 +112,36 @@ async function tarefasParaRanking(usuarioId, preferencias, agora) {
             ...(disciplina && { disciplina: { dificuldade: disciplina.dificuldade ?? null, peso: disciplina.peso ?? null } }),
         }];
     });
+
+    return { paraRanking, detalhes };
 }
 
 // ALTO/MÉDIO/BAIXO a partir do encaixe da sessão (tamanho e janela de foco), como mostra o calendário.
+// A API só grava sessões de 15 a 480 minutos. Uma sugestão maior vira blocos seguidos.
+function fatiasValidas(sessao) {
+    const inicioMs = Date.parse(sessao.inicio);
+    const fimMs = Date.parse(sessao.fim);
+    const restanteDepois = Number(sessao.minutosRestantes) || 0;
+    const fatias = [];
+    let cursor = inicioMs;
+
+    while (fimMs - cursor >= DURACAO_MINIMA * MINUTO) {
+        const minutos = Math.min(DURACAO_MAXIMA, Math.round((fimMs - cursor) / MINUTO));
+        if (minutos < DURACAO_MINIMA) break;
+        const termino = cursor + minutos * MINUTO;
+        fatias.push({
+            ...sessao,
+            inicio: formatarISO(cursor),
+            fim: formatarISO(termino),
+            minutos,
+            minutosRestantes: Math.max(0, Math.round((fimMs - termino) / MINUTO) + restanteDepois),
+        });
+        cursor = termino;
+    }
+
+    return fatias;
+}
+
 function nivelDeFoco(encaixe) {
     if (encaixe >= 0.8) return 'ALTO';
     return encaixe >= 0.6 ? 'MEDIO' : 'BAIXO';
@@ -116,10 +160,19 @@ export async function sugerir(usuarioId, semana) {
     if (!usuario) throw new ErroApi(404, 'Usuário não encontrado.');
     const preferencias = preferenciasDoUsuario(usuario);
 
-    const [ocupacoes, tarefas] = await Promise.all([
+    if (preferencias.ajusteDinamico !== false) {
+        await SessaoEstudo.updateMany(
+            { usuarioId, situacao: 'agendada', fim: { $lte: new Date(agora) } },
+            { $set: { situacao: 'nao_realizada' } },
+        );
+    }
+
+    const [ocupacoes, preparo] = await Promise.all([
         ocupacoesDoPeriodo(usuarioId, inicioSemana, fimSemana),
         tarefasParaRanking(usuarioId, preferencias, agora),
     ]);
+    const tarefas = preparo.paraRanking;
+    const detalhes = preparo.detalhes;
     const espacos = espacosLivres(ocupacoes, inicioSemana, agora);
     const minutosLivres = espacos.reduce((soma, espaco) => soma + (Date.parse(espaco.fim) - Date.parse(espaco.inicio)) / MINUTO, 0);
 
@@ -148,11 +201,11 @@ export async function sugerir(usuarioId, semana) {
         tarefas,
     });
 
-    const titulos = new Map(tarefas.map((tarefa) => [tarefa.id, tarefa.titulo]));
-
-    resposta.sugestoes = (ranking.alocacao || []).map((sessao) => ({
+    const limite = LIMITE_POR_RIGIDEZ[preferencias.rigidez] || LIMITE_POR_RIGIDEZ.equilibrado;
+    const ficha = (tarefaId) => detalhes.get(tarefaId) || { titulo: 'Atividade' };
+    resposta.sugestoes = (ranking.alocacao || []).slice(0, limite).flatMap((sessao) => fatiasValidas({
+        ...ficha(sessao.tarefaId),
         tarefaId: sessao.tarefaId,
-        titulo: titulos.get(sessao.tarefaId),
         inicio: sessao.inicio,
         fim: sessao.fim,
         minutos: sessao.minutos,
@@ -162,12 +215,21 @@ export async function sugerir(usuarioId, semana) {
         composicao: sessao.composicao,
     }));
     resposta.semAlocacao = (ranking.semAlocacao || []).map((item) => ({
+        ...ficha(item.tarefaId),
         tarefaId: item.tarefaId,
-        titulo: titulos.get(item.tarefaId),
         motivo: item.motivo,
         minutosRestantes: item.minutosRestantes,
     }));
     if (ranking.alocacaoTruncada) resposta.alocacaoTruncada = true;
+
+    if (resposta.sugestoes.length) {
+        const plano = await registrarPlano(usuarioId, {
+            inicioSemana,
+            sugestoes: resposta.sugestoes,
+            mensagem: `${resposta.sugestoes.length} sessão(ões) sugeridas para a semana.`,
+        });
+        resposta.planoId = plano ? String(plano._id) : null;
+    }
 
     return resposta;
 }

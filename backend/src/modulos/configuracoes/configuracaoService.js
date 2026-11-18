@@ -4,6 +4,7 @@
  */
 
 import { ErroApi } from '../../utils/ErroApi.js';
+import { DIA, inicioDaSemana as inicioSemanaMs } from '../../utils/fuso.js';
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 import { Usuario } from '../usuarios/Usuario.js';
@@ -30,11 +31,8 @@ const ROTULO_JANELA = {
     noite: '19:00 – 22:30',
 };
 
-function inicioDaSemana(data) {
-    const inicio = new Date(data.getFullYear(), data.getMonth(), data.getDate());
-    inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
-    inicio.setHours(0, 0, 0, 0);
-    return inicio;
+function inicioDaSemana(data = new Date()) {
+    return new Date(inicioSemanaMs(data.getTime()));
 }
 
 function minutos(hora) {
@@ -111,8 +109,7 @@ function lerConfiguracao(usuario) {
 
 async function montarResumo(usuarioId, configuracao) {
     const inicio = inicioDaSemana(new Date());
-    const fim = new Date(inicio);
-    fim.setDate(fim.getDate() + 7);
+    const fim = new Date(inicio.getTime() + 7 * DIA);
     const agora = new Date();
 
     const [sessoes, blocos] = await Promise.all([
@@ -147,7 +144,7 @@ async function montarResumo(usuarioId, configuracao) {
 
     return {
         janela: configuracao.focoMatinal ? ROTULO_JANELA[configuracao.janelaFoco] : 'Desligada',
-        pausa: configuracao.antifadiga ? 'A cada 90 min' : 'Desligada',
+        pausa: configuracao.antifadiga ? 'Pausa de 10 min entre sessões' : 'Desligada',
         sessoes: programadas,
         conflitos,
         blocos: blocos.length,

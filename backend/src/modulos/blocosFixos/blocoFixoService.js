@@ -45,8 +45,33 @@ function validarConsistencia(bloco) {
     if (['semanal', 'quinzenal', 'a_cada_3_semanas'].includes(bloco.recorrencia) && (!bloco.diasSemana?.length || bloco.data)) throw new ErroApi(400, 'Blocos recorrentes precisam de ao menos um dia e n\u00e3o podem ter data \u00fanica.');
     if (['quinzenal', 'a_cada_3_semanas'].includes(bloco.recorrencia) && !bloco.inicioRecorrencia) throw new ErroApi(400, 'Informe a semana inicial da recorrência.');
     if (bloco.recorrencia === 'unico' && (!bloco.data || bloco.diasSemana?.length)) throw new ErroApi(400, 'Blocos de data \u00fanica precisam de uma data e n\u00e3o usam dias da semana.');
-    const [h, m] = bloco.horaInicio.split(':').map(Number);
-    if ((h * 60 + m + bloco.duracaoMinutos) > 1440) throw new ErroApi(400, 'O hor\u00e1rio e a dura\u00e7\u00e3o ultrapassam o fim do dia.');
+    if (bloco.duracaoMinutos > 1440) throw new ErroApi(400, 'A duração máxima é 24 horas.');
+}
+
+function minutosHorario(hora) {
+    return String(hora).split(':').map(Number).reduce((h, m) => h * 60 + m);
+}
+
+function ocorreNoDia(bloco, data) {
+    if (bloco.recorrencia === 'unico') {
+        return Boolean(bloco.data) && bloco.data.toISOString().slice(0, 10) === data.toISOString().slice(0, 10);
+    }
+    return recorrenteNaData(bloco, data);
+}
+
+function fatiasNoDia(bloco, data) {
+    const fatias = [];
+    const inicio = minutosHorario(bloco.horaInicio);
+    const duracao = Number(bloco.duracaoMinutos) || 0;
+    if (ocorreNoDia(bloco, data)) fatias.push([inicio, Math.min(1440, inicio + duracao)]);
+    const ontem = new Date(data);
+    ontem.setUTCDate(ontem.getUTCDate() - 1);
+    if (inicio + duracao > 1440 && ocorreNoDia(bloco, ontem)) fatias.push([0, inicio + duracao - 1440]);
+    return fatias;
+}
+
+function fatiasConflitam(a, b) {
+    return a.some(([a1, a2]) => b.some(([b1, b2]) => a1 < b2 && b1 < a2));
 }
 async function validarDisciplinaDoUsuario(usuarioId, disciplinaId) {
     if (disciplinaId && !await Disciplina.exists({ _id: disciplinaId, usuarioId })) {
@@ -67,30 +92,19 @@ function recorrenteNaData(bloco, data) {
     const semana = Math.floor((data.getTime() - inicio.getTime()) / 604800000);
     return semana >= 0 && semana % INTERVALO_SEMANAS[bloco.recorrencia] === 0;
 }
-function caiNoMesmoDia(blocoA, blocoB) {
-    if (blocoA.recorrencia === 'unico' && blocoB.recorrencia === 'unico') return blocoA.data.getTime() === blocoB.data.getTime();
-    if (blocoA.recorrencia === 'unico') return recorrenteNaData(blocoB, blocoA.data);
-    if (blocoB.recorrencia === 'unico') return recorrenteNaData(blocoA, blocoB.data);
-    const inicioA = new Date(blocoA.inicioRecorrencia || blocoA.criadoEm || 0);
-    const inicioB = new Date(blocoB.inicioRecorrencia || blocoB.criadoEm || 0);
-    const inicio = new Date(Math.max(inicioA.getTime(), inicioB.getTime()));
-    inicio.setUTCHours(0, 0, 0, 0);
-    for (let i = 0; i < 42; i++) {
-        const data = new Date(inicio);
-        data.setUTCDate(data.getUTCDate() + i);
-        if (recorrenteNaData(blocoA, data) && recorrenteNaData(blocoB, data)) return true;
-    }
-    return false;
-}
 async function validarConflito(usuarioId, bloco, ignorarId = null) {
     const consulta = { usuarioId, _id: { $ne: ignorarId || new mongoose.Types.ObjectId() } };
     const existentes = await BlocoFixo.find(consulta).select('recorrencia diasSemana data inicioRecorrencia criadoEm horaInicio duracaoMinutos');
-    const inicio = bloco.horaInicio.split(':').map(Number).reduce((h, m) => h * 60 + m);
-    const choque = existentes.some(outro => {
+    const inicio = new Date();
+    inicio.setUTCHours(0, 0, 0, 0);
+    const choque = existentes.some((outro) => {
         const existente = outro.toObject();
-        if (!caiNoMesmoDia(bloco, existente)) return false;
-        const outroInicio = existente.horaInicio.split(':').map(Number).reduce((h, m) => h * 60 + m);
-        return inicio < outroInicio + existente.duracaoMinutos && outroInicio < inicio + bloco.duracaoMinutos;
+        for (let i = 0; i < 42; i += 1) {
+            const data = new Date(inicio);
+            data.setUTCDate(data.getUTCDate() + i);
+            if (fatiasConflitam(fatiasNoDia(bloco, data), fatiasNoDia(existente, data))) return true;
+        }
+        return false;
     });
     if (choque) throw new ErroApi(409, 'Este hor\u00e1rio se sobrep\u00f5e a outro bloco cadastrado nos mesmos dias.');
 }

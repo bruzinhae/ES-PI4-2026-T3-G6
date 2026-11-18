@@ -32,6 +32,8 @@
         for (const [campo, nome] of Object.entries(CAMPOS)) {
             rascunho[campo] = Boolean(formulario.querySelector(`[name="${nome}"]`)?.checked);
         }
+        rascunho.janelaFoco = document.getElementById('config-janela')?.value || 'manha';
+        rascunho.duracaoMinutos = Number(document.getElementById('config-duracao')?.value || 50);
         return rascunho;
     }
 
@@ -44,6 +46,10 @@
         seletor?.querySelectorAll('button').forEach((botao) => {
             botao.classList.toggle('ativo', botao.dataset.rigidez === rigidez);
         });
+        const janela = document.getElementById('config-janela');
+        const duracao = document.getElementById('config-duracao');
+        if (janela) janela.value = configuracao.janelaFoco || 'manha';
+        if (duracao) duracao.value = String(configuracao.duracaoMinutos || 50);
         atualizarTextos(configuracao);
     }
 
@@ -57,7 +63,7 @@
 
         if (metaAntifadiga) {
             metaAntifadiga.textContent = configuracao.antifadiga
-                ? 'Limite contínuo: 90 min'
+                ? 'Pausa de 10 min entre sessões'
                 : 'Proteção desligada';
         }
         if (metaFoco) {
@@ -110,7 +116,10 @@
     function houveMudanca() {
         if (!salva) return false;
         const atual = lerRascunho();
-        return Object.keys(CAMPOS).some((campo) => atual[campo] !== salva[campo]) || atual.rigidez !== salva.rigidez;
+        return Object.keys(CAMPOS).some((campo) => atual[campo] !== salva[campo])
+            || atual.rigidez !== salva.rigidez
+            || atual.janelaFoco !== salva.janelaFoco
+            || atual.duracaoMinutos !== salva.duracaoMinutos;
     }
 
     function refletirRascunho() {
@@ -148,7 +157,7 @@
     }
 
     formulario?.addEventListener('change', (evento) => {
-        if (evento.target.matches('input[type="checkbox"]')) refletirRascunho();
+        if (evento.target.matches('input[type="checkbox"], select')) refletirRascunho();
     });
 
     seletor?.addEventListener('click', (evento) => {
@@ -171,7 +180,36 @@
         carregar().catch((erro) => marcarEstado(erro.message || 'Não foi possível atualizar'));
     });
 
-    carregar().catch((erro) => marcarEstado(erro.message || 'Não foi possível carregar'));
+    async function pintarPlanos() {
+        const lista = document.getElementById('lista-planos');
+        if (!lista || !AcaiApi.listarPlanosIa) return;
+        const planos = await AcaiApi.listarPlanosIa();
+        const pendentes = planos.filter((plano) => plano.situacao === 'pendente').slice(0, 5);
+        lista.hidden = pendentes.length === 0;
+        lista.innerHTML = pendentes.map((plano) => `
+            <article data-plano="${plano.id}">
+                <strong>${plano.sessoesPropostas?.length || 0} sessões sugeridas</strong>
+                <p>${plano.mensagem || ''}</p>
+                <button type="button" data-decisao="aprovada">Aprovar</button>
+                <button type="button" data-decisao="recusada">Recusar</button>
+            </article>`).join('');
+    }
+
+    document.getElementById('lista-planos')?.addEventListener('click', async (evento) => {
+        const botao = evento.target.closest('[data-decisao]');
+        const artigo = evento.target.closest('[data-plano]');
+        if (!botao || !artigo) return;
+        try {
+            await AcaiApi.decidirPlanoIa(artigo.dataset.plano, botao.dataset.decisao);
+            await pintarPlanos();
+        } catch (erro) {
+            marcarEstado(erro.message || 'Não foi possível decidir o plano');
+        }
+    });
+
+    carregar()
+        .then(pintarPlanos)
+        .catch((erro) => marcarEstado(erro.message || 'Não foi possível carregar'));
 })();
 
 (function () {

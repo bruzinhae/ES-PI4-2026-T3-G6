@@ -5,58 +5,71 @@
  * Avisos de sessão continuam; a contagem de tarefas por disciplina fica na grade.
  */
 
+import { DIA, chaveDoDia, inicioDoDia } from '../../utils/fuso.js';
+import { minutosDeEstudo, resumoRotina } from '../../utils/rotinaSemanal.js';
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
+import { Tarefa } from '../tarefas/Tarefa.js';
 import { Usuario } from '../usuarios/Usuario.js';
-import { minutosDaSemana, resumoRotina } from '../../utils/rotinaSemanal.js';
 
 const LIMITE_AVISOS = 8;
 
-function inicioDoDia(data) {
-    return new Date(data.getFullYear(), data.getMonth(), data.getDate());
-}
-
-function somarDias(data, dias) {
-    const copia = new Date(data);
-    copia.setDate(copia.getDate() + dias);
-    return copia;
-}
-
-function chaveData(data) {
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-    return `${data.getFullYear()}-${mes}-${dia}`;
-}
-
 export async function montarCabecalho(usuarioId) {
-    const agora = new Date();
+    const agora = Date.now();
     const inicioHoje = inicioDoDia(agora);
-    const fimHoje = somarDias(inicioHoje, 1);
+    const fimHoje = inicioHoje + DIA;
+    const hoje = new Date(inicioHoje);
+    const amanha = new Date(fimHoje);
 
-    const [blocos, usuario, sessoesHoje] = await Promise.all([
-        BlocoFixo.find({ usuarioId, recorrencia: { $in: ['semanal', 'quinzenal', 'a_cada_3_semanas'] } }).select('duracaoMinutos diasSemana recorrencia').lean(),
+    const [blocos, usuario, sessoesHoje, tarefasPrazo] = await Promise.all([
+        BlocoFixo.find({ usuarioId, recorrencia: { $in: ['semanal', 'quinzenal', 'a_cada_3_semanas'] } }).select('categoria disciplinaId duracaoMinutos diasSemana recorrencia').lean(),
         Usuario.findById(usuarioId).select('metaSemanalHoras').lean(),
         SessaoEstudo.find({
             usuarioId,
-            inicio: { $gte: inicioHoje, $lt: fimHoje },
+            inicio: { $gte: hoje, $lt: amanha },
             situacao: { $ne: 'cancelada' },
         }).select('situacao').lean(),
+        Tarefa.find({
+            usuarioId,
+            situacao: { $ne: 'concluida' },
+            prazo: { $ne: null, $lt: amanha },
+        }).select('titulo prazo').sort({ prazo: 1 }).limit(5).lean(),
     ]);
 
     const notificacoes = [];
+    const chave = chaveDoDia(inicioHoje);
 
     if (sessoesHoje.length) {
         const feitas = sessoesHoje.filter((sessao) => sessao.situacao === 'concluida').length;
         notificacoes.push({
-            id: `sessoes-${chaveData(inicioHoje)}`,
+            id: `sessoes-${chave}`,
             texto: `Você concluiu ${feitas}/${sessoesHoje.length} sessões de hoje.`,
             quando: 'Hoje',
             href: 'index_calendario.html',
         });
     }
 
+    const atrasadas = tarefasPrazo.filter((tarefa) => tarefa.prazo < hoje);
+    const vencemHoje = tarefasPrazo.length - atrasadas.length;
+    if (atrasadas.length) {
+        notificacoes.push({
+            id: `tarefas-atraso-${chave}`,
+            texto: `${atrasadas.length} ${atrasadas.length === 1 ? 'tarefa passou' : 'tarefas passaram'} do prazo.`,
+            quando: 'Agora',
+            href: 'index_calendario.html',
+        });
+    }
+    if (vencemHoje) {
+        notificacoes.push({
+            id: `tarefas-hoje-${chave}`,
+            texto: `${vencemHoje} ${vencemHoje === 1 ? 'tarefa vence' : 'tarefas vencem'} hoje.`,
+            quando: 'Hoje',
+            href: 'index_calendario.html',
+        });
+    }
+
     return {
-        rotina: resumoRotina(minutosDaSemana(blocos), usuario?.metaSemanalHoras),
+        rotina: resumoRotina(minutosDeEstudo(blocos), usuario?.metaSemanalHoras),
         notificacoes: notificacoes.slice(0, LIMITE_AVISOS),
     };
 }

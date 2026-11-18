@@ -46,3 +46,9 @@ export function dataValida(chave) {
     const data = new Date(`${chave}T00:00:00Z`);
     return !Number.isNaN(data.getTime()) && data.toISOString().slice(0, 10) === chave;
 }
+
+// Minutos desde a meia-noite local (0–1439) do instante.
+export function minutosDoDia(ms) {
+    const local = new Date(paraLocal(ms));
+    return local.getUTCHours() * 60 + local.getUTCMinutes();
+}

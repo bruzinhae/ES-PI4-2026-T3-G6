@@ -15,6 +15,7 @@ import { app } from './app.js';
 import { conectarBanco } from './config/database.js';
 import { env } from './config/env.js';
 import { verificarCorreio } from './servicos/correio.js';
+import { garantirRanking } from './servicos/subirRanking.js';
 
 // Conecta no banco ANTES de subir o servidor: não faz sentido aceitar requisições
 // se não conseguimos salvar nem ler dados.
@@ -39,6 +40,7 @@ app.listen(env.porta, async () => {
         api: `${base}/api`,
     });
 
+    await garantirRanking();
     const correio = await verificarCorreio();
 
     if (correio.ok) {

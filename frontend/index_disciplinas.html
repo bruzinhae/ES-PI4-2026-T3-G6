@@ -15,7 +15,7 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="CSS/style_modal_bloco_fixo.css?v=2">
-    <link rel="stylesheet" href="CSS/layout.css?v=20">
+    <link rel="stylesheet" href="CSS/layout.css?v=21">
     <link rel="stylesheet" href="CSS/style_disciplinas.css?v=20">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
     <script src="JS/users/guarda.js?v=1"></script>
@@ -49,7 +49,7 @@
 
                 <div class="acoes-pagina">
 
-                    <button type="button" class="botao-claro">
+                    <button type="button" class="botao-claro" id="exportar-grade">
                         <img src="assets/icons/disciplinas/exportar.svg" alt="" width="13.33" height="13.33">
                         <span>Exportar Grade (.PDF)</span>
                     </button>
@@ -76,6 +76,13 @@
                     </div>
 
                     <div class="filtros">
+                        <select id="filtrar-situacao" class="seletor" aria-label="Filtrar por situação">
+                            <option value="ativa">Ativas</option>
+                            <option value="concluida">Concluídas</option>
+                            <option value="trancada">Trancadas</option>
+                            <option value="todas">Todas</option>
+                        </select>
+
                         <select id="filtrar-area" class="seletor seletor-area" aria-label="Filtrar por área">
                             <option value="todas">Filtrar por Área</option>
                         </select>
