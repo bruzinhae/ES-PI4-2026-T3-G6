@@ -810,9 +810,12 @@ const ETIQUETA_CLASSE = {
         const campo = document.getElementById('campo-bloco-disciplina');
         const indicadorObrigatorio = document.getElementById('bloco-disciplina-obrigatoria');
         campo.hidden = !aula;
+<<<<<<< Updated upstream
         seletorDisciplina.required = aula;
         seletorDisciplina.setAttribute('aria-required', String(aula));
         indicadorObrigatorio.hidden = !aula;
+=======
+>>>>>>> Stashed changes
     }
 
     function alternarRecorrencia() {
@@ -919,10 +922,6 @@ const ETIQUETA_CLASSE = {
         if (!['quinzenal', 'a_cada_3_semanas'].includes(dados.recorrencia)) dados.inicioRecorrencia = null;
         dados.horaInicio = String(dados.horaInicio || '').slice(0, 5);
         delete dados.horaFim;
-        if (dados.categoria === 'aulas' && !dados.disciplinaId) {
-            exibirErro('Escolha a matéria deste horário de aula.');
-            return;
-        }
         if (dados.categoria !== 'aulas') dados.disciplinaId = null;
         const erro = document.querySelector('#erro-form-bloco'); erro.textContent = '';
         if (dados.recorrencia !== 'unico' && !dados.diasSemana.length) { exibirErro('Selecione ao menos um dia da semana.'); return; }
