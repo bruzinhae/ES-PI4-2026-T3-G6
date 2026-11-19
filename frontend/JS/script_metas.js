@@ -1,3 +1,4 @@
+// Bernardo Alberto Amaro - 25015832
 function calcularPorcentagemProgresso(estudado, total) {
     if (total <= 0) return 0;
     if (estudado >= total) return 100;

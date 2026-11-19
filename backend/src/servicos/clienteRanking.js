@@ -1,3 +1,4 @@
+// Bernardo Alberto Amaro - 25015832
 import net from 'node:net';
 import { env } from '../config/env.js';
 import { ErroApi } from '../utils/ErroApi.js';

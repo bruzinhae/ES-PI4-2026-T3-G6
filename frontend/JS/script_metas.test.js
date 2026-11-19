@@ -1,3 +1,4 @@
+// Bernardo Alberto Amaro - 25015832
 const { calcularPorcentagemProgresso } = require('./script_metas');
 
 describe('Cálculos de Progresso de Metas', () => {
