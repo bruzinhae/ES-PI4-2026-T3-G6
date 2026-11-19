@@ -1,98 +1,130 @@
-# PI_IV_AcaiStudy
+# AçaíStudy 🍇
 
-Aplicação AçaíStudy (PI IV). Frontend estático em `frontend/`; backend (API Node.js/Express + MongoDB) em `backend/`.
+> **Organização de estudos sem esforço.**
 
-## Pré-requisitos
+Projeto Integrador IV · PUC
 
-- [Node.js 20+](https://nodejs.org/)
-- Conta MongoDB Atlas (recomendado) **ou** [Docker](https://docs.docker.com/get-docker/) para Mongo local
+## O problema
 
-## MongoDB Atlas (oficial do projeto)
+Muitos estudantes universitários têm dificuldade para organizar a semana. Aulas, trabalho, provas e
+entregas disputam o mesmo tempo, e montar um cronograma na mão (e mantê-lo atualizado) dá trabalho.
+Na prática, o planejamento fica de lado e o estudo acaba concentrado na véspera.
 
-No Compass, use o favorito **AçaíStudy**  
-(`mongodb+srv://...@acaistudy.9drrdbe.mongodb.net/`).
+## A solução
 
-1. Copie o exemplo de variáveis:
+O AçaíStudy é uma plataforma web que **monta e ajusta a rotina de estudos sozinha**. O estudante informa
+suas disciplinas, seus horários fixos e suas metas. A plataforma encontra os horários livres da semana,
+decide o que é mais urgente e sugere onde encaixar cada sessão de estudo. Depois, acompanha o progresso
+e propõe melhorias com a ajuda de uma assistente de IA, a **Sofia**.
 
-```bash
-cd backend
-cp .env.example .env
-```
+## Funcionalidades
 
-2. Edite `backend/.env` e troque `SUA_SENHA` pela senha do usuário Atlas `henrique_db_user`.
+| | Funcionalidade | Descrição |
+| - | -------------- | --------- |
+| 🚀 | **Onboarding guiado** | No primeiro acesso, perguntas sobre o semestre, os horários, o foco e as metas deixam tudo configurado |
+| 📅 | **Calendário semanal** | Aulas, compromissos fixos e sessões de estudo juntos, com **ajuste automático da grade** |
+| 📚 | **Disciplinas e tarefas** | Matérias do semestre, provas e trabalhos, e quanto tempo livre sobra na semana |
+| 🎯 | **Metas** | Objetivos com **sugestão automática de marcos** até o prazo |
+| 📊 | **Relatórios** | Horas estudadas, progresso por disciplina e sugestões da Sofia |
+| 🤖 | **Sofia (IA)** | Assistente com Gemini que analisa a rotina e sugere ajustes |
+| 🎓 | **Integração com o Canvas** | Importa cursos e atividades do Canvas LMS da instituição |
+| 🔐 | **Conta e segurança** | Cadastro, login com sessão por token, confirmação de e-mail e recuperação de senha |
 
-3. Suba a API:
+## Arquitetura
 
-```bash
-cd backend
-npm install
-npm run dev   # http://localhost:3001/api
-```
-
-No log, procure por:
+O sistema tem três camadas independentes:
 
 ```text
-MongoDB: conexão OK com o banco 'acaistudy'
+┌────────────┐   HTTP/JSON   ┌──────────────────┐   TCP/JSON   ┌────────────────────────┐
+│  Frontend  │ ────────────► │   API (Node.js)  │ ───────────► │ Servidor Java (ranking)│
+│ HTML/CSS/JS│ ◄──────────── │  Express · 3001  │ ◄─────────── │   sockets · porta 3000 │
+└────────────┘               └────────┬─────────┘              └────────────────────────┘
+                                      │
+                       ┌──────────────┼───────────────┐
+                       ▼              ▼               ▼
+                   MongoDB      Gemini (Sofia)   Canvas · SMTP
 ```
 
-> Não commite o arquivo `.env` (já está no `.gitignore`).
+- **Frontend:** páginas em HTML, CSS e JavaScript puro, entregues pela própria API.
+- **API:** Node.js com Express e MongoDB (Mongoose). Organizada em módulos (usuários, disciplinas,
+  tarefas, sessões, metas, relatórios, grade…), com autenticação por token.
+- **Servidor de ranking:** em Java, cliente-servidor com sockets e threads, no modelo visto em aula.
+  Recebe os horários livres e as tarefas pendentes e devolve **um ranking de prioridade** para cada
+  horário, além da distribuição dos marcos das metas. Não acessa o banco nem guarda estado: cada pedido
+  é uma linha de JSON.
 
-## MongoDB local (opcional / Docker)
+| Camada | Tecnologias |
+| ------ | ----------- |
+| Frontend | HTML5, CSS3, JavaScript (ES Modules), Jest |
+| Backend | Node.js 20, Express 5, MongoDB Atlas, Mongoose, bcrypt, Nodemailer |
+| Servidor | Java 17 (sem dependências), JUnit 5 |
+| Integrações | Google Gemini, Canvas LMS, SMTP |
 
-Se preferir local em vez do Atlas:
+## Como rodar
+
+**Pré-requisitos:** [Node.js 20+](https://nodejs.org/) e [Java 17+](https://adoptium.net/). Para o banco,
+use o MongoDB Atlas do grupo ou o [Docker](https://docs.docker.com/get-docker/), que sobe um Mongo local.
+
+**1. Configure o ambiente** (só na primeira vez):
 
 ```bash
 cd backend
-docker compose up -d
-# sem MONGODB_URI, usa mongodb://localhost:27017/acaistudy
-npm run dev
+cp .env.example .env     # coloque a senha do Atlas em MONGODB_URI
+npm install
 ```
 
-## Backend
+> Sem Atlas? Apague a linha `MONGODB_URI` do `.env` e rode `docker compose up -d` dentro de `backend/`.
 
-API única em Node.js (`backend/`), organizada em módulos (`backend/src/modulos/`). Veja [backend/README.md](backend/README.md).
-
-## Servidor Java
-
-O servidor Java (`servidor/`) é um serviço TCP separado, na porta 3000. O backend Node é o cliente dele e o usa em três lugares:
-o "Ajuste da grade" do calendário e o card de ajuste da página de Disciplinas (`GET /api/grade/sugestoes`),
-o botão "Sugerir marcos" das Metas (a Sofia) e `POST /api/ranking`. Sem ele, a grade responde 503 e a Sofia volta a usar só o Gemini.
-
-Para subir (Java 17, sem Maven e sem dependências):
+**2. Ligue o servidor Java** (terminal 1):
 
 ```bash
 cd servidor/src/main/java
 javac -d out Servidor.java
-java -cp out Servidor            # porta 3000
+java -cp out Servidor            # porta 3000 · para desligar, digite "desativar"
 ```
 
-Depois de mudar o código do servidor, recompile e reinicie. Veja [servidor/README.md](servidor/README.md) e
-[backend/README.md](backend/README.md) para detalhes.
+**3. Ligue a API** (terminal 2):
 
-## Frontend
+```bash
+cd backend
+npm run dev                      # porta 3001
+```
 
-Com o backend no ar, as páginas já abrem em `http://localhost:3001/index.html`, porque o mesmo servidor entrega o `frontend/`. Também dá para abrir a pasta com a extensão Live Server (a API em `localhost:3001` libera CORS no desenvolvimento).
+**4. Abra o site:** **<http://localhost:3001/index.html>** 🎉
 
-Todas as telas, menos a home (`index.html`), usam a API pelo cliente `frontend/JS/users/api.js`: conta e perfil, calendário, disciplinas e blocos fixos, metas, relatórios e configurações. O token fica em `localStorage` (`acaistudy-token`) e, para apontar para outra API, defina `window.ACAISTUDY_API_URL`.
+A API sobe só com o banco. A **Sofia** precisa de `GEMINI_API_KEY`, o **e-mail** precisa das variáveis
+`SMTP_*` e o **Canvas** precisa das variáveis `CANVAS_*`, todas no `.env`. Se o servidor Java estiver
+desligado, o ajuste da grade fica indisponível e o resto do site continua funcionando.
 
-Ponto de entrada: `frontend/index.html` (homepage). Autenticação em `frontend/index_login.html`.
+## Testes
 
-## Estrutura
+```bash
+cd backend  && npm test                  # API: rotina semanal
+cd frontend && npm install && npm test   # Frontend: metas (Jest)
+cd servidor && mvn test                  # Servidor Java: JUnit 5 (precisa do Maven)
+```
+
+## Estrutura do repositório
 
 ```text
-├── frontend/
-│   ├── index.html                    # homepage
-│   ├── index_*.html                  # app e autenticação
-│   ├── CSS/                          # estilos
-│   ├── JS/                           # scripts (JS/users/: login, cadastro, perfil, onboarding e cliente da API de usuários)
-│   └── assets/                       # ícones e imagens
-├── backend/
-│   ├── docker-compose.yml            # MongoDB local (opcional)
-│   ├── .env.example                  # modelo das variáveis de ambiente (Atlas, SMTP, Canvas, Gemini, servidor Java)
-│   ├── package.json
-│   └── src/                          # API Node.js (config, middlewares, servicos, utils, modulos/)
-├── servidor/                         # servidor Java de ranking, alocação e metas (veja servidor/README.md)
-│   └── src/main/java/                # código do servidor, em pastas (compile com javac -d out Servidor.java)
+├── frontend/                 # telas (index_*.html), estilos (CSS/) e scripts (JS/)
+├── backend/                  # API Node.js
+│   └── src/modulos/          # um módulo por área: auth, usuarios, disciplinas, tarefas, metas…
+├── servidor/                 # servidor Java de ranking, alocação e metas
 └── Arquivos/
-    └── Dicionário de dados/          # um JSON por coleção do MongoDB
+    └── Dicionário de dados/  # estrutura de cada coleção do MongoDB
 ```
+
+## Documentação
+
+- [backend/README.md](backend/README.md): rotas da API, autenticação e variáveis de ambiente.
+- [servidor/README.md](servidor/README.md): arquitetura do servidor Java e protocolo de comunicação.
+- [Dicionário de dados](Arquivos/Dicionário%20de%20dados/): campos de cada coleção do banco.
+
+## Equipe
+
+- Bernardo Alberto Amaro
+- Bruna Barbour Fernandes
+- Guilherme
+- Henrique Ribeiro
+- Rafael Candian

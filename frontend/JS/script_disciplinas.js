@@ -810,12 +810,9 @@ const ETIQUETA_CLASSE = {
         const campo = document.getElementById('campo-bloco-disciplina');
         const indicadorObrigatorio = document.getElementById('bloco-disciplina-obrigatoria');
         campo.hidden = !aula;
-<<<<<<< Updated upstream
         seletorDisciplina.required = aula;
         seletorDisciplina.setAttribute('aria-required', String(aula));
         indicadorObrigatorio.hidden = !aula;
-=======
->>>>>>> Stashed changes
     }
 
     function alternarRecorrencia() {
