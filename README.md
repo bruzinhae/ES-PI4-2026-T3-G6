@@ -55,8 +55,8 @@ O sistema tem três camadas independentes:
 
 | Camada | Tecnologias |
 | ------ | ----------- |
-| Frontend | HTML5, CSS3, JavaScript (ES Modules), Jest |
-| Backend | Node.js 20, Express 5, MongoDB Atlas, Mongoose, bcrypt, Nodemailer |
+| Frontend | HTML5, CSS3, JavaScript, Jest |
+| Backend | Node.js 20, Express 5, MongoDB Atlas, Mongoose, bcryptjs, Nodemailer |
 | Servidor | Java 17 (sem dependências), JUnit 5 |
 | Integrações | Google Gemini, Canvas LMS, SMTP |
 
@@ -125,6 +125,6 @@ cd servidor && mvn test                  # Servidor Java: JUnit 5 (precisa do Ma
 
 - Bernardo Alberto Amaro
 - Bruna Barbour Fernandes
-- Guilherme
+- Guilherme Domingues de Sousa
 - Henrique Ribeiro
 - Rafael Candian

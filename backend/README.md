@@ -83,10 +83,13 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | POST | `/api/auth/confirmar-email` | `{ token }` → `{ usuario }` com `emailVerificado: true` |
 | POST | `/api/auth/reenviar-confirmacao` 🔒 | Manda outro e-mail de confirmação → `{ confirmacaoEnviada, mensagem }` (avisa se o e-mail já está confirmado) |
 | POST | `/api/auth/logout` 🔒 | Encerra a sessão atual (204) |
+| GET | `/api/auth/sessoes` 🔒 | Lista as sessões abertas do usuário |
+| POST | `/api/auth/sessoes/encerrar-outras` 🔒 | Encerra todas as sessões, menos a atual |
 | GET | `/api/auth/eu` 🔒 | Usuário dono do token → `{ usuario }` |
 | GET | `/api/usuarios` 🔒 | **Read** — lista todos → `{ usuarios }` |
 | GET | `/api/usuarios/:id` 🔒 | **Read** — um usuário → `{ usuario }` (só o próprio; senão 403) |
 | PATCH | `/api/usuarios/:id` 🔒 | **Update** — campos do perfil e/ou `senha` → `{ usuario }` (só o próprio; trocar a senha encerra as outras sessões) |
+| GET | `/api/usuarios/:id/exportar` 🔒 | **Exportar** — dados da conta do próprio usuário |
 | POST | `/api/usuarios/:id/avatar` 🔒 | **Foto** — formulário com o arquivo no campo `foto` (PNG ou JPG, até 5 MB) → `{ usuario }` com `urlAvatar` apontando para a imagem |
 | DELETE | `/api/usuarios/:id/avatar` 🔒 | **Remove a foto** — apaga o arquivo e volta `urlAvatar` para `null` → `{ usuario }` |
 | DELETE | `/api/usuarios/:id` 🔒 | **Delete** — exclui a conta e as sessões (só o próprio) |
@@ -133,6 +136,8 @@ Rotas marcadas com 🔒 exigem o cabeçalho `Authorization: Bearer <token>` (o t
 | PATCH | `/api/sessoes-estudo/:id` 🔒 | Move ou ajusta a sessão (`inicio`, `fim`, `titulo`, `situacao`, `tipoFoco`). Revalida o conflito; cancelar libera o horário |
 | DELETE | `/api/sessoes-estudo/:id` 🔒 | Exclui a sessão (204) |
 | POST | `/api/sessoes-estudo/pomodoro` 🔒 | Registra uma sessão de foco já realizada (`minutos`, `fim`, `completo`) |
+| GET | `/api/planos-ia` 🔒 | Lista os planos propostos pela IA |
+| POST | `/api/planos-ia/:id/decidir` 🔒 | Decide um plano (`situacao` no corpo) |
 | GET | `/api/saude` | Health check |
 
 O corpo de `POST /api/ranking` segue o protocolo descrito em [servidor/README.md](../servidor/README.md):
@@ -189,7 +194,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   a consistência usa as sessões já encerradas e o ritmo é a média do progresso das metas ativas.
 - Na subida, `config/colecoes.js` cria/sincroniza todas as coleções do dicionário: `usuarios`, `sessoes_autenticacao`,
   `tokens_recuperacao_senha`, `tokens_confirmacao_email`, `disciplinas`, `blocos_rotina`, `tarefas`, `metas`, `sessoes_estudo`,
-  `conversas_sofia`, `planos_ia`. Metas, tarefas e sessões de estudo têm CRUD próprio; `planos_ia` tem schema, mas ainda não tem rotas.
+  `conversas_sofia`, `planos_ia`. Metas, tarefas e sessões de estudo têm CRUD próprio; `planos_ia` tem rotas em `/api/planos-ia`.
 - O frontend guarda o token em `localStorage` (`acaistudy-token`) e o envia em toda requisição (`JS/users/api.js`).
 - Canvas: o token de acesso fica cifrado no documento do usuário e some de toda resposta JSON. A sincronização
   grava `origem: "canvas"` e `idExterno` em disciplinas e tarefas, então uma nova sincronização atualiza em vez de duplicar.
@@ -225,7 +230,7 @@ backend/
         ├── ranking/               # POST /api/ranking, encaminha ao servidor Java
         ├── relatorios/            # painel da semana e conversa com a Sofia
         ├── cabecalho/             # gauge da rotina e avisos de sessão
-        └── planosIa/              # schema PlanoIa.js (coleção pronta, sem rotas)
+        └── planosIa/              # planos_ia: listagem e decisão (/api/planos-ia)
 
 Novo módulo: crie `src/modulos/<nome>/` com o mesmo padrão (model, service, controller, routes)
 e registre as rotas em `src/app.js`.

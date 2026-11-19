@@ -62,10 +62,10 @@ Para testar, suba o backend e use o botão "Ajuste da grade" do calendário (ou 
 
 ## Testes automatizados
 
-Os testes JUnit 5 em `servidor/src/test` ainda são da versão anterior do servidor (objetos serializados e sem pastas) e **não compilam** com o código atual: ficam para o Bernardo adaptar ao protocolo em JSON e aos pacotes. Só os testes usam Maven:
+Os testes JUnit 5 em `servidor/src/test` cobrem `Tarefa`, `EspacoLivre` e `SupervisoraDeConexao`. Só os testes usam Maven:
 
 ```bash
-mvn test      # na pasta servidor/, depois que os testes forem adaptados
+mvn test      # na pasta servidor/
 ```
 
 ## Protocolo
@@ -312,4 +312,4 @@ O código quase não tem comentários (como o do exemplo do Fazedor de Continhas
 - A alocação é gulosa: boa para uma semana de estudo, mas não busca a combinação ótima entre todas as tarefas.
 - A pausa antifadiga é fixa (10 min). As preferências `rigidez`, `repeticaoEspacada` e `ajusteDinamico` da tela de foco ainda não entram no cálculo.
 - O servidor não guarda nada: persistir as sessões aceitas é função do backend.
-- Os testes JUnit (issue #37) são da versão anterior e precisam ser adaptados. A alocação e as metas foram conferidas comparando as respostas com as da versão anterior do servidor, com milhares de pedidos, mas ainda não têm testes JUnit próprios.
+- A alocação e as metas foram conferidas comparando as respostas com as da versão anterior do servidor, com milhares de pedidos, mas ainda não têm testes JUnit próprios.
