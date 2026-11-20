@@ -298,7 +298,7 @@ consulta tarefas no banco: o chamador Node deve enviar esses dados no corpo da r
 
 ## Notas de implementação
 
-O código quase não tem comentários (como o do exemplo do Fazedor de Continhas); o que não é óbvio nele fica aqui.
+Cada classe e cada método têm um comentário curto (sem acentos, como o resto do código); o que não é óbvio e não cabe num comentário fica aqui.
 
 - **Ids repetidos.** Se duas tarefas (ou metas) chegam com o mesmo `id`, vale a primeira no desempate; na alocação vale a primeira que não está concluída. Por isso `Candidato` e `NotaDeMeta` guardam o prazo e a prioridade dessa primeira.
 - **Desempate.** Os três `compareTo` (`EspacoLivre`, `Candidato` e `NotaDeMeta`) comparam um atributo por vez e `Collections.sort` usa o resultado. Datas são comparadas pelo instante (`isBefore`, `isAfter` e `isEqual`), sem olhar o fuso.

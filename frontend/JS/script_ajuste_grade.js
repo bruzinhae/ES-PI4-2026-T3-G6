@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 // Card "Ajuste automático de grade" da página de Disciplinas: pede as sugestões da semana
 // (o servidor Java encaixa as tarefas nos horários que sobram depois dos blocos fixos) e mostra um resumo.
 (() => {

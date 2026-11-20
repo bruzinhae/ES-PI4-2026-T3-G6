@@ -6,16 +6,26 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.Semaphore;
 
+// Representa o cliente conectado: guarda o socket e os fluxos de texto e oferece
+// as operacoes do protocolo. Cada mensagem e uma linha de JSON.
 public class Parceiro
 {
+    // socket da conexao TCP com o cliente
     private Socket         conexao;
+    // receptor: le o texto enviado pelo cliente, linha por linha
     private BufferedReader receptor;
+    // transmissor: escreve texto para o cliente
     private PrintWriter    transmissor;
 
+    // comunicado ja lido mas ainda nao entregue (null = nada guardado)
     private Comunicado proximoComunicado=null;
 
+    // garante que espie() e envie() nao leiam a mesma linha ao mesmo tempo
+    // Semaphore com 1 permissao funciona como trava: quem pega a permissao
+    // executa sozinho ate devolve-la. Evita duas threads lendo ao mesmo tempo.
     private Semaphore mutEx = new Semaphore (1,true);
 
+    // Recebe o socket e os fluxos ja abertos; nenhum pode ser nulo
     public Parceiro (Socket         conexao,
                      BufferedReader receptor,
                      PrintWriter    transmissor)
@@ -35,21 +45,27 @@ public class Parceiro
         this.transmissor = transmissor;
     }
 
+    // Envia um comunicado ao cliente (escreve o JSON dele em uma linha)
     public void receba (Comunicado x) throws Exception
     {
         this.transmissor.println (x); // o toString de cada comunicado e o seu JSON
+        // flush: empurra o texto para a rede agora, sem esperar encher o buffer
         this.transmissor.flush   ();
 
+        // PrintWriter nao lanca excecao: checkError diz se houve falha na escrita
         if (this.transmissor.checkError ())
             throw new Exception ("Erro de transmissao");
     }
 
+    // Olha o proximo comunicado sem consumi-lo: fica guardado ate o envie()
     public Comunicado espie () throws Exception
     {
         try
         {
+            // pega a trava (espera se outra thread estiver com ela)
             this.mutEx.acquireUninterruptibly();
             if (this.proximoComunicado==null) this.proximoComunicado = this.leComunicado ();
+            // devolve a trava
             this.mutEx.release();
             return this.proximoComunicado;
         }
@@ -59,6 +75,7 @@ public class Parceiro
         }
     }
 
+    // Entrega o proximo comunicado (le da conexao se ainda nao houver um guardado)
     public Comunicado envie () throws Exception
     {
         try
@@ -74,6 +91,7 @@ public class Parceiro
         }
     }
 
+    // Fecha os fluxos e o socket
     public void adeus () throws Exception
     {
         try
@@ -88,13 +106,17 @@ public class Parceiro
         }
     }
 
+    // Le uma linha, descobre o comunicado pelo campo "tipo" e o constroi.
+    // Devolve null quando o cliente fechou a conexao.
     private Comunicado leComunicado () throws Exception // uma linha de texto = um comunicado em JSON
     {
+        // readLine bloqueia ate chegar uma linha inteira
         String linha = this.receptor.readLine ();
 
         if (linha==null)
             return null; // o parceiro fechou a conexao
 
+        // transforma o texto da linha em objeto JSON
         ObjetoJson json = new LeitorDeJson (linha).leObjeto ();
         String     tipo = json.getTexto ("tipo");
 

@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 import { Router } from 'express';
 import { exigirAutenticacao } from '../../middlewares/autenticacao.js';
 import * as controller from './gradeController.js';

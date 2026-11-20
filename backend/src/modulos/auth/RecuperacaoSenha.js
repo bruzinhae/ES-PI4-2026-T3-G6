@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 /**
  * auth/RecuperacaoSenha.js — SCHEMA da coleção "tokens_recuperacao_senha".
  *

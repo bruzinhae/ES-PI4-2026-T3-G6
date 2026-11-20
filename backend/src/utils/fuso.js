@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 import { env } from '../config/env.js';
 
 // Datas do calendário no fuso fixo da API (env.fuso). Os instantes são sempre milissegundos UTC;

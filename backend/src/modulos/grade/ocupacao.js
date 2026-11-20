@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 import { BlocoFixo } from '../blocosFixos/BlocoFixo.js';
 import { SessaoEstudo } from '../sessoesEstudo/SessaoEstudo.js';
 import { DIA, MINUTO, chaveDoDia, diaDaSemana, inicioDoDia, instanteLocal } from '../../utils/fuso.js';

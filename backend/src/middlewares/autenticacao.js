@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 /**
  * middlewares/autenticacao.js — PROTEÇÃO DE ROTAS.
  *

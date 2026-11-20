@@ -1,5 +1,7 @@
 import java.io.*;
 
+// Classe do material de aula (PPOO): le valores digitados no console. O Servidor usa
+// so getUmString, para ler o comando "desativar".
 public class Teclado
 {
     private static BufferedReader teclado =
@@ -7,6 +9,7 @@ public class Teclado
                    new InputStreamReader (
                    System.in));
 
+    // Le uma linha como texto
     public static String getUmString ()
     {
         String ret=null;
@@ -21,6 +24,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e converte para byte (erro se nao for um numero valido)
     public static byte getUmByte () throws Exception
     {
         byte ret=(byte)0;
@@ -39,6 +43,7 @@ public class Teclado
         return ret;
     }
  
+    // Le uma linha e converte para short
     public static short getUmShort () throws Exception
     {
         short ret=(short)0;
@@ -57,6 +62,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e converte para int
     public static int getUmInt () throws Exception
     {
         int ret=0;
@@ -75,6 +81,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e converte para long
     public static long getUmLong () throws Exception
     {
       //long ret=(long)0;
@@ -95,6 +102,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e converte para float
     public static float getUmFloat () throws Exception
     {
       //float ret=0;
@@ -115,6 +123,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e converte para double
     public static double getUmDouble () throws Exception
     {
       //double ret=0;
@@ -136,6 +145,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e devolve o primeiro caractere (erro se estiver vazia)
     public static char getUmChar () throws Exception
     {
         char ret=' ';
@@ -158,6 +168,7 @@ public class Teclado
         return ret;
     }
 
+    // Le uma linha e converte para boolean (true ou false)
     public static boolean getUmBoolean () throws Exception
     {
         boolean ret=false;

@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 /**
  * auth/Sessao.js — SCHEMA da coleção "sessoes_autenticacao".
  *

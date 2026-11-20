@@ -1,17 +1,23 @@
 // Bernardo Alberto Amaro - 25015832
+// Guilherme Domingues de Sousa - 22013871
 import net from 'node:net';
 import { env } from '../config/env.js';
 import { ErroApi } from '../utils/ErroApi.js';
 
+// Limites: tamanho máximo do pedido e da resposta (recusados acima disso), de itens por lista e de metas.
 const TAMANHO_MAXIMO = 2_000_000; // do pedido
 const TAMANHO_MAXIMO_DA_RESPOSTA = 16_000_000; // texto ocupa mais que bytes: um ranking grande passa de 2 MB
 const MAXIMO_DE_ITENS = 2000;
 const MAXIMO_DE_METAS = 200;
+// Valores padrão usados quando o pedido não informa o campo.
 const LIMITE_PADRAO = 10;
+// Valores de texto que o servidor Java aceita nesses campos.
 const JANELAS_DE_FOCO = ['manha', 'tarde', 'noite'];
 const CATEGORIAS = ['estudos', 'pessoal'];
 const MARCOS_PADRAO = 3;
+// Exemplo de data mostrado na mensagem de erro.
 const FORMATO_DA_DATA = '2026-10-27T09:00:00-03:00';
+// Fuso usado quando o pedido não traz "agora": -3 horas, em segundos (horário de Brasília).
 const FUSO_PADRAO = -3 * 3600;
 
 /**
@@ -23,10 +29,14 @@ const FUSO_PADRAO = -3 * 3600;
 
 // ------------------------------------------------------------------------------------------- datas
 
+// Reconhece uma data ISO-8601 com fuso, como 2026-11-12T15:00:00-03:00. Grupos: ano, mês, dia, hora,
+// minuto, segundo, fração do segundo, sinal do fuso e horas, minutos e segundos do fuso.
 const DATA_ISO = /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{0,9}))?)?(?:[Zz]|([+-])(\d{2})(?::(\d{2})(?::(\d{2}))?)?)$/;
 
+// true se o ano é bissexto.
 const bissexto = (ano) => ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0);
 
+// Quantos dias tem o mês (fevereiro depende do ano bissexto).
 function diasDoMes(ano, mes) {
   if (mes === 2) return bissexto(ano) ? 29 : 28;
   return [4, 6, 9, 11].includes(mes) ? 30 : 31;
@@ -42,6 +52,7 @@ function diaDaEpoca(ano, mes, dia) {
   return era * 146097 + doe - 719468;
 }
 
+// Operação inversa de diaDaEpoca: de dias desde 1970-01-01 para { ano, mes, dia }.
 function dataDoDia(diaDaEpocaLocal) {
   const z = diaDaEpocaLocal + 719468;
   const era = Math.floor(z / 146097);
@@ -55,6 +66,7 @@ function dataDoDia(diaDaEpocaLocal) {
   return { ano, mes, dia };
 }
 
+// Completa com zeros à esquerda (ex.: 7 vira 07).
 const preencher = (valor, tamanho) => String(valor).padStart(tamanho, '0');
 
 /** ISO-8601 com fuso → { segundos, nanos, deslocamento }, ou null se não estiver no formato ou a data não existir. */
@@ -105,13 +117,16 @@ const comoDataHora = (valor) => (valor ? formatarDataHora(valor) : null); // o s
 
 // ------------------------------------------------------------------------------- leitura dos campos
 
+// true só para objetos comuns (não é null nem lista).
 const ehObjeto = (valor) => valor !== null && typeof valor === 'object' && !Array.isArray(valor);
 
+// Confere que o campo é um objeto; senão responde 400.
 function objeto(valor, nome) {
   if (!ehObjeto(valor)) throw new ErroApi(400, `"${nome}" deve ser um objeto`);
   return valor;
 }
 
+// Devolve a lista do campo, conferindo que é uma lista e que não passa do máximo de itens.
 function lista(pedido, nome, maximo) {
   const valor = pedido[nome];
   if (!Array.isArray(valor)) throw new ErroApi(400, `"${nome}" deve ser uma lista`);
@@ -119,6 +134,7 @@ function lista(pedido, nome, maximo) {
   return valor;
 }
 
+// Devolve o campo como texto, ou o valor padrão se ele não foi informado.
 function texto(pedido, nome, padrao = null) {
   const valor = pedido[nome];
   if (valor === undefined || valor === null) return padrao;
@@ -132,6 +148,7 @@ function comoInt(valor) {
   return Number(BigInt.asIntN(32, longo));
 }
 
+// Devolve o campo como inteiro (ou null se ausente); número com casas decimais responde 400.
 function inteiro(pedido, nome) {
   const valor = pedido[nome];
   if (valor === undefined || valor === null) return null;
@@ -139,6 +156,7 @@ function inteiro(pedido, nome) {
   return comoInt(valor);
 }
 
+// Devolve o campo como verdadeiro/falso, ou o valor padrão se ausente.
 function logico(pedido, nome, padrao) {
   const valor = pedido[nome];
   if (valor === undefined || valor === null) return padrao;
@@ -146,6 +164,7 @@ function logico(pedido, nome, padrao) {
   return valor;
 }
 
+// Lê o campo como data e hora ISO-8601 com fuso; se for obrigatório e faltar, responde 400.
 function dataHora(pedido, nome, obrigatorio) {
   const valor = pedido[nome];
   if (valor === undefined || valor === null) {
@@ -159,26 +178,33 @@ function dataHora(pedido, nome, obrigatorio) {
 }
 
 // O servidor confia no que recebe (como o do Fazedor de Continhas); quem confere os intervalos é o cliente.
+// Confere que o valor (se informado) está entre o mínimo e o máximo.
 function entre(valor, nome, minimo, maximo) {
   if (valor !== null && (valor < minimo || valor > maximo)) throw new ErroApi(400, `"${nome}" deve estar entre ${minimo} e ${maximo}`);
   return valor;
 }
 
+// O id é obrigatório e não pode ser vazio.
 function idObrigatorio(id) {
   if (id === null) throw new ErroApi(400, '"id" é obrigatório');
   if (id.length === 0) throw new ErroApi(400, '"id" não pode ser vazio');
   return id;
 }
 
+// true se a data a é posterior à data b.
 const depoisDe = (a, b) => a.segundos > b.segundos || (a.segundos === b.segundos && a.nanos > b.nanos);
 
 // ------------------------------------------------------------------------ pedidos → comunicados
 
+// Instante atual no formato interno, usado quando o pedido não informa "agora".
 const agora = () => ({ segundos: Math.floor(Date.now() / 1000), nanos: (Date.now() % 1000) * 1_000_000, deslocamento: FUSO_PADRAO });
 
+// Confere o pedido de ranking que o backend montou e escreve o comunicado que o servidor Java entende
+// (campo tipo = pedidoDeRanking). Campo ausente recebe valor padrão; valor inválido responde 400.
 function pedidoDeRanking(pedido) {
   const quando = dataHora(pedido, 'agora', false) || agora();
 
+  // Preferências padrão, usadas se o pedido não trouxer as do usuário.
   let preferencias = { janelaFoco: 'manha', focoMatinal: true, duracaoMinutos: 50, antifadiga: true };
   if (pedido.preferencias !== undefined && pedido.preferencias !== null) {
     const p = objeto(pedido.preferencias, 'preferencias');
@@ -193,6 +219,7 @@ function pedidoDeRanking(pedido) {
     };
   }
 
+  // Espaços livres: cada um precisa de id, início e fim, com o fim depois do início.
   const espacos = lista(pedido, 'espacos', MAXIMO_DE_ITENS).map((item) => {
     const e = objeto(item, 'espacos[]');
     const inicio = dataHora(e, 'inicio', true);
@@ -201,6 +228,7 @@ function pedidoDeRanking(pedido) {
     return { id: idObrigatorio(texto(e, 'id')), inicio: comoDataHora(inicio), fim: comoDataHora(fim) };
   });
 
+  // Tarefas pendentes. Dificuldade e peso vêm da disciplina, quando existe.
   const tarefas = lista(pedido, 'tarefas', MAXIMO_DE_ITENS).map((item) => {
     const t = objeto(item, 'tarefas[]');
     const prazo = dataHora(t, 'prazo', false);
@@ -233,6 +261,7 @@ function pedidoDeRanking(pedido) {
     };
   });
 
+  // Máximo de candidatos devolvidos por espaço.
   const limite = entre(inteiro(pedido, 'limite'), 'limite', 1, 100);
   return {
     tipo: 'pedidoDeRanking',
@@ -245,9 +274,11 @@ function pedidoDeRanking(pedido) {
   };
 }
 
+// Valores aceitos para o tipo e a prioridade de uma meta.
 const TIPOS_DE_META = ['geral', 'disciplina', 'habito', 'projeto'];
 const PRIORIDADES_DE_META = ['baixa', 'media', 'alta'];
 
+// Confere o pedido de metas e escreve o comunicado pedidoDeMetas. Metas que não estão ativas ficam de fora.
 function pedidoDeMetas(pedido) {
   const quando = dataHora(pedido, 'agora', false) || agora();
 
@@ -281,6 +312,8 @@ function pedidoDeMetas(pedido) {
 
 // ------------------------------------------------------------------------ comunicados → respostas
 
+// Converte uma sessão alocada, como o servidor Java a devolve, para o formato da API
+// (as três notas ficam agrupadas em "composicao").
 const sessao = (s) => ({
   espacoId: s.espacoId,
   tarefaId: s.tarefaId,
@@ -292,6 +325,7 @@ const sessao = (s) => ({
   composicao: { urgencia: s.urgencia, importancia: s.importancia, encaixe: s.encaixe },
 });
 
+// Converte a resposta do servidor Java (tipo ranking) para o objeto JSON que as rotas e a grade usam.
 function respostaDeRanking(r) {
   const resposta = {
     tipo: 'ranking',
@@ -317,6 +351,7 @@ function respostaDeRanking(r) {
   return resposta;
 }
 
+// Converte a resposta do servidor Java (tipo prioridadeDeMetas) para o objeto JSON da API.
 const respostaDeMetas = (r) => ({
   tipo: 'prioridadeDeMetas',
   ranking: r.ranking.map((n) => ({
@@ -331,6 +366,8 @@ const respostaDeMetas = (r) => ({
 
 // --------------------------------------------------------------------------------------- modelos
 
+// Cada "modelo" descreve um tipo de pedido: campos aceitos, como montar o comunicado, que tipo de
+// resposta esperar e como convertê-la. Assim a mesma função (enviarPedido) atende os dois pedidos.
 const PEDIDO_DE_RANKING = {
   camposPermitidos: ['agora', 'preferencias', 'limite', 'alocar', 'espacos', 'tarefas'],
   descricao: 'de ranking',
@@ -359,6 +396,8 @@ export function pedirPrioridadeDeMetas(pedido, configuracao = env.rankingJava) {
   return enviarPedido(pedido, PEDIDO_DE_METAS, configuracao);
 }
 
+// Valida o pedido e monta o texto enviado pela rede: uma linha de JSON com o pedido e outra com
+// o pedido para sair (assim o servidor fecha a conexão depois de responder).
 function montarMensagem(pedido, modelo) {
   if (!pedido || typeof pedido !== 'object' || Array.isArray(pedido)) {
     throw new ErroApi(400, `Envie o pedido ${modelo.descricao} em formato JSON.`);
@@ -384,11 +423,14 @@ async function enviarPedido(pedido, modelo, configuracao) {
   }
 
   return new Promise((resolve, reject) => {
+    // Abre a conexão TCP com o servidor Java (host e porta vêm do .env).
     const socket = net.createConnection({ host: configuracao.host, port: configuracao.port });
     socket.setEncoding('utf8');
     let recebido = '';
+    // Garante que a Promise seja resolvida ou rejeitada uma única vez.
     let finalizado = false;
 
+    // Único ponto de saída: fecha o socket e resolve (resultado) ou rejeita (erro) a Promise.
     function encerrar(erro, resultado) {
       if (finalizado) return;
       finalizado = true;
@@ -397,16 +439,19 @@ async function enviarPedido(pedido, modelo, configuracao) {
       else resolve(resultado);
     }
 
+    // Tempo máximo de espera pelo servidor; passou disso, responde 504.
     socket.setTimeout(configuracao.timeoutMs, () => {
       encerrar(new ErroApi(504, 'O servidor Java de ranking demorou para responder.'));
     });
 
+    // Ao conectar, envia o pedido.
     socket.on('connect', () => {
       socket.write(mensagem, (erro) => {
         if (erro) encerrar(new ErroApi(503, 'Não foi possível enviar o pedido ao servidor Java de ranking.'));
       });
     });
 
+    // A resposta chega em pedaços: vai juntando até encontrar a quebra de linha, que marca o fim do JSON.
     socket.on('data', (parte) => {
       recebido += parte;
       if (recebido.length > TAMANHO_MAXIMO_DA_RESPOSTA) {
@@ -425,6 +470,7 @@ async function enviarPedido(pedido, modelo, configuracao) {
         return;
       }
 
+      // O servidor respondeu com um Erro: falha de cálculo vira 502; pedido recusado vira 400.
       if (resposta?.tipo === 'erro') {
         const erroDeCalculo = typeof resposta.mensagem === 'string' && resposta.mensagem.startsWith(modelo.prefixoDeErroDeCalculo);
         encerrar(new ErroApi(
@@ -449,10 +495,12 @@ async function enviarPedido(pedido, modelo, configuracao) {
       encerrar(null, convertida);
     });
 
+    // Servidor desligado ou inacessível.
     socket.on('error', () => {
       encerrar(new ErroApi(503, 'Servidor Java de ranking indisponível.'));
     });
 
+    // A conexão fechou antes de chegar a resposta.
     socket.on('close', () => {
       if (!finalizado) {
         encerrar(new ErroApi(503, 'O servidor Java encerrou a conexão sem responder.'));

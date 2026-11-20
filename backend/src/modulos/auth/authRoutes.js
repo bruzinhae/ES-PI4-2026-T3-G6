@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 /**
  * auth/authRoutes.js — MAPA DAS URLs de autenticação (montado em /api/auth no app.js).
  */

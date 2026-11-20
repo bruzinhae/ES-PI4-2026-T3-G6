@@ -1,3 +1,4 @@
+// Guilherme Domingues de Sousa - 22013871
 /**
  * Guarda de páginas internas — carregue no <head> (sem defer) de toda página que exige login.
  *

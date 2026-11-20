@@ -1,12 +1,19 @@
+// Guilherme Domingues de Sousa - 22013871
 package json;
 
 import java.util.*;
 
+// Le um texto JSON a mao (sem biblioteca) e o transforma em ObjetoJson. Guarda a
+// posicao atual e avanca caractere a caractere. Valores: objeto, lista, texto,
+// numero (Double), true, false e null.
 public class LeitorDeJson
 {
+    // texto JSON que esta sendo lido
     private String texto;
+    // indice do proximo caractere a ler
     private int    posicao;
 
+    // Recebe o texto a ler (nao pode ser null)
     public LeitorDeJson (String texto) throws Exception
     {
         if (texto==null)
@@ -16,6 +23,8 @@ public class LeitorDeJson
         this.posicao = 0;
     }
 
+    // Ponto de entrada: le o texto inteiro, que tem de ser um objeto, e confere que
+    // nao sobrou nada depois dele
     public ObjetoJson leObjeto () throws Exception // o texto inteiro tem de ser um objeto
     {
         Object ret = this.leValor ();
@@ -31,6 +40,7 @@ public class LeitorDeJson
         return (ObjetoJson)ret;
     }
 
+    // Olha o primeiro caractere para saber qual tipo de valor vem a seguir
     private Object leValor () throws Exception
     {
         this.pulaBrancos ();
@@ -45,6 +55,7 @@ public class LeitorDeJson
         return this.leNumero ();
     }
 
+    // Le { "nome": valor, ... } e guarda cada par no ObjetoJson
     private ObjetoJson leObjetoInterno () throws Exception
     {
         ObjetoJson ret = new ObjetoJson ();
@@ -78,6 +89,7 @@ public class LeitorDeJson
         }
     }
 
+    // Le [ valor, valor, ... ]
     private ArrayList<Object> leLista () throws Exception
     {
         ArrayList<Object> ret = new ArrayList<Object> ();
@@ -107,6 +119,7 @@ public class LeitorDeJson
         }
     }
 
+    // Le um texto entre aspas e trata os escapes de barra invertida (como o de quebra de linha)
     private String leTexto () throws Exception
     {
         StringBuilder ret = new StringBuilder ();
@@ -145,6 +158,7 @@ public class LeitorDeJson
         }
     }
 
+    // Le true, false ou null
     private Object lePalavra () throws Exception
     {
         if (this.texto.startsWith ("true", this.posicao))
@@ -168,6 +182,7 @@ public class LeitorDeJson
         throw new Exception ("Palavra invalida na posicao " + this.posicao);
     }
 
+    // Le um numero e o devolve como Double
     private Object leNumero () throws Exception
     {
         int inicio = this.posicao;
@@ -182,6 +197,7 @@ public class LeitorDeJson
         return Double.parseDouble (this.texto.substring (inicio, this.posicao));
     }
 
+    // Caractere da posicao atual, sem avancar; erro se o texto acabou
     private char proximo () throws Exception
     {
         if (this.posicao >= this.texto.length ())
@@ -190,6 +206,7 @@ public class LeitorDeJson
         return this.texto.charAt (this.posicao);
     }
 
+    // Avanca ate o proximo caractere que nao e espaco, tab ou quebra de linha
     private void pulaBrancos ()
     {
         while (this.posicao < this.texto.length () &&
@@ -197,6 +214,7 @@ public class LeitorDeJson
             this.posicao++;
     }
 
+    // Exige o caractere esperado na posicao atual e avanca
     private void consuma (char esperado) throws Exception
     {
         if (this.proximo ()!=esperado)
