@@ -1,24 +1,38 @@
+<!-- Bruna Barbour Fernandes RA: 23007950 -->
 <!DOCTYPE html>
+<!--
+    index_calendario.html — CRONOGRAMA SEMANAL (grade de estudos).
+
+    À esquerda fica a lista de tarefas pendentes; à direita, o calendário da semana
+    (ou do mês) com aulas, sessões de estudo, compromissos pessoais e as sugestões
+    da Sofia. O HTML traz só a estrutura: quem preenche tudo com os dados da API é o
+    JS/script_calendario.js. Os ?v= nos arquivos forçam o navegador a baixar a versão nova.
+-->
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ícone da aba do navegador -->
     <link rel="icon" href="assets/icons/favicon.png" type="image/png">
 
     <title>AçaíStudy - Cronograma Semanal</title>
 
+    <!-- Fontes do Google: preconnect abre a conexão antes para carregar mais rápido -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
+    <!-- Estilos: layout comum (cabeçalho e menu), estilos desta página e avisos (toasts) -->
     <link rel="stylesheet" href="CSS/layout.css?v=22">
     <link rel="stylesheet" href="CSS/style_calendario.css?v=14">
     <link rel="stylesheet" href="CSS/avisos.css?v=1">
+    <!-- Guarda de rota: roda antes da página aparecer e manda para o login quem não tem sessão -->
     <script src="JS/users/guarda.js?v=1"></script>
 </head>
 
 <body class="sidebar-recolhida">
 
+    <!-- Pontos de montagem: o layout.js desenha aqui o cabeçalho e a barra lateral -->
     <div id="cabecalho-raiz"></div>
     <div id="barra-lateral-raiz"></div>
 
@@ -29,20 +43,23 @@
 
             <section class="grade-layout">
 
-                <!-- ================= TAREFAS ================= -->
+                <!-- TAREFAS -->
 
                 <aside class="painel-tarefas">
 
+                    <!-- Título e contador de pendentes (atualizado pelo JS) -->
                     <div class="tarefas-cabecalho">
                         <h2>Tarefas Pendentes</h2>
                         <span class="selo-pendentes" id="selo-pendentes">0 pendentes</span>
                     </div>
 
+                    <!-- Busca por texto na lista de tarefas -->
                     <label class="campo-busca">
                         <img src="assets/icons/home/visao.svg" alt="" width="14" height="14">
                         <input type="search" id="busca-tarefas" placeholder="Buscar tarefas..." aria-label="Buscar tarefas">
                     </label>
 
+                    <!-- Filtros: o data-filtro diz ao JS qual grupo de tarefas mostrar -->
                     <div class="filtros-tarefas" role="tablist" aria-label="Filtrar tarefas">
                         <button type="button" class="filtro ativo" data-filtro="todos">Todos</button>
                         <button type="button" class="filtro" data-filtro="estudos">Estudos</button>
@@ -50,8 +67,10 @@
                         <button type="button" class="filtro" data-filtro="alta">Alta Prioridade</button>
                     </div>
 
+                    <!-- Os cartões de tarefa são criados pelo JS aqui dentro (e podem ser arrastados para a grade) -->
                     <div class="lista-tarefas" id="lista-tarefas"></div>
 
+                    <!-- Nova tarefa abre o modal; Ajuste da grade pede à Sofia que encaixe as tarefas nos horários livres -->
                     <div class="acoes-tarefas">
                         <button type="button" class="botao-nova-tarefa" id="botao-nova-tarefa">
                             <span>+ Nova Tarefa</span>
@@ -65,10 +84,11 @@
                 </aside>
 
 
-                <!-- ================= CALENDÁRIO ================= -->
+                <!-- CALENDÁRIO -->
 
                 <section class="painel-calendario">
 
+                    <!-- Barra de cima: navegação entre semanas, legenda de cores e filtro de camadas -->
                     <div class="toolbar-calendario">
 
                         <div class="nav-semana">
@@ -84,6 +104,7 @@
                                 <span><i class="ponto estudos"></i> Estudos</span>
                                 <span><i class="ponto pessoal"></i> Pessoal</span>
                             </div>
+                            <!-- Camadas: cada checkbox (data-camada) mostra ou esconde um tipo de bloco na grade -->
                             <div class="menu-camadas">
                                 <button type="button" class="botao-camadas" id="botao-camadas" aria-expanded="false" aria-controls="painel-camadas">Camadas</button>
                                 <div class="painel-camadas" id="painel-camadas" hidden>
@@ -97,6 +118,7 @@
 
                     </div>
 
+                    <!-- Aparece quando a Sofia deixa sugestões pendentes: ver, aceitar todas ou descartar -->
                     <div class="barra-sugestoes" id="barra-sugestoes" hidden>
                         <p id="texto-sugestoes" role="status"></p>
                         <div class="barra-sugestoes-acoes">
@@ -106,16 +128,20 @@
                         </div>
                     </div>
 
+                    <!-- VISÃO SEMANAL: dias nas colunas e horas nas linhas -->
                     <div class="grade-envoltorio" id="visao-semana-painel">
 
+                        <!-- Nomes e datas dos dias, preenchidos pelo JS -->
                         <div class="cabecalho-dias" id="cabecalho-dias">
                             <div class="canto-vazio"></div>
                         </div>
 
                         <div class="grade-corpo">
 
+                            <!-- Régua das horas à esquerda da grade -->
                             <div class="eixo-horas" id="eixo-horas" aria-hidden="true"></div>
 
+                            <!-- Uma coluna por dia (data-dia: 0 = primeiro dia da semana exibida); os blocos entram nelas -->
                             <div class="grade-dias" id="grade-dias">
                                 <div class="coluna-dia" data-dia="0"></div>
                                 <div class="coluna-dia" data-dia="1"></div>
@@ -130,6 +156,7 @@
 
                     </div>
 
+                    <!-- VISÃO MENSAL: escondida até o usuário trocar de visão -->
                     <div class="visao-mes" id="visao-mes-painel" hidden>
                         <div class="mes-ajuda">
                             <span>Semana atual destacada</span>
@@ -144,9 +171,11 @@
                             <span>Sex</span>
                             <span class="fim-semana">Sáb</span>
                         </div>
+                        <!-- Os quadrinhos dos dias do mês são criados pelo JS -->
                         <div class="mes-grade" id="mes-grade"></div>
                     </div>
 
+                    <!-- Rodapé: horas de estudo agendadas na semana (barra de progresso) e número de sessões -->
                     <footer class="rodape-grade">
                         <div class="stat" id="stat-carga">
                             <span id="carga-rotulo">Estudo agendado na semana</span>
@@ -167,8 +196,11 @@
 
     </main>
 
+    <!-- Cópia que segue o mouse enquanto uma tarefa ou bloco é arrastado para a grade -->
     <div class="fantasma-arrasto" id="fantasma-arrasto" hidden></div>
 
+    <!-- MODAL: DETALHES DA SESSÃO -->
+    <!-- Abre ao clicar num bloco da grade. Os botões de remover/concluir só aparecem quando fazem sentido -->
     <div class="modal-fundo" id="modal-sessao" aria-hidden="true">
         <section class="modal-cartao modal-sessao-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-sessao">
             <header class="modal-cabecalho">
@@ -183,6 +215,7 @@
                 <button class="modal-fechar" type="button" id="fechar-modal-sessao" aria-label="Fechar">×</button>
             </header>
 
+            <!-- Lista de detalhes (horário, disciplina...) montada pelo JS -->
             <dl class="detalhes-sessao" id="detalhes-sessao"></dl>
 
             <footer class="modal-rodape">
@@ -195,6 +228,8 @@
         </section>
     </div>
 
+    <!-- MODAL: AJUSTE DA GRADE -->
+    <!-- Lista as sessões que a Sofia sugeriu, para aceitar, manter ou descartar -->
     <div class="modal-fundo" id="modal-ajuste" aria-hidden="true">
         <section class="modal-cartao modal-ajuste-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-ajuste">
             <header class="modal-cabecalho">
@@ -216,6 +251,8 @@
         </section>
     </div>
 
+    <!-- MODAL: NOVA / EDITAR TAREFA -->
+    <!-- O mesmo formulário serve para criar e editar; o JS troca título, etiqueta e botões -->
     <div class="modal-fundo" id="modal-tarefa" aria-hidden="true">
         <section class="modal-cartao" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-tarefa">
             <header class="modal-cabecalho">
@@ -231,6 +268,7 @@
             </header>
 
             <form id="formulario-tarefa">
+                <!-- Campos ocultos: id vazio = tarefa nova; origem diz de onde o modal foi aberto (lista ou grade) -->
                 <input type="hidden" id="tarefa-id" name="id" value="">
                 <input type="hidden" id="tarefa-origem" name="origem" value="lista">
 
@@ -242,6 +280,7 @@
                     <input id="titulo-tarefa" name="titulo" type="text" maxlength="160" placeholder="Ex.: Revisar prova de Cálculo IV" required>
                 </div>
 
+                <!-- Dados principais da tarefa, em duas colunas -->
                 <div class="grade-modal">
                     <div class="campo-modal">
                         <label for="tipo-tarefa">Categoria <b>*</b></label>
@@ -285,6 +324,7 @@
                     </div>
                 </div>
 
+                <!-- Duração: o controle vai de 1 a 8 passos de 30 min (30 min a 4h) -->
                 <section class="ajuste-modal">
                     <div class="ajuste-titulo">
                         <div>
@@ -297,6 +337,7 @@
                     <div class="escala-modal"><span>30 min</span><span>2h</span><span>4h</span></div>
                 </section>
 
+                <!-- Prioridade de 1 a 10: quanto maior, antes a Sofia encaixa a tarefa -->
                 <section class="ajuste-modal impacto-modal">
                     <div class="ajuste-titulo">
                         <div>
@@ -322,6 +363,7 @@
                     </div>
                 </div>
 
+                <!-- Concluir e Excluir só aparecem ao editar uma tarefa que já existe -->
                 <footer class="acoes-modal">
                     <button class="botao-excluir-modal" type="button" id="concluir-tarefa" hidden>Concluir</button>
                     <button class="botao-excluir-modal" type="button" id="excluir-tarefa" hidden>Excluir</button>
@@ -332,6 +374,8 @@
         </section>
     </div>
 
+    <!-- Scripts no fim do body para o HTML já existir quando rodarem.
+         Ordem: api.js (chamadas à API) → layout.js (cabeçalho e menu) → avisos.js → lógica da página -->
     <script src="JS/users/api.js?v=15"></script>
     <script src="JS/componentes/layout.js?v=30"></script>
     <script src="JS/componentes/avisos.js?v=1"></script>

@@ -1,3 +1,4 @@
+// Bruna Barbour Fernandes RA: 23007950
 /**
  * services/usuarioService.js — REGRAS DE NEGÓCIO do CRUD de usuários.
  *
@@ -236,6 +237,8 @@ export async function excluir(id) {
         throw new ErroApi(404, 'Usuário não encontrado.');
     }
 
+    // Apaga junto tudo o que pertence ao usuário (foto e documentos das outras coleções),
+    // para não sobrar dado órfão no banco. Promise.all faz as exclusões em paralelo.
     await Promise.all([
         apagarFotos(id),
         Disciplina.deleteMany({ usuarioId: id }),
@@ -251,9 +254,15 @@ export async function excluir(id) {
     ]);
 }
 
+/**
+ * EXPORTAR — junta os dados do usuário num único JSON (direito de acesso da LGPD).
+ * Ficam de fora a senha, os tokens e as sessões de login. `.lean()` devolve objetos
+ * simples em vez de documentos do Mongoose, o que basta para só ler e é mais leve.
+ */
 export async function exportar(id) {
     const usuario = await buscarPorId(id);
     const filtro = { usuarioId: id };
+    // Busca as coleções em paralelo; a ordem do array é a mesma da desestruturação.
     const [disciplinas, blocos, tarefas, metas, sessoes, planos] = await Promise.all([
         Disciplina.find(filtro).lean(),
         BlocoFixo.find(filtro).lean(),
@@ -265,6 +274,7 @@ export async function exportar(id) {
 
     return {
         exportadoEm: new Date().toISOString(),
+        // Só os campos de perfil e preferências, escolhidos um a um.
         usuario: {
             nome: usuario.nome,
             email: usuario.email,

@@ -1,3 +1,4 @@
+// Bruna Barbour Fernandes RA: 23007950
 /**
  * controllers/usuarioController.js — CAMADA HTTP das rotas /api/usuarios.
  *

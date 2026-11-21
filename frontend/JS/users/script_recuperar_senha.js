@@ -1,12 +1,19 @@
+// Bruna Barbour Fernandes RA: 23007950
 /**
  * Recuperação de senha — pede o link por e-mail se a conta existir.
+ *
+ * Primeiro passo do "esqueci minha senha": o usuário informa o e-mail e a API envia um
+ * link com token para a tela de nova senha (script_nova_senha.js).
  */
 
+// IIFE: isola as variáveis deste script.
 (function () {
     const formulario = document.getElementById('formulario-recuperar');
     const campoEmail = document.getElementById('campo-email');
+    // Mensagem de "verifique seu e-mail", escondida até o envio dar certo.
     const feedback = document.getElementById('feedback-recuperar');
 
+    // Tira o destaque de erro do campo e apaga a mensagem abaixo dele.
     function limparErro(controle) {
         controle?.classList.remove('invalido');
 
@@ -17,6 +24,7 @@
         }
     }
 
+    // Marca o campo como inválido e mostra a mensagem logo abaixo.
     function marcarErro(controle, texto) {
         if (!controle) {
             return;
@@ -31,10 +39,12 @@
         controle.parentElement?.appendChild(msg);
     }
 
+    // Formato básico de e-mail: algo@algo.algo, sem espaços.
     function emailValido(valor) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
     }
 
+    // Ao digitar outro e-mail, some o erro e também o aviso de envio anterior.
     campoEmail?.addEventListener('input', () => {
         limparErro(campoEmail.closest('.controle-campo'));
 
@@ -44,7 +54,7 @@
     });
 
     formulario?.addEventListener('submit', async (evento) => {
-        evento.preventDefault();
+        evento.preventDefault(); // envio pela API, sem recarregar a página
 
         const email = campoEmail.value.trim();
         const controleEmail = campoEmail.closest('.controle-campo');
@@ -62,7 +72,7 @@
         }
 
         const botaoEnviar = formulario.querySelector('[type="submit"]');
-        botaoEnviar.disabled = true;
+        botaoEnviar.disabled = true; // evita pedir vários e-mails seguidos
 
         try {
             await AcaiApi.recuperarSenha(email);
@@ -79,4 +89,3 @@
         }
     });
 })();
-

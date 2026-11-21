@@ -1,3 +1,4 @@
+// Bruna Barbour Fernandes RA: 23007950
 /**
  * models/Usuario.js — MODELO da coleção "usuarios" no MongoDB.
  *
@@ -59,6 +60,7 @@ const usuarioSchema = new mongoose.Schema(
             default: null,
         },
 
+        // Data da última troca de senha (null = nunca trocou desde o cadastro).
         senhaAlteradaEm: {
             type: Date,
             default: null,
@@ -96,6 +98,7 @@ const usuarioSchema = new mongoose.Schema(
             default: null,
         },
 
+        // Faculdade/universidade do aluno (ex.: PUC-Campinas).
         instituicao: {
             type: String,
             trim: true,
@@ -103,6 +106,7 @@ const usuarioSchema = new mongoose.Schema(
             default: null,
         },
 
+        // Curso de graduação (ex.: Engenharia de Software).
         curso: {
             type: String,
             trim: true,
@@ -150,21 +154,26 @@ const usuarioSchema = new mongoose.Schema(
 
         // Preferências da tela de configurações. Fica no usuário para não abrir outra coleção.
         configuracao: {
+            // Sub-schema: um objeto dentro do usuário. `_id: false` evita um id próprio para ele.
             type: new mongoose.Schema({
+                // Liga/desliga recursos da Sofia na montagem da grade.
                 antifadiga: { type: Boolean, default: true },
                 focoMatinal: { type: Boolean, default: true },
                 repeticaoEspacada: { type: Boolean, default: true },
                 ajusteDinamico: { type: Boolean, default: true },
+                // Quão cheia a grade pode ficar.
                 rigidez: {
                     type: String,
                     enum: ['flexivel', 'equilibrado', 'intensivo'],
                     default: 'equilibrado',
                 },
+                // Período do dia em que o aluno rende mais.
                 janelaFoco: {
                     type: String,
                     enum: ['manha', 'tarde', 'noite'],
                     default: 'manha',
                 },
+                // Duração padrão de cada sessão de estudo, em minutos.
                 duracaoMinutos: {
                     type: Number,
                     enum: [25, 50, 90],
@@ -174,7 +183,8 @@ const usuarioSchema = new mongoose.Schema(
             default: () => ({}),
         },
 
-        // Conta do Canvas. Os tokens não saem na API (select: false e o toJSON acima).
+        // Conta do Canvas. Os tokens não saem na API (select: false e o toJSON abaixo).
+        // null = o usuário ainda não conectou o Canvas.
         canvas: {
             type: new mongoose.Schema({
                 instanciaUrl: { type: String, default: null },

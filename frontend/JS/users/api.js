@@ -1,3 +1,4 @@
+// Bruna Barbour Fernandes RA: 23007950
 /**
  * Cliente da API (backend/) — usuários em /api/usuarios e autenticação em /api/auth.
  * Depois do login/cadastro a API devolve um token de sessão; ele é guardado aqui e enviado
@@ -5,21 +6,28 @@
  * Uso: AcaiApi.criarUsuario({ ... }), AcaiApi.obterUsuarioAtual(), ...
  */
 
+// IIFE que devolve um objeto com as funções públicas (o "return" no fim do arquivo).
+// O que não está nesse return (ex.: requisitar, obterToken) fica privado aqui dentro.
 const AcaiApi = (function () {
+    // Endereço da API. Pode ser trocado definindo window.ACAISTUDY_API_URL antes deste script.
     const URL_BASE = window.ACAISTUDY_API_URL || 'http://localhost:3001/api';
+    // Chaves usadas no localStorage do navegador.
     const CHAVE_ID = 'acaistudy-usuario-id';
     const CHAVE_USUARIO = 'acaistudy-usuario';
     const CHAVE_TOKEN = 'acaistudy-token';
     const PAGINA_LOGIN = 'index_login.html';
 
+    // Id do usuário logado neste navegador (null se ninguém entrou).
     function obterIdAtual() {
         return localStorage.getItem(CHAVE_ID);
     }
 
+    // Token da sessão, enviado no cabeçalho Authorization.
     function obterToken() {
         return localStorage.getItem(CHAVE_TOKEN);
     }
 
+    // Salva o id e uma cópia do usuário no navegador; devolve o próprio usuário.
     function guardarUsuario(usuario) {
         localStorage.setItem(CHAVE_ID, usuario.id);
         localStorage.setItem(CHAVE_USUARIO, JSON.stringify(usuario));
@@ -27,6 +35,7 @@ const AcaiApi = (function () {
         return usuario;
     }
 
+    // Apaga tudo o que identifica a sessão neste navegador (usado no logout e em 401).
     function esquecerUsuario() {
         localStorage.removeItem(CHAVE_ID);
         localStorage.removeItem(CHAVE_USUARIO);
@@ -42,6 +51,10 @@ const AcaiApi = (function () {
 
     // `publica: true` para login e cadastro: não enviam token e, se der 401, mostram o erro
     // na tela em vez de redirecionar.
+    // Função central: todas as chamadas à API passam por aqui. Monta o fetch, envia o
+    // token, converte o corpo para JSON e transforma respostas de erro em exceções
+    // (com a mensagem da API e o status HTTP em erro.status).
+    // `arquivo: true` envia FormData (upload) em vez de JSON.
     async function requisitar(caminho, { metodo = 'GET', corpo, publica = false, arquivo = false } = {}) {
         let resposta;
         const token = publica ? null : obterToken();
@@ -60,13 +73,16 @@ const AcaiApi = (function () {
                 body: arquivo ? corpo : (corpo === undefined ? undefined : JSON.stringify(corpo)),
             });
         } catch {
+            // fetch só falha assim quando não chega ao servidor (API desligada, sem rede).
             throw new Error('Não foi possível conectar ao servidor. Verifique se a API está rodando.');
         }
 
+        // 204 = No Content (ex.: DELETE): não há corpo para ler.
         if (resposta.status === 204) {
             return null;
         }
 
+        // Se o corpo não for JSON válido, segue com objeto vazio.
         const dados = await resposta.json().catch(() => ({}));
 
         // Sessão inválida ou expirada: limpa o que está guardado e volta para o login.
@@ -75,6 +91,7 @@ const AcaiApi = (function () {
             window.location.replace(PAGINA_LOGIN);
         }
 
+        // Status fora de 200–299: vira erro com a mensagem que a API mandou.
         if (!resposta.ok) {
             const erro = new Error(dados.mensagem || 'Erro inesperado. Tente novamente.');
             erro.status = resposta.status;
@@ -86,6 +103,7 @@ const AcaiApi = (function () {
 
     // ----- CRUD -----
 
+    // CREATE — cadastro (POST /usuarios). A API já devolve o token, então a sessão fica aberta.
     async function criarUsuario(dados) {
         const resposta = await requisitar('/usuarios', { metodo: 'POST', corpo: dados, publica: true });
 
@@ -118,12 +136,14 @@ const AcaiApi = (function () {
         return requisitar('/auth/redefinir-senha', { metodo: 'POST', corpo: { token, senha }, publica: true });
     }
 
+    // Confere se o link de confirmação de e-mail ainda vale (sem gastar o token).
     function conferirConfirmacaoEmail(token) {
         const consulta = new URLSearchParams({ token });
 
         return requisitar(`/auth/confirmar-email?${consulta}`, { publica: true });
     }
 
+    // Confirma o e-mail com o token do link. Se for a conta logada aqui, atualiza a cópia salva.
     async function confirmarEmail(token) {
         const dados = await requisitar('/auth/confirmar-email', { metodo: 'POST', corpo: { token }, publica: true });
 
@@ -134,6 +154,7 @@ const AcaiApi = (function () {
         return dados?.usuario;
     }
 
+    // Pede outro e-mail de confirmação para a conta logada.
     function reenviarConfirmacaoEmail() {
         return requisitar('/auth/reenviar-confirmacao', { metodo: 'POST', corpo: {} });
     }
@@ -153,18 +174,22 @@ const AcaiApi = (function () {
         }
     }
 
+    // READ (lista) — a API devolve só a própria conta.
     async function listarUsuarios() {
         const { usuarios } = await requisitar('/usuarios');
 
         return usuarios;
     }
 
+    // READ (um) — GET /usuarios/:id.
     async function obterUsuario(id) {
         const { usuario } = await requisitar(`/usuarios/${id}`);
 
         return usuario;
     }
 
+    // UPDATE — PATCH /usuarios/:id com só os campos alterados.
+    // Repassa confirmacaoEnviada (vem quando o e-mail muda) junto do usuário.
     async function atualizarUsuario(id, alteracoes) {
         const dados = await requisitar(`/usuarios/${id}`, { metodo: 'PATCH', corpo: alteracoes });
         const { usuario } = dados;
@@ -180,15 +205,18 @@ const AcaiApi = (function () {
         return usuario;
     }
 
+    // Baixa todos os dados da conta em JSON (LGPD).
     async function exportarUsuario(id) {
         return requisitar(`/usuarios/${id}/exportar`);
     }
 
+    // Sessões de login abertas desta conta (a atual vem com atual: true).
     async function listarSessoesAuth() {
         const { sessoes } = await requisitar('/auth/sessoes');
         return sessoes;
     }
 
+    // Faz logout em todos os outros dispositivos.
     async function encerrarOutrasSessoes() {
         return requisitar('/auth/sessoes/encerrar-outras', { metodo: 'POST' });
     }
@@ -203,6 +231,7 @@ const AcaiApi = (function () {
         return plano;
     }
 
+    // DELETE — exclui a conta. Se for a do navegador, esquece a sessão também.
     async function excluirUsuario(id) {
         await requisitar(`/usuarios/${id}`, { metodo: 'DELETE' });
 
@@ -420,6 +449,7 @@ const AcaiApi = (function () {
     }
     // ----- Usuário logado neste navegador -----
 
+    // Atalhos que usam o id guardado, para as telas não precisarem saber o id.
     async function obterUsuarioAtual() {
         return guardarUsuario(await obterUsuario(obterIdAtual()));
     }
@@ -454,6 +484,7 @@ const AcaiApi = (function () {
         return excluirUsuario(obterIdAtual());
     }
 
+    // true se há id e token salvos (não garante que a sessão ainda vale; ver verificarSessao).
     function temUsuarioAtual() {
         return Boolean(obterIdAtual() && obterToken());
     }
@@ -511,6 +542,7 @@ const AcaiApi = (function () {
         return passos[passo] || passos.semestre;
     }
 
+    // Funções públicas: é isso que as páginas acessam como AcaiApi.nomeDaFuncao().
     return {
         criarUsuario,
         entrar,
@@ -583,4 +615,5 @@ const AcaiApi = (function () {
     };
 })();
 
+// Deixa o objeto acessível em window para os outros scripts da página.
 window.AcaiApi = AcaiApi;

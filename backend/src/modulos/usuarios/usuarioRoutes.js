@@ -1,3 +1,4 @@
+// Bruna Barbour Fernandes RA: 23007950
 /**
  * usuarios/usuarioRoutes.js — MAPA DAS URLs de usuários.
  *
@@ -24,7 +25,8 @@ export const usuarioRoutes = Router();
 // as que têm :id só aceitam o próprio usuário (senão 403).
 usuarioRoutes.post('/', controller.criar);                                                       // POST   /api/usuarios      → cria conta e abre a sessão (tela "Criar Nova Conta")
 usuarioRoutes.get('/', exigirAutenticacao, controller.listar);                                   // GET    /api/usuarios      → só a conta logada
-usuarioRoutes.get('/:id/exportar', exigirAutenticacao, exigirProprioUsuario, controller.exportar);
+// A rota /:id/exportar vem antes de /:id só por organização; o Express diferencia as duas pelo caminho.
+usuarioRoutes.get('/:id/exportar', exigirAutenticacao, exigirProprioUsuario, controller.exportar); // GET /api/usuarios/:id/exportar → baixa os dados da conta (LGPD)
 usuarioRoutes.get('/:id', exigirAutenticacao, exigirProprioUsuario, controller.buscarPorId);     // GET    /api/usuarios/:id  → busca um usuário (tela de perfil)
 usuarioRoutes.post('/:id/avatar', exigirAutenticacao, exigirProprioUsuario, receberFoto, controller.definirAvatar); // POST /api/usuarios/:id/avatar → envia a foto (PNG/JPG, até 5 MB)
 usuarioRoutes.delete('/:id/avatar', exigirAutenticacao, exigirProprioUsuario, controller.removerAvatar); // DELETE /api/usuarios/:id/avatar → tira a foto
