@@ -78,11 +78,6 @@ async function validarDisciplinaDoUsuario(usuarioId, disciplinaId) {
         throw new ErroApi(400, 'A disciplina selecionada n\u00e3o existe ou n\u00e3o pertence a esta conta.');
     }
 }
-function validarDisciplinaDaCategoria(categoria, disciplinaId) {
-    if (categoria === 'aulas' && !disciplinaId) {
-        throw new ErroApi(400, 'Escolha a matéria deste horário de aula.');
-    }
-}
 const INTERVALO_SEMANAS = { semanal: 1, quinzenal: 2, a_cada_3_semanas: 3 };
 function recorrenteNaData(bloco, data) {
     if (!INTERVALO_SEMANAS[bloco.recorrencia] || !bloco.diasSemana.includes((data.getUTCDay() + 6) % 7)) return false;
@@ -119,7 +114,6 @@ export async function buscarPorId(usuarioId, id) {
 export async function criar(usuarioId, dados) {
     const payload = validarPayload(dados);
     if (['quinzenal', 'a_cada_3_semanas'].includes(payload.recorrencia) && !payload.inicioRecorrencia) throw new ErroApi(400, 'Informe a semana inicial da recorrência.');
-    validarDisciplinaDaCategoria(payload.categoria, payload.disciplinaId);
     await validarDisciplinaDoUsuario(usuarioId, payload.disciplinaId);
     const bloco = new BlocoFixo({ ...payload, usuarioId, criadoEm: new Date(), diasSemana: payload.diasSemana || [], data: payload.data || null });
     validarConsistencia(bloco);
@@ -137,8 +131,6 @@ export async function atualizar(usuarioId, id, dados) {
     }
     const categoria = payload.categoria ?? bloco.categoria;
     if (categoria !== 'aulas') payload.disciplinaId = null;
-    const disciplinaId = Object.hasOwn(payload, 'disciplinaId') ? payload.disciplinaId : bloco.disciplinaId;
-    validarDisciplinaDaCategoria(categoria, disciplinaId);
     await validarDisciplinaDoUsuario(usuarioId, payload.disciplinaId);
     bloco.set(payload);
     validarConsistencia(bloco);

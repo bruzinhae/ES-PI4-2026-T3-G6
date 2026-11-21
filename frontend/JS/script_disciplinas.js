@@ -808,11 +808,8 @@ const ETIQUETA_CLASSE = {
     function atualizarVinculoAula() {
         const aula = formulario.elements.categoria.value === 'aulas';
         const campo = document.getElementById('campo-bloco-disciplina');
-        const indicadorObrigatorio = document.getElementById('bloco-disciplina-obrigatoria');
         campo.hidden = !aula;
-        seletorDisciplina.required = aula;
-        seletorDisciplina.setAttribute('aria-required', String(aula));
-        indicadorObrigatorio.hidden = !aula;
+        seletorDisciplina.required = false;
     }
 
     function alternarRecorrencia() {

@@ -228,7 +228,62 @@ img {
     margin-bottom: 8px;
 }
 
+.botao-concluir-tarefa,
+.botao-concluir-sessao {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+
+    width: 18px;
+    height: 18px;
+    padding: 0;
+
+    border: 1.5px solid var(--cinza-300, #cbd5e1);
+    border-radius: 50%;
+
+    background: var(--branco);
+    color: transparent;
+
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.botao-concluir-tarefa:hover,
+.botao-concluir-tarefa:focus-visible,
+.botao-concluir-sessao:hover,
+.botao-concluir-sessao:focus-visible {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.botao-concluir-tarefa:disabled,
+.botao-concluir-sessao:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+.botao-concluir-sessao {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+}
+
+.evento.sessao:has(.botao-concluir-sessao) strong {
+    padding-right: 16px;
+}
+
 .tarefa-topo strong {
+    flex: 1;
+    min-width: 0;
+
     font-size: 12px;
     font-weight: 700;
     line-height: 1.3;
@@ -397,7 +452,7 @@ img {
     position: absolute;
     top: 40px;
     right: 0;
-    z-index: 5;
+    z-index: 30;
     display: grid;
     gap: 8px;
     min-width: 160px;
@@ -407,6 +462,7 @@ img {
     background: var(--branco);
     font-size: 13px;
 }
+.painel-camadas[hidden] { display: none; }
 .painel-camadas label { display: flex; gap: 8px; align-items: center; }
 .grade-dias.oculta-aulas .evento.aula,
 .grade-dias.oculta-estudos .evento.estudo:not(.sugestao),
@@ -630,10 +686,11 @@ img {
 
 .evento {
     position: absolute;
-    left: 4px;
-    right: 4px;
+    /* --faixa/--faixas: posição lado a lado quando há eventos sobrepostos (ver organizarSobreposicoes) */
+    left: calc(4px + (100% - 8px) * var(--faixa, 0) / var(--faixas, 1));
+    width: calc((100% - 8px) / var(--faixas, 1) - 2px);
     top: calc(var(--inicio) * var(--linha-hora) + 3px);
-    height: calc(var(--duracao) * var(--linha-hora) - 6px);
+    height: max(calc(var(--duracao) * var(--linha-hora) - 6px), 18px);
 
     display: flex;
     flex-direction: column;

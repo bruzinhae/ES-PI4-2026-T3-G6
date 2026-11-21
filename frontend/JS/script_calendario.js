@@ -304,8 +304,14 @@ function criarCardLista(tarefa) {
     card.dataset.minutos = String(tarefa.minutos);
     card.dataset.filtro = [tarefa.categoria, tarefa.prioridade >= 8 ? 'alta' : ''].join(' ').trim();
 
+    const concluir = el('button', 'botao-concluir-tarefa', '✓');
+    concluir.type = 'button';
+    concluir.draggable = false;
+    concluir.title = 'Marcar como feita';
+    concluir.setAttribute('aria-label', `Marcar "${tarefa.titulo}" como feita`);
+
     const topo = el('div', 'tarefa-topo');
-    topo.append(el('strong', null, tarefa.titulo), el('span', 'duracao', formatarDuracao(tarefa.minutos)));
+    topo.append(concluir, el('strong', null, tarefa.titulo), el('span', 'duracao', formatarDuracao(tarefa.minutos)));
 
     const meta = el('div', 'tarefa-meta');
     meta.append(
@@ -371,6 +377,15 @@ function inicioDoBloco(bloco, chave) {
     return instante(chave, h * 60 + m);
 }
 
+// Focos registrados pelo pomodoro da barra lateral: contam nas horas estudadas, mas não aparecem como blocos na grade.
+function ehRegistroPomodoro(sessao) {
+    return sessao.situacao === 'concluida' && sessao.pomodorosPlanejados != null;
+}
+
+function sessoesDaGrade() {
+    return estado.sessoes.filter((sessao) => !ehRegistroPomodoro(sessao));
+}
+
 function tarefaDaSessao(sessao) {
     return estado.tarefas.find((tarefa) => tarefa.id === String(sessao.tarefaId));
 }
@@ -386,6 +401,8 @@ function criarEvento({ classe, titulo, detalhe, extra, inicio, fim }) {
     const evento = el('div', `evento ${classe}${tamanho}`);
     evento.style.setProperty('--inicio', String((ini - HORA_INICIAL * 60) / 60));
     evento.style.setProperty('--duracao', String((fimMin - ini) / 60));
+    evento.dataset.ini = String(ini);
+    evento.dataset.fim = String(fimMin);
     evento.title = `${titulo} · ${horario(inicio)} – ${horario(fim)}`;
     evento.append(
         el('strong', null, titulo),
@@ -440,7 +457,7 @@ function renderGrade() {
         });
     });
 
-    estado.sessoes.forEach((sessao) => {
+    sessoesDaGrade().forEach((sessao) => {
         const inicio = Date.parse(sessao.inicio);
         const fim = Date.parse(sessao.fim);
         const coluna = colunaDoInstante(inicio);
@@ -460,6 +477,14 @@ function renderGrade() {
         evento.dataset.sessao = sessao.id;
         evento.draggable = !concluida;
         evento.tabIndex = 0;
+        if (!concluida) {
+            const concluir = el('button', 'botao-concluir-sessao', '✓');
+            concluir.type = 'button';
+            concluir.draggable = false;
+            concluir.title = 'Marcar como feita';
+            concluir.setAttribute('aria-label', `Marcar "${sessao.titulo || tarefa?.titulo || 'sessão'}" como feita`);
+            evento.append(concluir);
+        }
         coluna.appendChild(evento);
     });
 
@@ -495,6 +520,49 @@ function renderGrade() {
         evento.append(acoes);
         coluna.appendChild(evento);
     });
+
+    Array.from(gradeDias.children).forEach(organizarSobreposicoes);
+}
+
+// Eventos que se cruzam no mesmo dia ficam lado a lado, em vez de um por cima do outro.
+// Eventos muito curtos contam com uma altura mínima, igual à que aparece na tela.
+const ALTURA_MINIMA_MIN = 20;
+
+function organizarSobreposicoes(coluna) {
+    const eventos = Array.from(coluna.querySelectorAll('.evento'))
+        .map((elemento) => {
+            const ini = Number(elemento.dataset.ini);
+            return { elemento, ini, fim: Math.max(Number(elemento.dataset.fim), ini + ALTURA_MINIMA_MIN) };
+        })
+        .sort((a, b) => a.ini - b.ini || b.fim - a.fim);
+
+    let grupo = [];
+    let fimDoGrupo = -Infinity;
+
+    const fecharGrupo = () => {
+        const faixas = [];
+        grupo.forEach((item) => {
+            let faixa = faixas.findIndex((fim) => fim <= item.ini);
+            if (faixa === -1) faixa = faixas.length;
+            faixas[faixa] = item.fim;
+            item.faixa = faixa;
+        });
+        grupo.forEach(({ elemento, faixa }) => {
+            elemento.style.setProperty('--faixa', String(faixa));
+            elemento.style.setProperty('--faixas', String(faixas.length));
+        });
+        grupo = [];
+    };
+
+    eventos.forEach((item) => {
+        if (item.ini >= fimDoGrupo) {
+            fecharGrupo();
+            fimDoGrupo = -Infinity;
+        }
+        grupo.push(item);
+        fimDoGrupo = Math.max(fimDoGrupo, item.fim);
+    });
+    fecharGrupo();
 }
 
 /* ---------- Visão mensal ---------- */
@@ -513,7 +581,7 @@ function itensDoDia(dia) {
         itens.push({ tipo: 'bloco', chip: chipDoBloco(bloco.categoria), titulo: bloco.nome, inicio: inicioDoBloco(bloco, chave), bloco, chave });
     });
 
-    estado.sessoes.filter((sessao) => chaveDoDia(Date.parse(sessao.inicio)) === chave).forEach((sessao) => {
+    sessoesDaGrade().filter((sessao) => chaveDoDia(Date.parse(sessao.inicio)) === chave).forEach((sessao) => {
         itens.push({ tipo: 'sessao', chip: tarefaDaSessao(sessao)?.categoria === 'pessoal' ? 'pessoal' : 'estudos', titulo: sessao.titulo, inicio: Date.parse(sessao.inicio), sessao });
     });
 
@@ -1192,6 +1260,12 @@ gradeDias.addEventListener('click', (evento) => {
         return;
     }
 
+    const concluirSessao = evento.target.closest('.botao-concluir-sessao');
+    if (concluirSessao) {
+        concluirSessaoDaGrade(concluirSessao.closest('.evento').dataset.sessao, concluirSessao);
+        return;
+    }
+
     const bloco = evento.target.closest('.evento');
     if (bloco?.dataset.sugestao != null) {
         abrirModalAjuste();
@@ -1226,7 +1300,40 @@ mesGrade.addEventListener('keydown', (evento) => {
     }
 });
 
+async function concluirSessaoDaGrade(id, botao) {
+    if (!id) return;
+    botao.disabled = true;
+    try {
+        await AcaiApi.atualizarSessao(id, { situacao: 'concluida' });
+        avisar('Sessão marcada como feita.', 'ok');
+    } catch (erro) {
+        avisar(erro.message || 'Não foi possível concluir a sessão.');
+        botao.disabled = false;
+        return;
+    }
+    await recarregar();
+}
+
+async function concluirTarefaDaLista(id, botao) {
+    botao.disabled = true;
+    try {
+        await AcaiApi.atualizarTarefa(id, { situacao: 'concluida' });
+        avisar('Tarefa marcada como feita.', 'ok');
+        await carregarTarefas();
+        await recarregar();
+    } catch (erro) {
+        avisar(erro.message || 'Não foi possível concluir a tarefa.');
+        botao.disabled = false;
+    }
+}
+
 listaTarefas.addEventListener('click', (evento) => {
+    const concluir = evento.target.closest('.botao-concluir-tarefa');
+    if (concluir) {
+        concluirTarefaDaLista(concluir.closest('.tarefa').dataset.id, concluir);
+        return;
+    }
+
     const card = evento.target.closest('.tarefa');
     const tarefa = card && estado.tarefas.find((item) => item.id === card.dataset.id);
     if (tarefa) abrirModal('editar', tarefa);
@@ -1391,6 +1498,11 @@ document.getElementById('botao-camadas')?.addEventListener('click', () => {
     const aberto = painelCamadas.hidden;
     painelCamadas.hidden = !aberto;
     document.getElementById('botao-camadas').setAttribute('aria-expanded', String(aberto));
+});
+document.addEventListener('click', (evento) => {
+    if (!painelCamadas || painelCamadas.hidden || evento.target.closest('.menu-camadas')) return;
+    painelCamadas.hidden = true;
+    document.getElementById('botao-camadas')?.setAttribute('aria-expanded', 'false');
 });
 painelCamadas?.addEventListener('change', (evento) => {
     const caixa = evento.target.closest('[data-camada]');

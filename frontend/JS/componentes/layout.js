@@ -202,16 +202,6 @@ function renderSidebar({ paginaAtiva, pastaIcones }) {
     return `
     <aside class="barra-lateral" id="barra-lateral">
 
-        <div class="grupo-lateral">
-            <p class="rotulo-lateral rotulo-pequeno">Ações Rápidas</p>
-
-            <button type="button" class="botao-sessao" id="botao-iniciar-sessao" title="Iniciar Sessão">
-                <img src="${icone(pastaIcones, 'iniciar.svg')}" alt="" width="8.25" height="10.5">
-                <span>Iniciar Sessão</span>
-            </button>
-        </div>
-
-
         <div class="grupo-lateral grupo-navegacao">
             <p class="rotulo-lateral">Navegação</p>
 

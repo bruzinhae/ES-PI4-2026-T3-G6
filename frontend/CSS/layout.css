@@ -576,44 +576,6 @@
 }
 
 
-/* Botão iniciar */
-
-.botao-sessao {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-
-    padding: 10px 16px;
-
-    border: 0;
-    border-radius: 6px;
-
-    background: var(--roxo);
-    color: var(--branco);
-
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 16px;
-
-    box-shadow: var(--sombra-pequena);
-
-    transition: background .2s ease;
-}
-
-.botao-sessao:hover {
-    background: #3e2852;
-}
-
-.botao-sessao.em-andamento {
-    background: #6b3f86;
-}
-
-.botao-sessao span {
-    white-space: nowrap;
-}
-
-
 /* Navegação */
 
 .navegacao {
@@ -953,7 +915,6 @@ body.sidebar-recolhida .botao-recolher-texto {
 }
 
 .barra-lateral.recolhida .rotulo-lateral,
-.barra-lateral.recolhida .botao-sessao span,
 .barra-lateral.recolhida .navegacao a span,
 .barra-lateral.recolhida .disciplina > div > span:last-child,
 .barra-lateral.recolhida .disciplina-vazia,
@@ -962,7 +923,6 @@ body.sidebar-recolhida .botao-recolher-texto {
 .barra-lateral.recolhida .pomodoro-configurar,
 .barra-lateral.recolhida .pomodoro-painel,
 body.sidebar-recolhida .rotulo-lateral,
-body.sidebar-recolhida .botao-sessao span,
 body.sidebar-recolhida .navegacao a span,
 body.sidebar-recolhida .disciplina > div > span:last-child,
 body.sidebar-recolhida .disciplina-vazia,
@@ -971,12 +931,6 @@ body.sidebar-recolhida .pomodoro-alternar span,
 body.sidebar-recolhida .pomodoro-configurar,
 body.sidebar-recolhida .pomodoro-painel {
     display: none;
-}
-
-.barra-lateral.recolhida .botao-sessao,
-body.sidebar-recolhida .botao-sessao {
-    gap: 0;
-    padding: 10px;
 }
 
 .barra-lateral.recolhida .navegacao a,
