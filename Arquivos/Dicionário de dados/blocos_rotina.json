@@ -11,6 +11,7 @@
       2
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "08:00",
     "duracaoMinutos": 120,
     "prioridade": 9,
@@ -31,6 +32,7 @@
       3
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "08:00",
     "duracaoMinutos": 120,
     "prioridade": 9,
@@ -50,6 +52,7 @@
       4
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "08:00",
     "duracaoMinutos": 120,
     "prioridade": 9,
@@ -71,6 +74,7 @@
       4
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "14:00",
     "duracaoMinutos": 240,
     "prioridade": 10,
@@ -92,6 +96,7 @@
       4
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "13:00",
     "duracaoMinutos": 60,
     "prioridade": 6,
@@ -115,6 +120,7 @@
       4
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "12:00",
     "duracaoMinutos": 60,
     "prioridade": 5,
@@ -135,6 +141,7 @@
       2
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "18:30",
     "duracaoMinutos": 60,
     "prioridade": 4,
@@ -160,6 +167,7 @@
       6
     ],
     "data": null,
+    "inicioRecorrencia": null,
     "horaInicio": "23:00",
     "duracaoMinutos": 480,
     "prioridade": 10,
@@ -177,11 +185,32 @@
     "recorrencia": "unico",
     "diasSemana": [],
     "data": "2026-10-31T00:00:00Z",
+    "inicioRecorrencia": null,
     "horaInicio": "10:00",
     "duracaoMinutos": 60,
     "prioridade": 7,
     "fixo": true,
     "local": "Clínica Sorriso",
+    "criadoEm": "2026-08-03T13:40:00Z",
+    "atualizadoEm": "2026-08-03T13:40:00Z"
+  },
+  {
+    "_id": "67200800000000000000000a",
+    "usuarioId": "672001000000000000000001",
+    "disciplinaId": null,
+    "nome": "Reunião do grupo de pesquisa",
+    "categoria": "outro",
+    "recorrencia": "quinzenal",
+    "diasSemana": [
+      4
+    ],
+    "data": null,
+    "inicioRecorrencia": "2026-08-03T00:00:00Z",
+    "horaInicio": "19:00",
+    "duracaoMinutos": 60,
+    "prioridade": 6,
+    "fixo": true,
+    "local": "Sala 210 - Bloco A",
     "criadoEm": "2026-08-03T13:40:00Z",
     "atualizadoEm": "2026-08-03T13:40:00Z"
   }
