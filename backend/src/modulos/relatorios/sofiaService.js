@@ -439,8 +439,8 @@ export async function abrirConversa(usuarioId, inicioQuery, atualizar = false) {
 }
 
 export async function enviarMensagem(usuarioId, inicioQuery, textoBruto) {
-    const texto = typeof textoBruto === 'string' ? textoBruto.trim() : '';
-    if (texto.length < 2 || texto.length > 1000) {
+    const mensagem = typeof textoBruto === 'string' ? textoBruto.trim() : '';
+    if (mensagem.length < 2 || mensagem.length > 1000) {
         throw new ErroApi(400, 'Escreva uma mensagem de 2 a 1000 caracteres.');
     }
 
@@ -452,13 +452,13 @@ export async function enviarMensagem(usuarioId, inicioQuery, textoBruto) {
     }
 
     const contexto = await montarContexto(usuarioId, inicio);
-    const anteriores = conversa.mensagens.slice(-LIMITE_HISTORICO).map((mensagem) => (
-        `${mensagem.papel === 'usuario' ? 'Estudante' : 'Sofia'}: ${mensagem.texto}`
+    const anteriores = conversa.mensagens.slice(-LIMITE_HISTORICO).map((item) => (
+        `${item.papel === 'usuario' ? 'Estudante' : 'Sofia'}: ${item.texto}`
     ));
     const prompt = [
         `Semana em JSON:\n${JSON.stringify(contexto)}`,
         anteriores.length ? `Conversa até aqui:\n${anteriores.join('\n')}` : '',
-        `Estudante: ${texto}`,
+        `Estudante: ${mensagem}`,
     ].filter(Boolean).join('\n\n');
 
     const { dados } = await gerarJson({
@@ -472,7 +472,7 @@ export async function enviarMensagem(usuarioId, inicioQuery, textoBruto) {
     }
 
     conversa.mensagens.push(
-        { papel: 'usuario', texto },
+        { papel: 'usuario', texto: mensagem },
         { papel: 'sofia', texto: resposta },
     );
     if (conversa.mensagens.length > LIMITE_MENSAGENS) {
