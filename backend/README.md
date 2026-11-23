@@ -2,7 +2,7 @@
 
 API única do projeto: cada área é um módulo em `src/modulos/` (usuários e autenticação, disciplinas,
 blocos fixos, tarefas, sessões de estudo, metas, relatórios, configurações, Canvas, grade e ranking).
-Os dados seguem o dicionário em `Arquivos/Dicionário de dados/`. Algumas rotas dependem do servidor
+Os dados seguem o dicionário em `docs/Dicionário de dados/`. Algumas rotas dependem do servidor
 Java de ranking (`servidor/`) e do Gemini; veja "Serviços externos" e "Variáveis de ambiente".
 
 ## Como rodar
@@ -168,7 +168,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   `req.usuario` e `req.sessao` estão disponíveis.
 - Blocos fixos são armazenados na coleção `blocos_rotina` (conforme o dicionário de dados), sempre associados a `usuarioId`. A API valida
   recorrência, dias, data, horário, duração, prioridade e conflitos de horário por usuário.
-- Disciplinas seguem `Arquivos/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|indigo|ciano|turquesa|verde|ambar|laranja|vermelho|rosa`; conteúdos embutidos).
+- Disciplinas seguem `docs/Dicionário de dados/disciplinas.json` (`cor` ∈ `roxo|azul|indigo|ciano|turquesa|verde|ambar|laranja|vermelho|rosa`; conteúdos embutidos).
   `horasSemanais` vem da soma dos blocos semanais vinculados; `progresso` é essa carga sobre a meta de horas da conta.
 - A API Node atua como cliente do servidor Java de ranking, falando texto: cada mensagem é uma linha de JSON com o campo `tipo`, montada e lida pelo `servicos/clienteRanking.js`. `POST /api/ranking` só encaminha o pedido autenticado:
   os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
@@ -189,7 +189,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
 - **Sessões de estudo** são o horário planejado de uma tarefa (coleção `sessoes_estudo`). Aceitar uma sugestão é `POST /api/sessoes-estudo`
   com `origem: "ia"`. Sessões `agendada` e `concluida` ocupam horário; `cancelada` e `nao_realizada` o liberam.
 - **Fuso:** a grade usa um deslocamento fixo (`FUSO_OFFSET`, padrão `-03:00`) e as datas da API saem nesse fuso, ex.: `2026-11-09T14:00:00-03:00`.
-- Metas seguem `Arquivos/Dicionário de dados/metas.json`. `progresso` é a fração de marcos `atingido`;
+- Metas seguem `docs/Dicionário de dados/metas.json`. `progresso` é a fração de marcos `atingido`;
   em hábito sem marcos, é as horas estudadas na semana sobre `metaSemanalHoras`. O painel não inventa previsão de IA:
   a consistência usa as sessões já encerradas e o ritmo é a média do progresso das metas ativas.
 - Na subida, `config/colecoes.js` cria/sincroniza todas as coleções do dicionário: `usuarios`, `sessoes_autenticacao`,

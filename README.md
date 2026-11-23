@@ -111,7 +111,7 @@ cd servidor && mvn test                  # Servidor Java: JUnit 5 (precisa do Ma
 ├── backend/                  # API Node.js
 │   └── src/modulos/          # um módulo por área: auth, usuarios, disciplinas, tarefas, metas…
 ├── servidor/                 # servidor Java de ranking, alocação e metas
-└── Arquivos/
+└── docs/
     └── Dicionário de dados/  # estrutura de cada coleção do MongoDB
 ```
 
@@ -119,7 +119,7 @@ cd servidor && mvn test                  # Servidor Java: JUnit 5 (precisa do Ma
 
 - [backend/README.md](backend/README.md): rotas da API, autenticação e variáveis de ambiente.
 - [servidor/README.md](servidor/README.md): arquitetura do servidor Java e protocolo de comunicação.
-- [Dicionário de dados](Arquivos/Dicionário%20de%20dados/): campos de cada coleção do banco.
+- [Dicionário de dados](docs/Dicionário%20de%20dados/): campos de cada coleção do banco.
 
 ## Equipe
 

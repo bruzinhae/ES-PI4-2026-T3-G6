@@ -8,7 +8,7 @@
  * (ValidationError, tratado em middlewares/tratarErros.js).
  *
  * Os campos seguem o dicionário de dados do projeto:
- * Arquivos/Dicionário de dados/usuarios.json — se mudar um, atualize o outro.
+ * docs/Dicionário de dados/usuarios.json — se mudar um, atualize o outro.
  */
 
 import mongoose from 'mongoose';

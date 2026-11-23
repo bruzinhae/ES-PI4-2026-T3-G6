@@ -1,6 +1,6 @@
 /**
  * planosIa/PlanoIa.js — SCHEMA da coleção "planos_ia".
- * Segue Arquivos/Dicionário de dados/planos_ia.json.
+ * Segue docs/Dicionário de dados/planos_ia.json.
  */
 
 import mongoose from 'mongoose';
