@@ -173,7 +173,7 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
 - A API Node atua como cliente do servidor Java de ranking, falando texto: cada mensagem é uma linha de JSON com o campo `tipo`, montada e lida pelo `servicos/clienteRanking.js`. `POST /api/ranking` só encaminha o pedido autenticado:
   os espaços livres e tarefas são informados pelo chamador. Já `GET /api/grade/sugestoes` **monta tudo a partir do banco**
   do usuário logado (o cliente não manda dados) e usa o mesmo cliente TCP com `alocar: true`.
-- **Sugestões da grade** (`modulos/grade/`): os espaços livres são, em cada dia da semana, a faixa das 07:00 às 21:00 menos os blocos
+- **Sugestões da grade** (`modulos/grade/`): os espaços livres são, em cada dia da semana, a faixa das 06:00 às 23:00 menos os blocos
   fixos (semanais e únicos) e as sessões agendadas ou concluídas, só de agora em diante e com ao menos 15 min. Entram as tarefas
   abertas, de estudo e pessoais (a categoria segue junto no pedido), **descontando os minutos já agendados em sessões futuras**, com a dificuldade e o peso da
   disciplina. As preferências (`janelaFoco`, `focoMatinal`, `duracaoMinutos`, `antifadiga`) vêm da conta do usuário. Sem tarefas ou
@@ -184,8 +184,8 @@ A foto não entra nesse JSON: envie o arquivo em `POST /api/usuarios/:id/avatar`
   comentário e os títulos. Cada sugestão volta com `dataSugerida` (`AAAA-MM-DD` ou `null`). Com o servidor fora do ar, a rota cai no
   comportamento anterior (o Gemini escolhe a meta, sem datas) e `priorizadoPeloServidor` vem `false`. O marco não tem campo de data: a data
   é só uma dica na tela, e incluir o marco grava apenas o título. Metas de hábito não entram no pedido ao servidor (hábito não recebe
-  marcos e, se entrasse, poderia ganhar o foco e deixar a tela sem sugestões). O servidor devolve os marcos como número do dia
-  (`diasDosMarcos`, dias desde 1970-01-01) e o `clienteRanking.js` escreve o `AAAA-MM-DD`.
+  marcos e, se entrasse, poderia ganhar o foco e deixar a tela sem sugestões). O servidor devolve as datas dos marcos já como `AAAA-MM-DD`
+  (`datasDosMarcos`) e o `clienteRanking.js` só as repassa.
 - **Sessões de estudo** são o horário planejado de uma tarefa (coleção `sessoes_estudo`). Aceitar uma sugestão é `POST /api/sessoes-estudo`
   com `origem: "ia"`. Sessões `agendada` e `concluida` ocupam horário; `cancelada` e `nao_realizada` o liberam.
 - **Fuso:** a grade usa um deslocamento fixo (`FUSO_OFFSET`, padrão `-03:00`) e as datas da API saem nesse fuso, ex.: `2026-11-09T14:00:00-03:00`.
