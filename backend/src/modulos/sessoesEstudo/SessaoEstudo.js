@@ -1,6 +1,6 @@
 /**
  * sessoesEstudo/SessaoEstudo.js — SCHEMA da coleção "sessoes_estudo".
- * Segue Arquivos/Dicionário de dados/sessoes_estudo.json.
+ * Segue docs/Dicionário de dados/sessoes_estudo.json.
  */
 
 import mongoose from 'mongoose';

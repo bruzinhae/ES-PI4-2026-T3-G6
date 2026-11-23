@@ -1,6 +1,6 @@
 /**
  * disciplinas/Disciplina.js — SCHEMA da coleção "disciplinas".
- * Segue Arquivos/Dicionário de dados/disciplinas.json.
+ * Segue docs/Dicionário de dados/disciplinas.json.
  * Conteúdos ficam embutidos no documento da disciplina.
  */
 

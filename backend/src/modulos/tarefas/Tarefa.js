@@ -1,6 +1,6 @@
 /**
  * tarefas/Tarefa.js — SCHEMA da coleção "tarefas".
- * Segue Arquivos/Dicionário de dados/tarefas.json.
+ * Segue docs/Dicionário de dados/tarefas.json.
  */
 
 import mongoose from 'mongoose';

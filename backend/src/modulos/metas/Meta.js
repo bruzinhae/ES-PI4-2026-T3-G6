@@ -1,6 +1,6 @@
 /**
  * metas/Meta.js — SCHEMA da coleção "metas".
- * Segue Arquivos/Dicionário de dados/metas.json.
+ * Segue docs/Dicionário de dados/metas.json.
  */
 
 import mongoose from 'mongoose';

@@ -3,7 +3,7 @@
  * auth/Sessao.js — SCHEMA da coleção "sessoes_autenticacao".
  *
  * Uma sessão representa um login ativo: "este usuário entrou e pode usar a API até expiraEm".
- * Segue o dicionário de dados (Arquivos/Dicionário de dados/sessoes_autenticacao.json), com
+ * Segue o dicionário de dados (docs/Dicionário de dados/sessoes_autenticacao.json), com
  * uma diferença: o `_id` é o HASH SHA-256 do token (ver utils/token.js), não o token em texto.
  *
  * O índice TTL em `expiraEm` faz o próprio MongoDB apagar sessões vencidas. Ele roda a cada
