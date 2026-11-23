@@ -11,7 +11,7 @@ import { ErroApi } from '../utils/ErroApi.js';
 
 const URL_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const MENSAGEM_INDISPONIVEL = 'A Sofia não conseguiu analisar sua semana agora. Tente novamente em instantes.';
-const MENSAGEM_LIMITE = 'A Sofia atingiu o limite de uso do Gemini. Tente novamente mais tarde.';
+const MENSAGEM_LIMITE = 'A Sofia atingiu o limite de uso. Tente novamente mais tarde.';
 
 function nivelPensamento(modelo) {
     const id = modelo.toLowerCase();
