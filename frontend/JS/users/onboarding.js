@@ -40,13 +40,7 @@ function marcarPassoOnboarding(passo) {
         const id = localStorage.getItem('acaistudy-usuario-id') || '';
         localStorage.setItem(`acaistudy-onboarding-passo:${id}`, passo);
     } catch {
-        // Sem armazenamento local o servidor continua sendo a referência.
-    }
-
-    if (window.AcaiApi?.atualizarUsuarioAtual) {
-        AcaiApi.atualizarUsuarioAtual({ onboardingPasso: passo }).catch(() => {
-            // A tela segue; o próximo salvamento tenta de novo.
-        });
+        // Sem armazenamento local o passo não é lembrado e o onboarding recomeça do primeiro.
     }
 }
 
