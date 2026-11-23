@@ -30,3 +30,7 @@ backend/.env
 # Servidor Java (build local)
 servidor/out/
 servidor/target/
+
+# Ferramentas locais (Claude, Impeccable)
+.claude/
+.impeccable/
