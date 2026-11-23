@@ -29,6 +29,9 @@ function obterTransporte() {
                 user: env.smtp.user,
                 pass: env.smtp.pass,
             },
+            connectionTimeout: 8000,
+            greetingTimeout: 8000,
+            socketTimeout: 12000,
         });
     }
 

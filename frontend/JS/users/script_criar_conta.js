@@ -122,9 +122,12 @@
         }
 
         const botaoCriar = formulario.querySelector('[type="submit"]');
+        const rotuloCriar = botaoCriar.querySelector('span');
+        const rotuloOriginal = rotuloCriar.textContent;
 
         // Evita cadastro duplicado por clique duplo.
         botaoCriar.disabled = true;
+        rotuloCriar.textContent = 'Criando conta…';
 
         try {
             const resposta = await AcaiApi.criarUsuario({ nome, email, senha, aceitouTermos: true });
@@ -132,15 +135,15 @@
             sessionStorage.setItem(
                 'acaistudy-aviso-confirmacao',
                 resposta.confirmacaoEnviada
-                    ? 'Enviamos um e-mail para confirmar sua conta. Abra o link para validar o endereço.'
-                    : 'Sua conta foi criada, mas o e-mail de confirmação não saiu. Peça o reenvio no perfil.',
+                    ? 'Conta criada. Enviamos um e-mail para confirmar o endereço. Você já pode continuar.'
+                    : 'Conta criada. O e-mail de confirmação não saiu agora. Peça o reenvio no perfil.',
             );
         } catch (erro) {
             // 409 = e-mail já cadastrado; demais erros aparecem no campo de senha.
             marcarErro(erro.status === 409 ? cEmail : cSenha, erro.message);
-            return;
-        } finally {
             botaoCriar.disabled = false;
+            rotuloCriar.textContent = rotuloOriginal;
+            return;
         }
 
         // Conta criada e sessão aberta: começa o onboarding pelo primeiro passo.

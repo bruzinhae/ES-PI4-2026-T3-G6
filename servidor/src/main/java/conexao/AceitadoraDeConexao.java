@@ -1,7 +1,8 @@
 package conexao;
 
-import java.net.*;
-import java.util.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 // Thread que fica no accept() da porta do servidor. Para cada cliente que conecta,
 // cria e liga uma SupervisoraDeConexao (uma thread por cliente).

@@ -17,6 +17,7 @@
 
 import * as usuarioService from './usuarioService.js';
 import * as authService from '../auth/authService.js';
+import { correioConfigurado } from '../../servicos/correio.js';
 import { apresentarUsuario, apresentarUsuarios } from './apresentarUsuario.js';
 
 // POST /api/usuarios — cria um usuário com os dados do formulário de cadastro e já abre a
@@ -25,12 +26,18 @@ import { apresentarUsuario, apresentarUsuarios } from './apresentarUsuario.js';
 export async function criar(req, res) {
     const usuario = await usuarioService.criar(req.body);
     const { token, expiraEm } = await authService.criarSessao(usuario._id, req.get('user-agent'));
-    const { enviada } = await authService.solicitarConfirmacaoEmail(usuario);
+    const confirmacaoEnviada = correioConfigurado();
+
+    // O e-mail não segura a resposta: a conta já existe e a tela pode seguir.
+    if (confirmacaoEnviada) {
+        authService.solicitarConfirmacaoEmail(usuario);
+    }
+
     res.status(201).json({
         usuario: apresentarUsuario(req, usuario),
         token,
         expiraEm,
-        confirmacaoEnviada: enviada,
+        confirmacaoEnviada,
     });
 }
 

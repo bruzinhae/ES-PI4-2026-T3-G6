@@ -37,9 +37,16 @@ function aplicarUsuarioNoCabecalho(usuario) {
 
 function marcarPassoOnboarding(passo) {
     try {
-        localStorage.setItem('acaistudy-onboarding-passo', passo);
+        const id = localStorage.getItem('acaistudy-usuario-id') || '';
+        localStorage.setItem(`acaistudy-onboarding-passo:${id}`, passo);
     } catch {
-        // Sem armazenamento local o login volta ao primeiro passo.
+        // Sem armazenamento local o servidor continua sendo a referência.
+    }
+
+    if (window.AcaiApi?.atualizarUsuarioAtual) {
+        AcaiApi.atualizarUsuarioAtual({ onboardingPasso: passo }).catch(() => {
+            // A tela segue; o próximo salvamento tenta de novo.
+        });
     }
 }
 

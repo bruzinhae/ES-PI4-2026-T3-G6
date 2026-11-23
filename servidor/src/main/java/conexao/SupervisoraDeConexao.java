@@ -1,10 +1,19 @@
 package conexao;
 
-import calculo.*;
-import comunicado.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+
+import calculo.CalculadoraDeMetas;
+import calculo.CalculadoraDeRanking;
+import comunicado.Comunicado;
+import comunicado.Erro;
+import comunicado.PedidoDeMetas;
+import comunicado.PedidoDeRanking;
+import comunicado.PedidoParaSair;
 
 // Thread dedicada a um cliente. Le os pedidos (ranking, metas ou saida), calcula a
 // resposta e a devolve; erros de calculo voltam ao cliente como um Erro.

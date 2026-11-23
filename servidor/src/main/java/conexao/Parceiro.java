@@ -1,10 +1,16 @@
 package conexao;
 
-import comunicado.*;
-import json.*;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.concurrent.Semaphore;
+
+import comunicado.Comunicado;
+import comunicado.PedidoDeMetas;
+import comunicado.PedidoDeRanking;
+import comunicado.PedidoParaSair;
+import json.LeitorDeJson;
+import json.ObjetoJson;
 
 // Representa o cliente conectado: guarda o socket e os fluxos de texto e oferece
 // as operacoes do protocolo. Cada mensagem e uma linha de JSON.
